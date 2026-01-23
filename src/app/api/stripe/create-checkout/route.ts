@@ -19,15 +19,13 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse("Invalid token", 401);
     }
 
-    const { email, fullName, plan } = await req.json();
+    const { email, fullName } = await req.json();
 
-    if (!email || !fullName || !plan) {
+    if (!email || !fullName) {
       return generateErrorResponse("Missing required fields", 400);
     }
 
-    if (plan !== "paid") {
-      return generateErrorResponse("Invalid plan selection", 400);
-    }
+    const planId = "PROFESSIONAL"; // Stripe checkout is for Pro plan
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
@@ -60,8 +58,9 @@ export async function POST(req: NextRequest) {
       metadata: {
         email,
         fullName,
-        plan,
+        planId,
         userId: decoded.userId,
+        businessId: decoded.businessId,
       },
     });
 
@@ -70,7 +69,7 @@ export async function POST(req: NextRequest) {
     console.error("Stripe checkout error:", error);
     return generateErrorResponse(
       error.message || "Failed to create checkout session",
-      500
+      500,
     );
   }
 }

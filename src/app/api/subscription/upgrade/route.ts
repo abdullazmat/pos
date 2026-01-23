@@ -6,43 +6,10 @@ import {
   generateErrorResponse,
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
-
-const PLANS = {
-  FREE: {
-    id: "FREE",
-    name: "Gratuito",
-    price: 0,
-    features: {
-      maxProducts: 100,
-      maxCategories: 10,
-      maxClients: 0,
-      maxSuppliers: 5,
-      maxUsers: 2,
-      arcaIntegration: false,
-      advancedReporting: false,
-      customBranding: false,
-      invoiceChannels: 1,
-      apiAccess: false,
-    },
-  },
-  PRO: {
-    id: "PRO",
-    name: "Pro",
-    price: 19990,
-    features: {
-      maxProducts: 999999,
-      maxCategories: 999999,
-      maxClients: 999999,
-      maxSuppliers: 999999,
-      maxUsers: 999999,
-      arcaIntegration: true,
-      advancedReporting: true,
-      customBranding: true,
-      invoiceChannels: 5,
-      apiAccess: true,
-    },
-  },
-};
+import {
+  getPlanConfig,
+  SUBSCRIPTION_PLANS,
+} from "@/lib/services/subscriptions/PlanConfig";
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,14 +22,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { planId } = body;
 
-    // Validate plan
-    if (!planId || !PLANS[planId as keyof typeof PLANS]) {
+    // Validate plan against canonical plan list
+    const plan = planId ? getPlanConfig(planId) : null;
+    if (!plan) {
       return generateErrorResponse("Invalid plan ID", 400);
     }
 
     await dbConnect();
 
-    const plan = PLANS[planId as keyof typeof PLANS];
     const now = new Date();
     const nextMonth = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 

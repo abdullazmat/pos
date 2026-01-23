@@ -106,17 +106,14 @@ export default function CategoriesPage() {
       setLoading(true);
       const token = localStorage.getItem("accessToken");
       const method = editingId ? "PUT" : "POST";
-      const url = editingId
-        ? `/api/categories/${editingId}`
-        : "/api/categories";
-
-      const response = await fetch(url, {
+      const response = await fetch("/api/categories", {
         method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          id: editingId || undefined,
           name: formData.name,
           description: formData.description,
         }),
@@ -162,10 +159,13 @@ export default function CategoriesPage() {
     try {
       setLoading(true);
       const token = localStorage.getItem("accessToken");
-      const response = await fetch(`/api/categories/${deleteTarget.id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `/api/categories?id=${encodeURIComponent(deleteTarget.id)}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       if (response.ok) {
         notify.success("Categoría eliminada");

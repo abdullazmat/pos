@@ -76,7 +76,7 @@ export default function UpgradePage() {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Error al iniciar el proceso de upgrade"
+          : "Error al iniciar el proceso de upgrade",
       );
       setUpgrading(false);
     }
@@ -107,7 +107,9 @@ export default function UpgradePage() {
 
       if (data.payment?.preferenceLink) {
         window.open(data.payment.preferenceLink, "_blank");
-        toast.success("Mercado Pago listo. El plan se activa al confirmar el pago.");
+        toast.success(
+          "Mercado Pago listo. El plan se activa al confirmar el pago.",
+        );
       } else {
         throw new Error("No se recibió el enlace de pago");
       }
@@ -116,7 +118,7 @@ export default function UpgradePage() {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Error al iniciar el pago con Mercado Pago"
+          : "Error al iniciar el pago con Mercado Pago",
       );
     } finally {
       setMpUpgrading(false);
@@ -132,16 +134,16 @@ export default function UpgradePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-100">
       <Header user={user} showBackButton={true} />
 
       <main className="max-w-6xl mx-auto px-4 py-12">
         {canceled && (
-          <div className="mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-6 h-6 text-yellow-600 mt-0.5 flex-shrink-0" />
+          <div className="mb-8 p-4 bg-amber-900/40 border border-amber-700 rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-6 h-6 text-amber-300 mt-0.5 flex-shrink-0" />
             <div>
-              <h3 className="font-semibold text-yellow-800">Pago Cancelado</h3>
-              <p className="text-yellow-700 text-sm">
+              <h3 className="font-semibold text-amber-100">Pago Cancelado</h3>
+              <p className="text-amber-100/80 text-sm">
                 Tu pago fue cancelado. Intenta de nuevo cuando estés listo para
                 actualizar tu plan.
               </p>
@@ -149,10 +151,10 @@ export default function UpgradePage() {
           </div>
         )}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold text-white mb-4">
             Actualizar a Plan Pro
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-slate-200">
             Desbloquea funciones ilimitadas y lleva tu negocio al siguiente
             nivel
           </p>
@@ -160,49 +162,49 @@ export default function UpgradePage() {
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           {/* Free Plan */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200">
+          <div className="bg-slate-900/80 rounded-2xl shadow-2xl p-8 border-2 border-slate-700 backdrop-blur">
             <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              <h3 className="text-2xl font-bold text-white mb-2">
                 Plan Gratuito
               </h3>
-              <p className="text-gray-600">Tu plan actual</p>
+              <p className="text-slate-300">Tu plan actual</p>
               <div className="mt-4">
-                <span className="text-5xl font-bold text-gray-900">$0</span>
-                <span className="text-gray-600">/mes</span>
+                <span className="text-5xl font-bold text-white">$0</span>
+                <span className="text-slate-300">/mes</span>
               </div>
             </div>
 
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700">Hasta 100 productos</span>
+                <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                <span className="text-slate-200">Hasta 100 productos</span>
               </li>
               <li className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700">
+                <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                <span className="text-slate-200">
                   Seguimiento básico de inventario
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700">
+                <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                <span className="text-slate-200">
                   Reportes de ventas diarios
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700">1 cuenta de usuario</span>
+                <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                <span className="text-slate-200">1 cuenta de usuario</span>
               </li>
               <li className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700">Soporte comunitario</span>
+                <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                <span className="text-slate-200">Soporte comunitario</span>
               </li>
             </ul>
 
             <div className="mt-8">
               <button
                 disabled
-                className="w-full py-3 bg-gray-200 text-gray-500 rounded-lg font-semibold cursor-not-allowed"
+                className="w-full py-3 bg-slate-800 text-slate-500 rounded-lg font-semibold cursor-not-allowed"
               >
                 Plan Actual
               </button>
@@ -210,7 +212,7 @@ export default function UpgradePage() {
           </div>
 
           {/* Pro Plan */}
-          <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-2xl p-8 border-2 border-purple-400 relative overflow-hidden">
+          <div className="bg-gradient-to-br from-blue-700 via-indigo-700 to-purple-700 rounded-2xl shadow-2xl p-8 border-2 border-purple-400 relative overflow-hidden">
             <div className="absolute top-4 right-4">
               <span className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold">
                 RECOMENDADO
@@ -312,7 +314,8 @@ export default function UpgradePage() {
               </button>
 
               <p className="text-center text-xs text-blue-100">
-                El plan Pro se activa automáticamente cuando el pago se confirma.
+                El plan Pro se activa automáticamente cuando el pago se
+                confirma.
               </p>
             </div>
           </div>
@@ -320,40 +323,40 @@ export default function UpgradePage() {
 
         {/* Feature Highlights */}
         <div className="grid md:grid-cols-3 gap-6 mt-12">
-          <div className="bg-white rounded-xl p-6 shadow-lg">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <TrendingUp className="w-6 h-6 text-blue-600" />
+          <div className="bg-slate-900/80 rounded-xl p-6 shadow-xl border border-slate-800">
+            <div className="w-12 h-12 bg-blue-900/50 rounded-lg flex items-center justify-center mb-4">
+              <TrendingUp className="w-6 h-6 text-blue-300" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-bold text-white mb-2">
               Escala Tu Negocio
             </h3>
-            <p className="text-gray-600">
+            <p className="text-slate-200">
               Sin límites en productos, ventas o usuarios. Crece sin
               restricciones.
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-lg">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <Shield className="w-6 h-6 text-purple-600" />
+          <div className="bg-slate-900/80 rounded-xl p-6 shadow-xl border border-slate-800">
+            <div className="w-12 h-12 bg-purple-900/50 rounded-lg flex items-center justify-center mb-4">
+              <Shield className="w-6 h-6 text-purple-300" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-bold text-white mb-2">
               Soporte Prioritario
             </h3>
-            <p className="text-gray-600">
+            <p className="text-slate-200">
               Obtén ayuda cuando la necesites con nuestro equipo de soporte
               dedicado.
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-lg">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <Users className="w-6 h-6 text-green-600" />
+          <div className="bg-slate-900/80 rounded-xl p-6 shadow-xl border border-slate-800">
+            <div className="w-12 h-12 bg-green-900/50 rounded-lg flex items-center justify-center mb-4">
+              <Users className="w-6 h-6 text-green-300" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-bold text-white mb-2">
               Gestión de Equipo
             </h3>
-            <p className="text-gray-600">
+            <p className="text-slate-200">
               Añade miembros ilimitados con permisos basados en roles.
             </p>
           </div>
@@ -361,7 +364,7 @@ export default function UpgradePage() {
 
         {/* Payment Security */}
         <div className="mt-12 text-center">
-          <div className="inline-flex items-center gap-2 text-gray-600 bg-white px-6 py-3 rounded-full shadow">
+          <div className="inline-flex items-center gap-2 text-slate-200 bg-slate-900/80 px-6 py-3 rounded-full shadow border border-slate-800">
             <CreditCard className="w-5 h-5" />
             <span className="text-sm font-medium">
               Pagos seguros con Stripe o Mercado Pago
