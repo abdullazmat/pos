@@ -8,7 +8,41 @@
   --background-end-rgb: 255, 255, 255;
 }
 
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-end-rgb));
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+html.dark body {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+/* Dark mode overrides for common elements */
+html.dark {
+  --background: 15 23 42;
+  --foreground: 241 245 250;
+}
+
+html.dark header,
+html.dark nav {
+  @apply bg-slate-950 border-slate-800;
+}
+
+html.dark button,
+html.dark input,
+html.dark textarea,
+html.dark select {
+  @apply bg-slate-900 text-slate-50 border-slate-700;
 }

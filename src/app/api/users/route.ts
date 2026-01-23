@@ -59,53 +59,78 @@ export async function POST(req: NextRequest) {
     if (!email || !password || !fullName || !username) {
       return generateErrorResponse(
         "Email, password, full name, and username are required",
-        400
+        400,
       );
     }
 
     if (password.length < 6) {
       return generateErrorResponse(
         "Password must be at least 6 characters",
-        400
+        400,
       );
     }
 
     await dbConnect();
 
-    // Check if email or username already exists within the same business
+    // Check if email or username already exists (unique across all businesses)
     const existingUser = await User.findOne({
       $or: [
         { email: email.toLowerCase() },
         { username: username.toLowerCase() },
       ],
-      businessId,
     });
 
     if (existingUser) {
-      if (existingUser.isActive) {
-        return generateErrorResponse("Email or username already exists", 400);
+      // Check which field is duplicate
+      if (
+        existingUser.email === email.toLowerCase() &&
+        existingUser.username === username.toLowerCase()
+      ) {
+        return generateErrorResponse(
+          "El email y nombre de usuario ya están en uso",
+          400,
+        );
+      } else if (existingUser.email === email.toLowerCase()) {
+        return generateErrorResponse("El email ya está en uso", 400);
+      } else {
+        return generateErrorResponse(
+          "El nombre de usuario ya está en uso",
+          400,
+        );
       }
+    }
 
+    // Check if user existed before in this business (for reactivation)
+    const deletedUser = await User.findOne({
+      $or: [
+        { email: email.toLowerCase() },
+        { username: username.toLowerCase() },
+      ],
+      businessId,
+      isActive: false,
+    });
+
+    if (deletedUser) {
       // Reactivate soft-deleted user instead of creating a new one to avoid duplicate key
       const hashedPassword = await bcrypt.hash(password, 10);
-      existingUser.email = email.toLowerCase();
-      existingUser.username = username.toLowerCase();
-      existingUser.fullName = fullName;
-      existingUser.phone = phone;
-      existingUser.role = userRole || "cashier";
-      existingUser.password = hashedPassword;
-      existingUser.isActive = true;
-      await existingUser.save();
+      deletedUser.email = email.toLowerCase();
+      deletedUser.username = username.toLowerCase();
+      deletedUser.fullName = fullName;
+      deletedUser.phone = phone;
+      deletedUser.role = userRole || "cashier";
+      deletedUser.password = hashedPassword;
+      deletedUser.isActive = true;
+      await deletedUser.save();
 
       const userResponse = {
-        _id: existingUser._id,
-        email: existingUser.email,
-        fullName: existingUser.fullName,
-        username: existingUser.username,
-        phone: existingUser.phone,
-        role: existingUser.role,
-        isActive: existingUser.isActive,
-        createdAt: existingUser.createdAt,
+        _id: deletedUser._id,
+        email: deletedUser.email,
+        fullName: deletedUser.fullName,
+        username: deletedUser.username,
+        phone: deletedUser.phone,
+        role: deletedUser.role,
+        isActive: deletedUser.isActive,
+        createdAt: deletedUser.createdAt,
       };
 
       return generateSuccessResponse({ user: userResponse }, 200);

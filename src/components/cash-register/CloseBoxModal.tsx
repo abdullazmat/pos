@@ -57,15 +57,15 @@ export default function CloseBoxModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-        <div className="flex items-center justify-between p-6 border-b">
+      <div className="bg-slate-800 rounded-lg shadow-xl max-w-md w-full mx-4 border border-slate-700">
+        <div className="flex items-center justify-between p-6 border-b border-slate-700">
           <div className="flex items-center gap-2">
             <Lock className="w-6 h-6 text-red-600" />
-            <h2 className="text-xl font-bold text-gray-900">Cerrar Caja</h2>
+            <h2 className="text-xl font-bold text-white">Cerrar Caja</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-400 hover:text-gray-200"
           >
             <X className="w-5 h-5" />
           </button>
@@ -73,28 +73,30 @@ export default function CloseBoxModal({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Summary Info */}
-          <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+          <div className="bg-slate-900/50 p-4 rounded-lg space-y-3 border border-slate-700">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Ventas:</span>
-              <span className="font-medium">${salesTotal.toFixed(2)}</span>
+              <span className="text-gray-400">Ventas:</span>
+              <span className="font-medium text-gray-100">
+                ${salesTotal.toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Retiros:</span>
-              <span className="font-medium">
+              <span className="text-gray-400">Retiros:</span>
+              <span className="font-medium text-gray-100">
                 -${withdrawalsTotal.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Devoluciones:</span>
-              <span className="font-medium">
+              <span className="text-gray-400">Devoluciones:</span>
+              <span className="font-medium text-gray-100">
                 -${creditNotesTotal.toFixed(2)}
               </span>
             </div>
-            <div className="border-t pt-3 flex justify-between">
-              <span className="font-semibold text-gray-900">
+            <div className="border-t border-slate-700 pt-3 flex justify-between">
+              <span className="font-semibold text-gray-200">
                 Monto Esperado:
               </span>
-              <span className="font-bold text-lg text-blue-600">
+              <span className="font-bold text-lg text-blue-400">
                 ${expectedAmount.toFixed(2)}
               </span>
             </div>
@@ -102,7 +104,7 @@ export default function CloseBoxModal({
 
           {/* Counted Amount Input */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-200 mb-1">
               Monto Contado *
             </label>
             <div className="relative">
@@ -133,7 +135,7 @@ export default function CloseBoxModal({
             >
               <div className="flex justify-between mb-2">
                 <span
-                  className={hasWarning ? "text-red-700" : "text-green-700"}
+                  className={hasWarning ? "text-red-400" : "text-green-400"}
                 >
                   Diferencia:
                 </span>
@@ -141,9 +143,9 @@ export default function CloseBoxModal({
                   className={`font-bold text-lg ${
                     difference >= 0
                       ? hasWarning
-                        ? "text-red-700"
-                        : "text-green-700"
-                      : "text-red-700"
+                        ? "text-red-400"
+                        : "text-green-400"
+                      : "text-red-400"
                   }`}
                 >
                   {difference >= 0 ? "+" : ""}${Math.abs(difference).toFixed(2)}{" "}
@@ -151,7 +153,7 @@ export default function CloseBoxModal({
                 </span>
               </div>
               {hasWarning && (
-                <p className="text-xs text-red-600">
+                <p className="text-xs text-red-400">
                   ⚠️ La diferencia es mayor al 2%. Verifica el conteo.
                 </p>
               )}
@@ -164,7 +166,7 @@ export default function CloseBoxModal({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className="flex-1 px-4 py-2 border border-slate-600 rounded-lg font-medium text-gray-300 hover:bg-slate-700 disabled:opacity-50"
             >
               Cancelar
             </button>

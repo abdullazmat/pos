@@ -15,12 +15,12 @@ export default function RegisterPage() {
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("free");
   const router = useRouter();
 
-  // If already authenticated, redirect to dashboard
+  // If already authenticated, redirect to POS
   useEffect(() => {
     try {
       const token = localStorage.getItem("accessToken");
       if (token) {
-        router.replace("/dashboard");
+        router.replace("/pos");
       }
     } catch {
       // ignore client storage errors
@@ -66,7 +66,7 @@ export default function RegisterPage() {
       localStorage.setItem("refreshToken", data.data.refreshToken);
       localStorage.setItem("user", JSON.stringify(data.data.user));
 
-      router.push("/dashboard");
+      router.push("/pos");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       setLoading(false);

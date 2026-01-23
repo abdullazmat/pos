@@ -23,7 +23,7 @@ export default function Home() {
       const userData = localStorage.getItem("user");
 
       if (accessToken && userData) {
-        router.push("/dashboard");
+        router.push("/pos");
       } else {
         setLoading(false);
       }

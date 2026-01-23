@@ -94,7 +94,7 @@ export default function POSPage() {
                 quantity: item.quantity + 1,
                 total: (item.quantity + 1) * item.unitPrice - item.discount,
               }
-            : item
+            : item,
         );
       }
       return [
@@ -128,8 +128,8 @@ export default function POSPage() {
               quantity,
               total: quantity * item.unitPrice - item.discount,
             }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
@@ -142,8 +142,8 @@ export default function POSPage() {
               discount,
               total: item.quantity * item.unitPrice - discount,
             }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
@@ -181,16 +181,16 @@ export default function POSPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
       <Header user={user} showBackButton={true} />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
           POS - {user?.role === "admin" ? "Administrador" : user?.fullName}
         </h1>
         {registerOpen === false && (
           <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-16 h-16 rounded-full bg-orange-600 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-orange-600 dark:bg-orange-500 flex items-center justify-center mb-4">
               <svg
                 className="w-8 h-8 text-white"
                 fill="none"
@@ -205,10 +205,10 @@ export default function POSPage() {
                 />
               </svg>
             </div>
-            <p className="text-lg font-semibold text-gray-800 mb-1">
+            <p className="text-lg font-semibold text-gray-800 dark:text-white mb-1">
               Caja Cerrada
             </p>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               Debes abrir una caja desde la sección "Control de Caja" para
               comenzar a vender
             </p>

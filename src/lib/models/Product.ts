@@ -4,12 +4,15 @@ export interface IProduct extends Document {
   name: string;
   code: string;
   barcode?: string;
+  description?: string;
   cost: number;
   price: number;
   margin: number;
   stock: number;
   minStock?: number;
   category?: string;
+  active: boolean;
+  isSoldByWeight: boolean;
   businessId: Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -26,6 +29,7 @@ const productSchema = new Schema<IProduct>(
       required: true,
     },
     barcode: String,
+    description: String,
     cost: {
       type: Number,
       required: true,
@@ -52,6 +56,14 @@ const productSchema = new Schema<IProduct>(
       min: 0,
     },
     category: String,
+    active: {
+      type: Boolean,
+      default: true,
+    },
+    isSoldByWeight: {
+      type: Boolean,
+      default: false,
+    },
     businessId: {
       type: Schema.Types.ObjectId,
       ref: "Business",
@@ -60,7 +72,7 @@ const productSchema = new Schema<IProduct>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 productSchema.index({ businessId: 1, code: 1 }, { unique: true });

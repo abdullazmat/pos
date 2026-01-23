@@ -45,7 +45,7 @@ export default function CreditNoteModal({
     const amountNum = parseFloat(amount);
     if (amountNum > currentBalance) {
       toast.error(
-        `Saldo insuficiente. Disponible: $${currentBalance.toFixed(2)}`
+        `Saldo insuficiente. Disponible: $${currentBalance.toFixed(2)}`,
       );
       return;
     }
@@ -68,15 +68,15 @@ export default function CreditNoteModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-        <div className="flex items-center justify-between p-6 border-b">
+      <div className="bg-slate-800 rounded-lg shadow-xl max-w-md w-full mx-4 border border-slate-700">
+        <div className="flex items-center justify-between p-6 border-b border-slate-700">
           <div className="flex items-center gap-2">
             <RotateCcw className="w-6 h-6 text-orange-600" />
-            <h2 className="text-xl font-bold text-gray-900">Nota de Crédito</h2>
+            <h2 className="text-xl font-bold text-white">Nota de Crédito</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-400 hover:text-gray-200"
           >
             <X className="w-5 h-5" />
           </button>
@@ -84,18 +84,18 @@ export default function CreditNoteModal({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Current Balance Info */}
-          <div className="bg-amber-50 p-4 rounded-lg">
-            <p className="text-sm text-amber-600 font-medium">
+          <div className="bg-amber-900/30 p-4 rounded-lg border border-amber-700/50">
+            <p className="text-sm text-amber-300 font-medium">
               Saldo Disponible
             </p>
-            <p className="text-2xl font-bold text-amber-900">
+            <p className="text-2xl font-bold text-amber-100">
               ${currentBalance.toFixed(2)}
             </p>
           </div>
 
           {/* Amount Input */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-200 mb-1">
               Monto de Devolución *
             </label>
             <div className="relative">
@@ -110,20 +110,20 @@ export default function CreditNoteModal({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full pl-8 pr-4 py-2 border border-slate-600 rounded-lg bg-slate-700 text-gray-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
           </div>
 
           {/* Reason Select */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-200 mb-1">
               Motivo *
             </label>
             <select
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-slate-600 rounded-lg bg-slate-700 text-gray-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             >
               <option value="">Selecciona un motivo</option>
               {reasons.map((r) => (
@@ -144,7 +144,7 @@ export default function CreditNoteModal({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Referencia de transacción, número de cliente, etc..."
               rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-slate-600 rounded-lg bg-slate-700 text-gray-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
 
@@ -154,7 +154,7 @@ export default function CreditNoteModal({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className="flex-1 px-4 py-2 border border-slate-600 rounded-lg font-medium text-gray-300 hover:bg-slate-700 disabled:opacity-50"
             >
               Cancelar
             </button>

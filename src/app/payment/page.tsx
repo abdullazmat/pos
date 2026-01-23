@@ -34,17 +34,17 @@ export default function PaymentStatusPage() {
     if (currentPath.includes("success")) {
       setStatus("success");
       setMessage(
-        "¡Tu pago ha sido procesado exitosamente! Tu suscripción está activada."
+        "¡Tu pago ha sido procesado exitosamente! Tu suscripción está activada.",
       );
     } else if (currentPath.includes("failure")) {
       setStatus("failure");
       setMessage(
-        "El pago no pudo ser procesado. Por favor intenta nuevamente."
+        "El pago no pudo ser procesado. Por favor intenta nuevamente.",
       );
     } else {
       setStatus("pending");
       setMessage(
-        "Tu pago está siendo procesado. Esto puede tomar unos minutos."
+        "Tu pago está siendo procesado. Esto puede tomar unos minutos.",
       );
     }
 
@@ -81,8 +81,8 @@ export default function PaymentStatusPage() {
             {status === "success"
               ? "¡Bienvenido!"
               : status === "failure"
-              ? "Pago No Completado"
-              : "Procesando..."}
+                ? "Pago No Completado"
+                : "Procesando..."}
           </h1>
 
           {/* Message */}
@@ -106,10 +106,10 @@ export default function PaymentStatusPage() {
           {/* Actions */}
           <div className="flex gap-4 justify-center">
             <button
-              onClick={() => router.push("/dashboard")}
+              onClick={() => router.push("/pos")}
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors"
             >
-              Ir al Dashboard
+              Ir al POS
             </button>
             {status !== "success" && (
               <button

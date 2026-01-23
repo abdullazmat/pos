@@ -36,10 +36,8 @@ export default function AdminPage() {
     id: string;
     name: string;
   } | null>(null);
-  const [userToEdit, setUserToEdit] = useState<SystemUser | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Form state
+  const [userToEdit, setUserToEdit] = useState<SystemUser | null>(null);
   const [formData, setFormData] = useState({
     fullName: "",
     username: "",
@@ -48,8 +46,6 @@ export default function AdminPage() {
     phone: "",
     role: "cashier" as "admin" | "supervisor" | "cashier",
   });
-
-  // Edit form state
   const [editFormData, setEditFormData] = useState({
     fullName: "",
     username: "",
@@ -60,8 +56,8 @@ export default function AdminPage() {
   });
 
   const currentPlan = {
-    name: "Básico",
-    userLimit: 10,
+    name: "Gratuito",
+    userLimit: 2,
     currentUsers: users.length,
   };
 
@@ -71,56 +67,35 @@ export default function AdminPage() {
       router.push("/auth/login");
       return;
     }
-
     const userData = JSON.parse(userStr);
+    setUser(userData);
+
     if (userData.role !== "admin") {
-      router.push("/dashboard");
+      router.push("/pos");
       return;
     }
 
-    setUser(userData);
     fetchUsers();
   }, [router]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchUsers(true);
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchUsers = async (isBackground = false) => {
+  const fetchUsers = async () => {
     try {
-      if (!isBackground) {
-        setLoading(true);
-      }
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (response.status === 401) {
-        toast.error("Sesión expirada, vuelve a iniciar sesión");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("user");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (response.status === 403) {
-        toast.error("No tienes permisos para ver usuarios");
-        router.push("/dashboard");
-        return;
-      }
-
       if (response.ok) {
         const data = await response.json();
         setUsers(data.data?.users || []);
+      } else if (response.status === 401) {
+        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        router.push("/auth/login");
       } else {
-        const errorBody = await response.json().catch(() => null);
-        const message = errorBody?.error || "Error al cargar usuarios";
-        toast.error(message);
+        toast.error("Error al cargar usuarios");
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -132,22 +107,6 @@ export default function AdminPage() {
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (
-      !formData.fullName ||
-      !formData.username ||
-      !formData.email ||
-      !formData.password
-    ) {
-      toast.warning("Por favor completa todos los campos obligatorios");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      toast.warning("La contraseña debe tener al menos 6 caracteres");
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
@@ -175,6 +134,13 @@ export default function AdminPage() {
           role: "cashier",
         });
         fetchUsers();
+      } else if (response.status === 401) {
+        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        setShowModal(false);
+        router.push("/auth/login");
       } else {
         toast.error(data.error || "Error al crear usuario");
       }
@@ -186,42 +152,22 @@ export default function AdminPage() {
     }
   };
 
-  const handleDeleteClick = (userId: string, userName: string) => {
-    setUserToDelete({ id: userId, name: userName });
-    setShowDeleteModal(true);
-  };
-
-  const handleEditClick = (user: SystemUser) => {
-    setUserToEdit(user);
+  const handleEditClick = (systemUser: SystemUser) => {
+    setUserToEdit(systemUser);
     setEditFormData({
-      fullName: user.fullName,
-      username: user.username,
-      email: user.email,
+      fullName: systemUser.fullName,
+      username: systemUser.username,
+      email: systemUser.email,
       password: "",
-      phone: user.phone || "",
-      role: user.role,
+      phone: systemUser.phone || "",
+      role: systemUser.role,
     });
     setShowEditModal(true);
   };
 
   const handleUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!userToEdit) return;
-
-    if (
-      !editFormData.fullName ||
-      !editFormData.username ||
-      !editFormData.email
-    ) {
-      toast.warning("Por favor completa todos los campos obligatorios");
-      return;
-    }
-
-    if (editFormData.password && editFormData.password.length < 6) {
-      toast.warning("La contraseña debe tener al menos 6 caracteres");
-      return;
-    }
 
     setIsSubmitting(true);
 
@@ -254,6 +200,13 @@ export default function AdminPage() {
           role: "cashier",
         });
         fetchUsers();
+      } else if (response.status === 401) {
+        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        setShowEditModal(false);
+        router.push("/auth/login");
       } else {
         toast.error(data.error || "Error al actualizar usuario");
       }
@@ -263,6 +216,11 @@ export default function AdminPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleDeleteClick = (userId: string, userName: string) => {
+    setUserToDelete({ id: userId, name: userName });
+    setShowDeleteModal(true);
   };
 
   const confirmDelete = async () => {
@@ -280,6 +238,13 @@ export default function AdminPage() {
         fetchUsers();
         setShowDeleteModal(false);
         setUserToDelete(null);
+      } else if (response.status === 401) {
+        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        setShowDeleteModal(false);
+        router.push("/auth/login");
       } else {
         const data = await response.json();
         toast.error(data.error || "Error al eliminar usuario");
@@ -294,14 +259,14 @@ export default function AdminPage() {
     switch (role.toLowerCase()) {
       case "admin":
       case "administrador":
-        return "bg-purple-100 text-purple-700";
+        return "bg-purple-900/40 text-purple-200 border border-purple-700/50";
       case "supervisor":
-        return "bg-green-100 text-green-700";
+        return "bg-green-900/40 text-green-200 border border-green-700/50";
       case "cashier":
       case "cajero":
-        return "bg-blue-100 text-blue-700";
+        return "bg-blue-900/40 text-blue-200 border border-blue-700/50";
       default:
-        return "bg-gray-100 text-gray-700";
+        return "bg-slate-800 text-slate-300 border border-slate-700";
     }
   };
 
@@ -309,14 +274,14 @@ export default function AdminPage() {
     switch (role.toLowerCase()) {
       case "admin":
       case "administrador":
-        return "bg-purple-100 text-purple-600";
+        return "bg-purple-900/40 text-purple-200";
       case "supervisor":
-        return "bg-green-100 text-green-600";
+        return "bg-green-900/40 text-green-200";
       case "cashier":
       case "cajero":
-        return "bg-blue-100 text-blue-600";
+        return "bg-blue-900/40 text-blue-200";
       default:
-        return "bg-gray-100 text-gray-600";
+        return "bg-slate-800 text-slate-300";
     }
   };
 
@@ -335,104 +300,73 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        Cargando...
+      <div className="flex items-center justify-center h-screen bg-slate-950">
+        <div className="text-slate-400">Cargando...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-950 text-slate-100">
       <Header user={user} showBackButton={true} />
 
       <main className="p-6 mx-auto max-w-7xl">
-        {/* Page Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-2">
-            <UserCog className="w-6 h-6 text-gray-700" />
-            <h1 className="text-2xl font-bold text-gray-900">
-              Gestión de Usuarios
-            </h1>
-          </div>
-          <p className="text-gray-600">
-            Administra cajeros y administradores del sistema
-          </p>
-        </div>
-
-        {/* Plan Limit Warning */}
-        <div className="p-4 mb-6 border border-red-200 bg-red-50 rounded-xl">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-red-600">⚠</span>
-              <span className="font-semibold text-red-900">
-                {currentPlan.currentUsers}/{currentPlan.userLimit} usuarios -{" "}
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2 text-slate-200">
+              <UserCog className="w-6 h-6 text-sky-400" />
+              <h1 className="text-2xl font-bold text-white">
+                Gestión de Usuarios
+              </h1>
+            </div>
+            <p className="text-slate-400 text-sm">
+              Administra cajeros y administradores del sistema
+            </p>
+            <div className="mt-3 inline-flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800">
+              <span className="text-sm text-slate-200 font-semibold">
+                {currentPlan.currentUsers}/{currentPlan.userLimit} usuarios ·{" "}
                 {currentPlan.name}
               </span>
+              <div className="w-32 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500"
+                  style={{
+                    width: `${Math.min((currentPlan.currentUsers / currentPlan.userLimit) * 100, 100)}%`,
+                  }}
+                ></div>
+              </div>
             </div>
           </div>
-          <div className="w-full h-2 mb-3 bg-red-200 rounded-full">
-            <div
-              className="h-2 bg-red-600 rounded-full"
-              style={{
-                width: `${
-                  (currentPlan.currentUsers / currentPlan.userLimit) * 100
-                }%`,
-              }}
-            ></div>
-          </div>
-          <p className="text-sm text-red-800">
-            Has alcanzado el límite de {currentPlan.userLimit} usuarios del Plan{" "}
-            {currentPlan.name}. Actualiza al Plan Profesional para tener 5
-            usuarios.
-          </p>
-        </div>
 
-        {/* Action Bar */}
-        <div className="flex justify-end mb-6">
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-4 py-2 font-semibold text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+            className="flex items-center gap-2 px-4 py-2.5 font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg shadow-sm"
           >
-            <span>+</span>
+            <span className="text-lg leading-none">+</span>
             <span>Nuevo Usuario</span>
           </button>
         </div>
 
-        {/* Users Table */}
-        <div className="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-xl">
+        <div className="overflow-hidden bg-slate-900 border border-slate-800 rounded-xl">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-gray-200 bg-gray-50">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-900/80 border-b border-slate-800 text-slate-300">
                 <tr>
-                  <th className="px-6 py-3 text-sm font-semibold text-left text-gray-700">
-                    Nombre
-                  </th>
-                  <th className="px-6 py-3 text-sm font-semibold text-left text-gray-700">
-                    Usuario
-                  </th>
-                  <th className="px-6 py-3 text-sm font-semibold text-left text-gray-700">
-                    Rol
-                  </th>
-                  <th className="px-6 py-3 text-sm font-semibold text-left text-gray-700">
-                    Límite Desc. %
-                  </th>
-                  <th className="px-6 py-3 text-sm font-semibold text-left text-gray-700">
-                    Estado
-                  </th>
-                  <th className="px-6 py-3 text-sm font-semibold text-left text-gray-700">
-                    Fecha Creación
-                  </th>
-                  <th className="px-6 py-3 text-sm font-semibold text-left text-gray-700">
-                    Acciones
-                  </th>
+                  <th className="px-6 py-3 text-left">Nombre</th>
+                  <th className="px-6 py-3 text-left">Usuario</th>
+                  <th className="px-6 py-3 text-left">Rol</th>
+                  <th className="px-6 py-3 text-left">Límite Desc. %</th>
+                  <th className="px-6 py-3 text-left">Estado</th>
+                  <th className="px-6 py-3 text-left">Fecha Creación</th>
+                  <th className="px-6 py-3 text-left">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-slate-800 text-slate-200">
                 {loading ? (
                   <tr>
                     <td
                       colSpan={7}
-                      className="px-6 py-8 text-center text-gray-500"
+                      className="px-6 py-8 text-center text-slate-400"
                     >
                       Cargando usuarios...
                     </td>
@@ -441,66 +375,60 @@ export default function AdminPage() {
                   <tr>
                     <td
                       colSpan={7}
-                      className="px-6 py-8 text-center text-gray-500"
+                      className="px-6 py-10 text-center text-slate-400"
                     >
                       No hay usuarios registrados
                     </td>
                   </tr>
                 ) : (
                   users.map((systemUser) => (
-                    <tr key={systemUser._id} className="hover:bg-gray-50">
+                    <tr key={systemUser._id} className="hover:bg-slate-850">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center ${getAvatarColor(
-                              systemUser.role
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${getAvatarColor(
+                              systemUser.role,
                             )}`}
                           >
-                            {systemUser.role.toLowerCase() === "admin" ? (
-                              <span className="text-lg">👑</span>
-                            ) : (
-                              <span className="text-lg">👤</span>
-                            )}
+                            {systemUser.role.toLowerCase() === "admin"
+                              ? "A"
+                              : "U"}
                           </div>
-                          <span className="font-medium text-gray-900">
+                          <span className="font-medium text-white">
                             {systemUser.fullName}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="px-2 py-1 font-mono text-sm text-gray-700 bg-gray-100 rounded">
+                        <span className="px-2 py-1 font-mono text-xs bg-slate-800 border border-slate-700 rounded text-slate-200">
                           {systemUser.username}
                         </span>
                       </td>
                       <td className="px-6 py-4">
                         <span
                           className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(
-                            systemUser.role
+                            systemUser.role,
                           )}`}
                         >
                           {getRoleLabel(systemUser.role)}
                         </span>
                       </td>
+                      <td className="px-6 py-4 text-slate-300">No definido</td>
                       <td className="px-6 py-4">
-                        <span className="text-gray-700">No definido</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-block px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
+                        <span className="inline-block px-3 py-1 text-xs font-semibold text-green-200 bg-green-900/40 rounded-full border border-green-700/50">
                           {systemUser.isActive ? "Activo" : "Inactivo"}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className="text-gray-700">
-                          {new Date(systemUser.createdAt).toLocaleDateString(
-                            "es-AR"
-                          )}
-                        </span>
+                      <td className="px-6 py-4 text-slate-300">
+                        {new Date(systemUser.createdAt).toLocaleDateString(
+                          "es-AR",
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleEditClick(systemUser)}
-                            className="p-2 text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
+                            className="p-2 text-blue-400 hover:text-blue-300 hover:bg-slate-800 rounded-lg"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
@@ -508,10 +436,10 @@ export default function AdminPage() {
                             onClick={() =>
                               handleDeleteClick(
                                 systemUser._id,
-                                systemUser.fullName
+                                systemUser.fullName,
                               )
                             }
-                            className="p-2 text-red-600 transition-colors rounded-lg hover:bg-red-50"
+                            className="p-2 text-red-400 hover:text-red-300 hover:bg-slate-800 rounded-lg"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -528,14 +456,12 @@ export default function AdminPage() {
         {/* Add User Modal */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Nuevo Usuario
-                </h2>
+            <div className="bg-slate-900 border border-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
+              <div className="flex items-center justify-between p-6 border-b border-slate-800">
+                <h2 className="text-xl font-bold text-white">Nuevo Usuario</h2>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-slate-400 hover:text-slate-200"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -543,8 +469,8 @@ export default function AdminPage() {
 
               <form onSubmit={handleAddUser} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre Completo <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Nombre Completo <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -552,15 +478,16 @@ export default function AdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, fullName: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Juan Pérez"
                     required
+                    minLength={2}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Usuario <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Usuario <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -568,15 +495,19 @@ export default function AdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, username: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="juanperez"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="juanperez (debe ser único)"
                     required
+                    minLength={3}
                   />
+                  <p className="text-xs text-slate-500 mt-1">
+                    El nombre de usuario debe ser único en el sistema
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Email <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="email"
@@ -584,15 +515,18 @@ export default function AdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="juan@ejemplo.com"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="juan@ejemplo.com (debe ser único)"
                     required
                   />
+                  <p className="text-xs text-slate-500 mt-1">
+                    El email debe ser único en el sistema
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contraseña <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Contraseña <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="password"
@@ -600,7 +534,7 @@ export default function AdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, password: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Mínimo 6 caracteres"
                     required
                     minLength={6}
@@ -608,7 +542,7 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Teléfono
                   </label>
                   <input
@@ -617,21 +551,21 @@ export default function AdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="+54 9 11 1234-5678"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Rol <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Rol <span className="text-red-400">*</span>
                   </label>
                   <select
                     value={formData.role}
                     onChange={(e) =>
                       setFormData({ ...formData, role: e.target.value as any })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   >
                     <option value="cashier">Cajero</option>
@@ -644,14 +578,14 @@ export default function AdminPage() {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium"
+                    className="flex-1 px-4 py-2 text-slate-300 bg-slate-800 rounded-lg hover:bg-slate-700 font-medium"
                     disabled={isSubmitting}
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Creando..." : "Crear Usuario"}
@@ -665,17 +599,15 @@ export default function AdminPage() {
         {/* Edit User Modal */}
         {showEditModal && userToEdit && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Editar Usuario
-                </h2>
+            <div className="bg-slate-900 border border-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
+              <div className="flex items-center justify-between p-6 border-b border-slate-800">
+                <h2 className="text-xl font-bold text-white">Editar Usuario</h2>
                 <button
                   onClick={() => {
                     setShowEditModal(false);
                     setUserToEdit(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-slate-400 hover:text-slate-200"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -683,8 +615,8 @@ export default function AdminPage() {
 
               <form onSubmit={handleUpdateUser} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre Completo <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Nombre Completo <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -695,15 +627,15 @@ export default function AdminPage() {
                         fullName: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Juan Pérez"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Usuario <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Usuario <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -714,15 +646,15 @@ export default function AdminPage() {
                         username: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="juanperez"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Email <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="email"
@@ -733,14 +665,14 @@ export default function AdminPage() {
                         email: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="juan@ejemplo.com"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Contraseña (dejar en blanco para no cambiar)
                   </label>
                   <input
@@ -752,14 +684,14 @@ export default function AdminPage() {
                         password: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Mínimo 6 caracteres"
                     minLength={6}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Teléfono
                   </label>
                   <input
@@ -771,14 +703,14 @@ export default function AdminPage() {
                         phone: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="+54 9 11 1234-5678"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Rol <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Rol <span className="text-red-400">*</span>
                   </label>
                   <select
                     value={editFormData.role}
@@ -788,7 +720,7 @@ export default function AdminPage() {
                         role: e.target.value as any,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   >
                     <option value="cashier">Cajero</option>
@@ -804,14 +736,14 @@ export default function AdminPage() {
                       setShowEditModal(false);
                       setUserToEdit(null);
                     }}
-                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium"
+                    className="flex-1 px-4 py-2 text-slate-300 bg-slate-800 rounded-lg hover:bg-slate-700 font-medium"
                     disabled={isSubmitting}
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Actualizando..." : "Actualizar Usuario"}
@@ -825,18 +757,20 @@ export default function AdminPage() {
         {/* Delete Confirmation Modal */}
         {showDeleteModal && userToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
               <div className="p-6">
-                <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
-                  <Trash2 className="w-6 h-6 text-red-600" />
+                <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-900/30 rounded-full">
+                  <Trash2 className="w-6 h-6 text-red-400" />
                 </div>
-                <h2 className="text-xl font-bold text-center text-gray-900 mb-2">
+                <h2 className="text-xl font-bold text-center text-white mb-2">
                   ¿Eliminar Usuario?
                 </h2>
-                <p className="text-center text-gray-600 mb-6">
+                <p className="text-center text-slate-400 mb-6">
                   ¿Estás seguro de eliminar al usuario{" "}
-                  <span className="font-semibold">"{userToDelete.name}"</span>?
-                  Esta acción no se puede deshacer.
+                  <span className="font-semibold text-white">
+                    "{userToDelete.name}"
+                  </span>
+                  ? Esta acción no se puede deshacer.
                 </p>
                 <div className="flex gap-3">
                   <button
@@ -845,14 +779,14 @@ export default function AdminPage() {
                       setShowDeleteModal(false);
                       setUserToDelete(null);
                     }}
-                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium"
+                    className="flex-1 px-4 py-2 text-slate-300 bg-slate-800 rounded-lg hover:bg-slate-700 font-medium"
                   >
                     Cancelar
                   </button>
                   <button
                     type="button"
                     onClick={confirmDelete}
-                    className="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 font-medium"
+                    className="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-500 font-medium"
                   >
                     Eliminar
                   </button>
@@ -864,7 +798,7 @@ export default function AdminPage() {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-500">
             Sistema POS © 2025 - Desarrollado para negocios pequeños
           </p>
         </div>

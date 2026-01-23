@@ -53,7 +53,20 @@ export async function POST(req: NextRequest) {
 
     const { businessId } = authResult.user!;
     const body = await req.json();
-    const { name, code, cost, price, stock, barcode, category } = body;
+    const {
+      name,
+      code,
+      cost,
+      price,
+      stock,
+      barcode,
+      category,
+      description,
+      minStock,
+      active,
+      isSoldByWeight,
+      margin,
+    } = body;
 
     if (!name || !code || !cost || !price) {
       return generateErrorResponse("Missing required fields", 400);
@@ -65,13 +78,13 @@ export async function POST(req: NextRequest) {
     const planCheck = await checkPlanLimit(
       businessId,
       "maxProducts",
-      productCount
+      productCount,
     );
     if (!planCheck.allowed) {
       return generateErrorResponse(planCheck.message, 403);
     }
 
-    const margin = ((price - cost) / price) * 100;
+    const calculatedMargin = margin || ((price - cost) / price) * 100;
 
     const existingProduct = await Product.findOne({ businessId, code });
     if (existingProduct) {
@@ -84,10 +97,14 @@ export async function POST(req: NextRequest) {
       code,
       cost,
       price,
-      margin,
+      margin: calculatedMargin,
       stock: stock || 0,
       barcode,
       category,
+      description,
+      minStock: minStock || 0,
+      active: active !== false,
+      isSoldByWeight: isSoldByWeight === true,
     });
 
     await product.save();
@@ -108,7 +125,21 @@ export async function PUT(req: NextRequest) {
 
     const { businessId } = authResult.user!;
     const body = await req.json();
-    const { id, name, code, cost, price, stock, barcode, category } = body;
+    const {
+      id,
+      name,
+      code,
+      cost,
+      price,
+      stock,
+      barcode,
+      category,
+      description,
+      minStock,
+      active,
+      isSoldByWeight,
+      margin,
+    } = body;
 
     if (!id) {
       return generateErrorResponse("Missing product id", 400);
@@ -136,9 +167,15 @@ export async function PUT(req: NextRequest) {
     if (typeof stock === "number") product.stock = stock;
     if (category !== undefined) product.category = category;
     if (barcode !== undefined) product.barcode = barcode;
+    if (description !== undefined) product.description = description;
+    if (typeof minStock === "number") product.minStock = minStock;
+    if (typeof active === "boolean") product.active = active;
+    if (typeof isSoldByWeight === "boolean")
+      product.isSoldByWeight = isSoldByWeight;
 
     if (product.price && product.cost) {
-      product.margin = ((product.price - product.cost) / product.price) * 100;
+      product.margin =
+        margin || ((product.price - product.cost) / product.price) * 100;
     }
 
     await product.save();
@@ -174,7 +211,9 @@ export async function DELETE(req: NextRequest) {
 
     await Product.deleteOne({ _id: id, businessId });
 
-    return generateSuccessResponse({ message: "Producto eliminado exitosamente" });
+    return generateSuccessResponse({
+      message: "Producto eliminado exitosamente",
+    });
   } catch (error) {
     console.error("Delete product error:", error);
     return generateErrorResponse("Internal server error", 500);

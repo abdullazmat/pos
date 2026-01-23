@@ -29,7 +29,7 @@ export default function UpgradeSuccessPage() {
   }
 
   const handleContinue = () => {
-    router.push("/dashboard");
+    router.push("/pos");
   };
 
   return (

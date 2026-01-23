@@ -26,7 +26,7 @@ export default function CashRegisterPage() {
   const [pendingAmount, setPendingAmount] = useState<number>(0);
   const [toastMsg, setToastMsg] = useState<string>("");
   const [toastType, setToastType] = useState<"success" | "error" | "info">(
-    "info"
+    "info",
   );
   const [toastOpen, setToastOpen] = useState(false);
   const [sessionData, setSessionData] = useState<any>({
@@ -252,7 +252,7 @@ export default function CashRegisterPage() {
                   setShowTicket(false);
                   setToastType("info");
                   setToastMsg(
-                    "Caja ya estaba abierta, sincronizando estado..."
+                    "Caja ya estaba abierta, sincronizando estado...",
                   );
                   setToastOpen(true);
                   router.push("/cash-register");
@@ -267,7 +267,7 @@ export default function CashRegisterPage() {
             } else {
               setToastType("error");
               setToastMsg(
-                "Sesión expirada. Por favor inicia sesión nuevamente."
+                "Sesión expirada. Por favor inicia sesión nuevamente.",
               );
               setToastOpen(true);
               router.push("/auth/login");
@@ -369,7 +369,7 @@ export default function CashRegisterPage() {
   const handleWithdrawal = async (
     amount: number,
     reason: string,
-    notes: string
+    notes: string,
   ) => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -418,7 +418,7 @@ export default function CashRegisterPage() {
   const handleCreditNote = async (
     amount: number,
     reason: string,
-    notes: string
+    notes: string,
   ) => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -512,36 +512,31 @@ export default function CashRegisterPage() {
   const expectedInCash = sessionData.expected;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-950 dark:bg-slate-950">
       <Header user={user} showBackButton={true} />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         {isOpen === false && (
-          <div className="flex flex-col items-center justify-center bg-gray-900/5 rounded-xl py-12 mb-8">
-            <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center mb-4">
+          <div className="flex flex-col items-center justify-center bg-slate-900/50 rounded-xl py-20 mb-8 border border-slate-800">
+            <div className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center mb-6 shadow-lg">
               <svg
-                className="w-8 h-8 text-gray-300"
-                fill="none"
-                stroke="currentColor"
+                className="w-10 h-10 text-slate-400"
+                fill="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
               </svg>
             </div>
-            <p className="text-lg font-semibold text-gray-200 mb-1">
+            <p className="text-2xl font-bold text-white mb-2">
               No hay caja abierta
             </p>
-            <p className="text-gray-400 mb-6">
-              Debes abrir una caja para comenzar a vender
+            <p className="text-slate-400 mb-8 text-center max-w-md">
+              Debes abrir una caja desde la sección "Control de Caja" para
+              comenzar a vender
             </p>
             <button
               onClick={() => setShowOpenModal(true)}
-              className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-lg flex items-center gap-2"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg flex items-center gap-2 shadow-lg hover:shadow-xl transition"
             >
               <svg
                 className="w-5 h-5"
@@ -566,11 +561,11 @@ export default function CashRegisterPage() {
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               {/* Monto Inicial */}
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-gray-600">Monto Inicial</p>
+                  <p className="text-sm text-slate-400">Monto Inicial</p>
                   <svg
-                    className="w-8 h-8 text-blue-500"
+                    className="w-8 h-8 text-blue-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -583,21 +578,21 @@ export default function CashRegisterPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-white">
                   ${initialAmount.toFixed(2)}
                 </p>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-slate-500 mt-2">
                   {movements.find((m: any) => m.type === "apertura")
                     ?.createdAt || "-"}
                 </p>
               </div>
 
               {/* Ventas */}
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-gray-600">Ventas</p>
+                  <p className="text-sm text-slate-400">Ventas</p>
                   <svg
-                    className="w-8 h-8 text-green-500"
+                    className="w-8 h-8 text-green-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -610,17 +605,17 @@ export default function CashRegisterPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-green-600">
+                <p className="text-3xl font-bold text-green-400">
                   ${sales.toFixed(2)}
                 </p>
               </div>
 
               {/* Retiros */}
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-gray-600">Retiros</p>
+                  <p className="text-sm text-slate-400">Retiros</p>
                   <svg
-                    className="w-8 h-8 text-red-500"
+                    className="w-8 h-8 text-red-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -633,17 +628,17 @@ export default function CashRegisterPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-red-600">
+                <p className="text-3xl font-bold text-red-400">
                   ${withdrawals.toFixed(2)}
                 </p>
               </div>
 
               {/* Esperado en Caja */}
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-gray-600">Esperado en Caja</p>
+                  <p className="text-sm text-slate-400">Esperado en Caja</p>
                   <svg
-                    className="w-8 h-8 text-purple-500"
+                    className="w-8 h-8 text-purple-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -656,7 +651,7 @@ export default function CashRegisterPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-purple-600">
+                <p className="text-3xl font-bold text-purple-400">
                   ${expectedInCash.toFixed(2)}
                 </p>
               </div>
@@ -666,7 +661,7 @@ export default function CashRegisterPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <button
                 onClick={() => setShowWithdrawalModal(true)}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition flex items-center justify-center gap-2"
+                className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2"
               >
                 <svg
                   className="w-5 h-5"
@@ -686,7 +681,7 @@ export default function CashRegisterPage() {
 
               <button
                 onClick={() => setShowCreditNoteModal(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition flex items-center justify-center gap-2"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2"
               >
                 <svg
                   className="w-5 h-5"
@@ -706,7 +701,7 @@ export default function CashRegisterPage() {
 
               <button
                 onClick={handleClose}
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition flex items-center justify-center gap-2"
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2"
               >
                 <svg
                   className="w-5 h-5"
@@ -725,87 +720,94 @@ export default function CashRegisterPage() {
               </button>
             </div>
             {/* Movements Table */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6 mb-8">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">
+                <h2 className="text-xl font-bold text-white">
                   Movimientos de la Sesión
                 </h2>
                 {loadingMovements && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span className="w-4 h-4 border-2 border-gray-300 border-b-transparent rounded-full animate-spin inline-block" />
+                  <div className="flex items-center gap-2 text-sm text-slate-400">
+                    <span className="w-4 h-4 border-2 border-slate-600 border-b-transparent rounded-full animate-spin inline-block" />
                     Actualizando...
                   </div>
                 )}
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-slate-700">
+                  <thead className="bg-slate-800">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                         Fecha/Hora
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                         Tipo
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                         Descripción
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                         Monto
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-slate-900 divide-y divide-slate-700">
                     {loadingMovements && movements.length === 0 ? (
                       [...Array(3)].map((_, i) => (
                         <tr key={`skeleton-${i}`}>
                           <td className="px-6 py-4">
-                            <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                            <div className="h-4 w-32 bg-slate-800 rounded animate-pulse" />
                           </td>
                           <td className="px-6 py-4">
-                            <div className="h-5 w-24 bg-gray-200 rounded animate-pulse" />
+                            <div className="h-5 w-24 bg-slate-800 rounded animate-pulse" />
                           </td>
                           <td className="px-6 py-4">
-                            <div className="h-4 w-64 bg-gray-200 rounded animate-pulse" />
+                            <div className="h-4 w-64 bg-slate-800 rounded animate-pulse" />
                           </td>
                           <td className="px-6 py-4">
-                            <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+                            <div className="h-4 w-20 bg-slate-800 rounded animate-pulse" />
                           </td>
                         </tr>
                       ))
                     ) : movements.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500">
+                        <td
+                          colSpan={4}
+                          className="px-6 py-8 text-center text-sm text-slate-500"
+                        >
                           No hay movimientos registrados en esta sesión
                         </td>
                       </tr>
                     ) : (
                       movements.map((movement: any, idx: number) => (
-                        <tr key={movement._id || idx} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <tr
+                          key={movement._id || idx}
+                          className="hover:bg-slate-800/50"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
                             {movement.createdAt}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span
                               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                 movement.type === "apertura"
-                                  ? "bg-blue-100 text-blue-800"
+                                  ? "bg-blue-900/40 text-blue-300"
                                   : movement.type === "venta"
-                                  ? "bg-green-100 text-green-800"
-                                  : movement.type === "retiro"
-                                  ? "bg-orange-100 text-orange-800"
-                                  : movement.type === "cierre"
-                                  ? "bg-gray-100 text-gray-800"
-                                  : "bg-purple-100 text-purple-800"
+                                    ? "bg-green-900/40 text-green-300"
+                                    : movement.type === "retiro"
+                                      ? "bg-orange-900/40 text-orange-300"
+                                      : movement.type === "cierre"
+                                        ? "bg-slate-700 text-slate-300"
+                                        : "bg-purple-900/40 text-purple-300"
                               }`}
                             >
-                              {movement.type.charAt(0).toUpperCase() + movement.type.slice(1)}
+                              {movement.type.charAt(0).toUpperCase() +
+                                movement.type.slice(1)}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-6 py-4 text-sm text-slate-300">
                             {movement.description}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-400">
                             ${movement.amount.toFixed(2)}
                           </td>
                         </tr>
@@ -819,53 +821,69 @@ export default function CashRegisterPage() {
         )}
 
         {/* Historial de Sesiones */}
-        <div className="bg-gray-900/10 rounded-xl p-6 mt-8">
-          <h2 className="text-lg font-semibold text-gray-100 mb-4">
+        <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6 mt-8">
+          <h2 className="text-lg font-bold text-white mb-6">
             Historial de Sesiones
           </h2>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="text-left text-gray-400">
-                  <th className="px-4 py-3">Fecha Apertura</th>
-                  <th className="px-4 py-3">Monto Inicial</th>
-                  <th className="px-4 py-3">Ventas</th>
-                  <th className="px-4 py-3">Retiros</th>
-                  <th className="px-4 py-3">Esperado</th>
-                  <th className="px-4 py-3">Real</th>
-                  <th className="px-4 py-3">Diferencia</th>
-                  <th className="px-4 py-3">Estado</th>
+                <tr className="border-b border-slate-700">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Fecha Apertura
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Monto Inicial
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Ventas
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Retiros
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Esperado
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Real
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Diferencia
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Estado
+                  </th>
                 </tr>
               </thead>
-              <tbody className="bg-gray-900/5">
+              <tbody className="divide-y divide-slate-700">
                 {sessions && sessions.length > 0 ? (
                   sessions.map((s, idx) => (
-                    <tr key={idx} className="border-t border-gray-800">
-                      <td className="px-4 py-3 text-gray-200">{s.openedAt}</td>
-                      <td className="px-4 py-3 text-gray-200">
+                    <tr key={idx} className="hover:bg-slate-800/50 transition">
+                      <td className="px-6 py-4 text-slate-300">{s.openedAt}</td>
+                      <td className="px-6 py-4 text-slate-300">
                         ${(s.initial ?? 0).toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 font-semibold text-green-500">
+                      <td className="px-6 py-4 font-semibold text-green-400">
                         ${(s.sales ?? 0).toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 font-semibold text-red-500">
+                      <td className="px-6 py-4 font-semibold text-red-400">
                         ${(s.withdrawals ?? 0).toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 text-gray-200">
+                      <td className="px-6 py-4 text-slate-300">
                         ${(s.expected ?? 0).toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 text-gray-200">
+                      <td className="px-6 py-4 text-slate-300">
                         {s.real == null ? "-" : `$${Number(s.real).toFixed(2)}`}
                       </td>
-                      <td className="px-4 py-3 text-gray-200">
+                      <td className="px-6 py-4 text-slate-300">
                         {s.diff == null ? "-" : `$${Number(s.diff).toFixed(2)}`}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
                             s.status === "Abierta"
-                              ? "bg-green-900/30 text-green-400"
-                              : "bg-gray-800 text-gray-300"
+                              ? "bg-green-900/40 text-green-400"
+                              : "bg-slate-800 text-slate-400"
                           }`}
                         >
                           {s.status}
@@ -877,7 +895,7 @@ export default function CashRegisterPage() {
                   <tr>
                     <td
                       colSpan={8}
-                      className="px-4 py-8 text-center text-sm text-gray-400"
+                      className="px-6 py-8 text-center text-sm text-slate-500"
                     >
                       No hay historial de sesiones
                     </td>

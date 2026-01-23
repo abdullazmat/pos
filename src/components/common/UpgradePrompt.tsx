@@ -35,19 +35,19 @@ export function UpgradePrompt({
           <Lock className="w-6 h-6 text-white" />
         </div>
 
-        <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
+        <h3 className="text-xl font-bold text-white text-center mb-2">
           Característica Premium
         </h3>
-        <p className="text-gray-600 text-center mb-6">{reason}</p>
+        <p className="text-gray-300 text-center mb-6">{reason}</p>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-4 mb-6">
           <div className="flex items-start gap-2">
-            <Zap className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <Zap className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-blue-900 text-sm">
+              <p className="font-semibold text-blue-100 text-sm">
                 {featureName}
               </p>
-              <p className="text-blue-700 text-xs mt-1">
+              <p className="text-blue-200 text-xs mt-1">
                 Disponible en plan Pro
               </p>
             </div>
@@ -57,7 +57,7 @@ export function UpgradePrompt({
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={handleClose}
-            className="px-4 py-2.5 border border-gray-200 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-4 py-2.5 border border-slate-600 rounded-lg font-semibold text-gray-300 hover:bg-slate-700 transition-colors"
           >
             Cerrar
           </button>
@@ -66,7 +66,7 @@ export function UpgradePrompt({
               router.push("/upgrade");
               handleClose();
             }}
-            className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            className="px-4 py-2.5 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
           >
             Upgrade
             <ArrowRight className="w-4 h-4" />
@@ -105,28 +105,28 @@ export function LimitReachedPrompt({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in slide-in-from-bottom-4">
+      <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in slide-in-from-bottom-4 border border-slate-700">
         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-600 mb-4 mx-auto">
           <Lock className="w-6 h-6 text-white" />
         </div>
 
-        <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
+        <h3 className="text-xl font-bold text-white text-center mb-2">
           Límite de Plan Alcanzado
         </h3>
-        <p className="text-gray-600 text-center mb-6">
+        <p className="text-gray-300 text-center mb-6">
           Has llegado al límite de {limitName} en tu plan actual.
         </p>
 
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+        <div className="bg-orange-900/30 border border-orange-700/50 rounded-lg p-4 mb-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-orange-900">
+            <span className="text-sm font-semibold text-orange-100">
               {limitName}
             </span>
-            <span className="text-sm text-orange-700">
+            <span className="text-sm text-orange-200">
               {current} / {max}
             </span>
           </div>
-          <div className="w-full bg-orange-200 rounded-full h-2">
+          <div className="w-full bg-orange-900/50 rounded-full h-2 border border-orange-700">
             <div
               className="bg-gradient-to-r from-orange-500 to-red-600 h-2 rounded-full"
               style={{ width: `${(current / max) * 100}%` }}
@@ -134,14 +134,14 @@ export function LimitReachedPrompt({
           </div>
         </div>
 
-        <p className="text-sm text-gray-600 text-center mb-6">
+        <p className="text-sm text-gray-300 text-center mb-6">
           Actualiza tu plan a Pro para disfrutar de límites ilimitados.
         </p>
 
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={handleClose}
-            className="px-4 py-2.5 border border-gray-200 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-4 py-2.5 border border-slate-600 rounded-lg font-semibold text-gray-300 hover:bg-slate-700 transition-colors"
           >
             Más tarde
           </button>
