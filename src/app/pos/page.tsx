@@ -17,6 +17,7 @@ interface CartItem {
   unitPrice: number;
   discount: number;
   total: number;
+  isSoldByWeight?: boolean;
 }
 
 export default function POSPage() {

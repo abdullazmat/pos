@@ -524,7 +524,6 @@ export default function ReportsPage() {
                           <td
                             colSpan={4}
                             className="py-4 px-4 text-center text-slate-600 dark:text-slate-400">
-                          >
                             {loading ? "Cargando..." : copy.recentSales.noSales}
                           </td>
                         </tr>

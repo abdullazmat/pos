@@ -25,6 +25,7 @@ import { PLAN_FEATURES, isLimitReached } from "@/lib/utils/planFeatures";
 
 interface Supplier {
   _id: string;
+  name: string;
   document?: string;
   phone?: string;
   email?: string;
@@ -1069,7 +1070,7 @@ export default function SuppliersPage() {
                     {copy.bulk.uploadPrompt}
                   </p>
                   <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {copy.bulk.orDrag}
+                    {copy.bulk.orClick}
                   </p>
                 </div>
               )}

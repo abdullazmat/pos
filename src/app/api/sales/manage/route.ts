@@ -74,12 +74,12 @@ export async function GET(req: NextRequest) {
 
       const analytics = {
         totalSales: sales.length,
-        totalRevenue: sales.reduce((sum, s) => sum + s.totalWithTax, 0),
-        totalTax: sales.reduce((sum, s) => sum + s.tax, 0),
+        totalRevenue: sales.reduce((sum, s) => sum + (s.totalWithTax || s.total), 0),
+        totalTax: sales.reduce((sum, s) => sum + (s.tax || 0), 0),
         totalDiscount: sales.reduce((sum, s) => sum + s.discount, 0),
         averageTicket:
           sales.length > 0
-            ? sales.reduce((sum, s) => sum + s.totalWithTax, 0) / sales.length
+            ? sales.reduce((sum, s) => sum + (s.totalWithTax || s.total), 0) / sales.length
             : 0,
         byPaymentMethod: {
           cash: sales.filter((s) => s.paymentMethod === "cash").length,

@@ -15,11 +15,15 @@ export interface ISale extends Document {
   userId: Schema.Types.ObjectId;
   items: SaleItem[];
   subtotal: number;
+  tax?: number;
+  totalWithTax?: number;
   discount: number;
   total: number;
-  paymentMethod: "cash" | "card" | "check" | "online" | "bankTransfer" | "qr";
-  paymentStatus: "pending" | "completed" | "failed";
+  paymentMethod: "cash" | "card" | "check" | "online" | "bankTransfer" | "qr" | "mercadopago" | "multiple";
+  paymentStatus: "pending" | "completed" | "failed" | "partial";
+  invoice?: Schema.Types.ObjectId;
   cashRegisterId?: Schema.Types.ObjectId;
+  paymentLink?: string;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -75,6 +79,11 @@ const saleSchema = new Schema<ISale>(
     },
     items: [saleItemSchema],
     subtotal: Number,
+    tax: {
+      type: Number,
+      default: 0,
+    },
+    totalWithTax: Number,
     discount: {
       type: Number,
       default: 0,
@@ -82,15 +91,17 @@ const saleSchema = new Schema<ISale>(
     total: Number,
     paymentMethod: {
       type: String,
-      enum: ["cash", "card", "check", "online", "bankTransfer", "qr"],
+      enum: ["cash", "card", "check", "online", "bankTransfer", "qr", "mercadopago", "multiple"],
       default: "cash",
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "completed", "failed"],
+      enum: ["pending", "completed", "failed", "partial"],
       default: "completed",
     },
+    invoice: Schema.Types.ObjectId,
     cashRegisterId: Schema.Types.ObjectId,
+    paymentLink: String,
     notes: String,
   },
   {
