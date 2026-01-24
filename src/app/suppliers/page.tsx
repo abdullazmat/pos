@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import {
   Truck,
@@ -31,8 +32,206 @@ interface Supplier {
   address?: string;
 }
 
+const SUPPLIER_COPY = {
+  es: {
+    title: "Gestión de Proveedores",
+    subtitle: "Administra tu red de proveedores",
+    bulkUpload: "Carga Masiva",
+    newSupplier: "Nuevo Proveedor",
+    planStatus: (count: number, max: string | number) => `${count}/${max} proveedores · Gratuito`,
+    limitReached: "Límite alcanzado",
+    stats: {
+      totalTitle: "Total Proveedores",
+      totalDesc: "Proveedores registrados",
+      activeTitle: "Proveedores Activos",
+      activeDesc: "Proveedores operativos",
+    },
+    searchPlaceholder: "Buscar por nombre, documento, teléfono o email...",
+    formTitleNew: "Nuevo Proveedor",
+    formTitleEdit: "Editar Proveedor",
+    labels: {
+      name: "Nombre *",
+      document: "Documento",
+      phone: "Teléfono",
+      email: "Email",
+      address: "Dirección",
+    },
+    actions: {
+      create: "Crear",
+      update: "Actualizar",
+      cancel: "Cancelar",
+    },
+    empty: {
+      none: "No hay proveedores aún",
+      search: "No se encontraron proveedores",
+    },
+    table: {
+      supplier: "Proveedor",
+      contact: "Contacto",
+      status: "Estado",
+      actions: "Acciones",
+    },
+    statusActive: "Activo",
+    delete: {
+      title: "Eliminar Proveedor",
+      subtitle: "Esta acción no se puede deshacer",
+      confirm: (name?: string) =>
+        `¿Estás seguro de que deseas eliminar a ${name || "este proveedor"}?`,
+      cancel: "Cancelar",
+      accept: "Eliminar",
+    },
+    bulk: {
+      title: "Importación Masiva de Proveedores",
+      subtitle: "Importa múltiples proveedores desde un archivo CSV",
+      instructions: [
+        "Descarga la plantilla CSV haciendo clic en el botón de abajo",
+        "Completa el archivo con los datos de tus proveedores",
+        "Sube el archivo completado usando el área de carga",
+      ],
+      fieldsLabel: "Campos del CSV:",
+      downloadTemplate: "Descargar Plantilla CSV",
+      uploadPrompt: "Arrastra tu archivo CSV aquí",
+      orClick: "o haz clic para seleccionar",
+      processing: "Procesando...",
+      importAction: "Importar Proveedores",
+      close: "Cancelar",
+    },
+  },
+  en: {
+    title: "Supplier Management",
+    subtitle: "Manage your supplier network",
+    bulkUpload: "Bulk Upload",
+    newSupplier: "New Supplier",
+    planStatus: (count: number, max: string | number) => `${count}/${max} suppliers · Free`,
+    limitReached: "Limit reached",
+    stats: {
+      totalTitle: "Total Suppliers",
+      totalDesc: "Registered suppliers",
+      activeTitle: "Active Suppliers",
+      activeDesc: "Operational suppliers",
+    },
+    searchPlaceholder: "Search by name, document, phone or email...",
+    formTitleNew: "New Supplier",
+    formTitleEdit: "Edit Supplier",
+    labels: {
+      name: "Name *",
+      document: "Document",
+      phone: "Phone",
+      email: "Email",
+      address: "Address",
+    },
+    actions: {
+      create: "Create",
+      update: "Update",
+      cancel: "Cancel",
+    },
+    empty: {
+      none: "No suppliers yet",
+      search: "No suppliers found",
+    },
+    table: {
+      supplier: "Supplier",
+      contact: "Contact",
+      status: "Status",
+      actions: "Actions",
+    },
+    statusActive: "Active",
+    delete: {
+      title: "Delete Supplier",
+      subtitle: "This action cannot be undone",
+      confirm: (name?: string) =>
+        `Are you sure you want to delete ${name || "this supplier"}?`,
+      cancel: "Cancel",
+      accept: "Delete",
+    },
+    bulk: {
+      title: "Bulk Supplier Import",
+      subtitle: "Import multiple suppliers from a CSV file",
+      instructions: [
+        "Download the CSV template using the button below",
+        "Fill the file with your suppliers' data",
+        "Upload the completed file using the drop area",
+      ],
+      fieldsLabel: "CSV fields:",
+      downloadTemplate: "Download CSV Template",
+      uploadPrompt: "Drag your CSV file here",
+      orClick: "or click to select",
+      processing: "Processing...",
+      importAction: "Import Suppliers",
+      close: "Cancel",
+    },
+  },
+  pt: {
+    title: "Gestão de Fornecedores",
+    subtitle: "Administre sua rede de fornecedores",
+    bulkUpload: "Carga Massiva",
+    newSupplier: "Novo Fornecedor",
+    planStatus: (count: number, max: string | number) => `${count}/${max} fornecedores · Gratuito`,
+    limitReached: "Limite atingido",
+    stats: {
+      totalTitle: "Total de Fornecedores",
+      totalDesc: "Fornecedores registrados",
+      activeTitle: "Fornecedores Ativos",
+      activeDesc: "Fornecedores operacionais",
+    },
+    searchPlaceholder: "Buscar por nome, documento, telefone ou email...",
+    formTitleNew: "Novo Fornecedor",
+    formTitleEdit: "Editar Fornecedor",
+    labels: {
+      name: "Nome *",
+      document: "Documento",
+      phone: "Telefone",
+      email: "Email",
+      address: "Endereço",
+    },
+    actions: {
+      create: "Criar",
+      update: "Atualizar",
+      cancel: "Cancelar",
+    },
+    empty: {
+      none: "Ainda não há fornecedores",
+      search: "Nenhum fornecedor encontrado",
+    },
+    table: {
+      supplier: "Fornecedor",
+      contact: "Contato",
+      status: "Status",
+      actions: "Ações",
+    },
+    statusActive: "Ativo",
+    delete: {
+      title: "Excluir Fornecedor",
+      subtitle: "Esta ação não pode ser desfeita",
+      confirm: (name?: string) =>
+        `Tem certeza de que deseja excluir ${name || "este fornecedor"}?`,
+      cancel: "Cancelar",
+      accept: "Excluir",
+    },
+    bulk: {
+      title: "Importação Massiva de Fornecedores",
+      subtitle: "Importe múltiplos fornecedores a partir de um arquivo CSV",
+      instructions: [
+        "Baixe o modelo CSV usando o botão abaixo",
+        "Preencha o arquivo com os dados dos fornecedores",
+        "Envie o arquivo usando a área de upload",
+      ],
+      fieldsLabel: "Campos do CSV:",
+      downloadTemplate: "Baixar Modelo CSV",
+      uploadPrompt: "Arraste seu arquivo CSV aqui",
+      orClick: "ou clique para selecionar",
+      processing: "Processando...",
+      importAction: "Importar Fornecedores",
+      close: "Cancelar",
+    },
+  },
+} as const;
+
 export default function SuppliersPage() {
   const router = useRouter();
+  const { currentLanguage } = useGlobalLanguage();
+  const copy = (SUPPLIER_COPY[currentLanguage] || SUPPLIER_COPY.en) as
+    typeof SUPPLIER_COPY.en;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -387,7 +586,7 @@ export default function SuppliersPage() {
           onDismiss={() => setShowLimitPrompt(false)}
         />
       )}
-      <div className="min-h-screen bg-slate-950">
+      <div className="min-h-screen bg-white dark:bg-slate-950">
         <Header user={user} showBackButton />
 
         <main className="max-w-7xl mx-auto px-4 py-8">
@@ -395,9 +594,9 @@ export default function SuppliersPage() {
             <div>
               <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
                 <Truck className="w-8 h-8 text-purple-400" />
-                Gestión de Proveedores
+                {copy.title}
               </h1>
-              <p className="text-slate-400">Administra tu red de proveedores</p>
+              <p className="text-slate-400">{copy.subtitle}</p>
             </div>
 
             {/* Action buttons */}
@@ -407,7 +606,7 @@ export default function SuppliersPage() {
                 className="bg-purple-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2"
               >
                 <Upload className="w-5 h-5" />
-                Carga Masiva
+                {copy.bulkUpload}
               </button>
               <button
                 onClick={() => {
@@ -431,7 +630,7 @@ export default function SuppliersPage() {
                 }`}
               >
                 <Plus className="w-5 h-5" />
-                Nuevo Proveedor
+                {copy.newSupplier}
               </button>
             </div>
           </div>
@@ -440,11 +639,11 @@ export default function SuppliersPage() {
           <div className="bg-emerald-900/20 border border-emerald-700 rounded-lg p-4 mb-6 flex items-center gap-2">
             <Truck className="w-5 h-5 text-emerald-400" />
             <span className="text-emerald-300 font-medium">
-              {supplierCount}/{maxSuppliers} proveedores · Gratuito
+              {copy.planStatus(supplierCount, maxSuppliers)}
             </span>
             {planConfig.maxSuppliers > 0 &&
               supplierCount >= planConfig.maxSuppliers && (
-                <span className="text-red-400 ml-auto">Límite alcanzado</span>
+                <span className="text-red-400 ml-auto">{copy.limitReached}</span>
               )}
           </div>
 
@@ -452,23 +651,23 @@ export default function SuppliersPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-slate-400">Total Proveedores</p>
+                <p className="text-sm text-slate-400">{copy.stats.totalTitle}</p>
                 <Truck className="w-8 h-8 text-purple-400" />
               </div>
               <p className="text-3xl font-bold text-white">{supplierCount}</p>
               <p className="text-sm text-slate-500 mt-1">
-                Proveedores registrados
+                {copy.stats.totalDesc}
               </p>
             </div>
 
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-slate-400">Proveedores Activos</p>
+                <p className="text-sm text-slate-400">{copy.stats.activeTitle}</p>
                 <Truck className="w-8 h-8 text-emerald-400" />
               </div>
               <p className="text-3xl font-bold text-white">{supplierCount}</p>
               <p className="text-sm text-slate-500 mt-1">
-                Proveedores operativos
+                {copy.stats.activeDesc}
               </p>
             </div>
           </div>
@@ -479,7 +678,7 @@ export default function SuppliersPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Buscar por nombre, documento, teléfono o email..."
+                placeholder={copy.searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-slate-500"
@@ -493,7 +692,7 @@ export default function SuppliersPage() {
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-white">
-                    {editingId ? "Editar Proveedor" : "Nuevo Proveedor"}
+                    {editingId ? copy.formTitleEdit : copy.formTitleNew}
                   </h2>
                   <button
                     onClick={() => {
@@ -509,7 +708,7 @@ export default function SuppliersPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Nombre *
+                        {copy.labels.name}
                       </label>
                       <input
                         type="text"
@@ -523,7 +722,7 @@ export default function SuppliersPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Documento
+                        {copy.labels.document}
                       </label>
                       <input
                         type="text"
@@ -536,7 +735,7 @@ export default function SuppliersPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Teléfono
+                        {copy.labels.phone}
                       </label>
                       <input
                         type="text"
@@ -549,7 +748,7 @@ export default function SuppliersPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Email
+                        {copy.labels.email}
                       </label>
                       <input
                         type="email"
@@ -562,7 +761,7 @@ export default function SuppliersPage() {
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Dirección
+                        {copy.labels.address}els.address}
                       </label>
                       <input
                         type="text"
@@ -579,7 +778,7 @@ export default function SuppliersPage() {
                       type="submit"
                       className="flex-1 bg-purple-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-purple-700 transition-colors"
                     >
-                      {editingId ? "Actualizar" : "Crear"}
+                      {editingId ? copy.actions.update : copy.actions.create}
                     </button>
                     <button
                       type="button"
@@ -589,7 +788,7 @@ export default function SuppliersPage() {
                       }}
                       className="flex-1 bg-slate-800 border border-slate-700 text-slate-300 px-6 py-2.5 rounded-lg font-medium hover:bg-slate-700 transition-colors"
                     >
-                      Cancelar
+                      {copy.actions.cancel}
                     </button>
                   </div>
                 </form>
@@ -606,9 +805,7 @@ export default function SuppliersPage() {
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-12 text-center">
               <Truck className="w-16 h-16 text-slate-700 mx-auto mb-4" />
               <p className="text-slate-400 text-lg">
-                {searchTerm
-                  ? "No se encontraron proveedores"
-                  : "No hay proveedores aún"}
+                {searchTerm ? copy.empty.search : copy.empty.none}
               </p>
             </div>
           ) : (
@@ -617,16 +814,16 @@ export default function SuppliersPage() {
                 <thead className="bg-slate-800">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      Proveedor
+                      {copy.table.supplier}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      Contacto
+                      {copy.table.contact}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      Estado
+                      {copy.table.status}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      Acciones
+                      {copy.table.actions}
                     </th>
                   </tr>
                 </thead>
@@ -646,7 +843,7 @@ export default function SuppliersPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-900/30 text-emerald-400 border border-emerald-800">
-                          Activo
+                          {copy.statusActive}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm flex gap-2">
@@ -690,21 +887,17 @@ export default function SuppliersPage() {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white">
-                  Eliminar Proveedor
+                  {copy.delete.title}
                 </h3>
                 <p className="text-sm text-slate-400">
-                  Esta acción no se puede deshacer
+                  {copy.delete.subtitle}
                 </p>
               </div>
             </div>
 
             <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 mb-6">
               <p className="text-slate-300">
-                ¿Estás seguro de que deseas eliminar a{" "}
-                <span className="font-semibold text-white">
-                  {supplierToDelete?.name}
-                </span>
-                ?
+                {copy.delete.confirm(supplierToDelete?.name)}
               </p>
             </div>
 
@@ -713,13 +906,13 @@ export default function SuppliersPage() {
                 onClick={() => setShowDeleteModal(false)}
                 className="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 text-slate-300 rounded-lg font-medium hover:bg-slate-700 transition-colors"
               >
-                Cancelar
+                {copy.delete.cancel}
               </button>
               <button
                 onClick={confirmDelete}
                 className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
               >
-                Eliminar
+                {copy.delete.accept}
               </button>
             </div>
           </div>
@@ -734,10 +927,10 @@ export default function SuppliersPage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-white">
-                  Importación Masiva de Proveedores
+                  {copy.bulk.title}
                 </h2>
                 <p className="text-sm text-slate-400 mt-1">
-                  Importa múltiples proveedores desde un archivo CSV
+                  {copy.bulk.subtitle}
                 </p>
               </div>
               <button
@@ -758,29 +951,17 @@ export default function SuppliersPage() {
                 Instrucciones
               </h3>
               <ol className="space-y-2 text-slate-300 text-sm">
-                <li className="flex gap-2">
-                  <span className="text-purple-400 font-semibold">1.</span>
-                  <span>
-                    Descarga la plantilla CSV haciendo clic en el botón de abajo
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-purple-400 font-semibold">2.</span>
-                  <span>
-                    Completa el archivo con los datos de tus proveedores
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-purple-400 font-semibold">3.</span>
-                  <span>
-                    Sube el archivo completado usando el área de carga
-                  </span>
-                </li>
+                {copy.bulk.instructions.map((instruction, index) => (
+                  <li key={index} className="flex gap-2">
+                    <span className="text-purple-400 font-semibold">{index + 1}.</span>
+                    <span>{instruction}</span>
+                  </li>
+                ))}
               </ol>
 
               <div className="mt-4 pt-4 border-t border-slate-700">
                 <p className="text-xs text-slate-400 mb-2">
-                  <strong className="text-slate-300">Campos del CSV:</strong>
+                  <strong className="text-slate-300">{copy.bulk.fieldsLabel}</strong>
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="text-slate-400">
@@ -815,7 +996,7 @@ export default function SuppliersPage() {
               className="w-full mb-6 px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-lg font-medium hover:bg-slate-700 transition-colors flex items-center justify-center gap-2"
             >
               <Download className="w-5 h-5" />
-              Descargar Plantilla CSV
+              {copy.bulk.downloadTemplate}
             </button>
 
             {/* Upload Area */}
@@ -838,10 +1019,10 @@ export default function SuppliersPage() {
               ) : (
                 <div>
                   <p className="text-white font-medium mb-1">
-                    Arrastra tu archivo CSV aquí
+                    {copy.bulk.uploadPrompt}
                   </p>
                   <p className="text-sm text-slate-400">
-                    o haz clic para seleccionar
+                    {copy.bulk.orClick}
                   </p>
                 </div>
               )}
@@ -863,14 +1044,14 @@ export default function SuppliersPage() {
                 }}
                 className="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 text-slate-300 rounded-lg font-medium hover:bg-slate-700 transition-colors"
               >
-                Cancelar
+                {copy.bulk.close}
               </button>
               <button
                 onClick={processCSV}
                 disabled={!uploadFile || uploadProgress}
                 className="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {uploadProgress ? "Procesando..." : "Importar Proveedores"}
+                {uploadProgress ? copy.bulk.processing : copy.bulk.importAction}
               </button>
             </div>
           </div>

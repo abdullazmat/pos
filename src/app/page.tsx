@@ -37,7 +37,13 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center bg-[#0b0c0e] text-white">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto mb-4 border-b-2 border-white rounded-full animate-spin"></div>
-          <p className="text-lg">Loading...</p>
+          <p className="text-lg">
+            {String(
+              require("@/lib/context/LanguageContext")
+                .useLanguage()
+                .t("loading", "common"),
+            )}
+          </p>
         </div>
       </div>
     );
@@ -47,7 +53,10 @@ export default function Home() {
     <>
       <Header />
 
-      <main id="top" className="bg-[#0b0c0e] text-white">
+      <main
+        id="top"
+        className="bg-white dark:bg-[#0b0c0e] text-gray-900 dark:text-white"
+      >
         <div className="px-6 pt-24 pb-40 mx-auto max-w-7xl">
           <div className="grid lg:grid-cols-2 gap-16 items-center min-h-[85vh]">
             <div className="space-y-16">

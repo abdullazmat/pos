@@ -60,7 +60,7 @@ export default function PaymentStatusPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton={false} />
 
       <main className="max-w-2xl mx-auto px-4 py-12">

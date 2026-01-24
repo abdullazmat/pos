@@ -1,0 +1,35 @@
+{
+  "pricing": {
+    "title": "Simple and transparent plans",
+    "subtitle": "Start free and grow when you need to",
+    "free": "Free Plan",
+    "freePrice": "$0",
+    "freeSubtitle": "forever",
+    "freeDescription": "Perfect to get started",
+    "pro": "Pro Plan",
+    "proPrice": "$24.990",
+    "proSubtitle": "ARS/month",
+    "proDescription": "Unlimited to grow",
+    "mostPopular": "Most Popular",
+    "freeFeatures": [
+      "Up to 100 products",
+      "Up to 2 users",
+      "Complete point of sale",
+      "Cash register control",
+      "Basic reports",
+      "Basic stock"
+    ],
+    "proFeatures": [
+      "Unlimited products",
+      "Unlimited users",
+      "Everything from free plan",
+      "Customer management",
+      "Credit sales",
+      "Expense management",
+      "Advanced reports",
+      "Priority support"
+    ],
+    "startFree": "Start Free",
+    "tryFree": "Try 14 days free"
+  }
+}

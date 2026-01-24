@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import SubscriptionProModal from "@/components/business-config/SubscriptionProModal";
 import SubscriptionFreePlanModal from "@/components/business-config/SubscriptionFreePlanModal";
@@ -45,6 +46,108 @@ interface Subscription {
   currentPeriodEnd: string;
 }
 
+const CONFIG_COPY = {
+  es: {
+    title: "Configuración del Negocio",
+    subtitle: "Administra tu información comercial y planes",
+    sections: {
+      logo: "Logo del Negocio",
+      businessInfo: "Información de Negocio",
+      plans: "Gestión de Planes",
+    },
+    businessForm: {
+      businessName: "Nombre del Negocio",
+      address: "Dirección",
+      phone: "Teléfono",
+      email: "Email",
+      website: "Sitio Web",
+      cuitRucDni: "CUIT/RUC/DNI",
+      ticketMessage: "Mensaje en Ticket",
+    },
+    buttons: {
+      save: "Guardar Cambios",
+      saving: "Guardando...",
+      subscribe: "Suscribirse",
+      selectPlan: "Seleccionar Plan",
+    },
+    messages: {
+      saved: "Configuración guardada exitosamente",
+      savingError: "Error al guardar la configuración",
+      alreadySubscribed: "Ya estás suscrito a este plan",
+      subscriptionUpdated: (planName: string) =>
+        `¡Suscripción actualizada a ${planName}!`,
+      subscriptionError: "Error al actualizar suscripción",
+      loading: "Cargando...",
+    },
+  },
+  en: {
+    title: "Business Configuration",
+    subtitle: "Manage your business information and plans",
+    sections: {
+      logo: "Business Logo",
+      businessInfo: "Business Information",
+      plans: "Plan Management",
+    },
+    businessForm: {
+      businessName: "Business Name",
+      address: "Address",
+      phone: "Phone",
+      email: "Email",
+      website: "Website",
+      cuitRucDni: "CUIT/RUC/DNI",
+      ticketMessage: "Ticket Message",
+    },
+    buttons: {
+      save: "Save Changes",
+      saving: "Saving...",
+      subscribe: "Subscribe",
+      selectPlan: "Select Plan",
+    },
+    messages: {
+      saved: "Configuration saved successfully",
+      savingError: "Error saving configuration",
+      alreadySubscribed: "You are already subscribed to this plan",
+      subscriptionUpdated: (planName: string) =>
+        `Subscription updated to ${planName}!`,
+      subscriptionError: "Error updating subscription",
+      loading: "Loading...",
+    },
+  },
+  pt: {
+    title: "Configuração do Negócio",
+    subtitle: "Gerencie suas informações comerciais e planos",
+    sections: {
+      logo: "Logo do Negócio",
+      businessInfo: "Informações do Negócio",
+      plans: "Gerenciamento de Planos",
+    },
+    businessForm: {
+      businessName: "Nome do Negócio",
+      address: "Endereço",
+      phone: "Telefone",
+      email: "Email",
+      website: "Site",
+      cuitRucDni: "CUIT/RUC/DNI",
+      ticketMessage: "Mensagem do Recibo",
+    },
+    buttons: {
+      save: "Salvar Alterações",
+      saving: "Salvando...",
+      subscribe: "Inscrever-se",
+      selectPlan: "Selecionar Plano",
+    },
+    messages: {
+      saved: "Configuração salva com sucesso",
+      savingError: "Erro ao salvar configuração",
+      alreadySubscribed: "Você já está inscrito neste plano",
+      subscriptionUpdated: (planName: string) =>
+        `Inscrição atualizada para ${planName}!`,
+      subscriptionError: "Erro ao atualizar inscrição",
+      loading: "Carregando...",
+    },
+  },
+};
+
 export default function BusinessConfigPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,6 +162,10 @@ export default function BusinessConfigPage() {
     null,
   );
   const router = useRouter();
+  const { currentLanguage } = useGlobalLanguage();
+  const copy =
+    CONFIG_COPY[currentLanguage as keyof typeof CONFIG_COPY] || CONFIG_COPY.es;
+
   const [formData, setFormData] = useState<BusinessConfig>({
     businessName: "MI NEGOCIO",
     address: "Dirección del negocio",
@@ -129,7 +236,7 @@ export default function BusinessConfigPage() {
 
   const handleSaveConfig = async () => {
     if (!formData.businessName || !formData.email) {
-      toast.error("El nombre del negocio y email son requeridos");
+      toast.error(copy.messages.savingError);
       return;
     }
 
@@ -149,15 +256,15 @@ export default function BusinessConfigPage() {
         const data = await response.json();
         setFormData(data.data);
         setConfigSaved(true);
-        toast.success("✅ Configuración guardada exitosamente");
+        toast.success(copy.messages.saved);
         setTimeout(() => setConfigSaved(false), 3000);
       } else {
         const error = await response.json();
-        toast.error(error.error || "Error al guardar la configuración");
+        toast.error(error.error || copy.messages.savingError);
       }
     } catch (error) {
       console.error("Error saving config:", error);
-      toast.error("Error al guardar la configuración");
+      toast.error(copy.messages.savingError);
     } finally {
       setSavingConfig(false);
     }
@@ -168,7 +275,7 @@ export default function BusinessConfigPage() {
     if (!plan) return;
 
     if (currentSubscription?.planId === planId) {
-      toast.info("Ya estás suscrito a este plan");
+      toast.info(copy.messages.alreadySubscribed);
       return;
     }
 
@@ -209,15 +316,15 @@ export default function BusinessConfigPage() {
       });
 
       if (response.ok) {
-        toast.success(`¡Suscripción actualizada a ${plan?.name}!`);
+        toast.success(copy.messages.subscriptionUpdated(plan?.name || ""));
         fetchSubscription();
       } else {
         const data = await response.json();
-        toast.error(data.error || "Error al actualizar suscripción");
+        toast.error(data.error || copy.messages.subscriptionError);
       }
     } catch (error) {
       console.error("Error subscribing:", error);
-      toast.error("Error al actualizar suscripción");
+      toast.error(copy.messages.subscriptionError);
     } finally {
       setSubscribing(false);
     }
@@ -241,18 +348,18 @@ export default function BusinessConfigPage() {
 
       if (response.ok) {
         toast.success(
-          `¡Suscripción actualizada a ${selectedPlanForModal?.name}!`,
+          copy.messages.subscriptionUpdated(selectedPlanForModal?.name || ""),
         );
         setShowSubscriptionModal(false);
         setSelectedPlanForModal(null);
         fetchSubscription();
       } else {
         const data = await response.json();
-        toast.error(data.error || "Error al actualizar suscripción");
+        toast.error(data.error || copy.messages.subscriptionError);
       }
     } catch (error) {
       console.error("Error subscribing:", error);
-      toast.error("Error al actualizar suscripción");
+      toast.error(copy.messages.subscriptionError);
     } finally {
       setSubscribing(false);
     }
@@ -275,18 +382,18 @@ export default function BusinessConfigPage() {
 
       if (response.ok) {
         toast.success(
-          `¡Suscripción actualizada a ${selectedPlanForModal?.name}!`,
+          copy.messages.subscriptionUpdated(selectedPlanForModal?.name || ""),
         );
         setShowFreePlanModal(false);
         setSelectedPlanForModal(null);
         fetchSubscription();
       } else {
         const data = await response.json();
-        toast.error(data.error || "Error al actualizar suscripción");
+        toast.error(data.error || copy.messages.subscriptionError);
       }
     } catch (error) {
       console.error("Error subscribing:", error);
-      toast.error("Error al actualizar suscripción");
+      toast.error(copy.messages.subscriptionError);
     } finally {
       setSubscribing(false);
     }
@@ -310,18 +417,18 @@ export default function BusinessConfigPage() {
 
       if (response.ok) {
         toast.success(
-          `¡Suscripción actualizada a ${selectedPlanForModal?.name}!`,
+          copy.messages.subscriptionUpdated(selectedPlanForModal?.name || ""),
         );
         setShowPremiumModal(false);
         setSelectedPlanForModal(null);
         fetchSubscription();
       } else {
         const data = await response.json();
-        toast.error(data.error || "Error al actualizar suscripción");
+        toast.error(data.error || copy.messages.subscriptionError);
       }
     } catch (error) {
       console.error("Error subscribing:", error);
-      toast.error("Error al actualizar suscripción");
+      toast.error(copy.messages.subscriptionError);
     } finally {
       setSubscribing(false);
     }
@@ -329,27 +436,23 @@ export default function BusinessConfigPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-950">
-        <div className="text-slate-400">Cargando...</div>
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-slate-950">
+        <div className="text-slate-400">{copy.messages.loading}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100">
       <Header user={user} showBackButton={true} />
       <div className="px-4 py-6 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Page header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-3xl">🏪</span>
-            <h1 className="text-2xl font-bold text-white">
-              Configuración del Negocio
-            </h1>
+            <h1 className="text-2xl font-bold text-white">{copy.title}</h1>
           </div>
-          <p className="text-slate-400">
-            Personaliza la información que aparece en tus tickets
-          </p>
+          <p className="text-slate-400">{copy.subtitle}</p>
         </div>
 
         {/* Content grid */}
@@ -360,7 +463,7 @@ export default function BusinessConfigPage() {
             <section className="bg-slate-900 border border-purple-600/30 rounded-xl overflow-hidden hover:border-purple-600/50 transition-colors">
               <div className="flex items-center justify-between p-4 border-b border-purple-600/20">
                 <h2 className="font-semibold text-white flex items-center gap-2">
-                  🎨 Logo del Negocio
+                  🎨 {copy.sections.logo}
                 </h2>
                 <span className="px-2.5 py-1 text-xs font-semibold text-purple-300 bg-purple-900/60 border border-purple-700/50 rounded-full">
                   Premium
@@ -388,8 +491,8 @@ export default function BusinessConfigPage() {
             <section className="bg-slate-900 border border-purple-600/30 rounded-xl overflow-hidden hover:border-purple-600/50 transition-colors">
               <div className="p-4 border-b border-purple-600/20">
                 <h2 className="font-semibold text-white flex items-center gap-2">
-                  <Crown className="w-5 h-5 text-purple-400" /> Plan de
-                  Suscripción
+                  <Crown className="w-5 h-5 text-purple-400" />{" "}
+                  {copy.sections.plans}
                 </h2>
               </div>
 
@@ -417,7 +520,7 @@ export default function BusinessConfigPage() {
                           )}
                           {currentSubscription?.planId === plan.id && (
                             <span className="px-2 py-0.5 text-xs font-semibold text-green-300 bg-green-900/50 border border-green-700/50 rounded-full">
-                              Plan Actual
+                              {copy.buttons.selectPlan}
                             </span>
                           )}
                         </div>
@@ -460,7 +563,7 @@ export default function BusinessConfigPage() {
                       {subscribing
                         ? "Procesando..."
                         : currentSubscription?.planId === plan.id
-                          ? "Plan Actual"
+                          ? copy.buttons.selectPlan
                           : "Click para suscribirse →"}
                     </button>
                   </div>
@@ -472,7 +575,7 @@ export default function BusinessConfigPage() {
             <section className="bg-slate-900 border border-purple-600/30 rounded-xl overflow-hidden hover:border-purple-600/50 transition-colors">
               <div className="p-4 border-b border-purple-600/20">
                 <h2 className="font-semibold text-white flex items-center gap-2">
-                  ⚙️ Configuración del Negocio
+                  ⚙️ {copy.sections.businessInfo}
                 </h2>
               </div>
 
@@ -480,7 +583,7 @@ export default function BusinessConfigPage() {
                 {/* Business Name */}
                 <div>
                   <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-                    📦 Nombre del Negocio{" "}
+                    📦 {copy.businessForm.businessName}{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -497,7 +600,7 @@ export default function BusinessConfigPage() {
                 {/* Address */}
                 <div>
                   <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-                    📍 Dirección
+                    📍 {copy.businessForm.address}
                   </label>
                   <input
                     type="text"
@@ -514,7 +617,7 @@ export default function BusinessConfigPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-                      ☎️ Teléfono
+                      ☎️ {copy.businessForm.phone}
                     </label>
                     <input
                       type="text"
@@ -528,7 +631,7 @@ export default function BusinessConfigPage() {
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-                      📧 Email
+                      📧 {copy.businessForm.email}
                     </label>
                     <input
                       type="email"
@@ -546,7 +649,7 @@ export default function BusinessConfigPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-                      🌐 Sitio Web
+                      🌐 {copy.businessForm.website}
                     </label>
                     <input
                       type="text"
@@ -560,7 +663,7 @@ export default function BusinessConfigPage() {
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-                      📋 CUIT/RUC/DNI
+                      📋 {copy.businessForm.cuitRucDni}
                     </label>
                     <input
                       type="text"
@@ -580,7 +683,7 @@ export default function BusinessConfigPage() {
                 {/* Ticket Message */}
                 <div>
                   <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-                    🎟️ Mensaje de Pie de Ticket
+                    🎟️ {copy.businessForm.ticketMessage}
                   </label>
                   <textarea
                     value={formData.ticketMessage}
@@ -606,7 +709,7 @@ export default function BusinessConfigPage() {
                     disabled={savingConfig}
                     className="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
                   >
-                    💾 {savingConfig ? "Guardando..." : "Guardar Configuración"}
+                    💾 {savingConfig ? copy.buttons.saving : copy.buttons.save}
                   </button>
                   <button
                     onClick={() => {

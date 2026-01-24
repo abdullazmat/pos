@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 
 interface ProductSearchProps {
   onAddToCart: (productId: string, name: string, price: number) => void;
@@ -11,6 +12,7 @@ export default function ProductSearch({
   onAddToCart,
   onSearch,
 }: ProductSearchProps) {
+  const { t } = useGlobalLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -66,7 +68,7 @@ export default function ProductSearch({
           </svg>
           <input
             type="text"
-            placeholder="Escanear o ingresar código de barras... (F6)"
+            placeholder={t("ui.scanPlaceholder", "pos")}
             className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
           />
         </div>
@@ -90,7 +92,7 @@ export default function ProductSearch({
           </svg>
           <input
             type="text"
-            placeholder="Buscar producto por nombre o código... (F5)"
+            placeholder={t("ui.searchPlaceholder", "pos")}
             value={searchQuery}
             onChange={handleSearchChange}
             className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
@@ -98,7 +100,7 @@ export default function ProductSearch({
         </div>
         {isSearching && (
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            Buscando...
+            {t("ui.searching", "pos")}
           </p>
         )}
       </div>
@@ -118,20 +120,20 @@ export default function ProductSearch({
             />
           </svg>
           <div className="text-sm text-blue-800 dark:text-blue-300">
-            <p className="font-medium mb-1">Tips rápidos:</p>
+            <p className="font-medium mb-1">{t("ui.tipsTitle", "pos")}</p>
             <p>
-              Usa el lector de barras o busca por nombre. Navega con{" "}
+              {t("ui.tipsBodyStart", "pos")}{" "}
               <kbd className="px-2 py-0.5 text-xs font-semibold bg-white dark:bg-slate-700 border border-blue-300 dark:border-blue-600 rounded">
                 ↑
               </kbd>{" "}
               <kbd className="px-2 py-0.5 text-xs font-semibold bg-white dark:bg-slate-700 border border-blue-300 dark:border-blue-600 rounded">
                 ↓
               </kbd>{" "}
-              y presiona{" "}
+              {t("ui.tipsBodyEnd", "pos")}{" "}
               <kbd className="px-2 py-0.5 text-xs font-semibold bg-white dark:bg-slate-700 border border-blue-300 dark:border-blue-600 rounded">
                 Enter
               </kbd>{" "}
-              para agregar.
+              {t("ui.tipsBodyAdd", "pos")}
             </p>
           </div>
         </div>
@@ -141,11 +143,11 @@ export default function ProductSearch({
       <div className="min-h-[300px]">
         {results.length === 0 && !searchQuery ? (
           <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-            <p className="text-lg">Empezá a escribir para buscar</p>
+            <p className="text-lg">{t("ui.startTyping", "pos")}</p>
           </div>
         ) : results.length === 0 && searchQuery ? (
           <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-            <p className="text-lg">No se encontraron productos</p>
+            <p className="text-lg">{t("ui.noProductsFound", "pos")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
@@ -161,10 +163,10 @@ export default function ProductSearch({
                   {product.name}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  Código: {product.code}
+                  {t("ui.codeLabel", "pos")} {product.code}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                  Stock: {product.stock}
+                  {t("ui.stockLabel", "pos")} {product.stock}
                 </p>
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-green-600 dark:text-green-400">
@@ -177,7 +179,7 @@ export default function ProductSearch({
                     }}
                     className="bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold transition"
                   >
-                    Agregar
+                    {t("ui.addButton", "pos")}
                   </button>
                 </div>
               </div>

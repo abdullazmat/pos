@@ -8,6 +8,8 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToastProvider } from "@/components/common/ToastProvider";
 import { GlobalErrorHandler } from "@/components/common/GlobalErrorHandler";
+import { LanguageProvider } from "@/lib/context/LanguageContext";
+import { ThemeProvider as CustomThemeProvider } from "@/lib/context/ThemeContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,18 +30,22 @@ export default function RootLayout({
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <GlobalErrorHandler />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-          storageKey="pos-theme"
-        >
-          <ToastProvider />
-          {children}
-          <Analytics />
-          <SpeedInsights />
-        </ThemeProvider>
+        <CustomThemeProvider>
+          <LanguageProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+              storageKey="pos-theme"
+            >
+              <ToastProvider />
+              {children}
+              <Analytics />
+              <SpeedInsights />
+            </ThemeProvider>
+          </LanguageProvider>
+        </CustomThemeProvider>
       </body>
     </html>
   );

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import Loading from "@/components/common/Loading";
 import { useSubscription } from "@/lib/hooks/useSubscription";
@@ -20,6 +21,7 @@ interface Sale {
 
 export default function SalesPage() {
   const router = useRouter();
+  const { t } = useGlobalLanguage();
   const { subscription, loading: subLoading } = useSubscription();
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
@@ -145,7 +147,7 @@ export default function SalesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton={true} />
 
       <main className="max-w-7xl mx-auto px-4 py-8">

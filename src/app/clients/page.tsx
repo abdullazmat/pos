@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import {
   Users,
@@ -26,8 +27,132 @@ interface Client {
   address?: string;
 }
 
+const CLIENT_COPY = {
+  es: {
+    title: "Gestión de Clientes",
+    subtitle: "Administra tu base de clientes",
+    searchPlaceholder: "Buscar por nombre, documento, teléfono o email...",
+    addPrimary: "Nuevo Cliente",
+    addBasic: "Nuevo Cliente (Plan Pro)",
+    premiumTitle: "Gestión de Clientes - Premium",
+    premiumDescription:
+      "Administra tu cartera de clientes y ventas a crédito (fiado)",
+    upgradeButtons: {
+      enterprise: "Plan Empresarial",
+      upgrade: "Actualizar Plan",
+    },
+    toastBasic: "Los clientes están disponibles solo en el plan Pro",
+    formTitleNew: "Nuevo Cliente",
+    formTitleEdit: "Editar Cliente",
+    labels: {
+      name: "Nombre *",
+      document: "Documento",
+      phone: "Teléfono",
+      email: "Email",
+      address: "Dirección",
+    },
+    actions: {
+      create: "Crear",
+      update: "Actualizar",
+      cancel: "Cancelar",
+    },
+    empty: {
+      none: "No hay clientes aún",
+      search: "No se encontraron clientes",
+    },
+    table: {
+      name: "Nombre",
+      document: "Documento",
+      contact: "Contacto",
+      actions: "Acciones",
+    },
+    deleteConfirm: "¿Estás seguro de eliminar este cliente?",
+  },
+  en: {
+    title: "Customer Management",
+    subtitle: "Manage your customer base",
+    searchPlaceholder: "Search by name, document, phone or email...",
+    addPrimary: "New Customer",
+    addBasic: "New Customer (Pro Plan)",
+    premiumTitle: "Customer Management - Premium",
+    premiumDescription: "Manage your customer portfolio and store credit sales",
+    upgradeButtons: {
+      enterprise: "Enterprise Plan",
+      upgrade: "Upgrade Plan",
+    },
+    toastBasic: "Customers are available only on the Pro plan",
+    formTitleNew: "New Customer",
+    formTitleEdit: "Edit Customer",
+    labels: {
+      name: "Name *",
+      document: "Document",
+      phone: "Phone",
+      email: "Email",
+      address: "Address",
+    },
+    actions: {
+      create: "Create",
+      update: "Update",
+      cancel: "Cancel",
+    },
+    empty: {
+      none: "No customers yet",
+      search: "No customers found",
+    },
+    table: {
+      name: "Name",
+      document: "Document",
+      contact: "Contact",
+      actions: "Actions",
+    },
+    deleteConfirm: "Are you sure you want to delete this customer?",
+  },
+  pt: {
+    title: "Gestão de Clientes",
+    subtitle: "Gerencie sua base de clientes",
+    searchPlaceholder: "Buscar por nome, documento, telefone ou email...",
+    addPrimary: "Novo Cliente",
+    addBasic: "Novo Cliente (Plano Pro)",
+    premiumTitle: "Gestão de Clientes - Premium",
+    premiumDescription: "Gerencie sua carteira de clientes e vendas a prazo",
+    upgradeButtons: {
+      enterprise: "Plano Empresarial",
+      upgrade: "Atualizar Plano",
+    },
+    toastBasic: "Clientes estão disponíveis apenas no plano Pro",
+    formTitleNew: "Novo Cliente",
+    formTitleEdit: "Editar Cliente",
+    labels: {
+      name: "Nome *",
+      document: "Documento",
+      phone: "Telefone",
+      email: "Email",
+      address: "Endereço",
+    },
+    actions: {
+      create: "Criar",
+      update: "Atualizar",
+      cancel: "Cancelar",
+    },
+    empty: {
+      none: "Ainda não há clientes",
+      search: "Nenhum cliente encontrado",
+    },
+    table: {
+      name: "Nome",
+      document: "Documento",
+      contact: "Contato",
+      actions: "Ações",
+    },
+    deleteConfirm: "Tem certeza que deseja excluir este cliente?",
+  },
+} as const;
+
 export default function ClientsPage() {
   const router = useRouter();
+  const { currentLanguage } = useGlobalLanguage();
+  const copy = (CLIENT_COPY[currentLanguage] ||
+    CLIENT_COPY.en) as typeof CLIENT_COPY.en;
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [clients, setClients] = useState<Client[]>([]);
@@ -107,7 +232,7 @@ export default function ClientsPage() {
           : "BASIC";
     if (currentPlan === "BASIC" && !editingId) {
       setShowUpgradePrompt(true);
-      toast.info("Los clientes están disponibles solo en el plan Pro");
+      toast.info(copy.toastBasic);
       return;
     }
 
@@ -156,7 +281,7 @@ export default function ClientsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar este cliente?")) return;
+    if (!confirm(copy.deleteConfirm)) return;
 
     try {
       const token = localStorage.getItem("accessToken");
@@ -211,7 +336,7 @@ export default function ClientsPage() {
         : "BASIC";
   const canAddClients = currentPlan !== "BASIC";
   const addButtonText =
-    currentPlan === "BASIC" ? "Nuevo Cliente (Plan Pro)" : "Nuevo Cliente";
+    currentPlan === "BASIC" ? copy.addBasic : copy.addPrimary;
 
   // Show premium upgrade prompt for BASIC plan
   if (currentPlan === "BASIC") {
@@ -228,10 +353,10 @@ export default function ClientsPage() {
               </div>
 
               <h2 className="text-3xl font-bold text-amber-400 mb-3">
-                Gestión de Clientes - Premium
+                {copy.premiumTitle}
               </h2>
               <p className="text-amber-200 mb-8 text-lg">
-                Administra tu cartera de clientes y ventas a crédito (fiado)
+                {copy.premiumDescription}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -240,13 +365,13 @@ export default function ClientsPage() {
                   className="px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-5 h-5" />
-                  Plan Empresarial
+                  {copy.upgradeButtons.enterprise}
                 </button>
                 <button
                   onClick={() => router.push("/upgrade")}
                   className="px-8 py-3 bg-amber-700 hover:bg-amber-800 text-white font-semibold rounded-xl transition-colors"
                 >
-                  Actualizar Plan
+                  {copy.upgradeButtons.upgrade}
                 </button>
               </div>
             </div>
@@ -261,19 +386,17 @@ export default function ClientsPage() {
       {showUpgradePrompt && (
         <UpgradePrompt
           onDismiss={() => setShowUpgradePrompt(false)}
-          featureName="Gestión de Clientes"
-          reason="Esta funcionalidad está disponible solo en el plan Pro"
+          featureName={copy.title}
+          reason={copy.toastBasic}
         />
       )}
-      <div className="min-h-screen bg-slate-950">
+      <div className="min-h-screen bg-white dark:bg-slate-950">
         <Header user={user} showBackButton />
 
         <main className="max-w-7xl mx-auto px-4 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Gestión de Clientes
-            </h1>
-            <p className="text-slate-400">Administra tu base de clientes</p>
+            <h1 className="text-3xl font-bold text-white mb-2">{copy.title}</h1>
+            <p className="text-slate-400">{copy.subtitle}</p>
           </div>
 
           {/* Actions Bar */}
@@ -282,7 +405,7 @@ export default function ClientsPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Buscar por nombre, documento, teléfono o email..."
+                placeholder={copy.searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-500"
@@ -318,13 +441,13 @@ export default function ClientsPage() {
           {showForm && (
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 mb-6">
               <h2 className="text-xl font-bold text-white mb-4">
-                {editingId ? "Editar Cliente" : "Nuevo Cliente"}
+                {editingId ? copy.formTitleEdit : copy.formTitleNew}
               </h2>
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Nombre *
+                      {copy.labels.name}
                     </label>
                     <input
                       type="text"
@@ -338,7 +461,7 @@ export default function ClientsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Documento
+                      {copy.labels.document}
                     </label>
                     <input
                       type="text"
@@ -351,7 +474,7 @@ export default function ClientsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Teléfono
+                      {copy.labels.phone}
                     </label>
                     <input
                       type="text"
@@ -364,7 +487,7 @@ export default function ClientsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Email
+                      {copy.labels.email}
                     </label>
                     <input
                       type="email"
@@ -377,7 +500,7 @@ export default function ClientsPage() {
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Dirección
+                      {copy.labels.address}
                     </label>
                     <input
                       type="text"
@@ -394,7 +517,7 @@ export default function ClientsPage() {
                     type="submit"
                     className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700"
                   >
-                    {editingId ? "Actualizar" : "Crear"}
+                    {editingId ? copy.actions.update : copy.actions.create}
                   </button>
                   <button
                     type="button"
@@ -404,7 +527,7 @@ export default function ClientsPage() {
                     }}
                     className="bg-slate-800 border border-slate-700 text-slate-300 px-6 py-2 rounded-lg font-medium hover:bg-slate-700"
                   >
-                    Cancelar
+                    {copy.actions.cancel}
                   </button>
                 </div>
               </form>
@@ -420,9 +543,7 @@ export default function ClientsPage() {
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-12 text-center">
               <Users className="w-16 h-16 text-slate-700 mx-auto mb-4" />
               <p className="text-slate-400 text-lg">
-                {searchTerm
-                  ? "No se encontraron clientes"
-                  : "No hay clientes aún"}
+                {searchTerm ? copy.empty.search : copy.empty.none}
               </p>
             </div>
           ) : (
@@ -431,16 +552,16 @@ export default function ClientsPage() {
                 <thead className="bg-slate-800">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      Nombre
+                      {copy.table.name}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      Documento
+                      {copy.table.document}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      Contacto
+                      {copy.table.contact}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                      Acciones
+                      {copy.table.actions}
                     </th>
                   </tr>
                 </thead>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import { useSubscription } from "@/lib/hooks/useSubscription";
 import { Receipt, Plus, Trash2, Calendar } from "lucide-react";
@@ -20,8 +21,37 @@ interface Expense {
   };
 }
 
+const EXPENSE_COPY = {
+  es: {
+    premiumBadge: "Premium",
+    title: "Gestión de Gastos - Premium",
+    description:
+      "Controla y registra todos los gastos operacionales de tu negocio",
+    primaryCta: "✨ Plan Empresarial",
+    secondaryCta: "Actualizar Plan",
+  },
+  en: {
+    premiumBadge: "Premium",
+    title: "Expenses Management - Premium",
+    description: "Track and log all operational expenses for your business",
+    primaryCta: "✨ Business Plan",
+    secondaryCta: "Upgrade Plan",
+  },
+  pt: {
+    premiumBadge: "Premium",
+    title: "Gestão de Despesas - Premium",
+    description:
+      "Controle e registre todas as despesas operacionais do seu negócio",
+    primaryCta: "✨ Plano Empresarial",
+    secondaryCta: "Atualizar Plano",
+  },
+} as const;
+
 export default function ExpensesPage() {
   const router = useRouter();
+  const { currentLanguage } = useGlobalLanguage();
+  const copy = (EXPENSE_COPY[currentLanguage] ||
+    EXPENSE_COPY.en) as typeof EXPENSE_COPY.en;
   const { subscription, loading: subLoading } = useSubscription();
   const [user, setUser] = useState<any>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -118,7 +148,7 @@ export default function ExpensesPage() {
   const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100">
       <Header user={user} showBackButton />
 
       <main className="max-w-5xl mx-auto px-4 py-12 flex items-center justify-center">
@@ -129,13 +159,13 @@ export default function ExpensesPage() {
             </div>
             <div className="space-y-1">
               <p className="text-amber-400 text-sm font-semibold uppercase tracking-wide">
-                Premium
+                {copy.premiumBadge}
               </p>
               <h1 className="text-2xl md:text-3xl font-bold text-white">
-                Gestión de Gastos - Premium
+                {copy.title}
               </h1>
               <p className="text-slate-300 text-sm md:text-base">
-                Controla y registra todos los gastos operacionales de tu negocio
+                {copy.description}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center">
@@ -143,13 +173,13 @@ export default function ExpensesPage() {
                 href="/plan-comparison"
                 className="flex-1 sm:flex-none px-6 py-2.5 rounded-lg font-semibold bg-amber-500 text-slate-900 hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
               >
-                ✨ Plan Empresarial
+                {copy.primaryCta}
               </Link>
               <Link
                 href="/upgrade"
                 className="flex-1 sm:flex-none px-6 py-2.5 rounded-lg font-semibold bg-amber-600 text-white hover:bg-amber-500 transition-colors border border-amber-500/70"
               >
-                Actualizar Plan
+                {copy.secondaryCta}
               </Link>
             </div>
           </div>

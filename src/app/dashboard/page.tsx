@@ -6,6 +6,7 @@ import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { useSubscription } from "@/lib/hooks/useSubscription";
 import { Zap, Calendar, Check } from "lucide-react";
+import { useLanguage } from "@/lib/context/LanguageContext";
 
 interface User {
   id: string;
@@ -19,6 +20,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { subscription, loading: subLoading } = useSubscription();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -41,13 +43,13 @@ export default function Dashboard() {
   const isPremium = subscription?.isPremium || false;
   const planName =
     subscription?.planId === "PROFESSIONAL"
-      ? "Plan Profesional"
+      ? String(t("planProfessional", "dashboard"))
       : subscription?.planId === "ENTERPRISE"
-        ? "Plan Empresarial"
-        : "Plan Básico";
+        ? String(t("planEnterprise", "dashboard"))
+        : String(t("planBasic", "dashboard"));
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton={false} />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
@@ -55,10 +57,10 @@ export default function Dashboard() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Bienvenido, {user?.fullName}!
+              {String(t("welcome", "dashboard"))}, {user?.fullName}!
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Tu plan actual:{" "}
+              {String(t("currentPlan", "dashboard"))}:{" "}
               <span className="font-semibold text-blue-600 dark:text-blue-400">
                 {planName}
               </span>
@@ -70,7 +72,7 @@ export default function Dashboard() {
               className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
             >
               <Zap className="w-5 h-5" />
-              <span>Actualizar a Pro</span>
+              <span>{String(t("upgradeToPro", "dashboard"))}</span>
             </Link>
           )}
         </div>
@@ -87,7 +89,7 @@ export default function Dashboard() {
             <div className="grid md:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Plan Actual
+                  {String(t("currentPlan", "dashboard"))}
                 </p>
                 <p className="text-xl font-bold text-gray-900 dark:text-white">
                   {planName}
@@ -95,7 +97,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Estado
+                  {String(t("status", "dashboard"))}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   <Check className="w-5 h-5 text-green-500 dark:text-green-400" />
@@ -106,7 +108,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Próxima Renovación
+                  {String(t("nextRenewal", "dashboard"))}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400" />
@@ -128,8 +130,12 @@ export default function Dashboard() {
             className="bg-blue-600 dark:bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 transition-colors shadow-lg dark:shadow-blue-600/30"
           >
             <h3 className="text-2xl font-bold mb-2">⚡</h3>
-            <h4 className="text-lg font-semibold">Venta POS</h4>
-            <p className="text-sm opacity-90">Caja rápida</p>
+            <h4 className="text-lg font-semibold">
+              {String(t("posSale", "dashboard"))}
+            </h4>
+            <p className="text-sm opacity-90">
+              {String(t("cashRegister", "dashboard"))}
+            </p>
           </Link>
 
           <Link
@@ -137,8 +143,12 @@ export default function Dashboard() {
             className="bg-green-600 dark:bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 dark:hover:bg-green-700 transition-colors shadow-lg dark:shadow-green-600/30"
           >
             <h3 className="text-2xl font-bold mb-2">📦</h3>
-            <h4 className="text-lg font-semibold">Productos</h4>
-            <p className="text-sm opacity-90">Gestionar inventario</p>
+            <h4 className="text-lg font-semibold">
+              {String(t("products", "dashboard"))}
+            </h4>
+            <p className="text-sm opacity-90">
+              {String(t("inventory", "dashboard"))}
+            </p>
           </Link>
 
           <Link
@@ -146,8 +156,12 @@ export default function Dashboard() {
             className="bg-purple-600 dark:bg-purple-600 text-white p-6 rounded-lg hover:bg-purple-700 dark:hover:bg-purple-700 transition-colors shadow-lg dark:shadow-purple-600/30"
           >
             <h3 className="text-2xl font-bold mb-2">📊</h3>
-            <h4 className="text-lg font-semibold">Reportes</h4>
-            <p className="text-sm opacity-90">Ver análisis</p>
+            <h4 className="text-lg font-semibold">
+              {String(t("reports", "dashboard"))}
+            </h4>
+            <p className="text-sm opacity-90">
+              {String(t("analytics", "dashboard"))}
+            </p>
           </Link>
 
           {user?.role === "admin" && (
@@ -156,36 +170,44 @@ export default function Dashboard() {
               className="bg-red-600 dark:bg-red-600 text-white p-6 rounded-lg hover:bg-red-700 dark:hover:bg-red-700 transition-colors shadow-lg dark:shadow-red-600/30"
             >
               <h3 className="text-2xl font-bold mb-2">⚙️</h3>
-              <h4 className="text-lg font-semibold">Admin</h4>
-              <p className="text-sm opacity-90">Configuración del sistema</p>
+              <h4 className="text-lg font-semibold">
+                {String(t("admin", "dashboard"))}
+              </h4>
+              <p className="text-sm opacity-90">
+                {String(t("systemSettings", "dashboard"))}
+              </p>
             </Link>
           )}
         </div>
 
         <div className="mt-12 bg-white dark:bg-slate-900 p-6 rounded-lg shadow dark:shadow-lg dark:shadow-black/50">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Estadísticas Rápidas
+            {String(t("quickStats", "dashboard"))}
           </h3>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">
               <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                 0
               </p>
-              <p className="text-gray-600 dark:text-gray-400">Ventas Hoy</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                {String(t("salesToday", "dashboard"))}
+              </p>
             </div>
             <div className="text-center">
               <p className="text-3xl font-bold text-green-600 dark:text-green-400">
                 0
               </p>
               <p className="text-gray-600 dark:text-gray-400">
-                Ingresos Totales
+                {String(t("totalRevenue", "dashboard"))}
               </p>
             </div>
             <div className="text-center">
               <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                 0
               </p>
-              <p className="text-gray-600 dark:text-gray-400">Productos</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                {String(t("products", "dashboard"))}
+              </p>
             </div>
           </div>
         </div>

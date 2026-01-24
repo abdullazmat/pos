@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import OpenRegisterModal from "@/components/cash-register/OpenRegisterModal";
 import OpenTicketModal from "@/components/cash-register/OpenTicketModal";
@@ -13,8 +14,207 @@ import WithdrawalModal from "@/components/cash-register/WithdrawalModal";
 import CreditNoteModal from "@/components/cash-register/CreditNoteModal";
 import CloseBoxModal from "@/components/cash-register/CloseBoxModal";
 
+const CASH_COPY = {
+  es: {
+    loading: "Cargando Control de Caja...",
+    toastAlreadyOpen: "Caja ya estaba abierta, sincronizando estado...",
+    sessionExpired: "Sesión expirada. Por favor inicia sesión nuevamente.",
+    openSuccess: "¡Caja abierta exitosamente!",
+    openError: "No se pudo abrir la caja",
+    closeSuccess: "¡Caja cerrada exitosamente!",
+    closeError: "No se pudo cerrar la caja",
+    withdrawSuccess: (amount: string) => `¡Retiro de ${amount} registrado!`,
+    withdrawError: "No se pudo registrar el retiro",
+    creditSuccess: (amount: string) =>
+      `¡Nota de crédito de ${amount} registrada!`,
+    creditError: "No se pudo registrar la nota de crédito",
+    noOpenTitle: "No hay caja abierta",
+    noOpenSubtitle:
+      'Debes abrir una caja desde la sección "Control de Caja" para comenzar a vender',
+    openButton: "Abrir Caja",
+    stats: {
+      initial: "Monto Inicial",
+      sales: "Ventas",
+      withdrawals: "Retiros",
+      expected: "Esperado en Caja",
+    },
+    actions: {
+      withdrawal: "Registrar Retiro",
+      creditNote: "Nota de Crédito / Devolución",
+      close: "Cerrar Caja",
+    },
+    movements: {
+      title: "Movimientos de la Sesión",
+      updating: "Actualizando...",
+      datetime: "Fecha/Hora",
+      type: "Tipo",
+      description: "Descripción",
+      amount: "Monto",
+      empty: "No hay movimientos registrados en esta sesión",
+      types: {
+        apertura: "Apertura",
+        venta: "Venta",
+        retiro: "Retiro",
+        cierre: "Cierre",
+        nota_credito: "Nota de crédito",
+      },
+    },
+    sessions: {
+      title: "Historial de Sesiones",
+      openDate: "Fecha Apertura",
+      initial: "Monto Inicial",
+      sales: "Ventas",
+      withdrawals: "Retiros",
+      expected: "Esperado",
+      real: "Real",
+      diff: "Diferencia",
+      status: "Estado",
+      empty: "No hay historial de sesiones",
+      statuses: {
+        open: "Abierta",
+        closed: "Cerrada",
+      },
+    },
+  },
+  en: {
+    loading: "Loading Cash Register...",
+    toastAlreadyOpen: "Register was already open, syncing state...",
+    sessionExpired: "Session expired. Please sign in again.",
+    openSuccess: "Cash register opened successfully!",
+    openError: "Could not open the register",
+    closeSuccess: "Cash register closed successfully!",
+    closeError: "Could not close the register",
+    withdrawSuccess: (amount: string) => `Withdrawal of ${amount} recorded!`,
+    withdrawError: "Unable to record withdrawal",
+    creditSuccess: (amount: string) => `Credit note of ${amount} recorded!`,
+    creditError: "Unable to record credit note",
+    noOpenTitle: "No register open",
+    noOpenSubtitle:
+      'Open a register from the "Cash Register" section to start selling',
+    openButton: "Open Register",
+    stats: {
+      initial: "Opening Cash",
+      sales: "Sales",
+      withdrawals: "Withdrawals",
+      expected: "Expected in Cash",
+    },
+    actions: {
+      withdrawal: "Log Withdrawal",
+      creditNote: "Credit Note / Refund",
+      close: "Close Register",
+    },
+    movements: {
+      title: "Session Movements",
+      updating: "Updating...",
+      datetime: "Date/Time",
+      type: "Type",
+      description: "Description",
+      amount: "Amount",
+      empty: "No movements recorded in this session",
+      types: {
+        apertura: "Opening",
+        venta: "Sale",
+        retiro: "Withdrawal",
+        cierre: "Close",
+        nota_credito: "Credit note",
+      },
+    },
+    sessions: {
+      title: "Session History",
+      openDate: "Open Date",
+      initial: "Opening Cash",
+      sales: "Sales",
+      withdrawals: "Withdrawals",
+      expected: "Expected",
+      real: "Actual",
+      diff: "Difference",
+      status: "Status",
+      empty: "No session history",
+      statuses: {
+        open: "Open",
+        closed: "Closed",
+      },
+    },
+  },
+  pt: {
+    loading: "Carregando Controle de Caixa...",
+    toastAlreadyOpen: "Caixa já estava aberta, sincronizando estado...",
+    sessionExpired: "Sessão expirada. Faça login novamente.",
+    openSuccess: "Caixa aberta com sucesso!",
+    openError: "Não foi possível abrir a caixa",
+    closeSuccess: "Caixa fechada com sucesso!",
+    closeError: "Não foi possível fechar a caixa",
+    withdrawSuccess: (amount: string) => `Retirada de ${amount} registrada!`,
+    withdrawError: "Não foi possível registrar a retirada",
+    creditSuccess: (amount: string) =>
+      `Nota de crédito de ${amount} registrada!`,
+    creditError: "Não foi possível registrar a nota de crédito",
+    noOpenTitle: "Nenhuma caixa aberta",
+    noOpenSubtitle:
+      'Abra uma caixa em "Controle de Caixa" para começar a vender',
+    openButton: "Abrir Caixa",
+    stats: {
+      initial: "Valor Inicial",
+      sales: "Vendas",
+      withdrawals: "Retiradas",
+      expected: "Esperado em Caixa",
+    },
+    actions: {
+      withdrawal: "Registrar Retirada",
+      creditNote: "Nota de Crédito / Devolução",
+      close: "Fechar Caixa",
+    },
+    movements: {
+      title: "Movimentos da Sessão",
+      updating: "Atualizando...",
+      datetime: "Data/Hora",
+      type: "Tipo",
+      description: "Descrição",
+      amount: "Valor",
+      empty: "Nenhum movimento registrado nesta sessão",
+      types: {
+        apertura: "Abertura",
+        venta: "Venda",
+        retiro: "Retirada",
+        cierre: "Fechamento",
+        nota_credito: "Nota de crédito",
+      },
+    },
+    sessions: {
+      title: "Histórico de Sessões",
+      openDate: "Data de Abertura",
+      initial: "Valor Inicial",
+      sales: "Vendas",
+      withdrawals: "Retiradas",
+      expected: "Esperado",
+      real: "Real",
+      diff: "Diferença",
+      status: "Status",
+      empty: "Nenhum histórico de sessões",
+      statuses: {
+        open: "Aberta",
+        closed: "Fechada",
+      },
+    },
+  },
+};
+
+const CURRENCY_LOCALE = {
+  es: "es-AR",
+  en: "en-US",
+  pt: "pt-BR",
+} as const;
+
 export default function CashRegisterPage() {
   const router = useRouter();
+  const { t, currentLanguage } = useGlobalLanguage();
+  const copy = (CASH_COPY[currentLanguage] ||
+    CASH_COPY.en) as typeof CASH_COPY.en;
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat(CURRENCY_LOCALE[currentLanguage], {
+      style: "currency",
+      currency: "ARS",
+    }).format(value);
   const [isOpen, setIsOpen] = useState<boolean | null>(null);
   const [opening, setOpening] = useState("");
   const [movements, setMovements] = useState<any[]>([]);
@@ -49,9 +249,9 @@ export default function CashRegisterPage() {
       return;
     }
     setUser(JSON.parse(userStr));
-    // Fetch current cash register status with timeout to avoid hanging loaders
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    // Fetch current cash register status with timeout to avoid hanging loaders
     (async () => {
       try {
         let token = localStorage.getItem("accessToken");
@@ -134,14 +334,13 @@ export default function CashRegisterPage() {
       }
     })();
     return () => {
-      clearTimeout(timeout);
+      setToastMsg(copy.openSuccess);
       controller.abort();
     };
   }, [router]);
 
   // Faster polling + fetch lock + visual loading indicator
   useEffect(() => {
-    if (!isOpen) return;
     const interval = setInterval(async () => {
       if (isPollingRef.current) return;
       isPollingRef.current = true;
@@ -251,9 +450,7 @@ export default function CashRegisterPage() {
                   setIsOpen(true);
                   setShowTicket(false);
                   setToastType("info");
-                  setToastMsg(
-                    "Caja ya estaba abierta, sincronizando estado...",
-                  );
+                  setToastMsg(copy.toastAlreadyOpen);
                   setToastOpen(true);
                   router.push("/cash-register");
                   return;
@@ -266,16 +463,14 @@ export default function CashRegisterPage() {
               }
             } else {
               setToastType("error");
-              setToastMsg(
-                "Sesión expirada. Por favor inicia sesión nuevamente.",
-              );
+              setToastMsg(copy.sessionExpired);
               setToastOpen(true);
               router.push("/auth/login");
               return;
             }
           } else {
             setToastType("error");
-            setToastMsg("Sesión expirada. Por favor inicia sesión nuevamente.");
+            setToastMsg(copy.sessionExpired);
             setToastOpen(true);
             router.push("/auth/login");
             return;
@@ -285,7 +480,7 @@ export default function CashRegisterPage() {
           setIsOpen(true);
           setShowTicket(false);
           setToastType("info");
-          setToastMsg("Caja ya estaba abierta, sincronizando estado...");
+          setToastMsg(copy.toastAlreadyOpen);
           setToastOpen(true);
           router.push("/cash-register");
           return;
@@ -320,14 +515,14 @@ export default function CashRegisterPage() {
         }
       } catch {}
       setToastType("success");
-      setToastMsg("¡Caja abierta exitosamente!");
+      setToastMsg(copy.openSuccess);
       setToastOpen(true);
       // Navigate to Control de Caja showing open state
       router.push("/cash-register");
     } catch (error) {
       console.error("Open register error:", error);
       setToastType("error");
-      setToastMsg("No se pudo abrir la caja");
+      setToastMsg(copy.openError);
       setToastOpen(true);
     }
   };
@@ -356,12 +551,12 @@ export default function CashRegisterPage() {
 
       setIsOpen(false);
       setToastType("success");
-      setToastMsg("¡Caja cerrada exitosamente!");
+      setToastMsg(copy.closeSuccess);
       setToastOpen(true);
     } catch (error) {
       console.error("Close register error:", error);
       setToastType("error");
-      setToastMsg("No se pudo cerrar la caja");
+      setToastMsg(copy.closeError);
       setToastOpen(true);
     }
   };
@@ -405,12 +600,12 @@ export default function CashRegisterPage() {
       });
 
       setToastType("success");
-      setToastMsg(`¡Retiro de $${amount.toFixed(2)} registrado!`);
+      setToastMsg(copy.withdrawSuccess(formatCurrency(amount)));
       setToastOpen(true);
     } catch (error) {
       console.error("Withdrawal error:", error);
       setToastType("error");
-      setToastMsg("No se pudo registrar el retiro");
+      setToastMsg(copy.withdrawError);
       setToastOpen(true);
     }
   };
@@ -455,12 +650,12 @@ export default function CashRegisterPage() {
       });
 
       setToastType("success");
-      setToastMsg(`¡Nota de crédito de $${amount.toFixed(2)} registrada!`);
+      setToastMsg(copy.creditSuccess(formatCurrency(amount)));
       setToastOpen(true);
     } catch (error) {
       console.error("Credit note error:", error);
       setToastType("error");
-      setToastMsg("No se pudo registrar la nota de crédito");
+      setToastMsg(copy.creditError);
       setToastOpen(true);
     }
   };
@@ -491,18 +686,18 @@ export default function CashRegisterPage() {
       setIsOpen(false);
       setShowCloseBoxModal(false);
       setToastType("success");
-      setToastMsg("¡Caja cerrada exitosamente!");
+      setToastMsg(copy.closeSuccess);
       setToastOpen(true);
     } catch (error) {
       console.error("Close box error:", error);
       setToastType("error");
-      setToastMsg("No se pudo cerrar la caja");
+      setToastMsg(copy.closeError);
       setToastOpen(true);
     }
   };
 
   if (loading || isOpen === null) {
-    return <Loading label="Cargando Control de Caja..." />;
+    return <Loading label={copy.loading} />;
   }
 
   // Real data from backend
@@ -512,7 +707,7 @@ export default function CashRegisterPage() {
   const expectedInCash = sessionData.expected;
 
   return (
-    <div className="min-h-screen bg-slate-950 dark:bg-slate-950">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton={true} />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
@@ -528,11 +723,10 @@ export default function CashRegisterPage() {
               </svg>
             </div>
             <p className="text-2xl font-bold text-white mb-2">
-              No hay caja abierta
+              {copy.noOpenTitle}
             </p>
             <p className="text-slate-400 mb-8 text-center max-w-md">
-              Debes abrir una caja desde la sección "Control de Caja" para
-              comenzar a vender
+              {copy.noOpenSubtitle}
             </p>
             <button
               onClick={() => setShowOpenModal(true)}
@@ -551,7 +745,7 @@ export default function CashRegisterPage() {
                   d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              Abrir Caja
+              {copy.openButton}
             </button>
           </div>
         )}
@@ -563,7 +757,7 @@ export default function CashRegisterPage() {
               {/* Monto Inicial */}
               <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-slate-400">Monto Inicial</p>
+                  <p className="text-sm text-slate-400">{copy.stats.initial}</p>
                   <svg
                     className="w-8 h-8 text-blue-400"
                     fill="none"
@@ -579,7 +773,7 @@ export default function CashRegisterPage() {
                   </svg>
                 </div>
                 <p className="text-3xl font-bold text-white">
-                  ${initialAmount.toFixed(2)}
+                  {formatCurrency(initialAmount)}
                 </p>
                 <p className="text-xs text-slate-500 mt-2">
                   {movements.find((m: any) => m.type === "apertura")
@@ -590,7 +784,7 @@ export default function CashRegisterPage() {
               {/* Ventas */}
               <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-slate-400">Ventas</p>
+                  <p className="text-sm text-slate-400">{copy.stats.sales}</p>
                   <svg
                     className="w-8 h-8 text-green-400"
                     fill="none"
@@ -606,14 +800,16 @@ export default function CashRegisterPage() {
                   </svg>
                 </div>
                 <p className="text-3xl font-bold text-green-400">
-                  ${sales.toFixed(2)}
+                  {formatCurrency(sales)}
                 </p>
               </div>
 
               {/* Retiros */}
               <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-slate-400">Retiros</p>
+                  <p className="text-sm text-slate-400">
+                    {copy.stats.withdrawals}
+                  </p>
                   <svg
                     className="w-8 h-8 text-red-400"
                     fill="none"
@@ -629,14 +825,16 @@ export default function CashRegisterPage() {
                   </svg>
                 </div>
                 <p className="text-3xl font-bold text-red-400">
-                  ${withdrawals.toFixed(2)}
+                  {formatCurrency(withdrawals)}
                 </p>
               </div>
 
               {/* Esperado en Caja */}
               <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-slate-400">Esperado en Caja</p>
+                  <p className="text-sm text-slate-400">
+                    {copy.stats.expected}
+                  </p>
                   <svg
                     className="w-8 h-8 text-purple-400"
                     fill="none"
@@ -652,7 +850,7 @@ export default function CashRegisterPage() {
                   </svg>
                 </div>
                 <p className="text-3xl font-bold text-purple-400">
-                  ${expectedInCash.toFixed(2)}
+                  {formatCurrency(expectedInCash)}
                 </p>
               </div>
             </div>
@@ -676,7 +874,7 @@ export default function CashRegisterPage() {
                     d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
                   />
                 </svg>
-                Registrar Retiro
+                {copy.actions.withdrawal}
               </button>
 
               <button
@@ -696,7 +894,7 @@ export default function CashRegisterPage() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                Nota de Crédito / Devolución
+                {copy.actions.creditNote}
               </button>
 
               <button
@@ -716,19 +914,19 @@ export default function CashRegisterPage() {
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
-                Cerrar Caja
+                {copy.actions.close}
               </button>
             </div>
             {/* Movements Table */}
             <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6 mb-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white">
-                  Movimientos de la Sesión
+                  {copy.movements.title}
                 </h2>
                 {loadingMovements && (
                   <div className="flex items-center gap-2 text-sm text-slate-400">
                     <span className="w-4 h-4 border-2 border-slate-600 border-b-transparent rounded-full animate-spin inline-block" />
-                    Actualizando...
+                    {copy.movements.updating}
                   </div>
                 )}
               </div>
@@ -737,16 +935,16 @@ export default function CashRegisterPage() {
                   <thead className="bg-slate-800">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                        Fecha/Hora
+                        {copy.movements.datetime}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                        Tipo
+                        {copy.movements.type}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                        Descripción
+                        {copy.movements.description}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                        Monto
+                        {copy.movements.amount}
                       </th>
                     </tr>
                   </thead>
@@ -774,7 +972,7 @@ export default function CashRegisterPage() {
                           colSpan={4}
                           className="px-6 py-8 text-center text-sm text-slate-500"
                         >
-                          No hay movimientos registrados en esta sesión
+                          {copy.movements.empty}
                         </td>
                       </tr>
                     ) : (
@@ -800,15 +998,15 @@ export default function CashRegisterPage() {
                                         : "bg-purple-900/40 text-purple-300"
                               }`}
                             >
-                              {movement.type.charAt(0).toUpperCase() +
-                                movement.type.slice(1)}
+                              {copy.movements.types[movement.type] ||
+                                movement.type}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-slate-300">
                             {movement.description}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-400">
-                            ${movement.amount.toFixed(2)}
+                            {formatCurrency(movement.amount)}
                           </td>
                         </tr>
                       ))
@@ -823,35 +1021,35 @@ export default function CashRegisterPage() {
         {/* Historial de Sesiones */}
         <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6 mt-8">
           <h2 className="text-lg font-bold text-white mb-6">
-            Historial de Sesiones
+            {copy.sessions.title}
           </h2>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-700">
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Fecha Apertura
+                    {copy.sessions.openDate}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Monto Inicial
+                    {copy.sessions.initial}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Ventas
+                    {copy.sessions.sales}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Retiros
+                    {copy.sessions.withdrawals}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Esperado
+                    {copy.sessions.expected}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Real
+                    {copy.sessions.real}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Diferencia
+                    {copy.sessions.diff}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Estado
+                    {copy.sessions.status}
                   </th>
                 </tr>
               </thead>
@@ -861,33 +1059,44 @@ export default function CashRegisterPage() {
                     <tr key={idx} className="hover:bg-slate-800/50 transition">
                       <td className="px-6 py-4 text-slate-300">{s.openedAt}</td>
                       <td className="px-6 py-4 text-slate-300">
-                        ${(s.initial ?? 0).toFixed(2)}
+                        {formatCurrency(s.initial ?? 0)}
                       </td>
                       <td className="px-6 py-4 font-semibold text-green-400">
-                        ${(s.sales ?? 0).toFixed(2)}
+                        {formatCurrency(s.sales ?? 0)}
                       </td>
                       <td className="px-6 py-4 font-semibold text-red-400">
-                        ${(s.withdrawals ?? 0).toFixed(2)}
+                        {formatCurrency(s.withdrawals ?? 0)}
                       </td>
                       <td className="px-6 py-4 text-slate-300">
-                        ${(s.expected ?? 0).toFixed(2)}
+                        {formatCurrency(s.expected ?? 0)}
                       </td>
                       <td className="px-6 py-4 text-slate-300">
-                        {s.real == null ? "-" : `$${Number(s.real).toFixed(2)}`}
+                        {s.real == null ? "-" : formatCurrency(Number(s.real))}
                       </td>
                       <td className="px-6 py-4 text-slate-300">
-                        {s.diff == null ? "-" : `$${Number(s.diff).toFixed(2)}`}
+                        {s.diff == null ? "-" : formatCurrency(Number(s.diff))}
                       </td>
                       <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                            s.status === "Abierta"
-                              ? "bg-green-900/40 text-green-400"
-                              : "bg-slate-800 text-slate-400"
-                          }`}
-                        >
-                          {s.status}
-                        </span>
+                        {(() => {
+                          const statusRaw = (s.status || "").toLowerCase();
+                          const isOpenStatus = [
+                            "abierta",
+                            "open",
+                            "aberta",
+                          ].includes(statusRaw);
+                          const statusKey = isOpenStatus ? "open" : "closed";
+                          return (
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                                isOpenStatus
+                                  ? "bg-green-900/40 text-green-400"
+                                  : "bg-slate-800 text-slate-400"
+                              }`}
+                            >
+                              {copy.sessions.statuses[statusKey] || s.status}
+                            </span>
+                          );
+                        })()}
                       </td>
                     </tr>
                   ))
@@ -897,7 +1106,7 @@ export default function CashRegisterPage() {
                       colSpan={8}
                       className="px-6 py-8 text-center text-sm text-slate-500"
                     >
-                      No hay historial de sesiones
+                      {copy.sessions.empty}
                     </td>
                   </tr>
                 )}

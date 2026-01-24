@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import { UserCog, Edit, Trash2, X } from "lucide-react";
 import { toast } from "react-toastify";
@@ -24,8 +25,248 @@ interface SystemUser {
   createdAt: string;
 }
 
+const ADMIN_COPY = {
+  es: {
+    title: "Gestión de Usuarios",
+    subtitle: "Administra cajeros y administradores del sistema",
+    userCount: "usuarios",
+    newUserButton: "Nuevo Usuario",
+    tableHeaders: {
+      name: "Nombre",
+      username: "Usuario",
+      role: "Rol",
+      discountLimit: "Límite Desc. %",
+      status: "Estado",
+      createdDate: "Fecha Creación",
+      actions: "Acciones",
+    },
+    loading: "Cargando usuarios...",
+    noUsers: "No hay usuarios registrados",
+    active: "Activo",
+    inactive: "Inactivo",
+    notDefined: "No definido",
+    roles: {
+      admin: "Administrador",
+      supervisor: "Supervisor",
+      cashier: "Cajero",
+    },
+    modal: {
+      newUser: "Nuevo Usuario",
+      editUser: "Editar Usuario",
+      deleteConfirm: "¿Eliminar Usuario?",
+      deleteMessage: "¿Estás seguro de eliminar al usuario",
+      deleteWarning: "Esta acción no se puede deshacer.",
+      fullName: "Nombre Completo",
+      username: "Usuario",
+      email: "Email",
+      password: "Contraseña",
+      passwordOptional: "Contraseña (dejar en blanco para no cambiar)",
+      phone: "Teléfono",
+      role: "Rol",
+      required: "*",
+      placeholders: {
+        fullName: "Juan Pérez",
+        username: "juanperez (debe ser único)",
+        usernameEdit: "juanperez",
+        email: "juan@ejemplo.com (debe ser único)",
+        emailEdit: "juan@ejemplo.com",
+        password: "Mínimo 6 caracteres",
+        phone: "+54 9 11 1234-5678",
+      },
+      hints: {
+        usernameUnique: "El nombre de usuario debe ser único en el sistema",
+        emailUnique: "El email debe ser único en el sistema",
+      },
+      buttons: {
+        cancel: "Cancelar",
+        create: "Crear Usuario",
+        creating: "Creando...",
+        update: "Actualizar Usuario",
+        updating: "Actualizando...",
+        delete: "Eliminar",
+      },
+    },
+    toasts: {
+      sessionExpired: "Sesión expirada. Por favor inicia sesión nuevamente.",
+      loadingError: "Error al cargar usuarios",
+      createSuccess: "Usuario creado exitosamente",
+      createError: "Error al crear usuario",
+      updateSuccess: "Usuario actualizado exitosamente",
+      updateError: "Error al actualizar usuario",
+      deleteSuccess: "Usuario eliminado exitosamente",
+      deleteError: "Error al eliminar usuario",
+    },
+    footer: "Sistema POS © 2025 - Desarrollado para negocios pequeños",
+    roleOptions: {
+      cashier: "Cajero",
+      supervisor: "Supervisor",
+      admin: "Administrador",
+    },
+    planName: "Gratuito",
+  },
+  en: {
+    title: "User Management",
+    subtitle: "Manage cashiers and system administrators",
+    userCount: "users",
+    newUserButton: "New User",
+    tableHeaders: {
+      name: "Name",
+      username: "Username",
+      role: "Role",
+      discountLimit: "Discount Limit %",
+      status: "Status",
+      createdDate: "Creation Date",
+      actions: "Actions",
+    },
+    loading: "Loading users...",
+    noUsers: "No users registered",
+    active: "Active",
+    inactive: "Inactive",
+    notDefined: "Not defined",
+    roles: {
+      admin: "Administrator",
+      supervisor: "Supervisor",
+      cashier: "Cashier",
+    },
+    modal: {
+      newUser: "New User",
+      editUser: "Edit User",
+      deleteConfirm: "Delete User?",
+      deleteMessage: "Are you sure you want to delete the user",
+      deleteWarning: "This action cannot be undone.",
+      fullName: "Full Name",
+      username: "Username",
+      email: "Email",
+      password: "Password",
+      passwordOptional: "Password (leave blank to keep current)",
+      phone: "Phone",
+      role: "Role",
+      required: "*",
+      placeholders: {
+        fullName: "John Doe",
+        username: "johndoe (must be unique)",
+        usernameEdit: "johndoe",
+        email: "john@example.com (must be unique)",
+        emailEdit: "john@example.com",
+        password: "Minimum 6 characters",
+        phone: "+1 (555) 123-4567",
+      },
+      hints: {
+        usernameUnique: "Username must be unique in the system",
+        emailUnique: "Email must be unique in the system",
+      },
+      buttons: {
+        cancel: "Cancel",
+        create: "Create User",
+        creating: "Creating...",
+        update: "Update User",
+        updating: "Updating...",
+        delete: "Delete",
+      },
+    },
+    toasts: {
+      sessionExpired: "Session expired. Please log in again.",
+      loadingError: "Error loading users",
+      createSuccess: "User created successfully",
+      createError: "Error creating user",
+      updateSuccess: "User updated successfully",
+      updateError: "Error updating user",
+      deleteSuccess: "User deleted successfully",
+      deleteError: "Error deleting user",
+    },
+    footer: "POS System © 2025 - Developed for small businesses",
+    roleOptions: {
+      cashier: "Cashier",
+      supervisor: "Supervisor",
+      admin: "Administrator",
+    },
+    planName: "Free",
+  },
+  pt: {
+    title: "Gestão de Usuários",
+    subtitle: "Gerencie caixas e administradores do sistema",
+    userCount: "usuários",
+    newUserButton: "Novo Usuário",
+    tableHeaders: {
+      name: "Nome",
+      username: "Usuário",
+      role: "Função",
+      discountLimit: "Limite de Desconto %",
+      status: "Status",
+      createdDate: "Data de Criação",
+      actions: "Ações",
+    },
+    loading: "Carregando usuários...",
+    noUsers: "Nenhum usuário registrado",
+    active: "Ativo",
+    inactive: "Inativo",
+    notDefined: "Não definido",
+    roles: {
+      admin: "Administrador",
+      supervisor: "Supervisor",
+      cashier: "Caixa",
+    },
+    modal: {
+      newUser: "Novo Usuário",
+      editUser: "Editar Usuário",
+      deleteConfirm: "Deletar Usuário?",
+      deleteMessage: "Tem certeza de que deseja deletar o usuário",
+      deleteWarning: "Esta ação não pode ser desfeita.",
+      fullName: "Nome Completo",
+      username: "Usuário",
+      email: "E-mail",
+      password: "Senha",
+      passwordOptional: "Senha (deixar em branco para manter atual)",
+      phone: "Telefone",
+      role: "Função",
+      required: "*",
+      placeholders: {
+        fullName: "João Silva",
+        username: "joaosilva (deve ser único)",
+        usernameEdit: "joaosilva",
+        email: "joao@exemplo.com (deve ser único)",
+        emailEdit: "joao@exemplo.com",
+        password: "Mínimo 6 caracteres",
+        phone: "+55 11 98765-4321",
+      },
+      hints: {
+        usernameUnique: "O nome de usuário deve ser único no sistema",
+        emailUnique: "O e-mail deve ser único no sistema",
+      },
+      buttons: {
+        cancel: "Cancelar",
+        create: "Criar Usuário",
+        creating: "Criando...",
+        update: "Atualizar Usuário",
+        updating: "Atualizando...",
+        delete: "Deletar",
+      },
+    },
+    toasts: {
+      sessionExpired: "Sessão expirada. Por favor, faça login novamente.",
+      loadingError: "Erro ao carregar usuários",
+      createSuccess: "Usuário criado com sucesso",
+      createError: "Erro ao criar usuário",
+      updateSuccess: "Usuário atualizado com sucesso",
+      updateError: "Erro ao atualizar usuário",
+      deleteSuccess: "Usuário deletado com sucesso",
+      deleteError: "Erro ao deletar usuário",
+    },
+    footer: "Sistema POS © 2025 - Desenvolvido para pequenas empresas",
+    roleOptions: {
+      cashier: "Caixa",
+      supervisor: "Supervisor",
+      admin: "Administrador",
+    },
+    planName: "Gratuito",
+  },
+};
+
 export default function AdminPage() {
   const router = useRouter();
+  const { currentLanguage } = useGlobalLanguage();
+  const copy = ADMIN_COPY[currentLanguage] || ADMIN_COPY["es"];
+
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<SystemUser[]>([]);
@@ -56,7 +297,7 @@ export default function AdminPage() {
   });
 
   const currentPlan = {
-    name: "Gratuito",
+    name: copy.planName,
     userLimit: 2,
     currentUsers: users.length,
   };
@@ -89,17 +330,17 @@ export default function AdminPage() {
         const data = await response.json();
         setUsers(data.data?.users || []);
       } else if (response.status === 401) {
-        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        toast.error(copy.toasts.sessionExpired);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
         router.push("/auth/login");
       } else {
-        toast.error("Error al cargar usuarios");
+        toast.error(copy.toasts.loadingError);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
-      toast.error("Error al cargar usuarios");
+      toast.error(copy.toasts.loadingError);
     } finally {
       setLoading(false);
     }
@@ -123,7 +364,7 @@ export default function AdminPage() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success("Usuario creado exitosamente");
+        toast.success(copy.toasts.createSuccess);
         setShowModal(false);
         setFormData({
           fullName: "",
@@ -135,18 +376,18 @@ export default function AdminPage() {
         });
         fetchUsers();
       } else if (response.status === 401) {
-        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        toast.error(copy.toasts.sessionExpired);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
         setShowModal(false);
         router.push("/auth/login");
       } else {
-        toast.error(data.error || "Error al crear usuario");
+        toast.error(data.error || copy.toasts.createError);
       }
     } catch (error) {
       console.error("Error creating user:", error);
-      toast.error("Error al crear usuario");
+      toast.error(copy.toasts.createError);
     } finally {
       setIsSubmitting(false);
     }
@@ -188,7 +429,7 @@ export default function AdminPage() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success("Usuario actualizado exitosamente");
+        toast.success(copy.toasts.updateSuccess);
         setShowEditModal(false);
         setUserToEdit(null);
         setEditFormData({
@@ -201,18 +442,18 @@ export default function AdminPage() {
         });
         fetchUsers();
       } else if (response.status === 401) {
-        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        toast.error(copy.toasts.sessionExpired);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
         setShowEditModal(false);
         router.push("/auth/login");
       } else {
-        toast.error(data.error || "Error al actualizar usuario");
+        toast.error(data.error || copy.toasts.updateError);
       }
     } catch (error) {
       console.error("Error updating user:", error);
-      toast.error("Error al actualizar usuario");
+      toast.error(copy.toasts.updateError);
     } finally {
       setIsSubmitting(false);
     }
@@ -234,12 +475,12 @@ export default function AdminPage() {
       });
 
       if (response.ok) {
-        toast.success("Usuario eliminado exitosamente");
+        toast.success(copy.toasts.deleteSuccess);
         fetchUsers();
         setShowDeleteModal(false);
         setUserToDelete(null);
       } else if (response.status === 401) {
-        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        toast.error(copy.toasts.sessionExpired);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
@@ -247,11 +488,11 @@ export default function AdminPage() {
         router.push("/auth/login");
       } else {
         const data = await response.json();
-        toast.error(data.error || "Error al eliminar usuario");
+        toast.error(data.error || copy.toasts.deleteError);
       }
     } catch (error) {
       console.error("Error deleting user:", error);
-      toast.error("Error al eliminar usuario");
+      toast.error(copy.toasts.deleteError);
     }
   };
 
@@ -288,11 +529,11 @@ export default function AdminPage() {
   const getRoleLabel = (role: string) => {
     switch (role.toLowerCase()) {
       case "admin":
-        return "Administrador";
+        return copy.roles.admin;
       case "supervisor":
-        return "Supervisor";
+        return copy.roles.supervisor;
       case "cashier":
-        return "Cajero";
+        return copy.roles.cashier;
       default:
         return role;
     }
@@ -301,13 +542,13 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-950">
-        <div className="text-slate-400">Cargando...</div>
+        <div className="text-slate-400">{copy.loading}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100">
       <Header user={user} showBackButton={true} />
 
       <main className="p-6 mx-auto max-w-7xl">
@@ -315,17 +556,13 @@ export default function AdminPage() {
           <div>
             <div className="flex items-center gap-2 mb-2 text-slate-200">
               <UserCog className="w-6 h-6 text-sky-400" />
-              <h1 className="text-2xl font-bold text-white">
-                Gestión de Usuarios
-              </h1>
+              <h1 className="text-2xl font-bold text-white">{copy.title}</h1>
             </div>
-            <p className="text-slate-400 text-sm">
-              Administra cajeros y administradores del sistema
-            </p>
+            <p className="text-slate-400 text-sm">{copy.subtitle}</p>
             <div className="mt-3 inline-flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800">
               <span className="text-sm text-slate-200 font-semibold">
-                {currentPlan.currentUsers}/{currentPlan.userLimit} usuarios ·{" "}
-                {currentPlan.name}
+                {currentPlan.currentUsers}/{currentPlan.userLimit}{" "}
+                {copy.userCount} · {currentPlan.name}
               </span>
               <div className="w-32 h-1.5 bg-slate-800 rounded-full overflow-hidden">
                 <div
@@ -343,7 +580,7 @@ export default function AdminPage() {
             className="flex items-center gap-2 px-4 py-2.5 font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg shadow-sm"
           >
             <span className="text-lg leading-none">+</span>
-            <span>Nuevo Usuario</span>
+            <span>{copy.newUserButton}</span>
           </button>
         </div>
 
@@ -352,13 +589,27 @@ export default function AdminPage() {
             <table className="w-full text-sm">
               <thead className="bg-slate-900/80 border-b border-slate-800 text-slate-300">
                 <tr>
-                  <th className="px-6 py-3 text-left">Nombre</th>
-                  <th className="px-6 py-3 text-left">Usuario</th>
-                  <th className="px-6 py-3 text-left">Rol</th>
-                  <th className="px-6 py-3 text-left">Límite Desc. %</th>
-                  <th className="px-6 py-3 text-left">Estado</th>
-                  <th className="px-6 py-3 text-left">Fecha Creación</th>
-                  <th className="px-6 py-3 text-left">Acciones</th>
+                  <th className="px-6 py-3 text-left">
+                    {copy.tableHeaders.name}
+                  </th>
+                  <th className="px-6 py-3 text-left">
+                    {copy.tableHeaders.username}
+                  </th>
+                  <th className="px-6 py-3 text-left">
+                    {copy.tableHeaders.role}
+                  </th>
+                  <th className="px-6 py-3 text-left">
+                    {copy.tableHeaders.discountLimit}
+                  </th>
+                  <th className="px-6 py-3 text-left">
+                    {copy.tableHeaders.status}
+                  </th>
+                  <th className="px-6 py-3 text-left">
+                    {copy.tableHeaders.createdDate}
+                  </th>
+                  <th className="px-6 py-3 text-left">
+                    {copy.tableHeaders.actions}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800 text-slate-200">
@@ -368,7 +619,7 @@ export default function AdminPage() {
                       colSpan={7}
                       className="px-6 py-8 text-center text-slate-400"
                     >
-                      Cargando usuarios...
+                      {copy.loading}
                     </td>
                   </tr>
                 ) : users.length === 0 ? (
@@ -377,7 +628,7 @@ export default function AdminPage() {
                       colSpan={7}
                       className="px-6 py-10 text-center text-slate-400"
                     >
-                      No hay usuarios registrados
+                      {copy.noUsers}
                     </td>
                   </tr>
                 ) : (
@@ -413,15 +664,21 @@ export default function AdminPage() {
                           {getRoleLabel(systemUser.role)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-slate-300">No definido</td>
+                      <td className="px-6 py-4 text-slate-300">
+                        {copy.notDefined}
+                      </td>
                       <td className="px-6 py-4">
                         <span className="inline-block px-3 py-1 text-xs font-semibold text-green-200 bg-green-900/40 rounded-full border border-green-700/50">
-                          {systemUser.isActive ? "Activo" : "Inactivo"}
+                          {systemUser.isActive ? copy.active : copy.inactive}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-slate-300">
                         {new Date(systemUser.createdAt).toLocaleDateString(
-                          "es-AR",
+                          currentLanguage === "es"
+                            ? "es-AR"
+                            : currentLanguage === "pt"
+                              ? "pt-BR"
+                              : "en-US",
                         )}
                       </td>
                       <td className="px-6 py-4">
@@ -458,7 +715,9 @@ export default function AdminPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-slate-900 border border-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
               <div className="flex items-center justify-between p-6 border-b border-slate-800">
-                <h2 className="text-xl font-bold text-white">Nuevo Usuario</h2>
+                <h2 className="text-xl font-bold text-white">
+                  {copy.modal.newUser}
+                </h2>
                 <button
                   onClick={() => setShowModal(false)}
                   className="text-slate-400 hover:text-slate-200"
@@ -470,7 +729,8 @@ export default function AdminPage() {
               <form onSubmit={handleAddUser} className="p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Nombre Completo <span className="text-red-400">*</span>
+                    {copy.modal.fullName}{" "}
+                    <span className="text-red-400">{copy.modal.required}</span>
                   </label>
                   <input
                     type="text"
@@ -479,7 +739,7 @@ export default function AdminPage() {
                       setFormData({ ...formData, fullName: e.target.value })
                     }
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Juan Pérez"
+                    placeholder={copy.modal.placeholders.fullName}
                     required
                     minLength={2}
                   />
@@ -487,7 +747,8 @@ export default function AdminPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Usuario <span className="text-red-400">*</span>
+                    {copy.modal.username}{" "}
+                    <span className="text-red-400">{copy.modal.required}</span>
                   </label>
                   <input
                     type="text"
@@ -496,18 +757,19 @@ export default function AdminPage() {
                       setFormData({ ...formData, username: e.target.value })
                     }
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="juanperez (debe ser único)"
+                    placeholder={copy.modal.placeholders.username}
                     required
                     minLength={3}
                   />
                   <p className="text-xs text-slate-500 mt-1">
-                    El nombre de usuario debe ser único en el sistema
+                    {copy.modal.hints.usernameUnique}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Email <span className="text-red-400">*</span>
+                    {copy.modal.email}{" "}
+                    <span className="text-red-400">{copy.modal.required}</span>
                   </label>
                   <input
                     type="email"
@@ -516,17 +778,18 @@ export default function AdminPage() {
                       setFormData({ ...formData, email: e.target.value })
                     }
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="juan@ejemplo.com (debe ser único)"
+                    placeholder={copy.modal.placeholders.email}
                     required
                   />
                   <p className="text-xs text-slate-500 mt-1">
-                    El email debe ser único en el sistema
+                    {copy.modal.hints.emailUnique}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Contraseña <span className="text-red-400">*</span>
+                    {copy.modal.password}{" "}
+                    <span className="text-red-400">{copy.modal.required}</span>
                   </label>
                   <input
                     type="password"
@@ -535,7 +798,7 @@ export default function AdminPage() {
                       setFormData({ ...formData, password: e.target.value })
                     }
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder={copy.modal.placeholders.password}
                     required
                     minLength={6}
                   />
@@ -543,7 +806,7 @@ export default function AdminPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Teléfono
+                    {copy.modal.phone}
                   </label>
                   <input
                     type="tel"
@@ -552,13 +815,14 @@ export default function AdminPage() {
                       setFormData({ ...formData, phone: e.target.value })
                     }
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="+54 9 11 1234-5678"
+                    placeholder={copy.modal.placeholders.phone}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Rol <span className="text-red-400">*</span>
+                    {copy.modal.role}{" "}
+                    <span className="text-red-400">{copy.modal.required}</span>
                   </label>
                   <select
                     value={formData.role}
@@ -568,9 +832,11 @@ export default function AdminPage() {
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   >
-                    <option value="cashier">Cajero</option>
-                    <option value="supervisor">Supervisor</option>
-                    <option value="admin">Administrador</option>
+                    <option value="cashier">{copy.roleOptions.cashier}</option>
+                    <option value="supervisor">
+                      {copy.roleOptions.supervisor}
+                    </option>
+                    <option value="admin">{copy.roleOptions.admin}</option>
                   </select>
                 </div>
 
@@ -581,14 +847,16 @@ export default function AdminPage() {
                     className="flex-1 px-4 py-2 text-slate-300 bg-slate-800 rounded-lg hover:bg-slate-700 font-medium"
                     disabled={isSubmitting}
                   >
-                    Cancelar
+                    {copy.modal.buttons.cancel}
                   </button>
                   <button
                     type="submit"
                     className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Creando..." : "Crear Usuario"}
+                    {isSubmitting
+                      ? copy.modal.buttons.creating
+                      : copy.modal.buttons.create}
                   </button>
                 </div>
               </form>
@@ -601,7 +869,9 @@ export default function AdminPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-slate-900 border border-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
               <div className="flex items-center justify-between p-6 border-b border-slate-800">
-                <h2 className="text-xl font-bold text-white">Editar Usuario</h2>
+                <h2 className="text-xl font-bold text-white">
+                  {copy.modal.editUser}
+                </h2>
                 <button
                   onClick={() => {
                     setShowEditModal(false);
@@ -616,7 +886,8 @@ export default function AdminPage() {
               <form onSubmit={handleUpdateUser} className="p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Nombre Completo <span className="text-red-400">*</span>
+                    {copy.modal.fullName}{" "}
+                    <span className="text-red-400">{copy.modal.required}</span>
                   </label>
                   <input
                     type="text"
@@ -628,14 +899,15 @@ export default function AdminPage() {
                       })
                     }
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Juan Pérez"
+                    placeholder={copy.modal.placeholders.fullName}
                     required
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Usuario <span className="text-red-400">*</span>
+                    {copy.modal.username}{" "}
+                    <span className="text-red-400">{copy.modal.required}</span>
                   </label>
                   <input
                     type="text"
@@ -647,14 +919,15 @@ export default function AdminPage() {
                       })
                     }
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="juanperez"
+                    placeholder={copy.modal.placeholders.usernameEdit}
                     required
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Email <span className="text-red-400">*</span>
+                    {copy.modal.email}{" "}
+                    <span className="text-red-400">{copy.modal.required}</span>
                   </label>
                   <input
                     type="email"
@@ -666,14 +939,14 @@ export default function AdminPage() {
                       })
                     }
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="juan@ejemplo.com"
+                    placeholder={copy.modal.placeholders.emailEdit}
                     required
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Contraseña (dejar en blanco para no cambiar)
+                    {copy.modal.passwordOptional}
                   </label>
                   <input
                     type="password"
@@ -685,14 +958,14 @@ export default function AdminPage() {
                       })
                     }
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder={copy.modal.placeholders.password}
                     minLength={6}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Teléfono
+                    {copy.modal.phone}
                   </label>
                   <input
                     type="tel"
@@ -704,13 +977,14 @@ export default function AdminPage() {
                       })
                     }
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="+54 9 11 1234-5678"
+                    placeholder={copy.modal.placeholders.phone}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Rol <span className="text-red-400">*</span>
+                    {copy.modal.role}{" "}
+                    <span className="text-red-400">{copy.modal.required}</span>
                   </label>
                   <select
                     value={editFormData.role}
@@ -723,9 +997,11 @@ export default function AdminPage() {
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   >
-                    <option value="cashier">Cajero</option>
-                    <option value="supervisor">Supervisor</option>
-                    <option value="admin">Administrador</option>
+                    <option value="cashier">{copy.roleOptions.cashier}</option>
+                    <option value="supervisor">
+                      {copy.roleOptions.supervisor}
+                    </option>
+                    <option value="admin">{copy.roleOptions.admin}</option>
                   </select>
                 </div>
 
@@ -739,14 +1015,16 @@ export default function AdminPage() {
                     className="flex-1 px-4 py-2 text-slate-300 bg-slate-800 rounded-lg hover:bg-slate-700 font-medium"
                     disabled={isSubmitting}
                   >
-                    Cancelar
+                    {copy.modal.buttons.cancel}
                   </button>
                   <button
                     type="submit"
                     className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Actualizando..." : "Actualizar Usuario"}
+                    {isSubmitting
+                      ? copy.modal.buttons.updating
+                      : copy.modal.buttons.update}
                   </button>
                 </div>
               </form>
@@ -763,14 +1041,14 @@ export default function AdminPage() {
                   <Trash2 className="w-6 h-6 text-red-400" />
                 </div>
                 <h2 className="text-xl font-bold text-center text-white mb-2">
-                  ¿Eliminar Usuario?
+                  {copy.modal.deleteConfirm}
                 </h2>
                 <p className="text-center text-slate-400 mb-6">
-                  ¿Estás seguro de eliminar al usuario{" "}
+                  {copy.modal.deleteMessage}{" "}
                   <span className="font-semibold text-white">
                     "{userToDelete.name}"
                   </span>
-                  ? Esta acción no se puede deshacer.
+                  ? {copy.modal.deleteWarning}
                 </p>
                 <div className="flex gap-3">
                   <button
@@ -781,14 +1059,14 @@ export default function AdminPage() {
                     }}
                     className="flex-1 px-4 py-2 text-slate-300 bg-slate-800 rounded-lg hover:bg-slate-700 font-medium"
                   >
-                    Cancelar
+                    {copy.modal.buttons.cancel}
                   </button>
                   <button
                     type="button"
                     onClick={confirmDelete}
                     className="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-500 font-medium"
                   >
-                    Eliminar
+                    {copy.modal.buttons.delete}
                   </button>
                 </div>
               </div>
@@ -798,9 +1076,7 @@ export default function AdminPage() {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-sm text-slate-500">
-            Sistema POS © 2025 - Desarrollado para negocios pequeños
-          </p>
+          <p className="text-sm text-slate-500">{copy.footer}</p>
         </div>
       </main>
     </div>

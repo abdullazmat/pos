@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+
 import Header from "@/components/layout/Header";
 import { toast as notify } from "react-toastify";
 import {
@@ -22,6 +24,9 @@ import { PLAN_FEATURES, isLimitReached } from "@/lib/utils/planFeatures";
 
 export default function CategoriesPage() {
   const router = useRouter();
+  const { t, currentLanguage } = useGlobalLanguage();
+  const copy = (CATEGORIES_COPY[currentLanguage] ||
+    CATEGORIES_COPY.en) as typeof CATEGORIES_COPY.en;
   const [categories, setCategories] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -36,6 +41,9 @@ export default function CategoriesPage() {
     name: string;
   } | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  const planUsageLabel = (current: number, max: number) =>
+    copy.planUsage(current, max);
 
   const loadSubscription = async () => {
     try {
@@ -196,38 +204,33 @@ export default function CategoriesPage() {
   if (loading && categories.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-slate-400">Cargando categorías...</div>
+        <div className="text-slate-400">{copy.loading}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton />
 
       <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
-            <h1 className="mb-1 text-3xl font-bold text-white">
-              Gestión de Categorías
-            </h1>
-            <p className="text-sm text-slate-400">
-              Organiza tus productos por categorías
-            </p>
+            <h1 className="mb-1 text-3xl font-bold text-white">{copy.title}</h1>
+            <p className="text-sm text-slate-400">{copy.subtitle}</p>
           </div>
           <div className="inline-flex items-center gap-3 px-4 py-2 border rounded-lg shadow-sm bg-slate-900 border-slate-800">
             <span className="flex items-center gap-2 text-sm font-medium text-slate-300">
               <span className="inline-flex items-center gap-1 text-emerald-400">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                {categories.length}/
-                {planConfig?.maxCategories === -1
-                  ? "∞"
-                  : planConfig?.maxCategories}{" "}
-                categorías
+                {planUsageLabel(
+                  categories.length,
+                  planConfig?.maxCategories ?? 0,
+                )}
               </span>
               <span className="hidden sm:inline text-slate-500">
-                · Gratuito
+                {copy.planTag}
               </span>
             </span>
             {currentPlan === "BASIC" && (
@@ -235,7 +238,7 @@ export default function CategoriesPage() {
                 onClick={() => router.push("/upgrade")}
                 className="px-2 py-1 text-xs text-blue-300 transition border rounded bg-blue-600/20 border-blue-500/40 hover:bg-blue-600/30"
               >
-                Upgrade Pro
+                {copy.upgradeCta}
               </button>
             )}
           </div>
@@ -257,7 +260,7 @@ export default function CategoriesPage() {
             className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
             <Plus className="w-5 h-5" />
-            Nueva Categoría
+            {copy.newCategory}
             {!canCreateCategory && <Lock className="w-4 h-4" />}
           </button>
         </div>
@@ -266,10 +269,8 @@ export default function CategoriesPage() {
         {categories.length === 0 ? (
           <div className="p-12 text-center border shadow-sm bg-slate-900 rounded-xl border-slate-800">
             <Tag className="w-16 h-16 mx-auto mb-4 text-slate-600" />
-            <p className="mb-2 text-lg text-slate-300">No hay categorías aún</p>
-            <p className="text-sm text-slate-500">
-              Crea tu primera categoría para organizar tus productos
-            </p>
+            <p className="mb-2 text-lg text-slate-300">{copy.emptyTitle}</p>
+            <p className="text-sm text-slate-500">{copy.emptySubtitle}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -311,9 +312,7 @@ export default function CategoriesPage() {
 
         {/* Footer */}
         <div className="mt-12 text-center">
-          <p className="text-sm text-slate-500">
-            Sistema POS © 2025 - Desarrollado para negocios pequeños
-          </p>
+          <p className="text-sm text-slate-500">{copy.footer}</p>
         </div>
       </main>
 
@@ -330,7 +329,9 @@ export default function CategoriesPage() {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-800">
               <h2 className="text-xl font-bold text-white">
-                {editingId ? "Editar Categoría" : "Nueva Categoría"}
+                {editingId
+                  ? t("pages.categories.editCategory", "pos")
+                  : t("pages.categories.addCategory", "pos")}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -344,7 +345,8 @@ export default function CategoriesPage() {
             <form onSubmit={handleSubmit} className="p-6">
               <div className="mb-6">
                 <label className="block mb-2 text-sm font-semibold text-slate-200">
-                  Nombre <span className="text-red-400">*</span>
+                  {t("pages.categories.categoryName", "pos")}{" "}
+                  <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -353,7 +355,7 @@ export default function CategoriesPage() {
                     setFormData({ ...formData, name: e.target.value })
                   }
                   className="w-full px-4 py-3 text-white transition-all border outline-none border-slate-700 bg-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-500"
-                  placeholder="Ej: lacteos, fiambres, quesos"
+                  placeholder={copy.namePlaceholder}
                   required
                   autoFocus
                 />
@@ -361,7 +363,7 @@ export default function CategoriesPage() {
 
               <div className="mb-6">
                 <label className="block mb-2 text-sm font-semibold text-slate-200">
-                  Descripción
+                  {t("pages.categories.description", "pos")}
                 </label>
                 <textarea
                   value={formData.description}
@@ -369,7 +371,7 @@ export default function CategoriesPage() {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   className="w-full px-4 py-3 text-white transition-all border outline-none resize-none border-slate-700 bg-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-500"
-                  placeholder="Añade una descripción opcional..."
+                  placeholder={copy.descriptionPlaceholder}
                   rows={4}
                 />
               </div>
@@ -385,7 +387,7 @@ export default function CategoriesPage() {
                   }}
                   className="flex-1 px-6 py-3 font-semibold transition-colors border text-slate-200 border-slate-700 rounded-xl hover:bg-slate-800"
                 >
-                  Cancelar
+                  {t("labels.cancel", "pos")}
                 </button>
                 <button
                   type="submit"
@@ -393,10 +395,10 @@ export default function CategoriesPage() {
                   className="flex-1 px-6 py-3 font-semibold text-white transition-colors bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading
-                    ? "Guardando..."
+                    ? copy.saving
                     : editingId
-                      ? "Actualizar"
-                      : "Crear"}
+                      ? copy.update
+                      : copy.create}
                 </button>
               </div>
             </form>
@@ -420,17 +422,15 @@ export default function CategoriesPage() {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white">
-                  Eliminar Categoría
+                  {copy.deleteTitle}
                 </h3>
-                <p className="text-sm text-gray-400">
-                  Esta acción no se puede deshacer
-                </p>
+                <p className="text-sm text-gray-400">{copy.deleteSubtitle}</p>
               </div>
             </div>
 
             <div className="p-4 mb-6 border rounded-lg bg-red-900/20 border-red-700/50">
               <p className="text-gray-200">
-                ¿Estás seguro de que deseas eliminar la categoría{" "}
+                {copy.deleteQuestion}{" "}
                 <span className="font-semibold text-gray-100">
                   {deleteTarget.name}
                 </span>
@@ -443,13 +443,13 @@ export default function CategoriesPage() {
                 onClick={() => setShowDeleteModal(false)}
                 className="flex-1 px-4 py-2.5 bg-slate-700 text-gray-200 rounded-lg font-medium hover:bg-slate-600 transition-colors border border-slate-600"
               >
-                Cancelar
+                {t("labels.cancel", "pos")}
               </button>
               <button
                 onClick={confirmDelete}
                 className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
               >
-                Eliminar
+                {t("labels.delete", "pos")}
               </button>
             </div>
           </div>
@@ -458,3 +458,69 @@ export default function CategoriesPage() {
     </div>
   );
 }
+
+const CATEGORIES_COPY = {
+  es: {
+    title: "Gestión de Categorías",
+    subtitle: "Organiza tus productos por categorías",
+    planUsage: (current: number, max: number) =>
+      `${current}/${max === -1 ? "∞" : max} categorías`,
+    planTag: "· Gratuito",
+    upgradeCta: "Upgrade Pro",
+    newCategory: "Nueva Categoría",
+    emptyTitle: "No hay categorías aún",
+    emptySubtitle: "Crea tu primera categoría para organizar tus productos",
+    footer: "Sistema POS © 2025 - Desarrollado para negocios pequeños",
+    loading: "Cargando categorías...",
+    namePlaceholder: "Ej: lacteos, fiambres, quesos",
+    descriptionPlaceholder: "Añade una descripción opcional...",
+    saving: "Guardando...",
+    update: "Actualizar",
+    create: "Crear",
+    deleteTitle: "Eliminar Categoría",
+    deleteSubtitle: "Esta acción no se puede deshacer",
+    deleteQuestion: "¿Estás seguro de que deseas eliminar la categoría",
+  },
+  en: {
+    title: "Category Management",
+    subtitle: "Organize your products by category",
+    planUsage: (current: number, max: number) =>
+      `${current}/${max === -1 ? "∞" : max} categories`,
+    planTag: "· Free",
+    upgradeCta: "Upgrade Pro",
+    newCategory: "New Category",
+    emptyTitle: "No categories yet",
+    emptySubtitle: "Create your first category to organize products",
+    footer: "POS System © 2025 - Built for small businesses",
+    loading: "Loading categories...",
+    namePlaceholder: "e.g., dairy, cold cuts, cheese",
+    descriptionPlaceholder: "Add an optional description...",
+    saving: "Saving...",
+    update: "Update",
+    create: "Create",
+    deleteTitle: "Delete Category",
+    deleteSubtitle: "This action cannot be undone",
+    deleteQuestion: "Are you sure you want to delete category",
+  },
+  pt: {
+    title: "Gestão de Categorias",
+    subtitle: "Organize seus produtos por categorias",
+    planUsage: (current: number, max: number) =>
+      `${current}/${max === -1 ? "∞" : max} categorias`,
+    planTag: "· Gratuito",
+    upgradeCta: "Upgrade Pro",
+    newCategory: "Nova Categoria",
+    emptyTitle: "Ainda não há categorias",
+    emptySubtitle: "Crie sua primeira categoria para organizar os produtos",
+    footer: "Sistema PDV © 2025 - Feito para pequenos negócios",
+    loading: "Carregando categorias...",
+    namePlaceholder: "Ex.: laticínios, frios, queijos",
+    descriptionPlaceholder: "Adicione uma descrição opcional...",
+    saving: "Salvando...",
+    update: "Atualizar",
+    create: "Criar",
+    deleteTitle: "Excluir Categoria",
+    deleteSubtitle: "Esta ação não pode ser desfeita",
+    deleteQuestion: "Tem certeza de que deseja excluir a categoria",
+  },
+};

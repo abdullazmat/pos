@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Mail, Lock, User, Check, ArrowRight } from "lucide-react";
+import { useLanguage } from "@/lib/context/LanguageContext";
+import { useTranslatedError } from "@/lib/hooks/useTranslatedError";
+import { useTranslatedToast } from "@/lib/hooks/useTranslatedToast";
 
 type SubscriptionPlan = "free" | "paid";
 
@@ -14,6 +17,9 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("free");
   const router = useRouter();
+  const { t } = useLanguage();
+  const { handleError } = useTranslatedError();
+  const toast = useTranslatedToast();
 
   // If already authenticated, redirect to POS
   useEffect(() => {
@@ -58,7 +64,12 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Registration failed");
+        const message = handleError(
+          data.errorKey || data.error || "userAlreadyExists",
+        );
+        setError(message);
+        toast.error("validationError");
+        return;
       }
 
       const data = await response.json();
@@ -68,7 +79,8 @@ export default function RegisterPage() {
 
       router.push("/pos");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const message = handleError(err);
+      setError(message);
       setLoading(false);
     }
   }
@@ -115,10 +127,10 @@ export default function RegisterPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-white mb-2">
-              Registra tu Negocio
+              {String(t("register.title", "auth"))}
             </h1>
             <p className="text-gray-400 text-sm">
-              Completa los datos para empezar a usar el sistema gratis
+              {String(t("register.title", "auth"))}
             </p>
           </div>
 
@@ -139,7 +151,8 @@ export default function RegisterPage() {
               {/* Business Name */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300">
-                  Nombre del Negocio <span className="text-red-400">*</span>
+                  {String(t("register.fullName", "auth"))}{" "}
+                  <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -153,7 +166,8 @@ export default function RegisterPage() {
               {/* Owner Full Name */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300">
-                  Nombre del Dueño <span className="text-red-400">*</span>
+                  {String(t("register.fullName", "auth"))}{" "}
+                  <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -170,7 +184,7 @@ export default function RegisterPage() {
               {/* Email */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300">
-                  Email
+                  {String(t("register.email", "auth"))}
                 </label>
                 <input
                   type="email"
@@ -199,7 +213,8 @@ export default function RegisterPage() {
               {/* Username */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300">
-                  Usuario Admin <span className="text-red-400">*</span>
+                  {String(t("login.email", "auth"))}{" "}
+                  <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -216,7 +231,8 @@ export default function RegisterPage() {
               {/* Password */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300">
-                  Contraseña <span className="text-red-400">*</span>
+                  {String(t("register.password", "auth"))}{" "}
+                  <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -274,7 +290,7 @@ export default function RegisterPage() {
               onClick={() => router.push("/")}
               className="w-full py-3 mt-6 font-medium text-gray-300 transition-all duration-200 bg-[#1a1d21] border border-gray-700 rounded-lg hover:bg-[#1f2226] hover:border-gray-600"
             >
-              Volver
+              {String(t("backToTop", "common"))}
             </button>
 
             {/* Sign Up Button */}
@@ -302,10 +318,10 @@ export default function RegisterPage() {
                       ></path>
                     </svg>
                   </div>
-                  <span>Creando negocio...</span>
+                  <span>{String(t("loading", "common"))}</span>
                 </>
               ) : (
-                "Crear Negocio"
+                String(t("register.submit", "auth"))
               )}
             </button>
           </form>
@@ -317,26 +333,26 @@ export default function RegisterPage() {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-slate-800/50 text-gray-400">
-                Have an account?
+                {String(t("register.haveAccount", "auth"))}
               </span>
             </div>
           </div>
 
           {/* Login Link */}
           <p className="mt-6 text-center text-gray-300">
-            Already have an account?{" "}
+            {String(t("register.haveAccount", "auth"))}{" "}
             <Link
               href="/auth/login"
               className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
             >
-              Sign In
+              {String(t("register.loginLink", "auth"))}
             </Link>
           </p>
         </div>
 
         {/* Footer Text */}
         <p className="text-center text-gray-400 text-xs mt-6">
-          Your data is secure and encrypted • Privacy Policy & Terms of Service
+          {String(t("allRightsReserved", "common"))}
         </p>
       </div>
 

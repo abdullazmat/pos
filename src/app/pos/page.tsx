@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import ProductSearch from "@/components/pos/ProductSearch";
 import Cart from "@/components/pos/Cart";
 import Header from "@/components/layout/Header";
@@ -20,6 +21,7 @@ interface CartItem {
 
 export default function POSPage() {
   const router = useRouter();
+  const { t } = useGlobalLanguage();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -164,29 +166,36 @@ export default function POSPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        toast.error(`${error.error || "Error al completar la venta"}`);
+        toast.error(`${error.error || t("ui.checkoutError", "pos")}`);
         return;
       }
 
-      toast.success("¡Venta completada exitosamente!");
+      toast.success(t("ui.checkoutSuccess", "pos"));
       setCartItems([]);
     } catch (error) {
       console.error("Checkout error:", error);
-      toast.error("Error al procesar la venta. Intenta nuevamente.");
+      toast.error(t("ui.checkoutProcessError", "pos"));
     }
   };
 
   if (loading || registerOpen === null) {
-    return <Loading label="Cargando POS..." />;
+    return <Loading label={t("ui.loading", "pos") || ""} />;
   }
 
+  const roleLabel = user?.role
+    ? t(`ui.roles.${user.role}`, "pos")
+    : t("ui.roles.user", "pos");
+  const displayName =
+    user?.role === "admin" ? roleLabel : user?.fullName || roleLabel;
+  const title = (t("ui.title", "pos") as string).replace("{role}", displayName);
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton={true} />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          POS - {user?.role === "admin" ? "Administrador" : user?.fullName}
+          {title}
         </h1>
         {registerOpen === false && (
           <div className="flex flex-col items-center justify-center py-20">
@@ -206,11 +215,10 @@ export default function POSPage() {
               </svg>
             </div>
             <p className="text-lg font-semibold text-gray-800 dark:text-white mb-1">
-              Caja Cerrada
+              {t("ui.closedTitle", "pos")}
             </p>
             <p className="text-gray-600 dark:text-gray-400">
-              Debes abrir una caja desde la sección "Control de Caja" para
-              comenzar a vender
+              {t("ui.closedDescription", "pos")}
             </p>
           </div>
         )}

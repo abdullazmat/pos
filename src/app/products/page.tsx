@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import {
   Search,
@@ -24,8 +25,363 @@ import {
   isLimitReached,
 } from "@/lib/utils/planFeatures";
 
+const PRODUCT_COPY = {
+  es: {
+    headerTitle: "Gestión de Productos",
+    headerSubtitle: "Administra tu catálogo de productos",
+    refreshLabel: "Refrescar",
+    importButton: "Importar Excel",
+    newButton: "Nuevo Producto",
+    planLabel: (count: number) => `${count}/100 productos - Gratuito`,
+    searchPlaceholder: "Buscar por nombre, código de barras o descripción...",
+    importModal: {
+      title: "Importar Productos desde Excel/CSV",
+      subtitle: "Sube tu archivo, revisa la vista previa y confirma.",
+      instructionsTitle: "Instrucciones",
+      steps: [
+        "Descarga la plantilla CSV con el botón inferior.",
+        "Completa los datos de tus productos en el archivo.",
+        "Guarda el archivo como CSV (separado por comas).",
+        "Sube el archivo usando 'Seleccionar Archivo'.",
+        "Revisa la vista previa y confirma la importación.",
+      ],
+      downloadTemplate: "Descargar Plantilla CSV",
+      selectedFile: "Archivo seleccionado:",
+      dropTitle: "Arrastra un archivo CSV aquí o haz clic para seleccionar",
+      dropSubtitle: "Formatos soportados: .csv, .xlsx, .xls",
+      selectFile: "Seleccionar Archivo",
+      csvFormatTitle: "Formato del archivo CSV",
+      requiredTitle: "Columnas requeridas:",
+      requiredList: [
+        "1. nombre (texto)",
+        "2. descripcion (texto, opcional)",
+        "3. costo (número)",
+        "4. precio (número)",
+        "5. stock (número)",
+      ],
+      optionalTitle: "Opcionales:",
+      optionalList: [
+        "6. codigo (texto, opcional - se autogenera si está vacío)",
+        "7. minStock (número)",
+        "8. categoria (texto)",
+        "9. activo (true/false)",
+        "10. seVendePorPeso (true/false)",
+      ],
+      cancel: "Cancelar",
+      confirm: "Importar Archivo",
+      confirming: "Importando...",
+    },
+    form: {
+      newTitle: "Nuevo Producto",
+      editTitle: "Editar Producto",
+      namePlaceholder: "Ingrese el nombre del producto",
+      descPlaceholder: "Descripción del producto (opcional)",
+      barcodePlaceholder: "Código de barras (opcional)",
+      categoryPlaceholder: "Sin categoría",
+      costLabel: "Costo de Compra",
+      marginLabel: "Margen de Ganancia (%)",
+      priceLabel: "Precio de Venta",
+      priceHint: "Se calcula automáticamente",
+      stockLabel: "Stock Inicial",
+      stockUnitHint: "(en unidades)",
+      stockPlaceholder: "Ej: 100",
+      codeLabel: "Código",
+      codePlaceholder: "Código (se autogenera si lo dejas vacío)",
+      codeHint: "Se autogenera si lo dejas vacío",
+      minStockLabel: "Stock Mínimo",
+      minStockHint: "(en unidades)",
+      minStockPlaceholder: "5",
+      minStockHelper: "Nivel para alertas de stock bajo",
+      activeLabel: "Producto activo",
+      weightLabel:
+        "Se vende por peso (kg) - Ej: verduras, fiambres, alimento de perros",
+      cancel: "Cancelar",
+      saveNew: "Crear Producto",
+      saveEdit: "Actualizar Producto",
+    },
+    table: {
+      product: "Producto",
+      code: "Código",
+      stock: "Stock",
+      status: "Estado",
+      cost: "Precio Costo",
+      price: "Precio Venta",
+      margin: "Margen",
+      actions: "Acciones",
+      normal: "Normal",
+      outOfStock: "Sin Stock",
+    },
+    empty: {
+      title: "No se encontraron productos.",
+      subtitle: "Intentá cambiar la búsqueda o agregar un producto.",
+    },
+    deleteModal: {
+      title: "Eliminar Producto",
+      subtitle: "Esta acción no se puede deshacer",
+      question: "¿Estás seguro de que deseas eliminar el producto",
+      confirm: "Eliminar",
+      cancel: "Cancelar",
+    },
+    upgrade: {
+      feature: "Productos Ilimitados",
+      reason:
+        "Tu plan Free tiene un límite de 100 productos. Actualiza a Pro para acceso ilimitado.",
+    },
+    limit: {
+      limitName: "Productos",
+    },
+    toast: {
+      selectFile: "Selecciona un archivo CSV o Excel",
+      sessionExpired: "Sesión expirada. Inicia sesión nuevamente.",
+      importing: "Importando archivo...",
+      importError: "Error al importar el archivo",
+      importSuccess: "Archivo importado correctamente",
+      saveError: "Error al guardar el producto",
+      saveSuccess: "¡Producto creado exitosamente!",
+      updateSuccess: "Producto actualizado",
+      deleteSuccess: "Producto eliminado exitosamente",
+      deleteError: "Error al eliminar producto",
+    },
+  },
+  en: {
+    headerTitle: "Product Management",
+    headerSubtitle: "Manage your product catalog",
+    refreshLabel: "Refresh",
+    importButton: "Import Excel/CSV",
+    newButton: "New Product",
+    planLabel: (count: number) => `${count}/100 products - Free tier`,
+    searchPlaceholder: "Search by name, barcode, or description...",
+    importModal: {
+      title: "Import Products from Excel/CSV",
+      subtitle: "Upload your file, preview, and confirm.",
+      instructionsTitle: "Instructions",
+      steps: [
+        "Download the CSV template using the button below.",
+        "Fill your product data in the file.",
+        "Save the file as CSV (comma separated).",
+        "Upload using 'Select File'.",
+        "Review the preview and confirm the import.",
+      ],
+      downloadTemplate: "Download CSV Template",
+      selectedFile: "Selected file:",
+      dropTitle: "Drag a CSV here or click to select",
+      dropSubtitle: "Supported formats: .csv, .xlsx, .xls",
+      selectFile: "Select File",
+      csvFormatTitle: "CSV file format",
+      requiredTitle: "Required columns:",
+      requiredList: [
+        "1. nombre (text)",
+        "2. descripcion (text, optional)",
+        "3. costo (number)",
+        "4. precio (number)",
+        "5. stock (number)",
+      ],
+      optionalTitle: "Optional:",
+      optionalList: [
+        "6. codigo (text, optional - auto-generated if empty)",
+        "7. minStock (number)",
+        "8. categoria (text)",
+        "9. activo (true/false)",
+        "10. seVendePorPeso (true/false)",
+      ],
+      cancel: "Cancel",
+      confirm: "Import File",
+      confirming: "Importing...",
+    },
+    form: {
+      newTitle: "New Product",
+      editTitle: "Edit Product",
+      namePlaceholder: "Enter the product name",
+      descPlaceholder: "Product description (optional)",
+      barcodePlaceholder: "Barcode (optional)",
+      categoryPlaceholder: "No category",
+      costLabel: "Cost",
+      marginLabel: "Margin (%)",
+      priceLabel: "Sale Price",
+      priceHint: "Calculated automatically",
+      stockLabel: "Opening Stock",
+      stockUnitHint: "(units)",
+      stockPlaceholder: "e.g., 100",
+      codeLabel: "Code",
+      codePlaceholder: "Code (auto-generated if left empty)",
+      codeHint: "Auto-generated if empty",
+      minStockLabel: "Min Stock",
+      minStockHint: "(units)",
+      minStockPlaceholder: "5",
+      minStockHelper: "Level for low-stock alerts",
+      activeLabel: "Active product",
+      weightLabel: "Sold by weight (kg) - e.g., produce, deli, pet food",
+      cancel: "Cancel",
+      saveNew: "Create Product",
+      saveEdit: "Update Product",
+    },
+    table: {
+      product: "Product",
+      code: "Code",
+      stock: "Stock",
+      status: "Status",
+      cost: "Cost Price",
+      price: "Sale Price",
+      margin: "Margin",
+      actions: "Actions",
+      normal: "Normal",
+      outOfStock: "Out of Stock",
+    },
+    empty: {
+      title: "No products found.",
+      subtitle: "Try changing the search or add a product.",
+    },
+    deleteModal: {
+      title: "Delete Product",
+      subtitle: "This action cannot be undone",
+      question: "Are you sure you want to delete product",
+      confirm: "Delete",
+      cancel: "Cancel",
+    },
+    upgrade: {
+      feature: "Unlimited Products",
+      reason:
+        "Your Free plan is limited to 100 products. Upgrade to Pro for unlimited access.",
+    },
+    limit: {
+      limitName: "Products",
+    },
+    toast: {
+      selectFile: "Select a CSV or Excel file",
+      sessionExpired: "Session expired. Please sign in again.",
+      importing: "Importing file...",
+      importError: "Error importing the file",
+      importSuccess: "File imported successfully",
+      saveError: "Error saving the product",
+      saveSuccess: "Product created successfully!",
+      updateSuccess: "Product updated",
+      deleteSuccess: "Product deleted successfully",
+      deleteError: "Error deleting product",
+    },
+  },
+  pt: {
+    headerTitle: "Gestão de Produtos",
+    headerSubtitle: "Administre seu catálogo de produtos",
+    refreshLabel: "Atualizar",
+    importButton: "Importar Excel/CSV",
+    newButton: "Novo Produto",
+    planLabel: (count: number) => `${count}/100 produtos - Gratuito`,
+    searchPlaceholder: "Busque por nome, código de barras ou descrição...",
+    importModal: {
+      title: "Importar Produtos de Excel/CSV",
+      subtitle: "Envie o arquivo, revise e confirme.",
+      instructionsTitle: "Instruções",
+      steps: [
+        "Baixe o modelo CSV com o botão abaixo.",
+        "Preencha os dados dos produtos no arquivo.",
+        "Salve como CSV (separado por vírgulas).",
+        "Envie usando 'Selecionar Arquivo'.",
+        "Revise a prévia e confirme a importação.",
+      ],
+      downloadTemplate: "Baixar Modelo CSV",
+      selectedFile: "Arquivo selecionado:",
+      dropTitle: "Arraste um CSV aqui ou clique para selecionar",
+      dropSubtitle: "Formatos suportados: .csv, .xlsx, .xls",
+      selectFile: "Selecionar Arquivo",
+      csvFormatTitle: "Formato do arquivo CSV",
+      requiredTitle: "Colunas obrigatórias:",
+      requiredList: [
+        "1. nombre (texto)",
+        "2. descripcion (texto, opcional)",
+        "3. costo (número)",
+        "4. precio (número)",
+        "5. stock (número)",
+      ],
+      optionalTitle: "Opcionais:",
+      optionalList: [
+        "6. codigo (texto, opcional - será gerado automaticamente se vazio)",
+        "7. minStock (número)",
+        "8. categoria (texto)",
+        "9. activo (true/false)",
+        "10. seVendePorPeso (true/false)",
+      ],
+      cancel: "Cancelar",
+      confirm: "Importar Arquivo",
+      confirming: "Importando...",
+    },
+    form: {
+      newTitle: "Novo Produto",
+      editTitle: "Editar Produto",
+      namePlaceholder: "Informe o nome do produto",
+      descPlaceholder: "Descrição do produto (opcional)",
+      barcodePlaceholder: "Código de barras (opcional)",
+      categoryPlaceholder: "Sem categoria",
+      costLabel: "Custo de Compra",
+      marginLabel: "Margem (%)",
+      priceLabel: "Preço de Venda",
+      priceHint: "Calculado automaticamente",
+      stockLabel: "Estoque Inicial",
+      stockUnitHint: "(em unidades)",
+      stockPlaceholder: "Ex.: 100",
+      codeLabel: "Código",
+      codePlaceholder: "Código (gerado automaticamente se deixar vazio)",
+      codeHint: "Gerado automaticamente se vazio",
+      minStockLabel: "Estoque Mínimo",
+      minStockHint: "(em unidades)",
+      minStockPlaceholder: "5",
+      minStockHelper: "Nível para alertas de estoque baixo",
+      activeLabel: "Produto ativo",
+      weightLabel: "Vendido por peso (kg) - Ex.: verduras, frios, ração",
+      cancel: "Cancelar",
+      saveNew: "Criar Produto",
+      saveEdit: "Atualizar Produto",
+    },
+    table: {
+      product: "Produto",
+      code: "Código",
+      stock: "Estoque",
+      status: "Status",
+      cost: "Preço de Custo",
+      price: "Preço de Venda",
+      margin: "Margem",
+      actions: "Ações",
+      normal: "Normal",
+      outOfStock: "Sem Estoque",
+    },
+    empty: {
+      title: "Nenhum produto encontrado.",
+      subtitle: "Tente mudar a busca ou adicionar um produto.",
+    },
+    deleteModal: {
+      title: "Excluir Produto",
+      subtitle: "Esta ação não pode ser desfeita",
+      question: "Tem certeza de que deseja excluir o produto",
+      confirm: "Excluir",
+      cancel: "Cancelar",
+    },
+    upgrade: {
+      feature: "Produtos Ilimitados",
+      reason:
+        "Seu plano Free tem limite de 100 produtos. Faça upgrade para Pro para uso ilimitado.",
+    },
+    limit: {
+      limitName: "Produtos",
+    },
+    toast: {
+      selectFile: "Selecione um arquivo CSV ou Excel",
+      sessionExpired: "Sessão expirada. Faça login novamente.",
+      importing: "Importando arquivo...",
+      importError: "Erro ao importar o arquivo",
+      importSuccess: "Arquivo importado com sucesso",
+      saveError: "Erro ao salvar o produto",
+      saveSuccess: "Produto criado com sucesso!",
+      updateSuccess: "Produto atualizado",
+      deleteSuccess: "Produto excluído com sucesso",
+      deleteError: "Erro ao excluir produto",
+    },
+  },
+};
+
 export default function ProductsPage() {
   const router = useRouter();
+  const { t, currentLanguage } = useGlobalLanguage();
+  const copy = (PRODUCT_COPY[currentLanguage] ||
+    PRODUCT_COPY.en) as typeof PRODUCT_COPY.en;
   const [mounted, setMounted] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -129,18 +485,18 @@ export default function ProductsPage() {
   const handleImportExcel = async (fileParam?: File | null) => {
     const fileToUpload = fileParam || importFile;
     if (!fileToUpload) {
-      toast.error("Selecciona un archivo CSV o Excel");
+      toast.error(copy.toast.selectFile);
       return;
     }
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      toast.error("Sesión expirada. Inicia sesión nuevamente.");
+      toast.error(copy.toast.sessionExpired);
       router.push("/auth/login");
       return;
     }
     const formData = new FormData();
     formData.append("file", fileToUpload);
-    toast.info("Importando archivo...");
+    toast.info(copy.toast.importing);
     setIsImporting(true);
     try {
       const response = await fetch("/api/products/import", {
@@ -152,21 +508,21 @@ export default function ProductsPage() {
       });
       const data = await response.json();
       if (response.status === 401) {
-        toast.error("Sesión expirada. Inicia sesión nuevamente.");
+        toast.error(copy.toast.sessionExpired);
         router.push("/auth/login");
         return;
       }
       if (!response.ok) {
-        toast.error(data.error || "Error al importar el archivo");
+        toast.error(data.error || copy.toast.importError);
         return;
       }
-      toast.success(data.message || "Archivo importado correctamente");
+      toast.success(data.message || copy.toast.importSuccess);
       await loadProducts();
       setShowImportModal(false);
       setImportFile(null);
     } catch (error) {
       console.error("Import excel error:", error);
-      toast.error("Error al importar el archivo");
+      toast.error(copy.toast.importError);
     } finally {
       setIsImporting(false);
     }
@@ -188,7 +544,7 @@ export default function ProductsPage() {
     const exampleRow = [
       "Manzana Roja",
       "Fruta fresca",
-      "SKU-001",
+      "",
       "120",
       "180",
       "50",
@@ -244,7 +600,7 @@ export default function ProductsPage() {
     e.preventDefault();
     try {
       const token = localStorage.getItem("accessToken");
-      const payload = {
+      const payload: any = {
         ...formData,
         cost: parseFloat(formData.cost),
         price: parseFloat(formData.price),
@@ -253,6 +609,11 @@ export default function ProductsPage() {
         margin: parseFloat(formData.margin),
         id: editingId || undefined,
       };
+
+      // If code is empty, drop it so the backend auto-generates
+      if (!payload.code || String(payload.code).trim() === "") {
+        delete payload.code;
+      }
       const response = await fetch("/api/products", {
         method: editingId ? "PUT" : "POST",
         headers: {
@@ -262,15 +623,22 @@ export default function ProductsPage() {
         body: JSON.stringify(payload),
       });
 
+      const data = await response.json();
       if (!response.ok) {
-        const error = await response.json();
-        toast.error(`${error.error || "Error al guardar el producto"}`);
+        toast.error(`${data.error || copy.toast.saveError}`);
         return;
       }
 
-      toast.success(
-        editingId ? "Producto actualizado" : "¡Producto creado exitosamente!",
-      );
+      const savedProduct =
+        data.data?.product || data.product || data.data?.products?.[0];
+
+      const successMessage = editingId
+        ? copy.toast.updateSuccess
+        : copy.toast.saveSuccess;
+
+      const codeSuffix = savedProduct?.code ? ` (${savedProduct.code})` : "";
+
+      toast.success(`${successMessage}${codeSuffix}`);
       setFormData({
         name: "",
         code: "",
@@ -290,7 +658,7 @@ export default function ProductsPage() {
       await loadProducts();
     } catch (error) {
       console.error("Create product error:", error);
-      toast.error("Error al guardar el producto");
+      toast.error(copy.toast.saveError);
     }
   };
 
@@ -310,15 +678,15 @@ export default function ProductsPage() {
       });
 
       if (response.ok) {
-        toast.success("Producto eliminado exitosamente");
+        toast.success(copy.toast.deleteSuccess);
         await loadProducts();
       } else {
         const errorData = await response.json();
-        toast.error(errorData.error || "Error al eliminar producto");
+        toast.error(errorData.error || copy.toast.deleteError);
       }
     } catch (error) {
       console.error("Error deleting product:", error);
-      toast.error("Error al eliminar producto");
+      toast.error(copy.toast.deleteError);
     } finally {
       setShowDeleteModal(false);
       setProductToDelete(null);
@@ -335,7 +703,7 @@ export default function ProductsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white dark:bg-slate-950">
         <Header user={user} showBackButton={true} />
         <main className="max-w-7xl mx-auto p-6">
           <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -357,7 +725,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton={true} />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
@@ -366,17 +734,15 @@ export default function ProductsPage() {
           <div className="flex items-start justify-between mb-6">
             <div>
               <h1 className="text-4xl font-bold text-white mb-2">
-                Gestión de Productos
+                {copy.headerTitle}
               </h1>
-              <p className="text-slate-400">
-                Administra tu catálogo de productos
-              </p>
+              <p className="text-slate-400">{copy.headerSubtitle}</p>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={loadProducts}
                 className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 font-semibold flex items-center gap-2 transition"
-                title="Refresh"
+                title={copy.refreshLabel}
               >
                 <RefreshCw className="w-5 h-5" />
               </button>
@@ -397,7 +763,7 @@ export default function ProductsPage() {
                     d="M12 4v16m8-8H4"
                   />
                 </svg>
-                Importar Excel
+                {copy.importButton}
               </button>
               <button
                 onClick={() => {
@@ -411,7 +777,7 @@ export default function ProductsPage() {
                 className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg"
               >
                 <Plus className="w-5 h-5" />
-                Nuevo Producto
+                {copy.newButton}
                 {!canCreateProduct && <Lock className="w-4 h-4 ml-auto" />}
               </button>
             </div>
@@ -431,7 +797,7 @@ export default function ProductsPage() {
               />
             </svg>
             <span className="text-sm font-medium text-slate-300">
-              {products.length}/100 productos - Gratuito
+              {copy.planLabel(products.length)}
             </span>
           </div>
         </div>
@@ -443,7 +809,7 @@ export default function ProductsPage() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar por nombre, código de barras o descripción..."
+              placeholder={copy.searchPlaceholder}
               className="w-full pl-12 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -477,10 +843,10 @@ export default function ProductsPage() {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white">
-                      Importar Productos desde Excel/CSV
+                      {copy.importModal.title}
                     </h3>
                     <p className="text-slate-400 text-sm">
-                      Sube tu archivo, revisa la vista previa y confirma.
+                      {copy.importModal.subtitle}
                     </p>
                   </div>
                 </div>
@@ -490,7 +856,7 @@ export default function ProductsPage() {
                     setImportFile(null);
                   }}
                   className="p-2 rounded-full hover:bg-slate-800 text-slate-400"
-                  aria-label="Cerrar"
+                  aria-label={t("close") || "Close"}
                 >
                   <svg
                     className="w-5 h-5"
@@ -526,22 +892,12 @@ export default function ProductsPage() {
                     </svg>
                     <div>
                       <h4 className="font-semibold text-white mb-2">
-                        Instrucciones
+                        {copy.importModal.instructionsTitle}
                       </h4>
                       <ol className="list-decimal list-inside space-y-1 text-sm text-blue-100">
-                        <li>
-                          Descarga la plantilla CSV con el botón inferior.
-                        </li>
-                        <li>
-                          Completa los datos de tus productos en el archivo.
-                        </li>
-                        <li>
-                          Guarda el archivo como CSV (separado por comas).
-                        </li>
-                        <li>Sube el archivo usando "Seleccionar Archivo".</li>
-                        <li>
-                          Revisa la vista previa y confirma la importación.
-                        </li>
+                        {copy.importModal.steps.map((step, idx) => (
+                          <li key={idx}>{step}</li>
+                        ))}
                       </ol>
                     </div>
                   </div>
@@ -565,11 +921,11 @@ export default function ProductsPage() {
                         d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"
                       />
                     </svg>
-                    Descargar Plantilla CSV
+                    {copy.importModal.downloadTemplate}
                   </button>
                   {importFile && (
                     <div className="text-sm text-slate-300 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 w-full sm:w-auto">
-                      Archivo seleccionado:{" "}
+                      {copy.importModal.selectedFile}{" "}
                       <span className="font-semibold text-white">
                         {importFile.name}
                       </span>
@@ -603,17 +959,17 @@ export default function ProductsPage() {
                   </div>
                   <div className="space-y-2">
                     <p className="text-slate-200 font-semibold">
-                      Arrastra un archivo CSV aquí o haz clic para seleccionar
+                      {copy.importModal.dropTitle}
                     </p>
                     <p className="text-slate-500 text-sm">
-                      Formatos soportados: .csv, .xlsx, .xls
+                      {copy.importModal.dropSubtitle}
                     </p>
                   </div>
                   <button
                     onClick={() => importInputRef.current?.click()}
                     className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow"
                   >
-                    Seleccionar Archivo
+                    {copy.importModal.selectFile}
                   </button>
                   <input
                     ref={importInputRef}
@@ -630,31 +986,27 @@ export default function ProductsPage() {
 
                 <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
                   <h4 className="text-white font-semibold mb-3">
-                    Formato del archivo CSV
+                    {copy.importModal.csvFormatTitle}
                   </h4>
                   <div className="grid md:grid-cols-2 gap-4 text-sm text-slate-300">
                     <div>
                       <p className="font-semibold text-slate-100 mb-2">
-                        Columnas requeridas:
+                        {copy.importModal.requiredTitle}
                       </p>
                       <ul className="space-y-1">
-                        <li>1. nombre (texto)</li>
-                        <li>2. descripcion (texto, opcional)</li>
-                        <li>3. codigo (texto)</li>
-                        <li>4. costo (número)</li>
-                        <li>5. precio (número)</li>
-                        <li>6. stock (número)</li>
+                        {copy.importModal.requiredList.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
                       </ul>
                     </div>
                     <div>
                       <p className="font-semibold text-slate-100 mb-2">
-                        Opcionales:
+                        {copy.importModal.optionalTitle}
                       </p>
                       <ul className="space-y-1">
-                        <li>7. minStock (número)</li>
-                        <li>8. categoria (texto)</li>
-                        <li>9. activo (true/false)</li>
-                        <li>10. seVendePorPeso (true/false)</li>
+                        {copy.importModal.optionalList.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
                       </ul>
                     </div>
                   </div>
@@ -668,14 +1020,16 @@ export default function ProductsPage() {
                     }}
                     className="w-full sm:w-auto px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-semibold border border-slate-700"
                   >
-                    Cancelar
+                    {copy.importModal.cancel}
                   </button>
                   <button
                     onClick={() => handleImportExcel(importFile)}
                     disabled={!importFile || isImporting}
                     className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isImporting ? "Importando..." : "Importar Archivo"}
+                    {isImporting
+                      ? copy.importModal.confirming
+                      : copy.importModal.confirm}
                   </button>
                 </div>
               </div>
@@ -688,7 +1042,7 @@ export default function ProductsPage() {
             <div className="bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 animate-in zoom-in-95 slide-in-from-bottom-4 border border-slate-800">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-white">
-                  {editingId ? "Editar Producto" : "Nuevo Producto"}
+                  {editingId ? copy.form.editTitle : copy.form.newTitle}
                 </h2>
                 <button
                   onClick={() => {
@@ -719,7 +1073,8 @@ export default function ProductsPage() {
                 {/* Product Name */}
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Nombre del Producto <span className="text-red-500">*</span>
+                    {t("pages.products.productName", "pos")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -727,7 +1082,7 @@ export default function ProductsPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    placeholder="Ingrese el nombre del producto"
+                    placeholder={copy.form.namePlaceholder}
                     className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     required
                   />
@@ -736,14 +1091,14 @@ export default function ProductsPage() {
                 {/* Description */}
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Descripción
+                    {t("pages.products.description", "pos")}
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
-                    placeholder="Descripción del producto (opcional)"
+                    placeholder={copy.form.descPlaceholder}
                     rows={3}
                     className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   />
@@ -753,7 +1108,7 @@ export default function ProductsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Código de Barras
+                      {t("pages.products.barcode", "pos")}
                     </label>
                     <input
                       type="text"
@@ -761,13 +1116,13 @@ export default function ProductsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, barcode: e.target.value })
                       }
-                      placeholder="Código de barras (opcional)"
+                      placeholder={copy.form.barcodePlaceholder}
                       className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Categoría
+                      {t("pages.products.category", "pos")}
                     </label>
                     <select
                       value={formData.category}
@@ -777,7 +1132,7 @@ export default function ProductsPage() {
                       className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     >
                       <option value="" className="bg-slate-800">
-                        Sin categoría
+                        {copy.form.categoryPlaceholder}
                       </option>
                       {categories.map((cat: any) => (
                         <option
@@ -796,7 +1151,8 @@ export default function ProductsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Costo de Compra <span className="text-red-500">*</span>
+                      {copy.form.costLabel}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
@@ -822,7 +1178,7 @@ export default function ProductsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Margen de Ganancia (%){" "}
+                      {copy.form.marginLabel}{" "}
                       <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -851,7 +1207,8 @@ export default function ProductsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Precio de Venta <span className="text-red-500">*</span>
+                      {copy.form.priceLabel}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
@@ -873,14 +1230,15 @@ export default function ProductsPage() {
                       required
                     />
                     <p className="text-xs text-slate-500 mt-1">
-                      Se calcula automáticamente
+                      {copy.form.priceHint}
                     </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Stock Inicial <span className="text-red-500">*</span>
+                      {copy.form.stockLabel}{" "}
+                      <span className="text-red-500">*</span>
                       <span className="text-xs text-slate-400 font-normal">
-                        (en unidades)
+                        {copy.form.stockUnitHint}
                       </span>
                     </label>
                     <input
@@ -889,7 +1247,7 @@ export default function ProductsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, stock: e.target.value })
                       }
-                      placeholder="Ej: 100"
+                      placeholder={copy.form.stockPlaceholder}
                       className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                       required
                     />
@@ -900,7 +1258,10 @@ export default function ProductsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Código <span className="text-red-500">*</span>
+                      {copy.form.codeLabel}
+                      <span className="text-xs text-slate-400 font-normal ml-2">
+                        {copy.form.codeHint || "(auto si vacío)"}
+                      </span>
                     </label>
                     <input
                       type="text"
@@ -908,16 +1269,16 @@ export default function ProductsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, code: e.target.value })
                       }
-                      placeholder="Código único del producto"
+                      placeholder={copy.form.codePlaceholder}
                       className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                      required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Stock Mínimo <span className="text-red-500">*</span>
+                      {copy.form.minStockLabel}{" "}
+                      <span className="text-red-500">*</span>
                       <span className="text-xs text-slate-400 font-normal">
-                        (en unidades)
+                        {copy.form.minStockHint}
                       </span>
                     </label>
                     <input
@@ -926,12 +1287,12 @@ export default function ProductsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, minStock: e.target.value })
                       }
-                      placeholder="5"
+                      placeholder={copy.form.minStockPlaceholder}
                       className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                       required
                     />
                     <p className="text-xs text-slate-500 mt-1">
-                      Nivel para alertas de stock bajo
+                      {copy.form.minStockHelper}
                     </p>
                   </div>
                 </div>
@@ -948,7 +1309,7 @@ export default function ProductsPage() {
                       className="w-4 h-4 rounded border-slate-600 text-blue-600 cursor-pointer"
                     />
                     <span className="text-sm text-slate-300">
-                      Producto activo
+                      {copy.form.activeLabel}
                     </span>
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer">
@@ -964,8 +1325,7 @@ export default function ProductsPage() {
                       className="w-4 h-4 rounded border-slate-600 text-blue-600 cursor-pointer"
                     />
                     <span className="text-sm text-slate-300">
-                      Se vende por peso (kg) - Ej: verduras, fiambres, alimento
-                      de perros
+                      {copy.form.weightLabel}
                     </span>
                   </label>
                 </div>
@@ -994,13 +1354,13 @@ export default function ProductsPage() {
                     }}
                     className="flex-1 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-semibold transition"
                   >
-                    Cancelar
+                    {copy.form.cancel}
                   </button>
                   <button
                     type="submit"
                     className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition"
                   >
-                    {editingId ? "Actualizar Producto" : "Crear Producto"}
+                    {editingId ? copy.form.saveEdit : copy.form.saveNew}
                   </button>
                 </div>
               </form>
@@ -1013,18 +1373,30 @@ export default function ProductsPage() {
           <table className="min-w-full text-sm">
             <thead>
               <tr className="text-left bg-slate-800/50 border-b border-slate-700">
-                <th className="p-3 font-semibold text-slate-200">Producto</th>
-                <th className="p-3 font-semibold text-slate-200">Código</th>
-                <th className="p-3 font-semibold text-slate-200">Stock</th>
-                <th className="p-3 font-semibold text-slate-200">Estado</th>
                 <th className="p-3 font-semibold text-slate-200">
-                  Precio Costo
+                  {copy.table.product}
                 </th>
                 <th className="p-3 font-semibold text-slate-200">
-                  Precio Venta
+                  {copy.table.code}
                 </th>
-                <th className="p-3 font-semibold text-slate-200">Margen</th>
-                <th className="p-3 font-semibold text-slate-200">Acciones</th>
+                <th className="p-3 font-semibold text-slate-200">
+                  {copy.table.stock}
+                </th>
+                <th className="p-3 font-semibold text-slate-200">
+                  {copy.table.status}
+                </th>
+                <th className="p-3 font-semibold text-slate-200">
+                  {copy.table.cost}
+                </th>
+                <th className="p-3 font-semibold text-slate-200">
+                  {copy.table.price}
+                </th>
+                <th className="p-3 font-semibold text-slate-200">
+                  {copy.table.margin}
+                </th>
+                <th className="p-3 font-semibold text-slate-200">
+                  {t("labels.actions", "pos")}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -1061,7 +1433,9 @@ export default function ProductsPage() {
                           : "bg-red-500/20 text-red-400"
                       }`}
                     >
-                      {product.active ? "Normal" : "Sin Stock"}
+                      {product.active
+                        ? copy.table.normal
+                        : copy.table.outOfStock}
                     </span>
                   </td>
                   <td className="p-3 text-slate-400">
@@ -1095,7 +1469,7 @@ export default function ProductsPage() {
                           setShowForm(true);
                         }}
                         className="p-2 rounded-full border border-slate-700 bg-slate-800 hover:bg-slate-700 text-blue-400 transition"
-                        title="Editar"
+                        title={t("labels.edit", "pos") as string}
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
@@ -1104,7 +1478,7 @@ export default function ProductsPage() {
                           handleDeleteClick(product._id, product.name)
                         }
                         className="p-2 rounded-full border border-slate-700 bg-slate-800 hover:bg-slate-700 text-red-400 transition"
-                        title="Eliminar"
+                        title={t("labels.delete", "pos") as string}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -1118,27 +1492,23 @@ export default function ProductsPage() {
 
         {filteredProducts.length === 0 && (
           <div className="bg-slate-900 rounded-lg shadow-lg p-12 text-center border border-slate-800">
-            <p className="text-slate-400 text-lg">
-              No se encontraron productos.
-            </p>
-            <p className="text-slate-500">
-              Intentá cambiar la búsqueda o agregar un producto.
-            </p>
+            <p className="text-slate-400 text-lg">{copy.empty.title}</p>
+            <p className="text-slate-500">{copy.empty.subtitle}</p>
           </div>
         )}
 
         {/* Upgrade Prompts */}
         {showUpgradePrompt && (
           <UpgradePrompt
-            featureName="Productos Ilimitados"
-            reason="Tu plan Free tiene un límite de 100 productos. Actualiza a Pro para acceso ilimitado."
+            featureName={copy.upgrade.feature}
+            reason={copy.upgrade.reason}
             onDismiss={() => setShowUpgradePrompt(false)}
           />
         )}
 
         {showLimitPrompt && (
           <LimitReachedPrompt
-            limitName="Productos"
+            limitName={copy.limit.limitName}
             current={products.length}
             max={planConfig?.maxProducts || 100}
             onDismiss={() => setShowLimitPrompt(false)}
@@ -1161,17 +1531,17 @@ export default function ProductsPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-white">
-                    Eliminar Producto
+                    {copy.deleteModal.title}
                   </h3>
                   <p className="text-sm text-slate-400">
-                    Esta acción no se puede deshacer
+                    {copy.deleteModal.subtitle}
                   </p>
                 </div>
               </div>
 
               <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 mb-6">
                 <p className="text-slate-300">
-                  ¿Estás seguro de que deseas eliminar el producto{" "}
+                  {copy.deleteModal.question}{" "}
                   <span className="font-semibold text-white">
                     {productToDelete?.name}
                   </span>
@@ -1184,13 +1554,13 @@ export default function ProductsPage() {
                   onClick={() => setShowDeleteModal(false)}
                   className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-medium transition-colors"
                 >
-                  Cancelar
+                  {copy.deleteModal.cancel}
                 </button>
                 <button
                   onClick={confirmDelete}
                   className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
                 >
-                  Eliminar
+                  {copy.deleteModal.confirm}
                 </button>
               </div>
             </div>

@@ -1,52 +1,58 @@
 import Link from "next/link";
 import { CheckIcon } from "@radix-ui/react-icons";
+import { useLang } from "@/lib/hooks/useLang";
 
 export default function PricingSection() {
+  const t = useLang("pricing");
+
   return (
-    <section id="pricing" className="py-24 bg-[#0b0c0e]">
+    <section id="pricing" className="py-24 bg-white dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-6">
         {/* Title */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white">
-            Planes simples y transparentes
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
+            {t("title")}
           </h2>
-          <p className="text-gray-400 mt-4 text-lg">
-            Empieza gratis y crece cuando lo necesites
+          <p className="text-gray-600 dark:text-gray-400 mt-4 text-lg">
+            {t("subtitle")}
           </p>
         </div>
 
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto">
           {/* Plan Gratuito */}
-          <div className="bg-[#121416] border border-gray-800 rounded-3xl p-10 relative">
-            <h3 className="text-2xl font-bold text-white">Plan Gratuito</h3>
+          <div className="bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl p-10 relative">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {t("free")}
+            </h3>
             <div className="mt-6">
-              <span className="text-5xl font-extrabold text-white">$0</span>
-              <span className="text-gray-400 ml-2">para siempre</span>
+              <span className="text-5xl font-extrabold text-gray-900 dark:text-white">
+                {t("freePrice")}
+              </span>
+              <span className="text-gray-600 dark:text-gray-400 ml-2">
+                {t("freeSubtitle")}
+              </span>
             </div>
-            <p className="text-gray-400 mt-3">Ideal para empezar</p>
+            <p className="text-gray-700 dark:text-gray-400 mt-3">
+              {t("freeDescription")}
+            </p>
 
             <ul className="mt-10 space-y-5">
-              {[
-                "Hasta 100 productos",
-                "Hasta 2 usuarios",
-                "Punto de venta completo",
-                "Control de caja",
-                "Reportes básicos",
-                "Stock básico",
-              ].map((item) => (
+              {t("freeFeatures", true).map((item: string) => (
                 <li key={item} className="flex items-center gap-3">
                   <CheckIcon className="w-6 h-6 text-green-500 flex-shrink-0" />
-                  <span className="text-gray-300">{item}</span>
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {item}
+                  </span>
                 </li>
               ))}
             </ul>
 
             <Link
               href="/auth/register"
-              className="w-full inline-flex justify-center mt-12 py-4 bg-[#1c1e21] text-white font-medium rounded-xl hover:bg-[#25272b] transition"
+              className="w-full inline-flex justify-center mt-12 py-4 bg-gray-200 dark:bg-slate-700 text-gray-900 dark:text-white font-medium rounded-xl hover:bg-gray-300 dark:hover:bg-slate-600 transition"
             >
-              Empezar Gratis
+              {t("startFree")}
             </Link>
           </div>
 
@@ -55,37 +61,36 @@ export default function PricingSection() {
             {/* Glowing border effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-3xl blur-xl opacity-40"></div>
 
-            <div className="relative bg-[#121416] border-2 border-blue-500 rounded-3xl p-10 shadow-2xl">
+            <div className="relative bg-white dark:bg-slate-800 border-2 border-blue-500 rounded-3xl p-10 shadow-2xl">
               {/* Popular Badge */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <span className="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-full">
-                  Más Popular
+                  {t("mostPopular")}
                 </span>
               </div>
 
-              <h3 className="text-2xl font-bold text-white">Plan Pro</h3>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {t("pro")}
+              </h3>
               <div className="mt-6">
-                <span className="text-5xl font-extrabold text-white">
-                  $19.990
+                <span className="text-5xl font-extrabold text-gray-900 dark:text-white">
+                  {t("proPrice")}
                 </span>
-                <span className="text-gray-400 ml-2">/mes</span>
+                <span className="text-gray-600 dark:text-gray-400 ml-2">
+                  {t("proSubtitle")}
+                </span>
               </div>
-              <p className="text-gray-400 mt-3">Sin límites para crecer</p>
+              <p className="text-gray-700 dark:text-gray-400 mt-3">
+                {t("proDescription")}
+              </p>
 
               <ul className="mt-10 space-y-5">
-                {[
-                  "Productos ilimitados",
-                  "Usuarios ilimitados",
-                  "Todo lo del plan gratuito",
-                  "Gestión de clientes",
-                  "Ventas a crédito (fiado)",
-                  "Gestión de gastos",
-                  "Reportes avanzados",
-                  "Soporte prioritario",
-                ].map((item) => (
+                {t("proFeatures", true).map((item: string) => (
                   <li key={item} className="flex items-center gap-3">
                     <CheckIcon className="w-6 h-6 text-green-500 flex-shrink-0" />
-                    <span className="text-gray-300">{item}</span>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {item}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -94,7 +99,7 @@ export default function PricingSection() {
                 href="/auth/register?plan=pro"
                 className="w-full inline-flex justify-center mt-12 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg"
               >
-                Probar 14 días gratis
+                {t("tryFree")}
               </Link>
             </div>
           </div>

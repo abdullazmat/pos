@@ -1,9 +1,15 @@
 // components/Header.tsx
+"use client";
+
 import Link from "next/link";
+import { LanguageSelector } from "./LanguageSelector";
+import { useLanguage } from "@/lib/context/LanguageContext";
 
 export default function Header() {
+  const { t } = useLanguage();
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#0b0c0e]/80 backdrop-blur-xl border-b border-gray-900">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#0b0c0e]/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-900">
       <div className="max-w-7xl mx-auto px-6 py-5">
         <div className="flex items-center justify-between">
           {/* Logo + Tagline */}
@@ -12,26 +18,29 @@ export default function Header() {
               <span className="text-white font-bold text-xl">P</span>
             </div>
             <div>
-              <h1 className="text-white font-bold text-lg">POS Cloud</h1>
+              <h1 className="text-gray-900 dark:text-white font-bold text-lg">
+                POS Cloud
+              </h1>
               <p className="text-gray-500 text-xs -mt-1">
-                Sistema de Ventas Profesional
+                {String(t("subtitle", "pricing"))}
               </p>
             </div>
           </Link>
 
           {/* Right Buttons */}
           <div className="flex items-center gap-4">
+            <LanguageSelector />
             <Link
               href="/auth/login"
-              className="px-5 py-2.5 border border-gray-700 rounded-lg text-white font-medium hover:bg-gray-800/50 transition"
+              className="px-5 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white font-medium hover:bg-gray-100 dark:hover:bg-gray-800/50 transition"
             >
-              Ingresar
+              {String(t("login", "common"))}
             </Link>
             <Link
               href="/auth/register"
               className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow-lg flex items-center gap-2"
             >
-              Empezar Gratis
+              {String(t("startFree", "pricing"))}
               <svg
                 className="w-4 h-4"
                 fill="none"

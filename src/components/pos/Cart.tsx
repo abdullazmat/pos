@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 
 interface CartItem {
   productId: string;
@@ -26,6 +27,7 @@ export default function Cart({
   onApplyDiscount,
   onCheckout,
 }: CartProps) {
+  const { t } = useGlobalLanguage();
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -62,13 +64,13 @@ export default function Cart({
               d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
             />
           </svg>
-          Carrito ({items.length})
+          {t("ui.cartTitle", "pos")} ({items.length})
         </h2>
         {items.length > 0 && (
           <button
             onClick={() => window.location.reload()}
             className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-2"
-            title="Limpiar Carrito"
+            title={t("ui.clearCart", "pos") as string}
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path
@@ -97,8 +99,10 @@ export default function Cart({
                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
               />
             </svg>
-            <p className="text-lg font-medium mb-1">Carrito vacío</p>
-            <p className="text-sm">Escanea o busca productos para comenzar</p>
+            <p className="text-lg font-medium mb-1">
+              {t("ui.cartEmpty", "pos")}
+            </p>
+            <p className="text-sm">{t("ui.cartEmptySubtitle", "pos")}</p>
           </div>
         ) : (
           items.map((item) => (
@@ -119,14 +123,14 @@ export default function Cart({
                   onClick={() => onRemove(item.productId)}
                   className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-medium"
                 >
-                  Eliminar
+                  {t("ui.remove", "pos")}
                 </button>
               </div>
 
               <div className="grid grid-cols-3 gap-2 mb-3">
                 <div>
                   <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                    Cant.
+                    {t("ui.quantity", "pos")}
                   </label>
                   <input
                     type="number"
@@ -140,7 +144,7 @@ export default function Cart({
                 </div>
                 <div>
                   <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                    Descuento
+                    {t("ui.discount", "pos")}
                   </label>
                   <input
                     type="number"
@@ -158,7 +162,7 @@ export default function Cart({
                 </div>
                 <div>
                   <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                    Total
+                    {t("ui.total", "pos")}
                   </label>
                   <div className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 rounded text-sm font-semibold text-gray-900 dark:text-white">
                     ${item.total.toFixed(2)}
@@ -174,17 +178,17 @@ export default function Cart({
         <>
           <div className="border-t dark:border-slate-700 pt-4 space-y-2 mb-6">
             <div className="flex justify-between text-gray-700 dark:text-gray-300">
-              <span>Subtotal:</span>
+              <span>{t("ui.subtotal", "pos")}:</span>
               <span>${subtotal.toFixed(2)}</span>
             </div>
             {totalDiscount > 0 && (
               <div className="flex justify-between text-red-600 dark:text-red-400">
-                <span>Descuento:</span>
+                <span>{t("ui.totalDiscount", "pos")}:</span>
                 <span>-${totalDiscount.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between text-2xl font-bold text-gray-900 dark:text-white bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-2 border-blue-200 dark:border-blue-800">
-              <span>Total:</span>
+              <span>{t("ui.total", "pos")}:</span>
               <span className="text-blue-600 dark:text-blue-400">
                 ${total.toFixed(2)}
               </span>
@@ -194,17 +198,25 @@ export default function Cart({
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Método de Pago
+                {t("ui.paymentMethod", "pos")}
               </label>
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
               >
-                <option value="cash">Efectivo</option>
-                <option value="card">Tarjeta</option>
-                <option value="check">Cheque</option>
-                <option value="online">Online</option>
+                <option value="cash">
+                  {t("ui.paymentOptions.cash", "pos")}
+                </option>
+                <option value="card">
+                  {t("ui.paymentOptions.card", "pos")}
+                </option>
+                <option value="check">
+                  {t("ui.paymentOptions.check", "pos")}
+                </option>
+                <option value="online">
+                  {t("ui.paymentOptions.online", "pos")}
+                </option>
               </select>
             </div>
 
@@ -234,7 +246,7 @@ export default function Cart({
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                  Procesando...
+                  {t("ui.processing", "pos")}
                 </>
               ) : (
                 <>
@@ -251,7 +263,7 @@ export default function Cart({
                       d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  Finalizar Venta
+                  {t("ui.checkout", "pos")}
                 </>
               )}
             </button>

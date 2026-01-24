@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import { useSubscription } from "@/lib/hooks/useSubscription";
 import {
@@ -14,8 +15,141 @@ import {
   BarChart3,
 } from "lucide-react";
 
+const REPORTS_COPY = {
+  es: {
+    title: "Reportes y Estadísticas",
+    subtitle: "Analiza el rendimiento completo de tu negocio",
+    exportCSV: "Exportar CSV",
+    dateRange: "Período de análisis:",
+    tabs: {
+      general: "Resumen General",
+      categories: "Por Categorías",
+      profitability: "Rentabilidad",
+      products: "Productos",
+      premium: "Premium",
+    },
+    kpis: {
+      totalSales: {
+        title: "Ventas Totales",
+        desc: "En el período seleccionado",
+      },
+      numSales: {
+        title: "Nº de Ventas",
+        desc: "Transacciones realizadas",
+      },
+      itemsSold: {
+        title: "Items Vendidos",
+        desc: "Productos en total",
+      },
+      avgTicket: {
+        title: "Ticket Promedio",
+        desc: "Por transacción",
+      },
+    },
+    limitedAccess: {
+      title: "Acceso Limitado",
+      desc: "Las gráficas están disponibles en el Plan Profesional o superior. Actualiza tu plan para acceder a esta funcionalidad.",
+    },
+    recentSales: {
+      title: "Ventas Recientes",
+      date: "Fecha",
+      time: "Hora",
+      items: "Items",
+      total: "Total",
+      noSales: "Sin ventas en este período",
+    },
+  },
+  en: {
+    title: "Reports and Statistics",
+    subtitle: "Analyze your business performance",
+    exportCSV: "Export CSV",
+    dateRange: "Analysis period:",
+    tabs: {
+      general: "Overview",
+      categories: "By Categories",
+      profitability: "Profitability",
+      products: "Products",
+      premium: "Premium",
+    },
+    kpis: {
+      totalSales: {
+        title: "Total Sales",
+        desc: "In the selected period",
+      },
+      numSales: {
+        title: "Number of Sales",
+        desc: "Transactions completed",
+      },
+      itemsSold: {
+        title: "Items Sold",
+        desc: "Products total",
+      },
+      avgTicket: {
+        title: "Average Ticket",
+        desc: "Per transaction",
+      },
+    },
+    limitedAccess: {
+      title: "Limited Access",
+      desc: "Charts are available in Professional Plan or higher. Upgrade your plan to access this feature.",
+    },
+    recentSales: {
+      title: "Recent Sales",
+      date: "Date",
+      time: "Time",
+      items: "Items",
+      total: "Total",
+      noSales: "No sales in this period",
+    },
+  },
+  pt: {
+    title: "Relatórios e Estatísticas",
+    subtitle: "Analise o desempenho completo do seu negócio",
+    exportCSV: "Exportar CSV",
+    dateRange: "Período de análise:",
+    tabs: {
+      general: "Resumo Geral",
+      categories: "Por Categorias",
+      profitability: "Rentabilidade",
+      products: "Produtos",
+      premium: "Premium",
+    },
+    kpis: {
+      totalSales: {
+        title: "Vendas Totais",
+        desc: "No período selecionado",
+      },
+      numSales: {
+        title: "Nº de Vendas",
+        desc: "Transações realizadas",
+      },
+      itemsSold: {
+        title: "Itens Vendidos",
+        desc: "Produtos no total",
+      },
+      avgTicket: {
+        title: "Ticket Médio",
+        desc: "Por transação",
+      },
+    },
+    limitedAccess: {
+      title: "Acesso Limitado",
+      desc: "Os gráficos estão disponíveis no Plano Profissional ou superior. Atualize seu plano para acessar este recurso.",
+    },
+    recentSales: {
+      title: "Vendas Recentes",
+      date: "Data",
+      time: "Hora",
+      items: "Itens",
+      total: "Total",
+      noSales: "Sem vendas neste período",
+    },
+  },
+};
+
 export default function ReportsPage() {
   const router = useRouter();
+  const { currentLanguage } = useGlobalLanguage();
   const { subscription, loading: subLoading } = useSubscription();
   const [activeTab, setActiveTab] = useState("general");
   const [user, setUser] = useState<any>(null);
@@ -24,8 +158,18 @@ export default function ReportsPage() {
   const [toDate, setToDate] = useState<string>("");
   const [reportData, setReportData] = useState<any>(null);
 
+  const copy =
+    REPORTS_COPY[currentLanguage as keyof typeof REPORTS_COPY] ||
+    REPORTS_COPY.es;
+
+  const CURRENCY_LOCALE: Record<string, string> = {
+    es: "es-AR",
+    en: "en-US",
+    pt: "pt-BR",
+  };
+
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("es-AR", {
+    new Intl.NumberFormat(CURRENCY_LOCALE[currentLanguage] || "es-AR", {
       style: "currency",
       currency: "ARS",
       minimumFractionDigits: 2,
@@ -105,34 +249,39 @@ export default function ReportsPage() {
   };
 
   const tabs = [
-    { id: "general", label: "Resumen General", icon: BarChart3 },
-    { id: "categories", label: "Por Categorías", icon: Package, premium: true },
+    { id: "general", icon: BarChart3 },
+    { id: "categories", icon: Package, premium: true },
     {
       id: "profitability",
-      label: "Rentabilidad",
       icon: DollarSign,
       premium: true,
     },
-    { id: "products", label: "Productos", icon: ShoppingCart, premium: true },
+    { id: "products", icon: ShoppingCart, premium: true },
   ];
 
+  const getTabLabel = (tabId: string): string => {
+    const tabLabels: Record<string, string> = {
+      general: copy.tabs.general,
+      categories: copy.tabs.categories,
+      profitability: copy.tabs.profitability,
+      products: copy.tabs.products,
+    };
+    return tabLabels[tabId] || "";
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100">
       <Header user={user} showBackButton />
 
       <main className="max-w-7xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-white">
-              Reportes y Estadísticas
-            </h1>
-            <p className="text-slate-400 text-sm">
-              Analiza el rendimiento completo de tu negocio
-            </p>
+            <h1 className="text-3xl font-bold text-white">{copy.title}</h1>
+            <p className="text-slate-400 text-sm">{copy.subtitle}</p>
           </div>
           <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/20">
             <Download className="w-5 h-5" />
-            Exportar CSV
+            {copy.exportCSV}
           </button>
         </div>
 
@@ -140,7 +289,7 @@ export default function ReportsPage() {
         <div className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 flex items-center gap-3 mb-6">
           <Calendar className="w-5 h-5 text-slate-400" />
           <span className="text-sm text-slate-300 font-medium">
-            Período de análisis:
+            {copy.dateRange}
           </span>
           <input
             type="date"
@@ -174,10 +323,10 @@ export default function ReportsPage() {
                   } ${tab.premium ? "opacity-60 cursor-not-allowed" : ""}`}
                 >
                   <Icon className="w-4 h-4" />
-                  {tab.label}
+                  {getTabLabel(tab.id)}
                   {tab.premium && (
                     <span className="ml-1 px-2 py-0.5 text-xs bg-purple-900/40 text-purple-200 rounded-full">
-                      Premium
+                      {copy.tabs.premium}
                     </span>
                   )}
                 </button>
@@ -191,7 +340,7 @@ export default function ReportsPage() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
                   <div className="flex items-center justify-between text-slate-400 text-sm mb-2">
-                    Ventas Totales
+                    {copy.kpis.totalSales.title}
                     <TrendingUp className="w-5 h-5 text-green-400" />
                   </div>
                   <div className="text-3xl font-bold text-white">
@@ -202,39 +351,39 @@ export default function ReportsPage() {
                         : "$0"}
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    En el período seleccionado
+                    {copy.kpis.totalSales.desc}
                   </p>
                 </div>
 
                 <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
                   <div className="flex items-center justify-between text-slate-400 text-sm mb-2">
-                    Nº de Ventas
+                    {copy.kpis.numSales.title}
                     <ShoppingCart className="w-5 h-5 text-blue-400" />
                   </div>
                   <div className="text-3xl font-bold text-white">
                     {loading ? "..." : reportData?.totalSales || 0}
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    Transacciones realizadas
+                    {copy.kpis.numSales.desc}
                   </p>
                 </div>
 
                 <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
                   <div className="flex items-center justify-between text-slate-400 text-sm mb-2">
-                    Items Vendidos
+                    {copy.kpis.itemsSold.title}
                     <Package className="w-5 h-5 text-purple-400" />
                   </div>
                   <div className="text-3xl font-bold text-white">
                     {loading ? "..." : reportData?.totalItems || 0}
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    Productos en total
+                    {copy.kpis.itemsSold.desc}
                   </p>
                 </div>
 
                 <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
                   <div className="flex items-center justify-between text-slate-400 text-sm mb-2">
-                    Ticket Promedio
+                    {copy.kpis.avgTicket.title}
                     <DollarSign className="w-5 h-5 text-amber-400" />
                   </div>
                   <div className="text-3xl font-bold text-white">
@@ -244,7 +393,9 @@ export default function ReportsPage() {
                         ? formatCurrency(reportData.avgTicket)
                         : "$0.00"}
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">Por transacción</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {copy.kpis.avgTicket.desc}
+                  </p>
                 </div>
               </div>
 
@@ -254,11 +405,9 @@ export default function ReportsPage() {
                   <BarChart3 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Acceso Limitado</h3>
+                  <h3 className="font-semibold">{copy.limitedAccess.title}</h3>
                   <p className="text-sm text-red-200/90">
-                    Las gráficas están disponibles en el Plan Profesional o
-                    superior. Actualiza tu plan para acceder a esta
-                    funcionalidad.
+                    {copy.limitedAccess.desc}
                   </p>
                 </div>
               </div>
@@ -266,16 +415,24 @@ export default function ReportsPage() {
               {/* Recent sales table */}
               <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
                 <h3 className="text-lg font-semibold text-white mb-4">
-                  Ventas Recientes
+                  {copy.recentSales.title}
                 </h3>
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead>
                       <tr className="text-slate-400 border-b border-slate-800">
-                        <th className="text-left py-3 px-4">Fecha</th>
-                        <th className="text-left py-3 px-4">Hora</th>
-                        <th className="text-left py-3 px-4">Items</th>
-                        <th className="text-left py-3 px-4">Total</th>
+                        <th className="text-left py-3 px-4">
+                          {copy.recentSales.date}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.recentSales.time}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.recentSales.items}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.recentSales.total}
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800">
@@ -302,9 +459,7 @@ export default function ReportsPage() {
                             colSpan={4}
                             className="py-4 px-4 text-center text-slate-400"
                           >
-                            {loading
-                              ? "Cargando..."
-                              : "No hay ventas recientes en el período"}
+                            {loading ? "Cargando..." : copy.recentSales.noSales}
                           </td>
                         </tr>
                       )}

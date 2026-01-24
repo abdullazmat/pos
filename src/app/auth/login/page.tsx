@@ -4,12 +4,18 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
+import { useLanguage } from "@/lib/context/LanguageContext";
+import { useTranslatedError } from "@/lib/hooks/useTranslatedError";
+import { useTranslatedToast } from "@/lib/hooks/useTranslatedToast";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const { t } = useLanguage();
+  const { handleError } = useTranslatedError();
+  const toast = useTranslatedToast();
 
   // If already authenticated, redirect to POS
   useEffect(() => {
@@ -41,7 +47,12 @@ export default function LoginPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Login failed");
+        const message = handleError(
+          data.errorKey || data.error || "invalidCredentials",
+        );
+        setError(message);
+        toast.error("invalidCredentials");
+        return;
       }
 
       const data = await response.json();
@@ -51,7 +62,8 @@ export default function LoginPage() {
 
       router.push("/pos");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const message = handleError(err);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -81,10 +93,10 @@ export default function LoginPage() {
           {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="mb-2 text-2xl font-bold text-white">
-              Iniciar Sesión
+              {String(t("login.title", "auth"))}
             </h1>
             <p className="text-sm text-gray-400">
-              Ingresá tus datos para acceder al sistema
+              {String(t("login.title", "auth"))}
             </p>
           </div>
 
@@ -105,31 +117,33 @@ export default function LoginPage() {
               {/* Username Input */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300">
-                  Usuario Admin <span className="text-red-400">*</span>
+                  {String(t("login.email", "auth"))}{" "}
+                  <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   name="username"
                   required
-                  placeholder="admin"
+                  placeholder={String(t("login.email", "auth"))}
                   className="w-full py-3 px-4 text-white placeholder-gray-500 bg-[#1a1d21] border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                 />
                 <p className="text-xs text-gray-500">
-                  Este es tu usuario para iniciar sesión
+                  {String(t("login.email", "auth"))}
                 </p>
               </div>
 
               {/* Password Input */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300">
-                  Contraseña <span className="text-red-400">*</span>
+                  {String(t("login.password", "auth"))}{" "}
+                  <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
                     required
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder={String(t("login.password", "auth"))}
                     minLength={6}
                     className="w-full py-3 px-4 pr-10 text-white placeholder-gray-500 bg-[#1a1d21] border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                   />
@@ -156,7 +170,7 @@ export default function LoginPage() {
                 onClick={() => router.push("/")}
                 className="w-full py-3 font-medium text-gray-300 transition-all duration-200 bg-[#1a1d21] border border-gray-700 rounded-lg hover:bg-[#1f2226] hover:border-gray-600"
               >
-                Volver
+                {String(t("backToTop", "common"))}
               </button>
 
               {/* Sign In Button */}
@@ -184,10 +198,10 @@ export default function LoginPage() {
                         ></path>
                       </svg>
                     </div>
-                    <span>Iniciando sesión...</span>
+                    <span>{String(t("loading", "common"))}</span>
                   </>
                 ) : (
-                  "Iniciar Sesión"
+                  String(t("login.submit", "auth"))
                 )}
               </button>
             </div>
@@ -195,12 +209,12 @@ export default function LoginPage() {
 
           {/* Sign Up Link */}
           <p className="mt-6 text-center text-gray-400 text-sm">
-            ¿No tenés cuenta?{" "}
+            {String(t("login.noAccount", "auth"))}{" "}
             <Link
               href="/auth/register"
               className="font-medium text-blue-400 transition-colors hover:text-blue-300"
             >
-              Registrate aquí
+              {String(t("login.registerLink", "auth"))}
             </Link>
           </p>
         </div>

@@ -1,0 +1,11 @@
+{
+  "errorCreatingProduct": "Error creating product",
+  "errorUpdatingProduct": "Error updating product",
+  "errorDeletingProduct": "Error deleting product",
+  "errorFetchingProducts": "Error fetching products",
+  "productCodeRequired": "Product code is required",
+  "productNameRequired": "Product name is required",
+  "productPriceRequired": "Product price is required",
+  "invalidPrice": "Price must be a valid number",
+  "genericError": "Something went wrong. Please try again"
+}

@@ -8,6 +8,7 @@ import {
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 import { checkPlanLimit } from "@/lib/utils/planValidation";
+import { generateProductCodeWithBusinessId } from "@/lib/utils/productCodeGenerator";
 
 export async function GET(req: NextRequest) {
   try {
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
       margin,
     } = body;
 
-    if (!name || !code || !cost || !price) {
+    if (!name || !cost || !price) {
       return generateErrorResponse("Missing required fields", 400);
     }
 
@@ -84,9 +85,27 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse(planCheck.message, 403);
     }
 
+    // Auto-generate code if not provided
+    let finalCode = code;
+    if (!finalCode) {
+      finalCode = generateProductCodeWithBusinessId(businessId);
+      // Ensure the generated code is unique
+      let attempts = 0;
+      while (
+        (await Product.findOne({ businessId, code: finalCode })) &&
+        attempts < 10
+      ) {
+        finalCode = generateProductCodeWithBusinessId(businessId);
+        attempts++;
+      }
+    }
+
     const calculatedMargin = margin || ((price - cost) / price) * 100;
 
-    const existingProduct = await Product.findOne({ businessId, code });
+    const existingProduct = await Product.findOne({
+      businessId,
+      code: finalCode,
+    });
     if (existingProduct) {
       return generateErrorResponse("Product code already exists", 409);
     }
@@ -94,7 +113,7 @@ export async function POST(req: NextRequest) {
     const product = new Product({
       businessId,
       name,
-      code,
+      code: finalCode,
       cost,
       price,
       margin: calculatedMargin,

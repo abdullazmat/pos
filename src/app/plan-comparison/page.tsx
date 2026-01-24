@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import Link from "next/link";
 import { Crown, Star } from "lucide-react";
@@ -25,12 +26,221 @@ interface Subscription {
   planId: string; // "FREE" | "PRO" | others
 }
 
+const PLAN_COMPARISON_COPY = {
+  es: {
+    title: "Comparación de Planes",
+    currentPlan: "Plan Actual:",
+    loading: "Cargando...",
+    free: "Gratuito",
+    unlimited: "ilimitado",
+    notAvailable: "No disponible",
+    characteristics: "Características",
+    limitsSection: "Límites",
+    posSection: "POS",
+    cashBoxSection: "Control de Caja",
+    managementSection: "Gestión",
+    reportsSection: "Reportes",
+    configSection: "Configuración",
+    freeHeader: "Gratuito",
+    proHeader: "Pro",
+    codeScan: "Escaneo de Códigos",
+    multiPaymentMethods: "Múltiples Métodos de Pago",
+    creditSales: "Ventas a Crédito/Fiado",
+    basicCashControl: "Control de Caja Básico",
+    cashWithdrawals: "Retiros de Caja",
+    cashAudit: "Auditoría de Caja",
+    returns: "Devoluciones",
+    stockManagement: "Gestión de Stock",
+    userManagement: "Gestión de Usuarios",
+    excelImport: "Importación Excel/CSV",
+    basicReports: "Reportes Básicos",
+    advancedReports: "Reportes Avanzados",
+    chartsGraphs: "Gráficos y Charts",
+    exportReports: "Exportar Reportes",
+    businessConfig: "Configuración del Negocio",
+    customTickets: "Tickets Personalizados",
+    customBranding: "Marca Personalizada",
+    legend: "Leyenda:",
+    availableFeature: "Característica disponible",
+    unavailableFeature: "Característica no disponible",
+    changeMethod: "Cambiar de Plan:",
+    changeLinkText: "Configuración del Negocio",
+    changePlanMessage: "para cambiar tu plan de suscripción.",
+    limits: {
+      products: "Productos",
+      users: "Usuarios",
+      categories: "Categorías",
+      clients: "Clientes",
+      suppliers: "Proveedores",
+      paymentMethods: "Métodos de Pago",
+      maxDiscount: "Descuento Máximo",
+    },
+    features: {
+      pos: "Sistema POS",
+      weightProducts: "Productos por Peso",
+      inventory: "Gestión de Inventario",
+      productNotes: "Notas en Productos",
+      discounts: "Descuentos",
+      reports: "Reportes",
+      clients: "Gestión de Clientes",
+      suppliers: "Gestión de Proveedores",
+      expenses: "Registro de Gastos",
+      cashBox: "Caja y Cierre",
+      customKeyboard: "Teclado Personalizado",
+      mercadoPago: "Mercado Pago",
+    },
+    buttons: {
+      select: "Seleccionar Plan",
+      current: "Plan Actual",
+    },
+  },
+  en: {
+    title: "Plan Comparison",
+    currentPlan: "Current Plan:",
+    loading: "Loading...",
+    free: "Free",
+    unlimited: "unlimited",
+    notAvailable: "Not available",
+    characteristics: "Features",
+    limitsSection: "Limits",
+    posSection: "POS",
+    cashBoxSection: "Cash Control",
+    managementSection: "Management",
+    reportsSection: "Reports",
+    configSection: "Configuration",
+    freeHeader: "Free",
+    proHeader: "Pro",
+    codeScan: "Code Scanning",
+    multiPaymentMethods: "Multiple Payment Methods",
+    creditSales: "Credit/Installment Sales",
+    basicCashControl: "Basic Cash Control",
+    cashWithdrawals: "Cash Withdrawals",
+    cashAudit: "Cash Audit",
+    returns: "Returns",
+    stockManagement: "Stock Management",
+    userManagement: "User Management",
+    excelImport: "Excel/CSV Import",
+    basicReports: "Basic Reports",
+    advancedReports: "Advanced Reports",
+    chartsGraphs: "Charts & Graphs",
+    exportReports: "Export Reports",
+    businessConfig: "Business Configuration",
+    customTickets: "Custom Tickets",
+    customBranding: "Custom Branding",
+    legend: "Legend:",
+    availableFeature: "Feature available",
+    unavailableFeature: "Feature not available",
+    changeMethod: "Change Plan:",
+    changeLinkText: "Business Configuration",
+    changePlanMessage: "to change your subscription plan.",
+    limits: {
+      products: "Products",
+      users: "Users",
+      categories: "Categories",
+      clients: "Clients",
+      suppliers: "Suppliers",
+      paymentMethods: "Payment Methods",
+      maxDiscount: "Max Discount",
+    },
+    features: {
+      pos: "POS System",
+      weightProducts: "Weight Products",
+      inventory: "Inventory Management",
+      productNotes: "Product Notes",
+      discounts: "Discounts",
+      reports: "Reports",
+      clients: "Client Management",
+      suppliers: "Supplier Management",
+      expenses: "Expense Tracking",
+      cashBox: "Cash & Closure",
+      customKeyboard: "Custom Keyboard",
+      mercadoPago: "Mercado Pago",
+    },
+    buttons: {
+      select: "Select Plan",
+      current: "Current Plan",
+    },
+  },
+  pt: {
+    title: "Comparação de Planos",
+    currentPlan: "Plano Atual:",
+    loading: "Carregando...",
+    free: "Gratuito",
+    unlimited: "ilimitado",
+    notAvailable: "Não disponível",
+    characteristics: "Características",
+    limitsSection: "Limites",
+    posSection: "PDV",
+    cashBoxSection: "Controle de Caixa",
+    managementSection: "Gerenciamento",
+    reportsSection: "Relatórios",
+    configSection: "Configuração",
+    freeHeader: "Gratuito",
+    proHeader: "Pro",
+    codeScan: "Escaneamento de Códigos",
+    multiPaymentMethods: "Múltiplos Métodos de Pagamento",
+    creditSales: "Vendas a Crédito/Parceladas",
+    basicCashControl: "Controle Básico de Caixa",
+    cashWithdrawals: "Retiradas de Caixa",
+    cashAudit: "Auditoria de Caixa",
+    returns: "Devoluções",
+    stockManagement: "Gerenciamento de Estoque",
+    userManagement: "Gerenciamento de Usuários",
+    excelImport: "Importação Excel/CSV",
+    basicReports: "Relatórios Básicos",
+    advancedReports: "Relatórios Avançados",
+    chartsGraphs: "Gráficos e Tabelas",
+    exportReports: "Exportar Relatórios",
+    businessConfig: "Configuração de Negócios",
+    customTickets: "Tíquetes Personalizados",
+    customBranding: "Marca Personalizada",
+    legend: "Legenda:",
+    availableFeature: "Recurso disponível",
+    unavailableFeature: "Recurso não disponível",
+    changeMethod: "Alterar Plano:",
+    changeLinkText: "Configuração de Negócios",
+    changePlanMessage: "para alterar seu plano de assinatura.",
+    limits: {
+      products: "Produtos",
+      users: "Usuários",
+      categories: "Categorias",
+      clients: "Clientes",
+      suppliers: "Fornecedores",
+      paymentMethods: "Métodos de Pagamento",
+      maxDiscount: "Desconto Máximo",
+    },
+    features: {
+      pos: "Sistema PDV",
+      weightProducts: "Produtos por Peso",
+      inventory: "Gerenciamento de Inventário",
+      productNotes: "Notas em Produtos",
+      discounts: "Descontos",
+      reports: "Relatórios",
+      clients: "Gerenciamento de Clientes",
+      suppliers: "Gerenciamento de Fornecedores",
+      expenses: "Registro de Despesas",
+      cashBox: "Caixa e Fechamento",
+      customKeyboard: "Teclado Personalizado",
+      mercadoPago: "Mercado Pago",
+    },
+    buttons: {
+      select: "Selecionar Plano",
+      current: "Plano Atual",
+    },
+  },
+};
+
 export default function PlanComparisonPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const router = useRouter();
+  const { currentLanguage } = useGlobalLanguage();
+  const copy =
+    PLAN_COMPARISON_COPY[
+      currentLanguage as keyof typeof PLAN_COMPARISON_COPY
+    ] || PLAN_COMPARISON_COPY.es;
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -74,66 +284,70 @@ export default function PlanComparisonPage() {
 
   const currentPlanName = (() => {
     const plan = plans.find((p) => p.id === subscription?.planId);
-    return plan?.name || (subscription?.planId === "PRO" ? "Pro" : "Gratuito");
+    return plan?.name || (subscription?.planId === "PRO" ? "Pro" : copy.free);
   })();
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-950">
-        <div className="text-slate-400">Cargando...</div>
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-slate-950">
+        <div className="text-slate-400">{copy.loading}</div>
       </div>
     );
   }
 
   // Comparison data based on screenshot
   const limitsRows: { label: string; free: string; pro: string }[] = [
-    { label: "Productos", free: "100", pro: "ilimitado" },
-    { label: "Usuarios", free: "2", pro: "ilimitado" },
-    { label: "Categorías", free: "20", pro: "ilimitado" },
-    { label: "Clientes", free: "No disponible", pro: "ilimitado" },
-    { label: "Proveedores", free: "5", pro: "ilimitado" },
-    { label: "Métodos de Pago", free: "2", pro: "ilimitado" },
-    { label: "Descuento Máximo", free: "No disponible", pro: "100%" },
+    { label: copy.limits.products, free: "100", pro: copy.unlimited },
+    { label: copy.limits.users, free: "2", pro: copy.unlimited },
+    { label: copy.limits.categories, free: "20", pro: copy.unlimited },
+    {
+      label: copy.limits.clients,
+      free: copy.notAvailable,
+      pro: copy.unlimited,
+    },
+    { label: copy.limits.suppliers, free: "5", pro: copy.unlimited },
+    { label: copy.limits.paymentMethods, free: "2", pro: copy.unlimited },
+    { label: copy.limits.maxDiscount, free: copy.notAvailable, pro: "100%" },
   ];
 
   const checkRowsPOS: { label: string; free: boolean; pro: boolean }[] = [
-    { label: "Sistema POS", free: true, pro: true },
-    { label: "Escaneo de Códigos", free: true, pro: true },
-    { label: "Productos por Peso", free: true, pro: true },
-    { label: "Descuentos", free: false, pro: true },
-    { label: "Múltiples Métodos de Pago", free: false, pro: true },
-    { label: "Ventas a Crédito/Fiado", free: false, pro: true },
-    { label: "Notas en Productos", free: false, pro: true },
+    { label: copy.features.pos, free: true, pro: true },
+    { label: copy.codeScan, free: true, pro: true },
+    { label: copy.features.weightProducts, free: true, pro: true },
+    { label: copy.features.discounts, free: false, pro: true },
+    { label: copy.multiPaymentMethods, free: false, pro: true },
+    { label: copy.creditSales, free: false, pro: true },
+    { label: copy.features.productNotes, free: false, pro: true },
   ];
 
   const checkRowsCaja: { label: string; free: boolean; pro: boolean }[] = [
-    { label: "Control de Caja Básico", free: true, pro: true },
-    { label: "Retiros de Caja", free: false, pro: true },
-    { label: "Auditoría de Caja", free: false, pro: true },
-    { label: "Devoluciones", free: true, pro: true },
+    { label: copy.basicCashControl, free: true, pro: true },
+    { label: copy.cashWithdrawals, free: false, pro: true },
+    { label: copy.cashAudit, free: false, pro: true },
+    { label: copy.returns, free: true, pro: true },
   ];
 
   const checkRowsGestion: { label: string; free: boolean; pro: boolean }[] = [
-    { label: "Gestión de Stock", free: true, pro: true },
-    { label: "Gestión de Clientes", free: false, pro: true },
-    { label: "Gestión de Proveedores", free: true, pro: true },
-    { label: "Registro de Gastos", free: false, pro: true },
-    { label: "Gestión de Usuarios", free: true, pro: true },
-    { label: "Importación Excel/CSV", free: false, pro: true },
+    { label: copy.stockManagement, free: true, pro: true },
+    { label: copy.features.clients, free: false, pro: true },
+    { label: copy.features.suppliers, free: true, pro: true },
+    { label: copy.features.expenses, free: false, pro: true },
+    { label: copy.userManagement, free: true, pro: true },
+    { label: copy.excelImport, free: false, pro: true },
   ];
 
   const checkRowsReportes: { label: string; free: boolean; pro: boolean }[] = [
-    { label: "Reportes Básicos", free: true, pro: true },
-    { label: "Reportes Avanzados", free: false, pro: true },
-    { label: "Gráficos y Charts", free: false, pro: true },
-    { label: "Exportar Reportes", free: false, pro: true },
+    { label: copy.basicReports, free: true, pro: true },
+    { label: copy.advancedReports, free: false, pro: true },
+    { label: copy.chartsGraphs, free: false, pro: true },
+    { label: copy.exportReports, free: false, pro: true },
   ];
 
   const checkRowsConfig: { label: string; free: boolean; pro: boolean }[] = [
-    { label: "Atajos de Teclado", free: true, pro: true },
-    { label: "Configuración del Negocio", free: true, pro: true },
-    { label: "Tickets Personalizados", free: false, pro: true },
-    { label: "Marca Personalizada", free: false, pro: true },
+    { label: copy.features.customKeyboard, free: true, pro: true },
+    { label: copy.businessConfig, free: true, pro: true },
+    { label: copy.customTickets, free: false, pro: true },
+    { label: copy.customBranding, free: false, pro: true },
   ];
 
   const Section = ({
@@ -210,16 +424,16 @@ export default function PlanComparisonPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100">
       <Header user={user} showBackButton />
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         {/* Title */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-white text-center">
-            Comparación de Planes
+            {copy.title}
           </h1>
           <p className="text-center text-slate-400 mt-1">
-            Plan Actual:{" "}
+            {copy.currentPlan}{" "}
             <span className="text-purple-300 font-semibold">
               {currentPlanName}
             </span>
@@ -246,8 +460,8 @@ export default function PlanComparisonPage() {
                 className={`w-full py-2 rounded-lg text-sm font-semibold ${subscription?.planId === "FREE" ? "bg-purple-700 text-white" : "bg-slate-800 text-slate-300"}`}
               >
                 {subscription?.planId === "FREE"
-                  ? "Plan Actual"
-                  : "Seleccionar"}
+                  ? copy.buttons.current
+                  : copy.buttons.select}
               </button>
             </div>
           </div>
@@ -272,7 +486,7 @@ export default function PlanComparisonPage() {
                 className={`block w-full py-2 rounded-lg text-sm font-semibold ${subscription?.planId === "PRO" ? "bg-purple-700 text-white" : "bg-purple-600 hover:bg-purple-500 text-white"}`}
               >
                 {subscription?.planId === "PRO"
-                  ? "Plan Actual"
+                  ? copy.buttons.current
                   : "Click para suscribirse →"}
               </Link>
             </div>
@@ -280,14 +494,14 @@ export default function PlanComparisonPage() {
         </div>
 
         {/* Characteristics label */}
-        <div className="text-slate-300 mb-2">Características</div>
+        <div className="text-slate-300 mb-2">{copy.characteristics}</div>
 
         {/* Limits */}
-        <Section title="Límites">
+        <Section title={copy.limitsSection}>
           <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-900/40">
             <div></div>
-            <div className="text-center">Gratuito</div>
-            <div className="text-center">Pro</div>
+            <div className="text-center">{copy.freeHeader}</div>
+            <div className="text-center">{copy.proHeader}</div>
           </div>
           {limitsRows.map((r) => (
             <RowLimits key={r.label} {...r} />
@@ -296,11 +510,11 @@ export default function PlanComparisonPage() {
 
         {/* POS */}
         <div className="mt-6">
-          <Section title="POS">
+          <Section title={copy.posSection}>
             <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-900/40">
               <div></div>
-              <div className="text-center">Gratuito</div>
-              <div className="text-center">Pro</div>
+              <div className="text-center">{copy.freeHeader}</div>
+              <div className="text-center">{copy.proHeader}</div>
             </div>
             {checkRowsPOS.map((r) => (
               <RowCheck key={r.label} {...r} />
@@ -310,11 +524,11 @@ export default function PlanComparisonPage() {
 
         {/* Control de Caja */}
         <div className="mt-6">
-          <Section title="Control de Caja">
+          <Section title={copy.cashBoxSection}>
             <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-900/40">
               <div></div>
-              <div className="text-center">Gratuito</div>
-              <div className="text-center">Pro</div>
+              <div className="text-center">{copy.freeHeader}</div>
+              <div className="text-center">{copy.proHeader}</div>
             </div>
             {checkRowsCaja.map((r) => (
               <RowCheck key={r.label} {...r} />
@@ -324,11 +538,11 @@ export default function PlanComparisonPage() {
 
         {/* Gestión */}
         <div className="mt-6">
-          <Section title="Gestión">
+          <Section title={copy.managementSection}>
             <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-900/40">
               <div></div>
-              <div className="text-center">Gratuito</div>
-              <div className="text-center">Pro</div>
+              <div className="text-center">{copy.freeHeader}</div>
+              <div className="text-center">{copy.proHeader}</div>
             </div>
             {checkRowsGestion.map((r) => (
               <RowCheck key={r.label} {...r} />
@@ -338,11 +552,11 @@ export default function PlanComparisonPage() {
 
         {/* Reportes */}
         <div className="mt-6">
-          <Section title="Reportes">
+          <Section title={copy.reportsSection}>
             <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-900/40">
               <div></div>
-              <div className="text-center">Gratuito</div>
-              <div className="text-center">Pro</div>
+              <div className="text-center">{copy.freeHeader}</div>
+              <div className="text-center">{copy.proHeader}</div>
             </div>
             {checkRowsReportes.map((r) => (
               <RowCheck key={r.label} {...r} />
@@ -352,11 +566,11 @@ export default function PlanComparisonPage() {
 
         {/* Configuración */}
         <div className="mt-6">
-          <Section title="Configuración">
+          <Section title={copy.configSection}>
             <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-900/40">
               <div></div>
-              <div className="text-center">Gratuito</div>
-              <div className="text-center">Pro</div>
+              <div className="text-center">{copy.freeHeader}</div>
+              <div className="text-center">{copy.proHeader}</div>
             </div>
             {checkRowsConfig.map((r) => (
               <RowCheck key={r.label} {...r} />
@@ -367,21 +581,21 @@ export default function PlanComparisonPage() {
         {/* Legend */}
         <div className="mt-6 bg-slate-900 border border-slate-800 rounded-xl p-4">
           <div className="text-slate-300 text-sm">
-            💡 <span className="font-semibold">Leyenda:</span>
+            💡 <span className="font-semibold">{copy.legend}</span>
           </div>
           <div className="mt-2 text-xs text-slate-400 flex gap-6">
-            <span>✓ Característica disponible</span>
-            <span>✕ Característica no disponible</span>
+            <span>✓ {copy.availableFeature}</span>
+            <span>✕ {copy.unavailableFeature}</span>
           </div>
         </div>
 
         {/* Callout */}
         <div className="mt-4 bg-purple-900/30 border border-purple-700/40 rounded-xl p-4 text-sm text-purple-200">
-          📦 Cambiar de Plan: Ve a Configuración →{" "}
+          📦 {copy.changeMethod} Ve a Configuración →{" "}
           <Link href="/business-config" className="underline">
-            Configuración del Negocio
+            {copy.changeLinkText}
           </Link>{" "}
-          para cambiar tu plan de suscripción.
+          {copy.changePlanMessage}
         </div>
       </div>
     </div>

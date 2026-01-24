@@ -1,0 +1,35 @@
+{
+  "pricing": {
+    "title": "Planos simples e transparentes",
+    "subtitle": "Comece grátis e cresça quando precisar",
+    "free": "Plano Gratuito",
+    "freePrice": "$0",
+    "freeSubtitle": "para sempre",
+    "freeDescription": "Ideal para começar",
+    "pro": "Plano Pro",
+    "proPrice": "$24.990",
+    "proSubtitle": "ARS/mês",
+    "proDescription": "Sem limites para crescer",
+    "mostPopular": "Mais Popular",
+    "freeFeatures": [
+      "Até 100 produtos",
+      "Até 2 usuários",
+      "Ponto de venda completo",
+      "Controle de caixa",
+      "Relatórios básicos",
+      "Estoque básico"
+    ],
+    "proFeatures": [
+      "Produtos ilimitados",
+      "Usuários ilimitados",
+      "Tudo do plano gratuito",
+      "Gerenciamento de clientes",
+      "Vendas a crédito",
+      "Gerenciamento de despesas",
+      "Relatórios avançados",
+      "Suporte prioritário"
+    ],
+    "startFree": "Começar Gratuitamente",
+    "tryFree": "Tente 14 dias grátis"
+  }
+}

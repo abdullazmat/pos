@@ -1,0 +1,19 @@
+{
+  "common": {
+    "language": "Language",
+    "spanish": "Español",
+    "english": "English",
+    "portuguese": "Português",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
+    "settings": "Settings",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}

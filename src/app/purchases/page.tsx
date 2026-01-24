@@ -109,7 +109,7 @@ export default function PurchasesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton={true} />
 
       <main className="max-w-7xl mx-auto p-6">

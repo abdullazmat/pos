@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import {
   Keyboard,
@@ -41,8 +42,361 @@ interface KeyboardConfig {
   shortcuts: KeyboardShortcuts;
 }
 
+const KEYBOARD_COPY = {
+  es: {
+    title: "Configuración del Teclado",
+    subtitle: "Personaliza tus atajos de teclado",
+    profiles: {
+      classic: {
+        name: "Clásico",
+        description:
+          "Teclas de función tradicionales (F1-F12). Ideal para teclados estándar.",
+      },
+      numeric: {
+        name: "Numérico Plus",
+        description:
+          "Optimizado para teclado numérico. Perfecto si usas constantemente el numpad para ingresar cantidades.",
+      },
+      speedster: {
+        name: "Velocista",
+        description:
+          "Mano izquierda en teclas QWER + Space. Ultra rápido para cajeros expertos con scanner en mano derecha.",
+      },
+    },
+    shortcuts: {
+      searchProduct: {
+        label: "Buscar Producto",
+        description: "Enfoca el campo de búsqueda de productos",
+      },
+      quantity: {
+        label: "Cantidad",
+        description: "Enfoca el campo de cantidad",
+      },
+      applyDiscount: {
+        label: "Aplicar Descuento",
+        description: "Abre el diálogo de descuento",
+      },
+      paymentMethod: {
+        label: "Método de Pago",
+        description: "Cambia el método de pago",
+      },
+      finalizeSale: {
+        label: "Finalizar Venta",
+        description: "Procesa y finaliza la venta actual",
+      },
+      cancelSale: {
+        label: "Cancelar Venta",
+        description: "Cancela la venta actual y limpia el carrito",
+      },
+      removeLastItem: {
+        label: "Eliminar Último Item",
+        description: "Elimina el último producto agregado",
+      },
+      openDrawer: {
+        label: "Abrir Cajón",
+        description: "Abre el cajón de dinero",
+      },
+      addProduct: {
+        label: "Agregar Producto",
+        description: "Agrega el producto al carrito (después de buscar)",
+      },
+      quickPayment: {
+        label: "Pago Rápido",
+        description: "Finaliza con pago exacto en efectivo",
+      },
+    },
+    selectProfile:
+      "Selecciona un perfil optimizado según tu estilo de trabajo o crea uno personalizado",
+    predefinedProfiles: "Perfiles Predefinidos",
+    custom: {
+      title: "Configuración Manual",
+      description: "Asigna tus propias teclas a cada acción",
+    },
+    buttons: {
+      save: "Guardar Cambios",
+      reset: "Revertir Cambios",
+      customize: "Personalizar",
+    },
+    hints: {
+      hint1:
+        "Puedes usar teclas de función (F1-F12), letras, números o teclas especiales",
+      hint2: "Los cambios se guardarán automáticamente",
+      hint3: "Usa teclas cercanas para mayor rapidez",
+      hint4:
+        "Asigna teclas cercanas al teclado numérico si usas scanner de códigos",
+    },
+    messages: {
+      saved: "Configuración guardada correctamente",
+      error: "Error al guardar la configuración",
+      reset: "Cambios revertidos",
+      duplicateKeys:
+        "No puedes tener teclas duplicadas. Por favor, verifica tu configuración.",
+      resetting: "Configuración restablecida",
+      resetError: "Error al restablecer configuración",
+      keyReset: "Tecla restablecida al valor por defecto",
+      instructions: "Instrucciones:",
+      instructionLine1:
+        "Selecciona un perfil predefinido o personaliza cada tecla individualmente",
+      instructionLine2:
+        'Haz clic en el botón "Editar" junto a la acción que quieres configurar',
+      instructionLine3:
+        "Presiona la tecla o combinación de teclas que deseas asignar",
+      instructionLine4:
+        "Puedes usar teclas de función (F1-F12), letras, números o combinaciones con Ctrl, Alt y Shift",
+      instructionLine5: "Presiona ESC para cancelar la edición",
+      instructionLine6:
+        "Asegúrate de no tener teclas duplicadas antes de guardar",
+      loading: "Cargando...",
+      pressKey: "Presiona una tecla...",
+      edit: "Editar",
+      resetDefaults: "Restablecer Valores por Defecto",
+      editing: "Editando tecla...",
+      unsavedChanges: "Cambios sin guardar",
+      configSaved: "Configuración guardada",
+      tips: "💡 Consejos:",
+      tip1: "Las teclas F1-F12 son ideales para acciones principales",
+      tip2: "Usa Ctrl+Letra para acciones secundarias (ej: Ctrl+D para descuento)",
+      tip3: "Mantén Enter para agregar productos, es el estándar",
+      tip4: "Asigna teclas cercanas al teclado numérico si usas scanner de códigos",
+    },
+  },
+  en: {
+    title: "Keyboard Configuration",
+    subtitle: "Customize your keyboard shortcuts",
+    profiles: {
+      classic: {
+        name: "Classic",
+        description:
+          "Traditional function keys (F1-F12). Ideal for standard keyboards.",
+      },
+      numeric: {
+        name: "Numeric Plus",
+        description:
+          "Optimized for numeric keypad. Perfect if you constantly use the numpad to enter quantities.",
+      },
+      speedster: {
+        name: "Speedster",
+        description:
+          "Left hand on QWER + Space keys. Ultra-fast for expert cashiers with scanner in right hand.",
+      },
+    },
+    shortcuts: {
+      searchProduct: {
+        label: "Search Product",
+        description: "Focus the product search field",
+      },
+      quantity: {
+        label: "Quantity",
+        description: "Focus the quantity field",
+      },
+      applyDiscount: {
+        label: "Apply Discount",
+        description: "Opens the discount dialog",
+      },
+      paymentMethod: {
+        label: "Payment Method",
+        description: "Changes the payment method",
+      },
+      finalizeSale: {
+        label: "Finalize Sale",
+        description: "Processes and finalizes the current sale",
+      },
+      cancelSale: {
+        label: "Cancel Sale",
+        description: "Cancels the current sale and clears the cart",
+      },
+      removeLastItem: {
+        label: "Remove Last Item",
+        description: "Removes the last added product",
+      },
+      openDrawer: {
+        label: "Open Drawer",
+        description: "Opens the cash drawer",
+      },
+      addProduct: {
+        label: "Add Product",
+        description: "Adds the product to cart (after search)",
+      },
+      quickPayment: {
+        label: "Quick Payment",
+        description: "Finalize with exact cash payment",
+      },
+    },
+    selectProfile:
+      "Select an optimized profile based on your work style or create a custom one",
+    predefinedProfiles: "Predefined Profiles",
+    custom: {
+      title: "Custom Configuration",
+      description: "Assign your own keys to each action",
+    },
+    buttons: {
+      save: "Save Changes",
+      reset: "Revert Changes",
+      customize: "Customize",
+    },
+    hints: {
+      hint1:
+        "You can use function keys (F1-F12), letters, numbers, or special keys",
+      hint2: "Changes will be saved automatically",
+      hint3: "Use adjacent keys for faster input",
+      hint4:
+        "Assign keys close to the numeric keypad if you use barcode scanner",
+    },
+    messages: {
+      saved: "Configuration saved successfully",
+      error: "Error saving configuration",
+      reset: "Changes reverted",
+      duplicateKeys:
+        "You cannot have duplicate keys. Please check your configuration.",
+      resetting: "Configuration reset",
+      resetError: "Error resetting configuration",
+      keyReset: "Key reset to default value",
+      instructions: "Instructions:",
+      instructionLine1:
+        "Select a predefined profile or customize each key individually",
+      instructionLine2:
+        'Click the "Edit" button next to the action you want to configure',
+      instructionLine3: "Press the key or key combination you want to assign",
+      instructionLine4:
+        "You can use function keys (F1-F12), letters, numbers or combinations with Ctrl, Alt and Shift",
+      instructionLine5: "Press ESC to cancel editing",
+      instructionLine6: "Make sure you don't have duplicate keys before saving",
+      loading: "Loading...",
+      pressKey: "Press a key...",
+      edit: "Edit",
+      resetDefaults: "Reset to Default Values",
+      editing: "Editing key...",
+      unsavedChanges: "Unsaved changes",
+      configSaved: "Configuration saved",
+      tips: "💡 Tips:",
+      tip1: "F1-F12 keys are ideal for main actions",
+      tip2: "Use Ctrl+Letter for secondary actions (e.g., Ctrl+D for discount)",
+      tip3: "Keep Enter to add products, it's the standard",
+      tip4: "Assign keys close to the numeric keypad if you use barcode scanner",
+    },
+  },
+  pt: {
+    title: "Configuração do Teclado",
+    subtitle: "Personalize seus atalhos de teclado",
+    profiles: {
+      classic: {
+        name: "Clássico",
+        description:
+          "Teclas de função tradicionais (F1-F12). Ideal para teclados padrão.",
+      },
+      numeric: {
+        name: "Numérico Plus",
+        description:
+          "Otimizado para teclado numérico. Perfeito se você usar constantemente o numpad para inserir quantidades.",
+      },
+      speedster: {
+        name: "Velocista",
+        description:
+          "Mão esquerda nas teclas QWER + Space. Ultra rápido para caixas experientes com scanner na mão direita.",
+      },
+    },
+    shortcuts: {
+      searchProduct: {
+        label: "Pesquisar Produto",
+        description: "Coloca o foco no campo de pesquisa de produtos",
+      },
+      quantity: {
+        label: "Quantidade",
+        description: "Coloca o foco no campo de quantidade",
+      },
+      applyDiscount: {
+        label: "Aplicar Desconto",
+        description: "Abre a caixa de diálogo de desconto",
+      },
+      paymentMethod: {
+        label: "Método de Pagamento",
+        description: "Muda o método de pagamento",
+      },
+      finalizeSale: {
+        label: "Finalizar Venda",
+        description: "Processa e finaliza a venda atual",
+      },
+      cancelSale: {
+        label: "Cancelar Venda",
+        description: "Cancela a venda atual e limpa o carrinho",
+      },
+      removeLastItem: {
+        label: "Remover Último Item",
+        description: "Remove o último produto adicionado",
+      },
+      openDrawer: {
+        label: "Abrir Gaveta",
+        description: "Abre a gaveta de dinheiro",
+      },
+      addProduct: {
+        label: "Adicionar Produto",
+        description: "Adiciona o produto ao carrinho (após pesquisa)",
+      },
+      quickPayment: {
+        label: "Pagamento Rápido",
+        description: "Finaliza com pagamento exato em dinheiro",
+      },
+    },
+    selectProfile:
+      "Selecione um perfil otimizado com base no seu estilo de trabalho ou crie um personalizado",
+    predefinedProfiles: "Perfis Predefinidos",
+    custom: {
+      title: "Configuração Personalizada",
+      description: "Atribua suas próprias teclas a cada ação",
+    },
+    buttons: {
+      save: "Salvar Alterações",
+      reset: "Reverter Alterações",
+      customize: "Personalizar",
+    },
+    hints: {
+      hint1:
+        "Você pode usar teclas de função (F1-F12), letras, números ou teclas especiais",
+      hint2: "As alterações serão salvas automaticamente",
+      hint3: "Use teclas adjacentes para inserção mais rápida",
+      hint4:
+        "Atribua teclas próximas ao teclado numérico se usar leitor de código de barras",
+    },
+    messages: {
+      saved: "Configuração salva com sucesso",
+      error: "Erro ao salvar a configuração",
+      reset: "Alterações revertidas",
+      duplicateKeys:
+        "Você não pode ter teclas duplicadas. Por favor, verifique sua configuração.",
+      resetting: "Configuração resetada",
+      resetError: "Erro ao resetar configuração",
+      keyReset: "Tecla resetada ao valor padrão",
+      instructions: "Instruções:",
+      instructionLine1:
+        "Selecione um perfil predefinido ou personalize cada tecla individualmente",
+      instructionLine2:
+        'Clique no botão "Editar" ao lado da ação que deseja configurar',
+      instructionLine3:
+        "Pressione a tecla ou combinação de teclas que deseja atribuir",
+      instructionLine4:
+        "Você pode usar teclas de função (F1-F12), letras, números ou combinações com Ctrl, Alt e Shift",
+      instructionLine5: "Pressione ESC para cancelar a edição",
+      instructionLine6:
+        "Certifique-se de não ter teclas duplicadas antes de salvar",
+      loading: "Carregando...",
+      pressKey: "Pressione uma tecla...",
+      edit: "Editar",
+      resetDefaults: "Redefinir para Valores Padrão",
+      editing: "Editando tecla...",
+      unsavedChanges: "Alterações não salvas",
+      configSaved: "Configuração salva",
+      tips: "💡 Dicas:",
+      tip1: "As teclas F1-F12 são ideais para ações principais",
+      tip2: "Use Ctrl+Letra para ações secundárias (ex: Ctrl+D para desconto)",
+      tip3: "Mantenha Enter para adicionar produtos, é o padrão",
+      tip4: "Atribua teclas próximas ao teclado numérico se usar leitor de código de barras",
+    },
+  },
+};
+
 export default function KeyboardConfigPage() {
   const router = useRouter();
+  const { currentLanguage } = useGlobalLanguage();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -65,13 +419,14 @@ export default function KeyboardConfigPage() {
     quickPayment: "F12",
   });
 
+  const copy =
+    KEYBOARD_COPY[currentLanguage as keyof typeof KEYBOARD_COPY] ||
+    KEYBOARD_COPY.es;
+
   const profiles = [
     {
       id: "classic",
-      name: "Clásico",
       icon: Type,
-      description:
-        "Teclas de función tradicionales (F1-F12). Ideal para teclados estándar.",
       shortcuts: {
         searchProduct: "F2",
         quantity: "F3",
@@ -87,10 +442,7 @@ export default function KeyboardConfigPage() {
     },
     {
       id: "numeric",
-      name: "Numérico Plus",
       icon: Calculator,
-      description:
-        "Optimizado para teclado numérico. Perfecto si usas constantemente el numpad para ingresar cantidades.",
       shortcuts: {
         searchProduct: "F2",
         quantity: "F3",
@@ -106,10 +458,7 @@ export default function KeyboardConfigPage() {
     },
     {
       id: "speedster",
-      name: "Velocista",
       icon: Zap,
-      description:
-        "Mano izquierda en teclas QWER + Space. Ultra rápido para cajeros expertos con scanner en mano derecha.",
       shortcuts: {
         searchProduct: "Q",
         quantity: "W",
@@ -125,58 +474,35 @@ export default function KeyboardConfigPage() {
     },
   ];
 
+  const getProfileName = (profileId: string) => {
+    return (
+      copy.profiles[profileId as keyof typeof copy.profiles]?.name || profileId
+    );
+  };
+
+  const getProfileDescription = (profileId: string) => {
+    return (
+      copy.profiles[profileId as keyof typeof copy.profiles]?.description || ""
+    );
+  };
+
   const shortcutActions = [
-    {
-      key: "searchProduct",
-      label: "Buscar Producto",
-      description: "Enfoca el campo de búsqueda de productos",
-    },
-    {
-      key: "quantity",
-      label: "Cantidad",
-      description: "Enfoca el campo de cantidad",
-    },
-    {
-      key: "applyDiscount",
-      label: "Aplicar Descuento",
-      description: "Abre el diálogo de descuento",
-    },
-    {
-      key: "paymentMethod",
-      label: "Método de Pago",
-      description: "Cambia el método de pago",
-    },
-    {
-      key: "finalizeSale",
-      label: "Finalizar Venta",
-      description: "Procesa y finaliza la venta actual",
-    },
-    {
-      key: "cancelSale",
-      label: "Cancelar Venta",
-      description: "Cancela la venta actual y limpia el carrito",
-    },
-    {
-      key: "removeLastItem",
-      label: "Eliminar Último Item",
-      description: "Elimina el último producto agregado",
-    },
-    {
-      key: "openDrawer",
-      label: "Abrir Cajón",
-      description: "Abre el cajón de dinero",
-    },
-    {
-      key: "addProduct",
-      label: "Agregar Producto",
-      description: "Agrega el producto al carrito (después de buscar)",
-    },
-    {
-      key: "quickPayment",
-      label: "Pago Rápido",
-      description: "Finaliza con pago exacto en efectivo",
-    },
-  ];
+    "searchProduct",
+    "quantity",
+    "applyDiscount",
+    "paymentMethod",
+    "finalizeSale",
+    "cancelSale",
+    "removeLastItem",
+    "openDrawer",
+    "addProduct",
+    "quickPayment",
+  ].map((key) => ({
+    key,
+    label: copy.shortcuts[key as keyof typeof copy.shortcuts]?.label || key,
+    description:
+      copy.shortcuts[key as keyof typeof copy.shortcuts]?.description || "",
+  }));
 
   useEffect(() => {
     const userStr = localStorage.getItem("user");
@@ -275,9 +601,7 @@ export default function KeyboardConfigPage() {
     const values = Object.values(customShortcuts);
     const uniqueValues = new Set(values);
     if (values.length !== uniqueValues.size) {
-      toast.error(
-        "No puedes tener teclas duplicadas. Por favor, verifica tu configuración.",
-      );
+      toast.error(copy.messages.duplicateKeys);
       return;
     }
 
@@ -297,7 +621,7 @@ export default function KeyboardConfigPage() {
       });
 
       if (response.ok) {
-        toast.success("Configuración guardada exitosamente");
+        toast.success(copy.messages.saved);
         setHasChanges(false);
         fetchConfig();
       } else if (response.status === 401) {
@@ -305,11 +629,11 @@ export default function KeyboardConfigPage() {
         router.push("/auth/login");
       } else {
         const data = await response.json();
-        toast.error(data.error || "Error al guardar configuración");
+        toast.error(data.error || copy.messages.error);
       }
     } catch (error) {
       console.error("Error saving config:", error);
-      toast.error("Error al guardar configuración");
+      toast.error(copy.messages.error);
     } finally {
       setSaving(false);
     }
@@ -324,15 +648,15 @@ export default function KeyboardConfigPage() {
       });
 
       if (response.ok) {
-        toast.success("Configuración restablecida");
+        toast.success(copy.messages.resetting);
         setHasChanges(false);
         fetchConfig();
       } else {
-        toast.error("Error al restablecer configuración");
+        toast.error(copy.messages.resetError);
       }
     } catch (error) {
       console.error("Error resetting config:", error);
-      toast.error("Error al restablecer configuración");
+      toast.error(copy.messages.resetError);
     }
   };
 
@@ -371,19 +695,21 @@ export default function KeyboardConfigPage() {
     }));
     setSelectedProfile("custom");
     setHasChanges(true);
-    toast.info("Tecla restablecida al valor por defecto");
+    toast.info(copy.messages.keyReset);
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-950">
-        <div className="text-slate-400">Cargando...</div>
+        <div className="text-slate-400">
+          {copy.messages.loading || "Cargando..."}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100">
       <Header user={user} showBackButton={true} />
 
       <main className="p-6 mx-auto max-w-7xl">
@@ -391,39 +717,23 @@ export default function KeyboardConfigPage() {
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
             <Keyboard className="w-7 h-7 text-blue-400" />
-            <h1 className="text-3xl font-bold text-white">
-              Configuración de Teclas
-            </h1>
+            <h1 className="text-3xl font-bold text-white">{copy.title}</h1>
           </div>
-          <p className="text-slate-400">
-            Personaliza los atajos de teclado para agilizar tu trabajo en el
-            punto de venta
-          </p>
+          <p className="text-slate-400">{copy.subtitle}</p>
         </div>
 
         {/* Instructions */}
         <div className="p-5 mb-8 bg-blue-900/20 border border-blue-800/50 rounded-xl">
           <h3 className="text-lg font-semibold text-blue-300 mb-3">
-            Instrucciones:
+            {copy.messages.instructions}
           </h3>
           <ul className="space-y-2 text-sm text-blue-200">
-            <li>
-              • Selecciona un perfil predefinido o personaliza cada tecla
-              individualmente
-            </li>
-            <li>
-              • Haz clic en el botón "Editar" junto a la acción que quieres
-              configurar
-            </li>
-            <li>
-              • Presiona la tecla o combinación de teclas que deseas asignar
-            </li>
-            <li>
-              • Puedes usar teclas de función (F1-F12), letras, números o
-              combinaciones con Ctrl, Alt y Shift
-            </li>
-            <li>• Presiona ESC para cancelar la edición</li>
-            <li>• Asegúrate de no tener teclas duplicadas antes de guardar</li>
+            <li>• {copy.messages.instructionLine1}</li>
+            <li>• {copy.messages.instructionLine2}</li>
+            <li>• {copy.messages.instructionLine3}</li>
+            <li>• {copy.messages.instructionLine4}</li>
+            <li>• {copy.messages.instructionLine5}</li>
+            <li>• {copy.messages.instructionLine6}</li>
           </ul>
         </div>
 
@@ -431,12 +741,9 @@ export default function KeyboardConfigPage() {
         <div className="mb-8">
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
             <Zap className="w-5 h-5 text-purple-400" />
-            Perfiles Predefinidos
+            {copy.predefinedProfiles}
           </h2>
-          <p className="text-slate-400 text-sm mb-4">
-            Selecciona un perfil optimizado según tu estilo de trabajo o
-            personaliza las teclas manualmente
-          </p>
+          <p className="text-slate-400 text-sm mb-4">{copy.selectProfile}</p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {profiles.map((profile) => {
@@ -457,11 +764,11 @@ export default function KeyboardConfigPage() {
                       className={`w-6 h-6 ${isSelected ? "text-blue-400" : "text-slate-400"}`}
                     />
                     <h3 className="text-lg font-bold text-white">
-                      {profile.name}
+                      {getProfileName(profile.id)}
                     </h3>
                   </div>
                   <p className="text-sm text-slate-400">
-                    {profile.description}
+                    {getProfileDescription(profile.id)}
                   </p>
                 </button>
               );
@@ -472,10 +779,10 @@ export default function KeyboardConfigPage() {
         {/* Individual Customization */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-white mb-4">
-            Personalización Individual
+            {copy.custom.title}
           </h2>
           <p className="text-slate-400 text-sm mb-4">
-            Configura cada atajo de teclado según tus preferencias
+            {copy.custom.description}
           </p>
 
           <div className="space-y-3">
@@ -493,7 +800,7 @@ export default function KeyboardConfigPage() {
                 <div className="flex items-center gap-2">
                   {editingKey === action.key ? (
                     <div className="px-4 py-2 bg-yellow-900/30 border border-yellow-600 rounded-lg font-mono text-sm text-yellow-300 min-w-[120px] text-center animate-pulse">
-                      Presiona una tecla...
+                      {copy.messages.pressKey}
                     </div>
                   ) : (
                     <div className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg font-mono text-sm text-blue-300 min-w-[120px] text-center">
@@ -505,7 +812,7 @@ export default function KeyboardConfigPage() {
                     disabled={editingKey !== null && editingKey !== action.key}
                     className="px-3 py-2 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-900 disabled:cursor-not-allowed text-slate-200 rounded-lg font-medium transition-colors text-sm"
                   >
-                    Editar
+                    {copy.messages.edit}
                   </button>
                   <button
                     onClick={() => handleDeleteKey(action.key)}
@@ -528,26 +835,26 @@ export default function KeyboardConfigPage() {
             className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-900 disabled:cursor-not-allowed text-slate-200 rounded-lg font-semibold transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
-            Restablecer Valores por Defecto
+            {copy.messages.resetDefaults}
           </button>
 
           <div className="flex items-center gap-2">
             {editingKey && (
               <div className="flex items-center gap-2 text-sm text-yellow-400 mr-4">
                 <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                Editando tecla...
+                {copy.messages.editing}
               </div>
             )}
             {hasChanges && !editingKey && (
               <div className="flex items-center gap-2 text-sm text-amber-400 mr-4">
                 <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                Cambios sin guardar
+                {copy.messages.unsavedChanges}
               </div>
             )}
             {!hasChanges && !editingKey && config && (
               <div className="flex items-center gap-2 text-sm text-green-400 mr-4">
                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                Configuración guardada
+                {copy.messages.configSaved}
               </div>
             )}
             <button
@@ -556,7 +863,7 @@ export default function KeyboardConfigPage() {
               className="flex items-center gap-2 px-6 py-2.5 bg-green-600 hover:bg-green-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-colors"
             >
               <Save className="w-4 h-4" />
-              {saving ? "Guardando..." : "Guardar Configuración"}
+              {saving ? copy.messages.saving : copy.buttons.save}
             </button>
           </div>
         </div>
@@ -564,19 +871,13 @@ export default function KeyboardConfigPage() {
         {/* Tips */}
         <div className="mt-8 p-5 bg-amber-900/20 border border-amber-800/50 rounded-xl">
           <h3 className="text-lg font-semibold text-amber-300 mb-3">
-            💡 Consejos:
+            {copy.messages.tips}
           </h3>
           <ul className="space-y-2 text-sm text-amber-200">
-            <li>• Las teclas F1-F12 son ideales para acciones principales</li>
-            <li>
-              • Usa Ctrl+Letra para acciones secundarias (ej: Ctrl+D para
-              descuento)
-            </li>
-            <li>• Mantén Enter para agregar productos, es el estándar</li>
-            <li>
-              • Asigna teclas cercanas al teclado numérico si usas scanner de
-              códigos
-            </li>
+            <li>• {copy.messages.tip1}</li>
+            <li>• {copy.messages.tip2}</li>
+            <li>• {copy.messages.tip3}</li>
+            <li>• {copy.messages.tip4}</li>
           </ul>
         </div>
       </main>

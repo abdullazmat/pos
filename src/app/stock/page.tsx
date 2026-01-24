@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import { useSubscription } from "@/lib/hooks/useSubscription";
 import {
@@ -22,8 +23,136 @@ interface Product {
   cost: number;
 }
 
+const STOCK_COPY = {
+  es: {
+    title: "Reporte de Stock",
+    subtitle: "Control de inventario y alertas",
+    export: "Exportar Stock",
+    stats: {
+      totalTitle: "Total Productos",
+      totalDesc: "Productos activos",
+      lowTitle: "Stock Bajo",
+      lowDesc: "Productos por reponer",
+      outTitle: "Sin Stock",
+      outDesc: "Productos agotados",
+    },
+    alert: (count: number) => `• ${count} producto(s) sin stock`,
+    filters: {
+      label: "Filtrar:",
+      all: "Todos",
+      low: "Stock Bajo",
+      out: "Sin Stock",
+    },
+    loading: "Cargando...",
+    empty: "No hay productos en esta categoría",
+    table: {
+      product: "Producto",
+      code: "Código",
+      stock: "Stock Actual",
+      min: "Stock Mínimo",
+      status: "Estado",
+      cost: "Precio Costo",
+      price: "Precio Venta",
+      margin: "Margen",
+    },
+    status: {
+      out: "Sin Stock",
+      low: "Stock Bajo",
+      ok: "Normal",
+    },
+  },
+  en: {
+    title: "Stock Report",
+    subtitle: "Inventory control and alerts",
+    export: "Export Stock",
+    stats: {
+      totalTitle: "Total Products",
+      totalDesc: "Active products",
+      lowTitle: "Low Stock",
+      lowDesc: "Products to replenish",
+      outTitle: "Out of Stock",
+      outDesc: "Depleted products",
+    },
+    alert: (count: number) => `• ${count} item(s) out of stock`,
+    filters: {
+      label: "Filter:",
+      all: "All",
+      low: "Low Stock",
+      out: "Out of Stock",
+    },
+    loading: "Loading...",
+    empty: "No products in this category",
+    table: {
+      product: "Product",
+      code: "Code",
+      stock: "Current Stock",
+      min: "Min Stock",
+      status: "Status",
+      cost: "Cost Price",
+      price: "Sale Price",
+      margin: "Margin",
+    },
+    status: {
+      out: "Out of Stock",
+      low: "Low Stock",
+      ok: "Normal",
+    },
+  },
+  pt: {
+    title: "Relatório de Estoque",
+    subtitle: "Controle de inventário e alertas",
+    export: "Exportar Estoque",
+    stats: {
+      totalTitle: "Total de Produtos",
+      totalDesc: "Produtos ativos",
+      lowTitle: "Estoque Baixo",
+      lowDesc: "Produtos para repor",
+      outTitle: "Sem Estoque",
+      outDesc: "Produtos esgotados",
+    },
+    alert: (count: number) => `• ${count} item(ns) sem estoque`,
+    filters: {
+      label: "Filtrar:",
+      all: "Todos",
+      low: "Estoque Baixo",
+      out: "Sem Estoque",
+    },
+    loading: "Carregando...",
+    empty: "Não há produtos nesta categoria",
+    table: {
+      product: "Produto",
+      code: "Código",
+      stock: "Estoque Atual",
+      min: "Estoque Mínimo",
+      status: "Status",
+      cost: "Preço de Custo",
+      price: "Preço de Venda",
+      margin: "Margem",
+    },
+    status: {
+      out: "Sem Estoque",
+      low: "Estoque Baixo",
+      ok: "Normal",
+    },
+  },
+} as const;
+
+const CURRENCY_LOCALE = {
+  es: "es-AR",
+  en: "en-US",
+  pt: "pt-BR",
+} as const;
+
 export default function StockPage() {
   const router = useRouter();
+  const { currentLanguage } = useGlobalLanguage();
+  const copy = (STOCK_COPY[currentLanguage] ||
+    STOCK_COPY.en) as typeof STOCK_COPY.en;
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat(CURRENCY_LOCALE[currentLanguage], {
+      style: "currency",
+      currency: "ARS",
+    }).format(value ?? 0);
   const { subscription, loading: subLoading } = useSubscription();
   const [user, setUser] = useState<any>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -109,16 +238,14 @@ export default function StockPage() {
   const totalProducts = safeProducts.filter((p) => p.stock > 0).length;
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Reporte de Stock
-            </h1>
-            <p className="text-slate-400">Control de inventario y alertas</p>
+            <h1 className="text-3xl font-bold text-white mb-2">{copy.title}</h1>
+            <p className="text-slate-400">{copy.subtitle}</p>
           </div>
           <button
             onClick={async () => {
@@ -147,7 +274,7 @@ export default function StockPage() {
             className="bg-emerald-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-700 flex items-center gap-2"
           >
             <Download className="w-5 h-5" />
-            Exportar Stock
+            {copy.export}
           </button>
         </div>
 
@@ -155,29 +282,31 @@ export default function StockPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-slate-400">Total Productos</p>
+              <p className="text-sm text-slate-400">{copy.stats.totalTitle}</p>
               <Package className="w-8 h-8 text-blue-400" />
             </div>
             <p className="text-3xl font-bold text-white">{totalProducts}</p>
-            <p className="text-sm text-slate-500 mt-1">Productos activos</p>
+            <p className="text-sm text-slate-500 mt-1">
+              {copy.stats.totalDesc}
+            </p>
           </div>
 
           <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-slate-400">Stock Bajo</p>
+              <p className="text-sm text-slate-400">{copy.stats.lowTitle}</p>
               <TrendingDown className="w-8 h-8 text-amber-400" />
             </div>
             <p className="text-3xl font-bold text-white">{lowStock.length}</p>
-            <p className="text-sm text-slate-500 mt-1">Productos por reponer</p>
+            <p className="text-sm text-slate-500 mt-1">{copy.stats.lowDesc}</p>
           </div>
 
           <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-slate-400">Sin Stock</p>
+              <p className="text-sm text-slate-400">{copy.stats.outTitle}</p>
               <AlertTriangle className="w-8 h-8 text-red-400" />
             </div>
             <p className="text-3xl font-bold text-white">{outOfStock.length}</p>
-            <p className="text-sm text-slate-500 mt-1">Productos agotados</p>
+            <p className="text-sm text-slate-500 mt-1">{copy.stats.outDesc}</p>
           </div>
         </div>
 
@@ -189,7 +318,7 @@ export default function StockPage() {
               <div>
                 <p className="font-medium text-amber-100">Alertas de Stock</p>
                 <p className="text-sm text-amber-200">
-                  • {lowStock.length} producto(s) sin stock
+                  {copy.alert(lowStock.length)}
                 </p>
               </div>
             </div>
@@ -198,7 +327,9 @@ export default function StockPage() {
 
         {/* Filter Buttons */}
         <div className="mb-6 flex items-center gap-3">
-          <span className="text-sm font-medium text-slate-300">Filtrar:</span>
+          <span className="text-sm font-medium text-slate-300">
+            {copy.filters.label}
+          </span>
           <button
             onClick={() => setFilterType("all")}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -207,7 +338,7 @@ export default function StockPage() {
                 : "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700"
             }`}
           >
-            Todos ({safeProducts.length})
+            {copy.filters.all} ({safeProducts.length})
           </button>
           <button
             onClick={() => setFilterType("low")}
@@ -217,7 +348,7 @@ export default function StockPage() {
                 : "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700"
             }`}
           >
-            Stock Bajo ({lowStock.length})
+            {copy.filters.low} ({lowStock.length})
           </button>
           <button
             onClick={() => setFilterType("out")}
@@ -227,7 +358,7 @@ export default function StockPage() {
                 : "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700"
             }`}
           >
-            Sin Stock ({outOfStock.length})
+            {copy.filters.out} ({outOfStock.length})
           </button>
         </div>
 
@@ -239,9 +370,7 @@ export default function StockPage() {
         ) : filteredProducts.length === 0 ? (
           <div className="bg-slate-900 border border-slate-800 rounded-lg p-12 text-center">
             <Package className="w-16 h-16 text-slate-700 mx-auto mb-4" />
-            <p className="text-slate-400 text-lg">
-              No hay productos en esta categoría
-            </p>
+            <p className="text-slate-400 text-lg">{copy.empty}</p>
           </div>
         ) : (
           <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
@@ -249,28 +378,28 @@ export default function StockPage() {
               <thead className="bg-slate-800">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                    Producto
+                    {copy.table.product}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                    Código
+                    {copy.table.code}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                    Stock Actual
+                    {copy.table.stock}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                    Stock Mínimo
+                    {copy.table.min}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                    Estado
+                    {copy.table.status}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                    Precio Costo
+                    {copy.table.cost}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                    Precio Venta
+                    {copy.table.price}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                    Margen
+                    {copy.table.margin}
                   </th>
                 </tr>
               </thead>
@@ -318,23 +447,23 @@ export default function StockPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {isOutOfStock ? (
                           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-900/30 text-red-400 border border-red-800">
-                            Sin Stock
+                            {copy.status.out}
                           </span>
                         ) : isLowStock ? (
                           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-900/30 text-amber-400 border border-amber-800">
-                            Stock Bajo
+                            {copy.status.low}
                           </span>
                         ) : (
                           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-900/30 text-emerald-400 border border-emerald-800">
-                            Normal
+                            {copy.status.ok}
                           </span>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">
-                        ${product.cost.toFixed(2)}
+                        {formatCurrency(product.cost)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">
-                        ${product.price.toFixed(2)}
+                        {formatCurrency(product.price)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-emerald-400 font-medium">

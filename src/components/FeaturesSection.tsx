@@ -1,4 +1,5 @@
 // components/FeaturesSection.tsx
+import { useLanguage } from "@/lib/context/LanguageContext";
 import {
   LightningBoltIcon,
   CubeIcon,
@@ -36,74 +37,49 @@ const UsersIcon = () => (
   </svg>
 );
 
-const features = [
-  {
-    icon: LightningBoltIcon,
-    title: "Súper Rápido",
-    description:
-      "Interfaz optimizada como supermercado. Vende en segundos con código de barras.",
-  },
-  {
-    icon: CloudIcon,
-    title: "100% en la Nube",
-    description:
-      "Sin instalaciones. Accede desde cualquier navegador, en cualquier dispositivo.",
-  },
-  {
-    icon: CubeIcon,
-    title: "Control de Stock",
-    description:
-      "Gestiona inventario automáticamente con cada venta. Alertas de stock bajo.",
-  },
-  {
-    icon: BarChartIcon,
-    title: "Reportes en Vivo",
-    description:
-      "Ventas, caja, productos más vendidos. Todo actualizado en tiempo real.",
-  },
-  {
-    icon: UsersIcon,
-    title: "Multi-Usuario",
-    description:
-      "Gestiona cajeros y administradores. Control de permisos y descuentos.",
-  },
-  {
-    icon: LockClosedIcon,
-    title: "Seguro y Confiable",
-    description:
-      "Tus datos protegidos con Supabase. Backup automático en la nube.",
-  },
+const iconMap = [
+  LightningBoltIcon,
+  CloudIcon,
+  CubeIcon,
+  BarChartIcon,
+  UsersIcon,
+  LockClosedIcon,
 ];
 
 export default function FeaturesSection() {
+  const { t } = useLanguage();
+  const features = t("features", "landing") as Array<{
+    title: string;
+    description: string;
+  }>;
   return (
-    <section id="features" className="py-24 bg-[#0b0c0e]">
+    <section id="features" className="py-24 bg-white dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white">
-            Todo lo que necesitas
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
+            {String(t("title", "pricing"))}
           </h2>
-          <p className="text-gray-400 mt-4 text-lg">
-            Un sistema completo diseñado específicamente para negocios pequeños
+          <p className="text-gray-600 dark:text-gray-400 mt-4 text-lg">
+            {String(t("subtitle", "pricing"))}
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
+          {features?.map((feature, index) => {
+            const Icon = iconMap[index] || LightningBoltIcon;
             return (
               <div
                 key={index}
-                className="group bg-[#121416] border border-gray-800 rounded-2xl p-8 hover:border-gray-700 hover:bg-[#16181c] transition-all duration-300"
+                className="group bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl p-8 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-300"
               >
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-white dark:text-white">
                   <Icon />
                 </div>
 
-                <h3 className="text-xl font-semibold text-white mb-3">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-gray-700 dark:text-gray-400 text-sm leading-relaxed">
                   {feature.description}
                 </p>
               </div>

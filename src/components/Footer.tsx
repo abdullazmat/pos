@@ -1,7 +1,13 @@
 // components/Footer.tsx
+"use client";
+
+import { useLanguage } from "@/lib/context/LanguageContext";
+
 export default function Footer() {
+  const { t } = useLanguage();
+
   return (
-    <footer className="bg-[#0a0b0d] border-t border-gray-900">
+    <footer className="bg-gray-100 dark:bg-slate-900 border-t border-gray-300 dark:border-slate-800">
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid md:grid-cols-4 gap-10">
           {/* Logo + Description */}
@@ -10,30 +16,43 @@ export default function Footer() {
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">P</span>
               </div>
-              <span className="text-white font-bold text-xl">POS Cloud</span>
+              <span className="text-gray-900 dark:text-white font-bold text-xl">
+                POS Cloud
+              </span>
             </div>
-            <p className="text-gray-500 text-sm leading-relaxed">
-              Sistema de punto de venta en la nube para negocios pequeños
+            <p className="text-gray-700 dark:text-gray-400 text-sm leading-relaxed">
+              {String(t("subtitle", "pricing"))}
             </p>
           </div>
 
           {/* Producto */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Producto</h4>
-            <ul className="space-y-3 text-gray-500 text-sm">
+            <h4 className="text-gray-900 dark:text-white font-semibold mb-4">
+              {String(t("features", "common"))}
+            </h4>
+            <ul className="space-y-3 text-gray-700 dark:text-gray-400 text-sm">
               <li>
-                <a href="#features" className="hover:text-white transition">
-                  Características
+                <a
+                  href="#features"
+                  className="hover:text-gray-900 dark:hover:text-white transition"
+                >
+                  {String(t("features", "common"))}
                 </a>
               </li>
               <li>
-                <a href="#pricing" className="hover:text-white transition">
-                  Precios
+                <a
+                  href="#pricing"
+                  className="hover:text-gray-900 dark:hover:text-white transition"
+                >
+                  {String(t("pricing", "common"))}
                 </a>
               </li>
               <li>
-                <a href="#cta" className="hover:text-white transition">
-                  Documentación
+                <a
+                  href="#cta"
+                  className="hover:text-gray-900 dark:hover:text-white transition"
+                >
+                  {String(t("documentation", "common"))}
                 </a>
               </li>
             </ul>
@@ -41,37 +60,42 @@ export default function Footer() {
 
           {/* Soporte */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Soporte</h4>
-            <ul className="space-y-3 text-gray-500 text-sm">
+            <h4 className="text-gray-900 dark:text-white font-semibold mb-4">
+              {String(t("support", "common"))}
+            </h4>
+            <ul className="space-y-3 text-gray-700 dark:text-gray-400 text-sm">
               <li>
                 <a
                   href="mailto:soporte@poscloud.app?subject=Necesito%20ayuda"
-                  className="hover:text-white transition"
+                  className="hover:text-gray-900 dark:hover:text-white transition"
                 >
-                  Centro de Ayuda
+                  {String(t("help", "common"))}
                 </a>
               </li>
               <li>
                 <a
                   href="mailto:hola@poscloud.app"
-                  className="hover:text-white transition"
+                  className="hover:text-gray-900 dark:hover:text-white transition"
                 >
-                  Contacto
+                  {String(t("contact", "common"))}
                 </a>
               </li>
               <li>
                 <a
                   href="https://status.poscloud.app"
-                  className="hover:text-white transition"
+                  className="hover:text-gray-900 dark:hover:text-white transition"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Estado del Servicio
+                  {String(t("serviceStatus", "common"))}
                 </a>
               </li>
               <li>
-                <a href="#top" className="hover:text-white transition">
-                  Volver al inicio
+                <a
+                  href="#top"
+                  className="hover:text-gray-900 dark:hover:text-white transition"
+                >
+                  {String(t("backToTop", "common"))}
                 </a>
               </li>
             </ul>
@@ -79,24 +103,32 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Legal</h4>
-            <ul className="space-y-3 text-gray-500 text-sm">
+            <h4 className="text-gray-900 dark:text-white font-semibold mb-4">
+              {String(t("legal", "common"))}
+            </h4>
+            <ul className="space-y-3 text-gray-700 dark:text-gray-400 text-sm">
               <li>
-                <a href="#" className="hover:text-white transition">
-                  Términos de Servicio
+                <a
+                  href="#"
+                  className="hover:text-gray-900 dark:hover:text-white transition"
+                >
+                  {String(t("terms", "common"))}
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition">
-                  Privacidad
+                <a
+                  href="#"
+                  className="hover:text-gray-900 dark:hover:text-white transition"
+                >
+                  {String(t("privacy", "common"))}
                 </a>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-gray-900 text-center text-gray-600 text-sm">
-          © 2025 POS Cloud. Todos los derechos reservados.
+        <div className="mt-16 pt-8 border-t border-gray-300 dark:border-slate-800 text-center text-gray-600 dark:text-gray-400 text-sm">
+          © 2025 POS Cloud. {String(t("allRightsReserved", "common"))}
         </div>
       </div>
     </footer>
