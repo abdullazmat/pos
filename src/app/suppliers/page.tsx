@@ -38,7 +38,8 @@ const SUPPLIER_COPY = {
     subtitle: "Administra tu red de proveedores",
     bulkUpload: "Carga Masiva",
     newSupplier: "Nuevo Proveedor",
-    planStatus: (count: number, max: string | number) => `${count}/${max} proveedores · Gratuito`,
+    planStatus: (count: number, max: string | number) =>
+      `${count}/${max} proveedores · Gratuito`,
     limitReached: "Límite alcanzado",
     stats: {
       totalTitle: "Total Proveedores",
@@ -102,7 +103,8 @@ const SUPPLIER_COPY = {
     subtitle: "Manage your supplier network",
     bulkUpload: "Bulk Upload",
     newSupplier: "New Supplier",
-    planStatus: (count: number, max: string | number) => `${count}/${max} suppliers · Free`,
+    planStatus: (count: number, max: string | number) =>
+      `${count}/${max} suppliers · Free`,
     limitReached: "Limit reached",
     stats: {
       totalTitle: "Total Suppliers",
@@ -166,7 +168,8 @@ const SUPPLIER_COPY = {
     subtitle: "Administre sua rede de fornecedores",
     bulkUpload: "Carga Massiva",
     newSupplier: "Novo Fornecedor",
-    planStatus: (count: number, max: string | number) => `${count}/${max} fornecedores · Gratuito`,
+    planStatus: (count: number, max: string | number) =>
+      `${count}/${max} fornecedores · Gratuito`,
     limitReached: "Limite atingido",
     stats: {
       totalTitle: "Total de Fornecedores",
@@ -230,8 +233,8 @@ const SUPPLIER_COPY = {
 export default function SuppliersPage() {
   const router = useRouter();
   const { currentLanguage } = useGlobalLanguage();
-  const copy = (SUPPLIER_COPY[currentLanguage] || SUPPLIER_COPY.en) as
-    typeof SUPPLIER_COPY.en;
+  const copy = (SUPPLIER_COPY[currentLanguage] ||
+    SUPPLIER_COPY.en) as typeof SUPPLIER_COPY.en;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -545,13 +548,13 @@ export default function SuppliersPage() {
     return (
       <div className="min-h-screen bg-slate-950">
         <Header user={user} showBackButton={true} />
-        <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-slate-800 rounded w-1/4"></div>
-            <div className="h-12 bg-slate-800 rounded"></div>
+        <main className="px-4 py-8 mx-auto max-w-7xl">
+          <div className="space-y-4 animate-pulse">
+            <div className="w-1/4 h-8 rounded bg-slate-800"></div>
+            <div className="h-12 rounded bg-slate-800"></div>
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-12 bg-slate-800 rounded"></div>
+                <div key={i} className="h-12 rounded bg-slate-800"></div>
               ))}
             </div>
           </div>
@@ -589,10 +592,10 @@ export default function SuppliersPage() {
       <div className="min-h-screen bg-white dark:bg-slate-950">
         <Header user={user} showBackButton />
 
-        <main className="max-w-7xl mx-auto px-4 py-8">
+        <main className="px-4 py-8 mx-auto max-w-7xl">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+              <h1 className="flex items-center gap-3 mb-2 text-3xl font-bold text-white">
                 <Truck className="w-8 h-8 text-purple-400" />
                 {copy.title}
               </h1>
@@ -636,59 +639,65 @@ export default function SuppliersPage() {
           </div>
 
           {/* Plan Status */}
-          <div className="bg-emerald-900/20 border border-emerald-700 rounded-lg p-4 mb-6 flex items-center gap-2">
+          <div className="flex items-center gap-2 p-4 mb-6 border rounded-lg bg-emerald-900/20 border-emerald-700">
             <Truck className="w-5 h-5 text-emerald-400" />
-            <span className="text-emerald-300 font-medium">
+            <span className="font-medium text-emerald-300">
               {copy.planStatus(supplierCount, maxSuppliers)}
             </span>
             {planConfig.maxSuppliers > 0 &&
               supplierCount >= planConfig.maxSuppliers && (
-                <span className="text-red-400 ml-auto">{copy.limitReached}</span>
+                <span className="ml-auto text-red-400">
+                  {copy.limitReached}
+                </span>
               )}
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
+          <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-2">
+            <div className="p-6 border rounded-lg bg-slate-900 border-slate-800">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-slate-400">{copy.stats.totalTitle}</p>
+                <p className="text-sm text-slate-400">
+                  {copy.stats.totalTitle}
+                </p>
                 <Truck className="w-8 h-8 text-purple-400" />
               </div>
               <p className="text-3xl font-bold text-white">{supplierCount}</p>
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="mt-1 text-sm text-slate-500">
                 {copy.stats.totalDesc}
               </p>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
+            <div className="p-6 border rounded-lg bg-slate-900 border-slate-800">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-slate-400">{copy.stats.activeTitle}</p>
+                <p className="text-sm text-slate-400">
+                  {copy.stats.activeTitle}
+                </p>
                 <Truck className="w-8 h-8 text-emerald-400" />
               </div>
               <p className="text-3xl font-bold text-white">{supplierCount}</p>
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="mt-1 text-sm text-slate-500">
                 {copy.stats.activeDesc}
               </p>
             </div>
           </div>
 
           {/* Search Bar */}
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-6">
+          <div className="p-4 mb-6 border rounded-lg bg-slate-900 border-slate-800">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-5 h-5" />
+              <Search className="absolute w-5 h-5 transform -translate-y-1/2 left-3 top-1/2 text-slate-500" />
               <input
                 type="text"
                 placeholder={copy.searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-slate-500"
+                className="w-full py-2 pl-10 pr-4 text-white border rounded-lg border-slate-700 bg-slate-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-slate-500"
               />
             </div>
           </div>
 
           {/* Form */}
           {showForm && (
-            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-white">
@@ -699,15 +708,15 @@ export default function SuppliersPage() {
                       setShowForm(false);
                       setEditingId(null);
                     }}
-                    className="text-slate-400 hover:text-white transition-colors"
+                    className="transition-colors text-slate-400 hover:text-white"
                   >
                     <X className="w-6 h-6" />
                   </button>
                 </div>
                 <form onSubmit={handleSubmit}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 gap-4 mb-4 md:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <label className="block mb-2 text-sm font-medium text-slate-300">
                         {copy.labels.name}
                       </label>
                       <input
@@ -716,12 +725,12 @@ export default function SuppliersPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, name: e.target.value })
                         }
-                        className="w-full px-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-4 py-2 text-white border rounded-lg border-slate-700 bg-slate-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <label className="block mb-2 text-sm font-medium text-slate-300">
                         {copy.labels.document}
                       </label>
                       <input
@@ -730,11 +739,11 @@ export default function SuppliersPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, document: e.target.value })
                         }
-                        className="w-full px-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-4 py-2 text-white border rounded-lg border-slate-700 bg-slate-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <label className="block mb-2 text-sm font-medium text-slate-300">
                         {copy.labels.phone}
                       </label>
                       <input
@@ -743,11 +752,11 @@ export default function SuppliersPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, phone: e.target.value })
                         }
-                        className="w-full px-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-4 py-2 text-white border rounded-lg border-slate-700 bg-slate-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <label className="block mb-2 text-sm font-medium text-slate-300">
                         {copy.labels.email}
                       </label>
                       <input
@@ -756,11 +765,11 @@ export default function SuppliersPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
                         }
-                        className="w-full px-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-4 py-2 text-white border rounded-lg border-slate-700 bg-slate-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <label className="block mb-2 text-sm font-medium text-slate-300">
                         {copy.labels.address}
                       </label>
                       <input
@@ -769,7 +778,7 @@ export default function SuppliersPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, address: e.target.value })
                         }
-                        className="w-full px-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-4 py-2 text-white border rounded-lg border-slate-700 bg-slate-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -798,31 +807,31 @@ export default function SuppliersPage() {
 
           {/* Suppliers Table */}
           {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            <div className="py-12 text-center">
+              <div className="inline-block w-8 h-8 border-b-2 border-purple-600 rounded-full animate-spin"></div>
             </div>
           ) : filteredSuppliers.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-12 text-center">
-              <Truck className="w-16 h-16 text-slate-700 mx-auto mb-4" />
-              <p className="text-slate-400 text-lg">
+            <div className="p-12 text-center border rounded-lg bg-slate-900 border-slate-800">
+              <Truck className="w-16 h-16 mx-auto mb-4 text-slate-700" />
+              <p className="text-lg text-slate-400">
                 {searchTerm ? copy.empty.search : copy.empty.none}
               </p>
             </div>
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
+            <div className="overflow-hidden border rounded-lg bg-slate-900 border-slate-800">
               <table className="min-w-full divide-y divide-slate-800">
                 <thead className="bg-slate-800">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-300">
                       {copy.table.supplier}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-300">
                       {copy.table.contact}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-300">
                       {copy.table.status}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-300">
                       {copy.table.actions}
                     </th>
                   </tr>
@@ -835,21 +844,21 @@ export default function SuppliersPage() {
                           {supplier.name}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                      <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-400">
                         <div>{supplier.phone || "-"}</div>
                         <div className="text-xs text-slate-500">
                           {supplier.email || ""}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-900/30 text-emerald-400 border border-emerald-800">
+                        <span className="inline-flex px-2 text-xs font-semibold leading-5 border rounded-full bg-emerald-900/30 text-emerald-400 border-emerald-800">
                           {copy.statusActive}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm flex gap-2">
+                      <td className="flex gap-2 px-6 py-4 text-sm whitespace-nowrap">
                         <button
                           onClick={() => handleEdit(supplier)}
-                          className="text-slate-400 hover:text-blue-400 p-2 hover:bg-slate-800 rounded"
+                          className="p-2 rounded text-slate-400 hover:text-blue-400 hover:bg-slate-800"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
@@ -857,7 +866,7 @@ export default function SuppliersPage() {
                           onClick={() =>
                             handleDeleteClick(supplier._id, supplier.name)
                           }
-                          className="text-slate-400 hover:text-red-400 p-2 hover:bg-slate-800 rounded"
+                          className="p-2 rounded text-slate-400 hover:text-red-400 hover:bg-slate-800"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -878,24 +887,22 @@ export default function SuppliersPage() {
           onClick={() => setShowDeleteModal(false)}
         >
           <div
-            className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6"
+            className="w-full max-w-md p-6 border shadow-2xl bg-slate-900 border-slate-800 rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-4 mb-4">
-              <div className="bg-red-900/30 p-3 rounded-full border border-red-800">
+              <div className="p-3 border border-red-800 rounded-full bg-red-900/30">
                 <Trash2 className="w-6 h-6 text-red-400" />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white">
                   {copy.delete.title}
                 </h3>
-                <p className="text-sm text-slate-400">
-                  {copy.delete.subtitle}
-                </p>
+                <p className="text-sm text-slate-400">{copy.delete.subtitle}</p>
               </div>
             </div>
 
-            <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 mb-6">
+            <div className="p-4 mb-6 border rounded-lg bg-slate-800 border-slate-700">
               <p className="text-slate-300">
                 {copy.delete.confirm(supplierToDelete?.name)}
               </p>
@@ -921,15 +928,15 @@ export default function SuppliersPage() {
 
       {/* Bulk Upload Modal */}
       {showBulkUpload && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-2xl w-full shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-2xl p-8 border shadow-2xl bg-slate-900 border-slate-800 rounded-2xl">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-white">
                   {copy.bulk.title}
                 </h2>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="mt-1 text-sm text-slate-400">
                   {copy.bulk.subtitle}
                 </p>
               </div>
@@ -938,35 +945,39 @@ export default function SuppliersPage() {
                   setShowBulkUpload(false);
                   setUploadFile(null);
                 }}
-                className="text-slate-400 hover:text-white transition-colors"
+                className="transition-colors text-slate-400 hover:text-white"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
             {/* Instructions */}
-            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+            <div className="p-6 mb-6 border rounded-lg bg-slate-800 border-slate-700">
+              <h3 className="flex items-center gap-2 mb-3 text-lg font-semibold text-white">
                 <FileText className="w-5 h-5 text-purple-400" />
                 Instrucciones
               </h3>
-              <ol className="space-y-2 text-slate-300 text-sm">
+              <ol className="space-y-2 text-sm text-slate-300">
                 {copy.bulk.instructions.map((instruction, index) => (
                   <li key={index} className="flex gap-2">
-                    <span className="text-purple-400 font-semibold">{index + 1}.</span>
+                    <span className="font-semibold text-purple-400">
+                      {index + 1}.
+                    </span>
                     <span>{instruction}</span>
                   </li>
                 ))}
               </ol>
 
-              <div className="mt-4 pt-4 border-t border-slate-700">
-                <p className="text-xs text-slate-400 mb-2">
-                  <strong className="text-slate-300">{copy.bulk.fieldsLabel}</strong>
+              <div className="pt-4 mt-4 border-t border-slate-700">
+                <p className="mb-2 text-xs text-slate-400">
+                  <strong className="text-slate-300">
+                    {copy.bulk.fieldsLabel}
+                  </strong>
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="text-slate-400">
                     •{" "}
-                    <span className="text-purple-400 font-semibold">
+                    <span className="font-semibold text-purple-400">
                       nombre
                     </span>{" "}
                     (requerido)
@@ -993,7 +1004,7 @@ export default function SuppliersPage() {
             {/* Download Template Button */}
             <button
               onClick={downloadTemplate}
-              className="w-full mb-6 px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-lg font-medium hover:bg-slate-700 transition-colors flex items-center justify-center gap-2"
+              className="flex items-center justify-center w-full gap-2 px-4 py-3 mb-6 font-medium text-white transition-colors border rounded-lg bg-slate-800 border-slate-700 hover:bg-slate-700"
             >
               <Download className="w-5 h-5" />
               {copy.bulk.downloadTemplate}
@@ -1003,13 +1014,13 @@ export default function SuppliersPage() {
             <div
               onDrop={handleFileDrop}
               onDragOver={(e) => e.preventDefault()}
-              className="border-2 border-dashed border-slate-700 rounded-lg p-8 text-center hover:border-purple-500 transition-colors cursor-pointer"
+              className="p-8 text-center transition-colors border-2 border-dashed rounded-lg cursor-pointer border-slate-700 hover:border-purple-500"
               onClick={() => fileInputRef.current?.click()}
             >
-              <Upload className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+              <Upload className="w-12 h-12 mx-auto mb-4 text-slate-500" />
               {uploadFile ? (
                 <div>
-                  <p className="text-white font-medium mb-1">
+                  <p className="mb-1 font-medium text-white">
                     {uploadFile.name}
                   </p>
                   <p className="text-sm text-slate-400">
@@ -1018,12 +1029,10 @@ export default function SuppliersPage() {
                 </div>
               ) : (
                 <div>
-                  <p className="text-white font-medium mb-1">
+                  <p className="mb-1 font-medium text-white">
                     {copy.bulk.uploadPrompt}
                   </p>
-                  <p className="text-sm text-slate-400">
-                    {copy.bulk.orClick}
-                  </p>
+                  <p className="text-sm text-slate-400">{copy.bulk.orClick}</p>
                 </div>
               )}
               <input
