@@ -341,21 +341,21 @@ export default function ClientsPage() {
   // Show premium upgrade prompt for BASIC plan
   if (currentPlan === "BASIC") {
     return (
-      <div className="min-h-screen bg-slate-950">
+      <div className="min-h-screen bg-white dark:bg-slate-950">
         <Header user={user} showBackButton />
 
         <main className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-center min-h-[70vh]">
-            <div className="max-w-2xl w-full border-2 border-dashed border-amber-600 rounded-2xl p-12 text-center bg-gradient-to-br from-slate-900/50 to-slate-800/30">
+            <div className="max-w-2xl w-full border-2 border-dashed border-amber-500 dark:border-amber-600 rounded-2xl p-12 text-center bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-900/50 dark:to-slate-800/30">
               <div className="relative inline-block mb-6">
-                <UserPlus className="w-20 h-20 text-amber-400 mx-auto" />
-                <Sparkles className="w-8 h-8 text-amber-400 absolute -top-1 -right-1" />
+                <UserPlus className="w-20 h-20 text-amber-600 dark:text-amber-400 mx-auto" />
+                <Sparkles className="w-8 h-8 text-amber-600 dark:text-amber-400 absolute -top-1 -right-1" />
               </div>
 
-              <h2 className="text-3xl font-bold text-amber-400 mb-3">
+              <h2 className="text-3xl font-bold text-amber-700 dark:text-amber-400 mb-3">
                 {copy.premiumTitle}
               </h2>
-              <p className="text-amber-200 mb-8 text-lg">
+              <p className="text-amber-800 dark:text-amber-200 mb-8 text-lg">
                 {copy.premiumDescription}
               </p>
 
@@ -395,20 +395,24 @@ export default function ClientsPage() {
 
         <main className="max-w-7xl mx-auto px-4 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">{copy.title}</h1>
-            <p className="text-slate-400">{copy.subtitle}</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+              {copy.title}
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400">
+              {copy.subtitle}
+            </p>
           </div>
 
           {/* Actions Bar */}
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div className="bg-white border border-slate-200 rounded-lg p-4 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between dark:bg-slate-900 dark:border-slate-800">
             <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder={copy.searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-500"
+                className="w-full pl-10 pr-4 py-2 border border-slate-300 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-400"
               />
             </div>
             <button
@@ -439,14 +443,14 @@ export default function ClientsPage() {
 
           {/* Form */}
           {showForm && (
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 mb-6">
-              <h2 className="text-xl font-bold text-white mb-4">
+            <div className="bg-white border border-slate-200 rounded-lg p-6 mb-6 dark:bg-slate-900 dark:border-slate-800">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
                 {editingId ? copy.formTitleEdit : copy.formTitleNew}
               </h2>
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {copy.labels.name}
                     </label>
                     <input
@@ -455,12 +459,12 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-300 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {copy.labels.document}
                     </label>
                     <input
@@ -469,11 +473,11 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, document: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-300 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {copy.labels.phone}
                     </label>
                     <input
@@ -482,11 +486,11 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-300 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {copy.labels.email}
                     </label>
                     <input
@@ -495,11 +499,11 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-300 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {copy.labels.address}
                     </label>
                     <input
@@ -508,7 +512,7 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, address: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-slate-700 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-300 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     />
                   </div>
                 </div>
@@ -525,7 +529,7 @@ export default function ClientsPage() {
                       setShowForm(false);
                       setEditingId(null);
                     }}
-                    className="bg-slate-800 border border-slate-700 text-slate-300 px-6 py-2 rounded-lg font-medium hover:bg-slate-700"
+                    className="bg-white border border-slate-300 text-slate-700 px-6 py-2 rounded-lg font-medium hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
                   >
                     {copy.actions.cancel}
                   </button>
@@ -540,58 +544,61 @@ export default function ClientsPage() {
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           ) : filteredClients.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-12 text-center">
-              <Users className="w-16 h-16 text-slate-700 mx-auto mb-4" />
-              <p className="text-slate-400 text-lg">
+            <div className="bg-white border border-slate-200 rounded-lg p-12 text-center dark:bg-slate-900 dark:border-slate-800">
+              <Users className="w-16 h-16 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
+              <p className="text-slate-500 dark:text-slate-400 text-lg">
                 {searchTerm ? copy.empty.search : copy.empty.none}
               </p>
             </div>
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-              <table className="min-w-full divide-y divide-slate-800">
-                <thead className="bg-slate-800">
+            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+              <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                <thead className="bg-slate-100 dark:bg-slate-800">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                       {copy.table.name}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                       {copy.table.document}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                       {copy.table.contact}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                       {copy.table.actions}
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800">
                   {filteredClients.map((client) => (
-                    <tr key={client._id} className="hover:bg-slate-800/50">
+                    <tr
+                      key={client._id}
+                      className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-slate-100">
+                        <div className="font-medium text-slate-900 dark:text-slate-100">
                           {client.name}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
                         {client.document || "-"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
                         <div>{client.phone || "-"}</div>
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
                           {client.email || ""}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm flex gap-2">
                         <button
                           onClick={() => handleEdit(client)}
-                          className="text-blue-400 hover:text-blue-300 p-2 hover:bg-slate-800 rounded"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(client._id)}
-                          className="text-red-400 hover:text-red-300 p-2 hover:bg-slate-800 rounded"
+                          className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

@@ -39,14 +39,16 @@ export default function SubscriptionFreePlanModal({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-700 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700 sticky top-0 bg-slate-800">
+        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700 sticky top-0 bg-slate-50 dark:bg-slate-800">
           <div className="flex items-center gap-2">
             <Crown className="w-6 h-6 text-blue-400" />
             <div>
-              <h2 className="text-xl font-bold text-white">Contactar Ventas</h2>
-              <p className="text-xs text-gray-400">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                Contactar Ventas
+              </h2>
+              <p className="text-xs text-slate-600 dark:text-gray-400">
                 Información de facturación
               </p>
             </div>
@@ -54,7 +56,7 @@ export default function SubscriptionFreePlanModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-white transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
@@ -138,7 +140,7 @@ export default function SubscriptionFreePlanModal({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 px-4 py-3 border border-slate-600 rounded-lg font-semibold text-gray-300 hover:bg-slate-700 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-3 border border-slate-300 rounded-lg font-semibold text-slate-800 bg-white hover:bg-slate-50 transition-colors disabled:opacity-50 dark:border-slate-600 dark:text-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700"
             >
               Cancelar
             </button>

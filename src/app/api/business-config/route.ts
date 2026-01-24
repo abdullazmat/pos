@@ -50,6 +50,13 @@ export async function GET(req: NextRequest) {
       website: business.website || "",
       cuitRucDni: business.cuitRucDni || "",
       ticketMessage: business.ticketMessage || "",
+      paymentMethods: business.paymentMethods || [
+        { id: "cash", name: "Efectivo", enabled: true },
+        { id: "bankTransfer", name: "Transferencia Bancaria", enabled: true },
+        { id: "qr", name: "Código QR", enabled: true },
+        { id: "card", name: "Tarjeta", enabled: false },
+        { id: "check", name: "Cheque", enabled: false },
+      ],
     });
   } catch (error) {
     console.error("Get business config error:", error);
@@ -74,6 +81,7 @@ export async function POST(req: NextRequest) {
       website,
       cuitRucDni,
       ticketMessage,
+      paymentMethods,
     } = body;
 
     // Validate required fields
@@ -97,6 +105,13 @@ export async function POST(req: NextRequest) {
         cuitRucDni: cuitRucDni || "",
         ticketMessage:
           ticketMessage || "¡GRACIAS POR SU COMPRA!\nVuelva pronto",
+        paymentMethods: paymentMethods || [
+          { id: "cash", name: "Efectivo", enabled: true },
+          { id: "bankTransfer", name: "Transferencia Bancaria", enabled: true },
+          { id: "qr", name: "Código QR", enabled: true },
+          { id: "card", name: "Tarjeta", enabled: false },
+          { id: "check", name: "Cheque", enabled: false },
+        ],
         owner: userId,
       },
       { new: true, upsert: true },
@@ -114,6 +129,7 @@ export async function POST(req: NextRequest) {
       website: business.website || "",
       cuitRucDni: business.cuitRucDni || "",
       ticketMessage: business.ticketMessage || "",
+      paymentMethods: business.paymentMethods || [],
     });
   } catch (error) {
     console.error("Update business config error:", error);

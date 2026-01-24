@@ -1,4 +1,29 @@
+"use client";
+
+import { useLanguage } from "@/lib/context/LanguageContext";
+
+const COPY = {
+  es: {
+    scannedProduct: "Producto Escaneado",
+    totalSale: "Total Venta",
+    products: "Productos",
+  },
+  en: {
+    scannedProduct: "Scanned Product",
+    totalSale: "Total Sale",
+    products: "Products",
+  },
+  pt: {
+    scannedProduct: "Produto Escaneado",
+    totalSale: "Venda Total",
+    products: "Produtos",
+  },
+};
+
 export default function PosPreview() {
+  const { currentLanguage } = useLanguage();
+  const copy = COPY[currentLanguage as keyof typeof COPY] || COPY.es;
+
   return (
     <div className="bg-gray-100 dark:bg-slate-800 rounded-3xl border border-gray-300 dark:border-slate-700 shadow-2xl overflow-hidden">
       {/* Window bar (macOS style) */}
@@ -11,7 +36,7 @@ export default function PosPreview() {
       {/* Content */}
       <div className="p-8">
         <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
-          Producto Escaneado
+          {copy.scannedProduct}
         </p>
 
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-300 dark:border-slate-800">
@@ -21,7 +46,7 @@ export default function PosPreview() {
                 $12.500
               </p>
               <p className="text-gray-600 dark:text-gray-500 text-sm mt-1">
-                Total Venta
+                {copy.totalSale}
               </p>
             </div>
             <div>
@@ -29,7 +54,7 @@ export default function PosPreview() {
                 143
               </p>
               <p className="text-gray-600 dark:text-gray-500 text-sm mt-1">
-                Productos
+                {copy.products}
               </p>
             </div>
           </div>

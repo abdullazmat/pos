@@ -37,6 +37,11 @@ interface BusinessConfig {
   website: string;
   cuitRucDni: string;
   ticketMessage: string;
+  paymentMethods?: Array<{
+    id: string;
+    name: string;
+    enabled: boolean;
+  }>;
 }
 
 interface Subscription {
@@ -54,6 +59,21 @@ const CONFIG_COPY = {
       logo: "Logo del Negocio",
       businessInfo: "Información de Negocio",
       plans: "Gestión de Planes",
+      ticketPreview: "Vista Previa del Ticket",
+      paymentMethods: "Métodos de Pago",
+    },
+    ticket: {
+      address: "Dirección del negocio",
+      ticketLabel: "TICKET:",
+      dateLabel: "FECHA:",
+      timeLabel: "HORA:",
+      totalLabel: "TOTAL :",
+      defaultMessage: "¡GRACIAS POR SU COMPRA!\nVuelva pronto",
+    },
+    premiumFunction: {
+      title: "Función Premium",
+      description: "Personaliza tu ticket con el logo de tu negocio",
+      availability: "Disponible en Plan Profesional y superior",
     },
     businessForm: {
       businessName: "Nombre del Negocio",
@@ -64,11 +84,23 @@ const CONFIG_COPY = {
       cuitRucDni: "CUIT/RUC/DNI",
       ticketMessage: "Mensaje en Ticket",
     },
+    paymentMethods: {
+      title: "Métodos de Pago Disponibles",
+      subtitle:
+        "Configura qué métodos de pago estarán disponibles en el punto de venta",
+      cash: "Efectivo",
+      bankTransfer: "Transferencia Bancaria",
+      qr: "Código QR",
+      card: "Tarjeta",
+      check: "Cheque",
+    },
     buttons: {
       save: "Guardar Cambios",
       saving: "Guardando...",
       subscribe: "Suscribirse",
       selectPlan: "Seleccionar Plan",
+      processing: "Procesando...",
+      subscribeClick: "Click para suscribirse →",
     },
     messages: {
       saved: "Configuración guardada exitosamente",
@@ -78,6 +110,7 @@ const CONFIG_COPY = {
         `¡Suscripción actualizada a ${planName}!`,
       subscriptionError: "Error al actualizar suscripción",
       loading: "Cargando...",
+      previewInfo: "Vista previa se actualiza en tiempo real",
     },
   },
   en: {
@@ -87,6 +120,21 @@ const CONFIG_COPY = {
       logo: "Business Logo",
       businessInfo: "Business Information",
       plans: "Plan Management",
+      ticketPreview: "Ticket Preview",
+      paymentMethods: "Payment Methods",
+    },
+    ticket: {
+      address: "Business address",
+      ticketLabel: "TICKET:",
+      dateLabel: "DATE:",
+      timeLabel: "TIME:",
+      totalLabel: "TOTAL:",
+      defaultMessage: "THANK YOU FOR YOUR PURCHASE!\nCome back soon",
+    },
+    premiumFunction: {
+      title: "Premium Feature",
+      description: "Customize your ticket with your business logo",
+      availability: "Available in Professional Plan and above",
     },
     businessForm: {
       businessName: "Business Name",
@@ -97,11 +145,23 @@ const CONFIG_COPY = {
       cuitRucDni: "CUIT/RUC/DNI",
       ticketMessage: "Ticket Message",
     },
+    paymentMethods: {
+      title: "Available Payment Methods",
+      subtitle:
+        "Configure which payment methods will be available at the point of sale",
+      cash: "Cash",
+      bankTransfer: "Bank Transfer",
+      qr: "QR Code",
+      card: "Card",
+      check: "Check",
+    },
     buttons: {
       save: "Save Changes",
       saving: "Saving...",
       subscribe: "Subscribe",
       selectPlan: "Select Plan",
+      processing: "Processing...",
+      subscribeClick: "Click to subscribe →",
     },
     messages: {
       saved: "Configuration saved successfully",
@@ -111,6 +171,7 @@ const CONFIG_COPY = {
         `Subscription updated to ${planName}!`,
       subscriptionError: "Error updating subscription",
       loading: "Loading...",
+      previewInfo: "Preview updates in real time",
     },
   },
   pt: {
@@ -120,6 +181,21 @@ const CONFIG_COPY = {
       logo: "Logo do Negócio",
       businessInfo: "Informações do Negócio",
       plans: "Gerenciamento de Planos",
+      ticketPreview: "Pré-visualização do Recibo",
+      paymentMethods: "Métodos de Pagamento",
+    },
+    ticket: {
+      address: "Endereço do negócio",
+      ticketLabel: "TICKET:",
+      dateLabel: "DATA:",
+      timeLabel: "HORA:",
+      totalLabel: "TOTAL:",
+      defaultMessage: "OBRIGADO PELA SUA COMPRA!\nVolte em breve",
+    },
+    premiumFunction: {
+      title: "Função Premium",
+      description: "Personalize seu recibo com o logotipo do seu negócio",
+      availability: "Disponível no Plano Profissional e superior",
     },
     businessForm: {
       businessName: "Nome do Negócio",
@@ -130,11 +206,23 @@ const CONFIG_COPY = {
       cuitRucDni: "CUIT/RUC/DNI",
       ticketMessage: "Mensagem do Recibo",
     },
+    paymentMethods: {
+      title: "Métodos de Pagamento Disponíveis",
+      subtitle:
+        "Configure quais métodos de pagamento estarão disponíveis no ponto de venda",
+      cash: "Dinheiro",
+      bankTransfer: "Transferência Bancária",
+      qr: "Código QR",
+      card: "Cartão",
+      check: "Cheque",
+    },
     buttons: {
       save: "Salvar Alterações",
       saving: "Salvando...",
       subscribe: "Inscrever-se",
       selectPlan: "Selecionar Plano",
+      processing: "Processando...",
+      subscribeClick: "Clique para se inscrever →",
     },
     messages: {
       saved: "Configuração salva com sucesso",
@@ -144,6 +232,7 @@ const CONFIG_COPY = {
         `Inscrição atualizada para ${planName}!`,
       subscriptionError: "Erro ao atualizar inscrição",
       loading: "Carregando...",
+      previewInfo: "Visualização é atualizada em tempo real",
     },
   },
 };
@@ -168,12 +257,19 @@ export default function BusinessConfigPage() {
 
   const [formData, setFormData] = useState<BusinessConfig>({
     businessName: "MI NEGOCIO",
-    address: "Dirección del negocio",
+    address: copy.ticket.address,
     phone: "(sin teléfono)",
     email: "correo@ejemplo.com",
     website: "www.minegocio.com",
     cuitRucDni: "00-00000000-0",
-    ticketMessage: "¡GRACIAS POR SU COMPRA!\nVuelva pronto",
+    ticketMessage: copy.ticket.defaultMessage,
+    paymentMethods: [
+      { id: "cash", name: "Efectivo", enabled: true },
+      { id: "bankTransfer", name: "Transferencia Bancaria", enabled: true },
+      { id: "qr", name: "Código QR", enabled: true },
+      { id: "card", name: "Tarjeta", enabled: false },
+      { id: "check", name: "Cheque", enabled: false },
+    ],
   });
   const [savingConfig, setSavingConfig] = useState(false);
   const [configSaved, setConfigSaved] = useState(false);
@@ -188,11 +284,31 @@ export default function BusinessConfigPage() {
     fetchPlans();
     fetchSubscription();
     fetchBusinessConfig();
-  }, [router]);
+  }, [router, currentLanguage]);
+
+  // Update form data when language changes
+  useEffect(() => {
+    const defaultMessages = [
+      CONFIG_COPY.es.ticket.defaultMessage,
+      CONFIG_COPY.en.ticket.defaultMessage,
+      CONFIG_COPY.pt.ticket.defaultMessage,
+    ];
+    
+    setFormData((prevFormData) => {
+      // If current message is empty or is one of the default messages, update to current language's default
+      const isDefaultMessage = defaultMessages.includes(prevFormData.ticketMessage);
+      const shouldUpdate = !prevFormData.ticketMessage || isDefaultMessage;
+      
+      return {
+        ...prevFormData,
+        ticketMessage: shouldUpdate ? copy.ticket.defaultMessage : prevFormData.ticketMessage,
+      };
+    });
+  }, [currentLanguage, copy]);
 
   const fetchPlans = async () => {
     try {
-      const response = await fetch("/api/plans");
+      const response = await fetch(`/api/plans?lang=${currentLanguage}`);
       if (response.ok) {
         const data = await response.json();
         setPlans(data.data.plans);
@@ -225,7 +341,12 @@ export default function BusinessConfigPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setFormData(data.data || formData);
+        const configData = data.data || formData;
+        // Ensure ticketMessage always has a value, use default if empty
+        if (!configData.ticketMessage || configData.ticketMessage.trim() === "") {
+          configData.ticketMessage = copy.ticket.defaultMessage;
+        }
+        setFormData(configData);
       }
     } catch (error) {
       console.error("Error fetching config:", error);
@@ -268,6 +389,17 @@ export default function BusinessConfigPage() {
     } finally {
       setSavingConfig(false);
     }
+  };
+
+  const togglePaymentMethod = (methodId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      paymentMethods: prev.paymentMethods?.map((method) =>
+        method.id === methodId
+          ? { ...method, enabled: !method.enabled }
+          : method,
+      ),
+    }));
   };
 
   const handleSubscribe = async (planId: string) => {
@@ -450,9 +582,11 @@ export default function BusinessConfigPage() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-3xl">🏪</span>
-            <h1 className="text-2xl font-bold text-white">{copy.title}</h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+              {copy.title}
+            </h1>
           </div>
-          <p className="text-slate-400">{copy.subtitle}</p>
+          <p className="text-slate-600 dark:text-slate-400">{copy.subtitle}</p>
         </div>
 
         {/* Content grid */}
@@ -460,38 +594,38 @@ export default function BusinessConfigPage() {
           {/* Left column */}
           <div className="space-y-6">
             {/* Logo del Negocio */}
-            <section className="bg-slate-900 border border-purple-600/30 rounded-xl overflow-hidden hover:border-purple-600/50 transition-colors">
-              <div className="flex items-center justify-between p-4 border-b border-purple-600/20">
-                <h2 className="font-semibold text-white flex items-center gap-2">
+            <section className="bg-white border border-purple-200 dark:bg-slate-900 dark:border-purple-600/30 rounded-xl overflow-hidden hover:border-purple-300 dark:hover:border-purple-600/50 transition-colors">
+              <div className="flex items-center justify-between p-4 border-b border-purple-200 dark:border-purple-600/20">
+                <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                   🎨 {copy.sections.logo}
                 </h2>
-                <span className="px-2.5 py-1 text-xs font-semibold text-purple-300 bg-purple-900/60 border border-purple-700/50 rounded-full">
+                <span className="px-2.5 py-1 text-xs font-semibold text-purple-700 bg-purple-100 border border-purple-300 dark:text-purple-300 dark:bg-purple-900/60 dark:border-purple-700/50 rounded-full">
                   Premium
                 </span>
               </div>
               <div className="p-6">
-                <div className="p-6 text-center border-2 border-purple-700/40 rounded-xl bg-purple-900/20">
-                  <div className="flex items-center justify-center w-16 h-16 mx-auto mb-3 text-purple-300 bg-purple-900/60 rounded-xl">
+                <div className="p-6 text-center border-2 border-purple-300 dark:border-purple-700/40 rounded-xl bg-purple-50 dark:bg-purple-900/20">
+                  <div className="flex items-center justify-center w-16 h-16 mx-auto mb-3 text-purple-700 bg-purple-200 dark:text-purple-300 dark:bg-purple-900/60 rounded-xl">
                     👑
                   </div>
-                  <h3 className="font-semibold text-purple-300">
-                    Función Premium
+                  <h3 className="font-semibold text-purple-700 dark:text-purple-300">
+                    {copy.premiumFunction.title}
                   </h3>
-                  <p className="mt-1 text-sm text-purple-200">
-                    Personaliza tu ticket con el logo de tu negocio
+                  <p className="mt-1 text-sm text-purple-700 dark:text-purple-200">
+                    {copy.premiumFunction.description}
                   </p>
-                  <p className="mt-2 text-xs text-purple-300/70">
-                    Disponible en Plan Profesional y superior
+                  <p className="mt-2 text-xs text-purple-600 dark:text-purple-300/70">
+                    {copy.premiumFunction.availability}
                   </p>
                 </div>
               </div>
             </section>
 
             {/* Plan de Suscripción */}
-            <section className="bg-slate-900 border border-purple-600/30 rounded-xl overflow-hidden hover:border-purple-600/50 transition-colors">
-              <div className="p-4 border-b border-purple-600/20">
-                <h2 className="font-semibold text-white flex items-center gap-2">
-                  <Crown className="w-5 h-5 text-purple-400" />{" "}
+            <section className="bg-white border border-purple-200 dark:bg-slate-900 dark:border-purple-600/30 rounded-xl overflow-hidden hover:border-purple-300 dark:hover:border-purple-600/50 transition-colors">
+              <div className="p-4 border-b border-purple-200 dark:border-purple-600/20">
+                <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Crown className="w-5 h-5 text-purple-600 dark:text-purple-400" />{" "}
                   {copy.sections.plans}
                 </h2>
               </div>
@@ -502,37 +636,37 @@ export default function BusinessConfigPage() {
                     key={plan.id}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       currentSubscription?.planId === plan.id
-                        ? "border-purple-600/60 bg-purple-900/30"
-                        : "border-slate-700/50 bg-slate-800/30 hover:border-slate-600/50"
+                        ? "border-purple-400 bg-purple-50 dark:border-purple-600/60 dark:bg-purple-900/30"
+                        : "border-slate-300 bg-slate-50 hover:border-slate-400 dark:border-slate-700/50 dark:bg-slate-800/30 dark:hover:border-slate-600/50"
                     }`}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-lg">{plan.icon}</span>
-                          <span className="font-semibold text-white">
+                          <span className="font-semibold text-slate-900 dark:text-white">
                             {plan.name}
                           </span>
                           {plan.popular && (
-                            <span className="px-2 py-0.5 text-xs font-semibold text-yellow-300 bg-yellow-900/50 border border-yellow-700/50 rounded-full">
+                            <span className="px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 border border-yellow-300 dark:text-yellow-300 dark:bg-yellow-900/50 dark:border-yellow-700/50 rounded-full">
                               Popular
                             </span>
                           )}
                           {currentSubscription?.planId === plan.id && (
-                            <span className="px-2 py-0.5 text-xs font-semibold text-green-300 bg-green-900/50 border border-green-700/50 rounded-full">
+                            <span className="px-2 py-0.5 text-xs font-semibold text-green-700 bg-green-100 border border-green-300 dark:text-green-300 dark:bg-green-900/50 dark:border-green-700/50 rounded-full">
                               {copy.buttons.selectPlan}
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-slate-600 dark:text-slate-400">
                           {plan.description}
                         </p>
                       </div>
                       <div className="text-right ml-4">
-                        <div className="text-2xl font-bold text-white">
+                        <div className="text-2xl font-bold text-slate-900 dark:text-white">
                           ${plan.price.toLocaleString()}
                         </div>
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-slate-500 dark:text-slate-500">
                           {plan.billing}
                         </div>
                       </div>
@@ -542,7 +676,7 @@ export default function BusinessConfigPage() {
                       {plan.limits.map((limit, idx) => (
                         <span
                           key={idx}
-                          className="px-2 py-1 text-xs text-slate-300 bg-slate-700/50 rounded"
+                          className="px-2 py-1 text-xs text-slate-700 bg-slate-200 dark:text-slate-300 dark:bg-slate-700/50 rounded"
                         >
                           {limit}
                         </span>
@@ -556,15 +690,15 @@ export default function BusinessConfigPage() {
                       }
                       className={`w-full py-2 px-4 rounded-lg font-semibold text-sm transition-colors ${
                         currentSubscription?.planId === plan.id
-                          ? "bg-slate-700 text-slate-400 cursor-not-allowed"
+                          ? "bg-slate-300 text-slate-500 cursor-not-allowed dark:bg-slate-700 dark:text-slate-400"
                           : "bg-purple-600 hover:bg-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                       }`}
                     >
                       {subscribing
-                        ? "Procesando..."
+                        ? copy.buttons.processing
                         : currentSubscription?.planId === plan.id
                           ? copy.buttons.selectPlan
-                          : "Click para suscribirse →"}
+                          : copy.buttons.subscribeClick}
                     </button>
                   </div>
                 ))}
@@ -572,9 +706,9 @@ export default function BusinessConfigPage() {
             </section>
 
             {/* Configuración del Negocio Form */}
-            <section className="bg-slate-900 border border-purple-600/30 rounded-xl overflow-hidden hover:border-purple-600/50 transition-colors">
-              <div className="p-4 border-b border-purple-600/20">
-                <h2 className="font-semibold text-white flex items-center gap-2">
+            <section className="bg-white border border-purple-200 dark:bg-slate-900 dark:border-purple-600/30 rounded-xl overflow-hidden hover:border-purple-300 dark:hover:border-purple-600/50 transition-colors">
+              <div className="p-4 border-b border-purple-200 dark:border-purple-600/20">
+                <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                   ⚙️ {copy.sections.businessInfo}
                 </h2>
               </div>
@@ -582,7 +716,7 @@ export default function BusinessConfigPage() {
               <div className="p-6 space-y-4">
                 {/* Business Name */}
                 <div>
-                  <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
                     📦 {copy.businessForm.businessName}{" "}
                     <span className="text-red-500">*</span>
                   </label>
@@ -593,13 +727,13 @@ export default function BusinessConfigPage() {
                       setFormData({ ...formData, businessName: e.target.value })
                     }
                     placeholder="MI NEGOCIO"
-                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
                   />
                 </div>
 
                 {/* Address */}
                 <div>
-                  <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
                     📍 {copy.businessForm.address}
                   </label>
                   <input
@@ -609,14 +743,14 @@ export default function BusinessConfigPage() {
                       setFormData({ ...formData, address: e.target.value })
                     }
                     placeholder="Ej. Av. San Martin 1234, CABA"
-                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
                   />
                 </div>
 
                 {/* Phone and Email */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                    <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
                       ☎️ {copy.businessForm.phone}
                     </label>
                     <input
@@ -626,11 +760,11 @@ export default function BusinessConfigPage() {
                         setFormData({ ...formData, phone: e.target.value })
                       }
                       placeholder="011 1234-5678"
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none transition-colors"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                    <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
                       📧 {copy.businessForm.email}
                     </label>
                     <input
@@ -640,7 +774,7 @@ export default function BusinessConfigPage() {
                         setFormData({ ...formData, email: e.target.value })
                       }
                       placeholder="info@minegocio.com"
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none transition-colors"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -648,7 +782,7 @@ export default function BusinessConfigPage() {
                 {/* Website and CUIT/RUC/DNI */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                    <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
                       🌐 {copy.businessForm.website}
                     </label>
                     <input
@@ -658,11 +792,11 @@ export default function BusinessConfigPage() {
                         setFormData({ ...formData, website: e.target.value })
                       }
                       placeholder="www.minegocio.com"
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none transition-colors"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                    <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
                       📋 {copy.businessForm.cuitRucDni}
                     </label>
                     <input
@@ -675,14 +809,14 @@ export default function BusinessConfigPage() {
                         })
                       }
                       placeholder="20-12345678-9"
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none transition-colors"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
 
                 {/* Ticket Message */}
                 <div>
-                  <label className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
                     🎟️ {copy.businessForm.ticketMessage}
                   </label>
                   <textarea
@@ -693,13 +827,52 @@ export default function BusinessConfigPage() {
                         ticketMessage: e.target.value,
                       })
                     }
-                    placeholder="¡GRACIAS POR SU COMPRA!&#10;Vuelva pronto"
+                    placeholder={copy.ticket.defaultMessage.replace(/\n/g, "&#10;")}
                     rows={4}
-                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none transition-colors resize-none"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors resize-none"
                   />
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                     Usa \n para saltos de línea
                   </p>
+                </div>
+
+                {/* Payment Methods */}
+                <div className="border-t border-slate-300 dark:border-slate-700 pt-6">
+                  <label className="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                    💳 {copy.paymentMethods.title}
+                  </label>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mb-4">
+                    {copy.paymentMethods.subtitle}
+                  </p>
+                  <div className="space-y-3">
+                    {formData.paymentMethods?.map((method) => (
+                      <div
+                        key={method.id}
+                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700"
+                      >
+                        <span className="text-sm font-medium text-slate-900 dark:text-white">
+                          {copy.paymentMethods[
+                            method.id as keyof typeof copy.paymentMethods
+                          ] || method.name}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => togglePaymentMethod(method.id)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                            method.enabled
+                              ? "bg-blue-600"
+                              : "bg-slate-300 dark:bg-slate-600"
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              method.enabled ? "translate-x-6" : "translate-x-1"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Buttons */}
@@ -713,9 +886,9 @@ export default function BusinessConfigPage() {
                   </button>
                   <button
                     onClick={() => {
-                      toast.info("Vista previa se actualiza en tiempo real");
+                      toast.info(copy.messages.previewInfo);
                     }}
-                    className="py-2 px-4 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
+                    className="py-2 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
                   >
                     👁️ Preview
                   </button>
@@ -726,56 +899,56 @@ export default function BusinessConfigPage() {
 
           {/* Right column - Ticket Preview */}
           <div>
-            <section className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden sticky top-20">
-              <div className="flex items-center justify-between p-4 border-b border-slate-800">
-                <h2 className="font-semibold text-white flex items-center gap-2">
-                  <Eye className="w-4 h-4" /> Vista Previa del Ticket
+            <section className="bg-white border border-slate-300 dark:bg-slate-900 dark:border-slate-800 rounded-xl overflow-hidden sticky top-20">
+              <div className="flex items-center justify-between p-4 border-b border-slate-300 dark:border-slate-800">
+                <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Eye className="w-4 h-4" /> {copy.sections.ticketPreview}
                 </h2>
               </div>
               <div className="flex items-center justify-center p-6">
-                {/* Ticket Preview - Dark/Terminal Style */}
-                <div className="w-80 bg-black text-green-400 rounded-lg shadow-2xl overflow-hidden p-4 text-center text-xs font-mono border border-green-600/30">
+                {/* Ticket Preview - Paper Style for Light Mode, Terminal Style for Dark Mode */}
+                <div className="w-80 bg-white text-slate-800 dark:bg-black dark:text-green-400 rounded-lg shadow-2xl overflow-hidden p-4 text-center text-xs font-mono border border-slate-300 dark:border-green-600/30">
                   {/* Header with line decorations */}
-                  <div className="mb-2 text-green-500">
+                  <div className="mb-2 text-slate-900 dark:text-green-500">
                     <p className="font-bold text-sm mb-1">
                       {formData.businessName.toUpperCase()}
                     </p>
                   </div>
 
-                  <div className="text-xs text-green-600 space-y-0.5 mb-2">
-                    {formData.address && <p>Dirección del negocio</p>}
+                  <div className="text-xs text-slate-600 dark:text-green-600 space-y-0.5 mb-2">
+                    {formData.address && <p>{copy.ticket.address}</p>}
                     {formData.phone && <p>Tel: {formData.phone}</p>}
                     {formData.email && <p>{formData.email}</p>}
                     {formData.website && <p>{formData.website}</p>}
                     {formData.cuitRucDni && <p>CUIT: {formData.cuitRucDni}</p>}
                   </div>
 
-                  <div className="my-2 border-t border-green-600/30"></div>
+                  <div className="my-2 border-t border-slate-300 dark:border-green-600/30"></div>
 
-                  <div className="space-y-0.5 text-xs text-left text-green-400 mb-2">
+                  <div className="space-y-0.5 text-xs text-left text-slate-700 dark:text-green-400 mb-2">
                     <div className="flex justify-between">
-                      <span>TICKET:</span>
+                      <span>{copy.ticket.ticketLabel}</span>
                       <span>#001-00123</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>FECHA:</span>
+                      <span>{copy.ticket.dateLabel}</span>
                       <span>23/1/2026</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>HORA:</span>
+                      <span>{copy.ticket.timeLabel}</span>
                       <span>07:08 a. m.</span>
                     </div>
                   </div>
 
-                  <div className="my-2 border-t border-green-600/30"></div>
+                  <div className="my-2 border-t border-slate-300 dark:border-green-600/30"></div>
 
-                  <div className="space-y-1 text-xs text-left text-green-400 mb-2">
+                  <div className="space-y-1 text-xs text-left text-slate-700 dark:text-green-400 mb-2">
                     <div>
                       <div className="flex justify-between">
                         <span>Coca Cola 1.5L</span>
                         <span>$3000.00</span>
                       </div>
-                      <div className="flex justify-between text-green-600">
+                      <div className="flex justify-between text-slate-500 dark:text-green-600">
                         <span>2 x $1500.00</span>
                         <span>$3000.00</span>
                       </div>
@@ -785,21 +958,21 @@ export default function BusinessConfigPage() {
                         <span>Pan Lactal</span>
                         <span>$850.00</span>
                       </div>
-                      <div className="flex justify-between text-green-600">
+                      <div className="flex justify-between text-slate-500 dark:text-green-600">
                         <span>1 x $850.00</span>
                         <span>$850.00</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="my-2 border-t border-dashed border-green-600/30"></div>
+                  <div className="my-2 border-t border-dashed border-slate-300 dark:border-green-600/30"></div>
 
-                  <div className="flex justify-between font-bold mb-3 text-green-500">
-                    <span>TOTAL :</span>
+                  <div className="flex justify-between font-bold mb-3 text-slate-900 dark:text-green-500">
+                    <span>{copy.ticket.totalLabel}</span>
                     <span>$3850.00</span>
                   </div>
 
-                  <div className="text-xs text-green-600 whitespace-pre-wrap">
+                  <div className="text-xs text-slate-600 dark:text-green-600 whitespace-pre-wrap">
                     {formData.ticketMessage}
                   </div>
                 </div>

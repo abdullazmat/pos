@@ -357,9 +357,11 @@ export default function PlanComparisonPage() {
     title: string;
     children: React.ReactNode;
   }) => (
-    <section className="bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 bg-slate-900/60 border-b border-slate-800 flex items-center gap-2">
-        <h2 className="text-slate-200 font-semibold">{title}</h2>
+    <section className="bg-white border border-slate-300 dark:bg-slate-900/80 dark:border-slate-800 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 bg-slate-100 border-b border-slate-300 dark:bg-slate-900/60 dark:border-slate-800 flex items-center gap-2">
+        <h2 className="text-slate-900 dark:text-slate-200 font-semibold">
+          {title}
+        </h2>
       </div>
       <div>{children}</div>
     </section>
@@ -374,10 +376,14 @@ export default function PlanComparisonPage() {
     free: string;
     pro: string;
   }) => (
-    <div className="grid grid-cols-3 px-4 py-3 text-sm border-t border-slate-800/60">
-      <div className="text-slate-300">{label}</div>
-      <div className="text-center text-slate-200">{free}</div>
-      <div className="text-center text-slate-200">{pro}</div>
+    <div className="grid grid-cols-3 px-4 py-3 text-sm border-t border-slate-200 dark:border-slate-800/60">
+      <div className="text-slate-700 dark:text-slate-300">{label}</div>
+      <div className="text-center text-slate-900 dark:text-slate-200">
+        {free}
+      </div>
+      <div className="text-center text-slate-900 dark:text-slate-200">
+        {pro}
+      </div>
     </div>
   );
 
@@ -390,20 +396,20 @@ export default function PlanComparisonPage() {
     free: boolean;
     pro: boolean;
   }) => (
-    <div className="grid grid-cols-3 px-4 py-3 text-sm border-t border-slate-800/60">
-      <div className="text-slate-300">{label}</div>
+    <div className="grid grid-cols-3 px-4 py-3 text-sm border-t border-slate-200 dark:border-slate-800/60">
+      <div className="text-slate-700 dark:text-slate-300">{label}</div>
       <div className="text-center">
         {free ? (
-          <span className="text-green-400">✓</span>
+          <span className="text-green-600 dark:text-green-400">✓</span>
         ) : (
-          <span className="text-slate-500">✕</span>
+          <span className="text-slate-400 dark:text-slate-500">✕</span>
         )}
       </div>
       <div className="text-center">
         {pro ? (
-          <span className="text-green-400">✓</span>
+          <span className="text-green-600 dark:text-green-400">✓</span>
         ) : (
-          <span className="text-slate-500">✕</span>
+          <span className="text-slate-400 dark:text-slate-500">✕</span>
         )}
       </div>
     </div>
@@ -418,7 +424,7 @@ export default function PlanComparisonPage() {
   const proPlan = plans.find((p) => p.id === "PRO") || {
     id: "PRO",
     name: "Pro",
-    price: 19990,
+    price: 24990,
     billing: "/mes",
     popular: true,
   };
@@ -429,12 +435,12 @@ export default function PlanComparisonPage() {
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         {/* Title */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white text-center">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white text-center">
             {copy.title}
           </h1>
-          <p className="text-center text-slate-400 mt-1">
+          <p className="text-center text-slate-600 dark:text-slate-400 mt-1">
             {copy.currentPlan}{" "}
-            <span className="text-purple-300 font-semibold">
+            <span className="text-purple-600 dark:text-purple-300 font-semibold">
               {currentPlanName}
             </span>
           </p>
@@ -444,20 +450,22 @@ export default function PlanComparisonPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
           {/* Free */}
           <div
-            className={`rounded-xl border ${subscription?.planId === "FREE" ? "border-purple-600" : "border-slate-800"} bg-slate-900 p-5`}
+            className={`rounded-xl border ${subscription?.planId === "FREE" ? "border-purple-600" : "border-slate-300 dark:border-slate-800"} bg-white dark:bg-slate-900 p-5`}
           >
             <div className="flex items-center gap-2 mb-2">
-              <span className="px-2 py-0.5 text-xs font-semibold bg-slate-800 border border-slate-700 rounded">
+              <span className="px-2 py-0.5 text-xs font-semibold bg-slate-200 border border-slate-300 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 rounded">
                 FREE
               </span>
             </div>
-            <div className="text-white font-semibold">{freePlan.name}</div>
-            <div className="mt-1 text-slate-300 text-sm">
+            <div className="text-slate-900 dark:text-white font-semibold">
+              {freePlan.name}
+            </div>
+            <div className="mt-1 text-slate-700 dark:text-slate-300 text-sm">
               $ {freePlan.price}/mes
             </div>
             <div className="mt-4">
               <button
-                className={`w-full py-2 rounded-lg text-sm font-semibold ${subscription?.planId === "FREE" ? "bg-purple-700 text-white" : "bg-slate-800 text-slate-300"}`}
+                className={`w-full py-2 rounded-lg text-sm font-semibold ${subscription?.planId === "FREE" ? "bg-purple-700 text-white" : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300"}`}
               >
                 {subscription?.planId === "FREE"
                   ? copy.buttons.current
@@ -468,16 +476,18 @@ export default function PlanComparisonPage() {
 
           {/* Pro */}
           <div
-            className={`rounded-xl border ${subscription?.planId === "PRO" ? "border-purple-600" : "border-slate-800"} bg-slate-900 p-5`}
+            className={`rounded-xl border ${subscription?.planId === "PRO" ? "border-purple-600" : "border-slate-300 dark:border-slate-800"} bg-white dark:bg-slate-900 p-5`}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Star className="w-4 h-4 text-yellow-300" />
-              <span className="px-2 py-0.5 text-xs font-semibold text-yellow-300 bg-yellow-900/40 border border-yellow-700/50 rounded">
+              <Star className="w-4 h-4 text-yellow-500 dark:text-yellow-300" />
+              <span className="px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 border border-yellow-300 dark:text-yellow-300 dark:bg-yellow-900/40 dark:border-yellow-700/50 rounded">
                 Popular
               </span>
             </div>
-            <div className="text-white font-semibold">{proPlan.name}</div>
-            <div className="mt-1 text-slate-300 text-sm">
+            <div className="text-slate-900 dark:text-white font-semibold">
+              {proPlan.name}
+            </div>
+            <div className="mt-1 text-slate-700 dark:text-slate-300 text-sm">
               $ {proPlan.price.toLocaleString()}/mes
             </div>
             <div className="mt-4">
@@ -494,11 +504,13 @@ export default function PlanComparisonPage() {
         </div>
 
         {/* Characteristics label */}
-        <div className="text-slate-300 mb-2">{copy.characteristics}</div>
+        <div className="text-slate-700 dark:text-slate-300 mb-2">
+          {copy.characteristics}
+        </div>
 
         {/* Limits */}
         <Section title={copy.limitsSection}>
-          <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-900/40">
+          <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300">
             <div></div>
             <div className="text-center">{copy.freeHeader}</div>
             <div className="text-center">{copy.proHeader}</div>
@@ -511,7 +523,7 @@ export default function PlanComparisonPage() {
         {/* POS */}
         <div className="mt-6">
           <Section title={copy.posSection}>
-            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-900/40">
+            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300">
               <div></div>
               <div className="text-center">{copy.freeHeader}</div>
               <div className="text-center">{copy.proHeader}</div>
@@ -525,7 +537,7 @@ export default function PlanComparisonPage() {
         {/* Control de Caja */}
         <div className="mt-6">
           <Section title={copy.cashBoxSection}>
-            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-900/40">
+            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300">
               <div></div>
               <div className="text-center">{copy.freeHeader}</div>
               <div className="text-center">{copy.proHeader}</div>
@@ -539,7 +551,7 @@ export default function PlanComparisonPage() {
         {/* Gestión */}
         <div className="mt-6">
           <Section title={copy.managementSection}>
-            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-900/40">
+            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300">
               <div></div>
               <div className="text-center">{copy.freeHeader}</div>
               <div className="text-center">{copy.proHeader}</div>
@@ -553,7 +565,7 @@ export default function PlanComparisonPage() {
         {/* Reportes */}
         <div className="mt-6">
           <Section title={copy.reportsSection}>
-            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-900/40">
+            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300">
               <div></div>
               <div className="text-center">{copy.freeHeader}</div>
               <div className="text-center">{copy.proHeader}</div>
@@ -567,7 +579,7 @@ export default function PlanComparisonPage() {
         {/* Configuración */}
         <div className="mt-6">
           <Section title={copy.configSection}>
-            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-900/40">
+            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300">
               <div></div>
               <div className="text-center">{copy.freeHeader}</div>
               <div className="text-center">{copy.proHeader}</div>
@@ -579,18 +591,18 @@ export default function PlanComparisonPage() {
         </div>
 
         {/* Legend */}
-        <div className="mt-6 bg-slate-900 border border-slate-800 rounded-xl p-4">
-          <div className="text-slate-300 text-sm">
+        <div className="mt-6 bg-white border border-slate-300 dark:bg-slate-900 dark:border-slate-800 rounded-xl p-4">
+          <div className="text-slate-700 dark:text-slate-300 text-sm">
             💡 <span className="font-semibold">{copy.legend}</span>
           </div>
-          <div className="mt-2 text-xs text-slate-400 flex gap-6">
+          <div className="mt-2 text-xs text-slate-600 dark:text-slate-400 flex gap-6">
             <span>✓ {copy.availableFeature}</span>
             <span>✕ {copy.unavailableFeature}</span>
           </div>
         </div>
 
         {/* Callout */}
-        <div className="mt-4 bg-purple-900/30 border border-purple-700/40 rounded-xl p-4 text-sm text-purple-200">
+        <div className="mt-4 bg-purple-50 border border-purple-300 dark:bg-purple-900/30 dark:border-purple-700/40 rounded-xl p-4 text-sm text-purple-800 dark:text-purple-200">
           📦 {copy.changeMethod} Ve a Configuración →{" "}
           <Link href="/business-config" className="underline">
             {copy.changeLinkText}

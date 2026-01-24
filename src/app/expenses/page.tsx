@@ -152,19 +152,19 @@ export default function ExpensesPage() {
       <Header user={user} showBackButton />
 
       <main className="max-w-5xl mx-auto px-4 py-12 flex items-center justify-center">
-        <div className="w-full bg-slate-900/90 border border-amber-500/50 border-dashed rounded-2xl p-10 shadow-2xl">
+        <div className="w-full bg-white dark:bg-slate-900/90 border border-amber-200 dark:border-amber-500/50 border-dashed rounded-2xl p-10 shadow-xl dark:shadow-2xl">
           <div className="flex flex-col items-center text-center gap-4">
-            <div className="w-16 h-16 rounded-xl bg-amber-500/10 border border-amber-400/50 text-amber-400 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-xl bg-amber-100 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-400/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
               <Receipt className="w-9 h-9" />
             </div>
             <div className="space-y-1">
-              <p className="text-amber-400 text-sm font-semibold uppercase tracking-wide">
+              <p className="text-amber-600 dark:text-amber-400 text-sm font-semibold uppercase tracking-wide">
                 {copy.premiumBadge}
               </p>
-              <h1 className="text-2xl md:text-3xl font-bold text-white">
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
                 {copy.title}
               </h1>
-              <p className="text-slate-300 text-sm md:text-base">
+              <p className="text-slate-700 dark:text-slate-300 text-sm md:text-base">
                 {copy.description}
               </p>
             </div>

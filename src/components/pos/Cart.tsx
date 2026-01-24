@@ -1,7 +1,16 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import {
+  normalizeDecimalSeparator,
+  parseQuantity,
+  formatQuantity,
+  validateQuantity,
+  getInputStep,
+  getInputMin,
+  getInputPlaceholder,
+} from "@/lib/utils/decimalFormatter";
 
 interface CartItem {
   productId: string;
@@ -10,6 +19,13 @@ interface CartItem {
   unitPrice: number;
   discount: number;
   total: number;
+  isSoldByWeight?: boolean;
+}
+
+interface PaymentMethod {
+  id: string;
+  name: string;
+  enabled: boolean;
 }
 
 interface CartProps {
@@ -30,6 +46,39 @@ export default function Cart({
   const { t } = useGlobalLanguage();
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
   const [isLoading, setIsLoading] = useState(false);
+  const [availablePaymentMethods, setAvailablePaymentMethods] = useState<
+    PaymentMethod[]
+  >([
+    { id: "cash", name: "Efectivo", enabled: true },
+    { id: "bankTransfer", name: "Transferencia", enabled: true },
+    { id: "qr", name: "QR", enabled: true },
+  ]);
+
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const response = await fetch("/api/business-config", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.data?.paymentMethods) {
+            const enabled = data.data.paymentMethods.filter(
+              (m: PaymentMethod) => m.enabled,
+            );
+            if (enabled.length > 0) {
+              setAvailablePaymentMethods(enabled);
+              setPaymentMethod(enabled[0].id);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching payment methods:", error);
+      }
+    };
+    fetchPaymentMethods();
+  }, []);
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.quantity * item.unitPrice,
@@ -131,16 +180,53 @@ export default function Cart({
                 <div>
                   <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
                     {t("ui.quantity", "pos")}
+                    {item.isSoldByWeight ? " (kg)" : ""}
                   </label>
                   <input
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={(e) =>
-                      onUpdateQuantity(item.productId, parseInt(e.target.value))
-                    }
-                    className="w-full px-2 py-1 border border-gray-300 dark:border-slate-600 rounded text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    type="text"
+                    inputMode={item.isSoldByWeight ? "decimal" : "numeric"}
+                    placeholder={getInputPlaceholder(
+                      item.isSoldByWeight || false,
+                      "en",
+                    )}
+                    value={formatQuantity(item.quantity)}
+                    onChange={(e) => {
+                      const normalized = normalizeDecimalSeparator(
+                        e.target.value,
+                      );
+                      const parsed = parseQuantity(e.target.value);
+
+                      if (parsed !== null) {
+                        // Validate the quantity
+                        const validation = validateQuantity(
+                          parsed,
+                          item.isSoldByWeight || false,
+                        );
+                        if (validation.isValid) {
+                          onUpdateQuantity(item.productId, parsed);
+                        }
+                        // If invalid, silently reject (don't update)
+                      } else if (e.target.value === "") {
+                        // Allow clearing the input
+                        onUpdateQuantity(item.productId, 0);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // On blur, ensure a valid value or reset to previous
+                      if (
+                        e.target.value === "" ||
+                        parseQuantity(e.target.value) === null
+                      ) {
+                        onUpdateQuantity(item.productId, item.quantity);
+                      }
+                    }}
+                    className="w-full px-2 py-1 border border-gray-300 dark:border-slate-600 rounded text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   />
+                  {item.isSoldByWeight && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Use comma or period (1,254 or 1.254)
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
@@ -205,18 +291,11 @@ export default function Cart({
                 onChange={(e) => setPaymentMethod(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
               >
-                <option value="cash">
-                  {t("ui.paymentOptions.cash", "pos")}
-                </option>
-                <option value="card">
-                  {t("ui.paymentOptions.card", "pos")}
-                </option>
-                <option value="check">
-                  {t("ui.paymentOptions.check", "pos")}
-                </option>
-                <option value="online">
-                  {t("ui.paymentOptions.online", "pos")}
-                </option>
+                {availablePaymentMethods.map((method) => (
+                  <option key={method.id} value={method.id}>
+                    {t(`ui.paymentOptions.${method.id}`, "pos") || method.name}
+                  </option>
+                ))}
               </select>
             </div>
 

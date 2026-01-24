@@ -4,7 +4,12 @@ import { useState, useCallback } from "react";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 
 interface ProductSearchProps {
-  onAddToCart: (productId: string, name: string, price: number) => void;
+  onAddToCart: (
+    productId: string,
+    name: string,
+    price: number,
+    isSoldByWeight?: boolean,
+  ) => void;
   onSearch?: (query: string) => void;
 }
 
@@ -156,7 +161,12 @@ export default function ProductSearch({
                 key={product._id}
                 className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 bg-white dark:bg-slate-800 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/50 hover:border-blue-300 dark:hover:border-blue-600 transition cursor-pointer"
                 onClick={() =>
-                  onAddToCart(product._id, product.name, product.price)
+                  onAddToCart(
+                    product._id,
+                    product.name,
+                    product.price,
+                    product.isSoldByWeight,
+                  )
                 }
               >
                 <h3 className="font-semibold text-gray-800 dark:text-white mb-2">
@@ -175,7 +185,12 @@ export default function ProductSearch({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onAddToCart(product._id, product.name, product.price);
+                      onAddToCart(
+                        product._id,
+                        product.name,
+                        product.price,
+                        product.isSoldByWeight,
+                      );
                     }}
                     className="bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold transition"
                   >

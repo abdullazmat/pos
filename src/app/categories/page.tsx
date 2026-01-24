@@ -1,25 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 
 import Header from "@/components/layout/Header";
 import { toast as notify } from "react-toastify";
-import {
-  Tag,
-  Plus,
-  Edit2,
-  Trash2,
-  X,
-  AlertCircle,
-  CheckCircle,
-  Lock,
-} from "lucide-react";
-import {
-  UpgradePrompt,
-  LimitReachedPrompt,
-} from "@/components/common/UpgradePrompt";
+import { Edit2, Lock, Plus, Tag, Trash2, X } from "lucide-react";
+import { LimitReachedPrompt } from "@/components/common/UpgradePrompt";
 import { PLAN_FEATURES, isLimitReached } from "@/lib/utils/planFeatures";
 
 export default function CategoriesPage() {
@@ -27,6 +15,7 @@ export default function CategoriesPage() {
   const { t, currentLanguage } = useGlobalLanguage();
   const copy = (CATEGORIES_COPY[currentLanguage] ||
     CATEGORIES_COPY.en) as typeof CATEGORIES_COPY.en;
+
   const [categories, setCategories] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -66,6 +55,7 @@ export default function CategoriesPage() {
       const token = localStorage.getItem("accessToken");
       if (!token) {
         router.push("/auth/login");
+        setLoading(false);
         return;
       }
 
@@ -89,6 +79,24 @@ export default function CategoriesPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    const userStr = localStorage.getItem("user");
+    if (!userStr) {
+      router.push("/auth/login");
+      return;
+    }
+
+    setUser(JSON.parse(userStr));
+    fetchCategories();
+    loadSubscription();
+  }, [router, mounted]);
 
   const currentPlan: "BASIC" | "PROFESSIONAL" | "ENTERPRISE" =
     subscription?.planId?.toUpperCase() === "PROFESSIONAL"
@@ -191,271 +199,299 @@ export default function CategoriesPage() {
     }
   }
 
-  useEffect(() => {
-    setMounted(true);
-    loadSubscription();
-    fetchCategories();
-  }, []);
-
   if (!mounted) {
     return null;
   }
 
-  if (loading && categories.length === 0) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-slate-400">{copy.loading}</div>
+      <div className="min-h-screen bg-white dark:bg-slate-950">
+        <Header user={user} showBackButton />
+        <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="space-y-4 animate-pulse">
+            <div className="w-1/3 h-8 rounded bg-slate-200 dark:bg-slate-800" />
+            <div className="h-12 rounded bg-slate-200 dark:bg-slate-800" />
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="h-16 rounded bg-slate-200 dark:bg-slate-800"
+                />
+              ))}
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
-      <Header user={user} showBackButton />
+    <>
+      {showLimitPrompt && (
+        <LimitReachedPrompt
+          limitName="Categorías"
+          current={categories.length}
+          max={planConfig.maxCategories}
+          onDismiss={() => setShowLimitPrompt(false)}
+        />
+      )}
 
-      <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="flex items-start justify-between gap-4 mb-6">
-          <div>
-            <h1 className="mb-1 text-3xl font-bold text-white">{copy.title}</h1>
-            <p className="text-sm text-slate-400">{copy.subtitle}</p>
-          </div>
-          <div className="inline-flex items-center gap-3 px-4 py-2 border rounded-lg shadow-sm bg-slate-900 border-slate-800">
-            <span className="flex items-center gap-2 text-sm font-medium text-slate-300">
-              <span className="inline-flex items-center gap-1 text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                {planUsageLabel(
-                  categories.length,
-                  planConfig?.maxCategories ?? 0,
-                )}
+      <div className="min-h-screen bg-white dark:bg-slate-950">
+        <Header user={user} showBackButton />
+
+        <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          {/* Page Header */}
+          <div className="flex items-start justify-between gap-4 mb-6">
+            <div>
+              <h1 className="mb-1 text-3xl font-bold text-slate-900 dark:text-white">
+                {copy.title}
+              </h1>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {copy.subtitle}
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-3 px-4 py-2 border rounded-lg shadow-sm bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+              <span className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  {planUsageLabel(
+                    categories.length,
+                    planConfig?.maxCategories ?? 0,
+                  )}
+                </span>
+                <span className="hidden sm:inline text-slate-500 dark:text-slate-500">
+                  {copy.planTag}
+                </span>
               </span>
-              <span className="hidden sm:inline text-slate-500">
-                {copy.planTag}
-              </span>
-            </span>
-            {currentPlan === "BASIC" && (
-              <button
-                onClick={() => router.push("/upgrade")}
-                className="px-2 py-1 text-xs text-blue-300 transition border rounded bg-blue-600/20 border-blue-500/40 hover:bg-blue-600/30"
-              >
-                {copy.upgradeCta}
-              </button>
-            )}
+              {currentPlan === "BASIC" && (
+                <button
+                  onClick={() => router.push("/upgrade")}
+                  className="px-2 py-1 text-xs text-blue-600 transition border rounded bg-blue-100 border-blue-200 hover:bg-blue-200/80 dark:text-blue-300 dark:bg-blue-600/20 dark:border-blue-500/40 dark:hover:bg-blue-600/30"
+                >
+                  {copy.upgradeCta}
+                </button>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Action Bar */}
-        <div className="flex items-center justify-end mb-6">
-          <button
-            onClick={() => {
-              if (!canCreateCategory) {
-                setShowLimitPrompt(true);
-                return;
-              }
-              setShowModal(true);
-              setEditingId(null);
-              setFormData({ name: "", description: "" });
-            }}
-            disabled={!canCreateCategory}
-            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-          >
-            <Plus className="w-5 h-5" />
-            {copy.newCategory}
-            {!canCreateCategory && <Lock className="w-4 h-4" />}
-          </button>
-        </div>
-
-        {/* Categories Grid */}
-        {categories.length === 0 ? (
-          <div className="p-12 text-center border shadow-sm bg-slate-900 rounded-xl border-slate-800">
-            <Tag className="w-16 h-16 mx-auto mb-4 text-slate-600" />
-            <p className="mb-2 text-lg text-slate-300">{copy.emptyTitle}</p>
-            <p className="text-sm text-slate-500">{copy.emptySubtitle}</p>
+          {/* Action Bar */}
+          <div className="flex items-center justify-end mb-6">
+            <button
+              onClick={() => {
+                if (!canCreateCategory) {
+                  setShowLimitPrompt(true);
+                  return;
+                }
+                setShowModal(true);
+                setEditingId(null);
+                setFormData({ name: "", description: "" });
+              }}
+              disabled={!canCreateCategory}
+              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+            >
+              <Plus className="w-5 h-5" />
+              {copy.newCategory}
+              {!canCreateCategory && <Lock className="w-4 h-4" />}
+            </button>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((category) => (
-              <div
-                key={category._id}
-                className="flex items-center justify-between p-4 transition border bg-slate-900 rounded-xl border-slate-800 hover:border-slate-700 hover:bg-slate-900/80"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-500/15 p-2.5 rounded-lg border border-blue-500/30">
-                    <Tag className="w-5 h-5 text-blue-400" />
+
+          {/* Categories Grid */}
+          {categories.length === 0 ? (
+            <div className="p-12 text-center border shadow-sm bg-white rounded-xl border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+              <Tag className="w-16 h-16 mx-auto mb-4 text-slate-400 dark:text-slate-600" />
+              <p className="mb-2 text-lg text-slate-800 dark:text-slate-300">
+                {copy.emptyTitle}
+              </p>
+              <p className="text-sm text-slate-600 dark:text-slate-500">
+                {copy.emptySubtitle}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {categories.map((category) => (
+                <div
+                  key={category._id}
+                  className="flex items-center justify-between p-4 transition border bg-white rounded-xl border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-800 dark:hover:border-slate-700 dark:hover:bg-slate-900/80"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-50 p-2.5 rounded-lg border border-blue-100 dark:bg-blue-500/15 dark:border-blue-500/30">
+                      <Tag className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <span className="font-medium text-slate-800 dark:text-slate-100">
+                      {category.name}
+                    </span>
                   </div>
-                  <span className="font-medium text-slate-100">
-                    {category.name}
-                  </span>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => handleEdit(category)}
+                      className="p-2 text-blue-600 transition-colors rounded-lg hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-500/10"
+                      title="Editar"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleDeleteClick(category._id, category.name)
+                      }
+                      className="p-2 text-red-600 transition-colors rounded-lg hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-500/10"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => handleEdit(category)}
-                    className="p-2 text-blue-400 transition-colors rounded-lg hover:bg-blue-500/10"
-                    title="Editar"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleDeleteClick(category._id, category.name)
-                    }
-                    className="p-2 text-red-400 transition-colors rounded-lg hover:bg-red-500/10"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="mt-12 text-center">
+            <p className="text-sm text-slate-600 dark:text-slate-500">
+              {copy.footer}
+            </p>
+          </div>
+        </main>
+
+        {/* Modal */}
+        {showModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowModal(false)}
+          >
+            <div
+              className="w-full max-w-md border shadow-2xl bg-white rounded-2xl border-slate-200 dark:bg-slate-900 dark:border-slate-800"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                  {editingId
+                    ? t("pages.categories.editCategory", "pos")
+                    : t("pages.categories.addCategory", "pos")}
+                </h2>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="p-1 transition-colors rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-            ))}
+
+              <form onSubmit={handleSubmit} className="p-6">
+                <div className="mb-6">
+                  <label className="block mb-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
+                    {t("pages.categories.categoryName", "pos")}{" "}
+                    <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="w-full px-4 py-3 text-slate-900 transition-all border outline-none border-slate-300 bg-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-400 dark:text-white dark:border-slate-700 dark:bg-slate-800 dark:placeholder-slate-500"
+                    placeholder={copy.namePlaceholder}
+                    required
+                    autoFocus
+                  />
+                </div>
+
+                <div className="mb-6">
+                  <label className="block mb-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
+                    {t("pages.categories.description", "pos")}
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    className="w-full px-4 py-3 text-slate-900 transition-all border outline-none resize-none border-slate-300 bg-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-400 dark:text-white dark:border-slate-700 dark:bg-slate-800 dark:placeholder-slate-500"
+                    placeholder={copy.descriptionPlaceholder}
+                    rows={4}
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowModal(false);
+                      setEditingId(null);
+                      setFormData({ name: "", description: "" });
+                    }}
+                    className="flex-1 px-6 py-3 font-semibold transition-colors border text-slate-700 border-slate-300 rounded-xl hover:bg-slate-100 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-800"
+                  >
+                    {t("labels.cancel", "pos")}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 px-6 py-3 font-semibold text-white transition-colors bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading
+                      ? copy.saving
+                      : editingId
+                        ? copy.update
+                        : copy.create}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 
-        {/* Footer */}
-        <div className="mt-12 text-center">
-          <p className="text-sm text-slate-500">{copy.footer}</p>
-        </div>
-      </main>
-
-      {/* Modal */}
-      {showModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-          onClick={() => setShowModal(false)}
-        >
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && deleteTarget && (
           <div
-            className="w-full max-w-md border shadow-2xl bg-slate-900 rounded-2xl border-slate-800"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowDeleteModal(false)}
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-800">
-              <h2 className="text-xl font-bold text-white">
-                {editingId
-                  ? t("pages.categories.editCategory", "pos")
-                  : t("pages.categories.addCategory", "pos")}
-              </h2>
-              <button
-                onClick={() => setShowModal(false)}
-                className="p-1 transition-colors rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <form onSubmit={handleSubmit} className="p-6">
-              <div className="mb-6">
-                <label className="block mb-2 text-sm font-semibold text-slate-200">
-                  {t("pages.categories.categoryName", "pos")}{" "}
-                  <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full px-4 py-3 text-white transition-all border outline-none border-slate-700 bg-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-500"
-                  placeholder={copy.namePlaceholder}
-                  required
-                  autoFocus
-                />
+            <div
+              className="w-full max-w-md p-6 border shadow-2xl bg-white rounded-2xl border-slate-200 dark:bg-slate-900 dark:border-slate-800"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-red-100 rounded-full dark:bg-red-900/40">
+                  <Trash2 className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                    {copy.deleteTitle}
+                  </h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    {copy.deleteSubtitle}
+                  </p>
+                </div>
               </div>
 
-              <div className="mb-6">
-                <label className="block mb-2 text-sm font-semibold text-slate-200">
-                  {t("pages.categories.description", "pos")}
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  className="w-full px-4 py-3 text-white transition-all border outline-none resize-none border-slate-700 bg-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-500"
-                  placeholder={copy.descriptionPlaceholder}
-                  rows={4}
-                />
+              <div className="p-4 mb-6 border rounded-lg bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-700/50">
+                <p className="text-slate-700 dark:text-slate-200">
+                  {copy.deleteQuestion}{" "}
+                  <span className="font-semibold text-slate-900 dark:text-white">
+                    {deleteTarget.name}
+                  </span>
+                  ?
+                </p>
               </div>
 
-              {/* Modal Footer */}
               <div className="flex gap-3">
                 <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    setEditingId(null);
-                    setFormData({ name: "", description: "" });
-                  }}
-                  className="flex-1 px-6 py-3 font-semibold transition-colors border text-slate-200 border-slate-700 rounded-xl hover:bg-slate-800"
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 px-4 py-2.5 font-medium transition-colors border rounded-lg text-slate-700 bg-white border-slate-300 hover:bg-slate-100 dark:text-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800"
                 >
                   {t("labels.cancel", "pos")}
                 </button>
                 <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 px-6 py-3 font-semibold text-white transition-colors bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-2.5 font-medium text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700"
                 >
-                  {loading
-                    ? copy.saving
-                    : editingId
-                      ? copy.update
-                      : copy.create}
+                  {t("labels.delete", "pos")}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && deleteTarget && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          onClick={() => setShowDeleteModal(false)}
-        >
-          <div
-            className="w-full max-w-md p-6 border shadow-2xl bg-slate-800 rounded-2xl border-slate-700"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-red-100 rounded-full">
-                <Trash2 className="w-6 h-6 text-red-600" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">
-                  {copy.deleteTitle}
-                </h3>
-                <p className="text-sm text-gray-400">{copy.deleteSubtitle}</p>
-              </div>
-            </div>
-
-            <div className="p-4 mb-6 border rounded-lg bg-red-900/20 border-red-700/50">
-              <p className="text-gray-200">
-                {copy.deleteQuestion}{" "}
-                <span className="font-semibold text-gray-100">
-                  {deleteTarget.name}
-                </span>
-                ?
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="flex-1 px-4 py-2.5 bg-slate-700 text-gray-200 rounded-lg font-medium hover:bg-slate-600 transition-colors border border-slate-600"
-              >
-                {t("labels.cancel", "pos")}
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
-              >
-                {t("labels.delete", "pos")}
-              </button>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
 

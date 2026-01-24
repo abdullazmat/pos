@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import CashRegister from "@/lib/models/CashRegister";
 import CashMovement from "@/lib/models/CashMovement";
+import Business from "@/lib/models/Business";
+import User from "@/lib/models/User";
 import { authMiddleware } from "@/lib/middleware/auth";
 import {
   generateErrorResponse,
@@ -192,7 +194,7 @@ export async function POST(req: NextRequest) {
           isOpen: true,
           movements: [movement],
         },
-        201
+        201,
       );
     } else {
       // Close
@@ -227,14 +229,21 @@ export async function POST(req: NextRequest) {
       cashRegister.status = "closed";
       cashRegister.closedAt = new Date();
       cashRegister.closedBy = userId;
-      cashRegister.closingBalance =
+      const closingBalance =
         typeof countedAmount === "number"
           ? countedAmount
           : cashRegister.currentBalance;
+      cashRegister.closingBalance = closingBalance;
       cashRegister.salesTotal = salesTotal;
       cashRegister.withdrawalsTotal = withdrawalsTotal;
       // Persist current balance to match closing balance
-      cashRegister.currentBalance = cashRegister.closingBalance;
+      cashRegister.currentBalance = closingBalance;
+
+      // Fetch business and cashier info for receipt summary
+      const [business, cashier] = await Promise.all([
+        Business.findById(businessId).select("name"),
+        User.findById(userId).select("fullName username email"),
+      ]);
 
       await cashRegister.save();
 
@@ -244,16 +253,47 @@ export async function POST(req: NextRequest) {
         businessId,
         type: "cierre",
         description: "Cierre de caja",
-        amount: cashRegister.closingBalance || expected,
+        amount: closingBalance || expected,
         createdBy: userId,
       });
 
       await movement.save();
 
+      const formattedMovements = movements.map((m) => ({
+        _id: m._id,
+        type: m.type,
+        description: m.description,
+        amount: m.amount,
+        createdAt: m.createdAt?.toLocaleString("es-AR") || "-",
+      }));
+      formattedMovements.push({
+        _id: movement._id,
+        type: movement.type,
+        description: movement.description,
+        amount: movement.amount,
+        createdAt: movement.createdAt?.toLocaleString("es-AR") || "-",
+      });
+
       return generateSuccessResponse({
         cashRegister,
         isOpen: false,
         message: "Cash register closed successfully",
+        summary: {
+          businessName: business?.name || "Mi Negocio",
+          cashierName:
+            cashier?.fullName || cashier?.username || cashier?.email || "",
+          sessionId: cashRegister._id.toString(),
+          openedAt: cashRegister.openedAt?.toLocaleString("es-AR") || "",
+          closedAt: cashRegister.closedAt?.toLocaleString("es-AR") || "",
+          openingBalance: cashRegister.openingBalance || 0,
+          salesTotal,
+          withdrawalsTotal,
+          creditNotesTotal,
+          expected,
+          countedAmount: closingBalance,
+          difference: closingBalance - expected,
+          movements: formattedMovements,
+        },
       });
     }
   } catch (error) {

@@ -85,7 +85,12 @@ export default function POSPage() {
     };
   }, [router]);
 
-  const handleAddToCart = (productId: string, name: string, price: number) => {
+  const handleAddToCart = (
+    productId: string,
+    name: string,
+    price: number,
+    isSoldByWeight?: boolean,
+  ) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.productId === productId);
       if (existing) {
@@ -93,8 +98,15 @@ export default function POSPage() {
           item.productId === productId
             ? {
                 ...item,
-                quantity: item.quantity + 1,
-                total: (item.quantity + 1) * item.unitPrice - item.discount,
+                quantity: item.isSoldByWeight
+                  ? item.quantity + 0.1
+                  : item.quantity + 1,
+                total:
+                  (item.isSoldByWeight
+                    ? item.quantity + 0.1
+                    : item.quantity + 1) *
+                    item.unitPrice -
+                  item.discount,
               }
             : item,
         );
@@ -104,10 +116,11 @@ export default function POSPage() {
         {
           productId,
           productName: name,
-          quantity: 1,
+          quantity: isSoldByWeight ? 0.1 : 1,
           unitPrice: price,
           discount: 0,
-          total: price,
+          total: isSoldByWeight ? price * 0.1 : price,
+          isSoldByWeight: isSoldByWeight || false,
         },
       ];
     });
@@ -166,7 +179,9 @@ export default function POSPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        toast.error(`${error.error || t("ui.checkoutError", "pos")}`);
+        // Show translated error message instead of API error
+        console.error("Checkout API error:", error.error);
+        toast.error(t("ui.checkoutError", "pos"));
         return;
       }
 

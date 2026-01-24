@@ -733,15 +733,17 @@ export default function ProductsPage() {
         <div className="mb-8">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
+              <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
                 {copy.headerTitle}
               </h1>
-              <p className="text-slate-400">{copy.headerSubtitle}</p>
+              <p className="text-slate-600 dark:text-slate-400">
+                {copy.headerSubtitle}
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={loadProducts}
-                className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 font-semibold flex items-center gap-2 transition"
+                className="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg font-semibold flex items-center gap-2 transition shadow-sm dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                 title={copy.refreshLabel}
               >
                 <RefreshCw className="w-5 h-5" />
@@ -784,9 +786,9 @@ export default function ProductsPage() {
           </div>
 
           {/* Plan Status Badge */}
-          <div className="inline-flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-lg border border-slate-700 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border bg-white border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800">
             <svg
-              className="w-4 h-4 text-green-400"
+              className="w-4 h-4 text-green-500 dark:text-green-400"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -796,7 +798,7 @@ export default function ProductsPage() {
                 clipRule="evenodd"
               />
             </svg>
-            <span className="text-sm font-medium text-slate-300">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
               {copy.planLabel(products.length)}
             </span>
           </div>
@@ -805,12 +807,12 @@ export default function ProductsPage() {
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={copy.searchPlaceholder}
-              className="w-full pl-12 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100"
             />
           </div>
         </div>
@@ -821,10 +823,10 @@ export default function ProductsPage() {
             onClick={() => setShowImportModal(false)}
           >
             <div
-              className="bg-slate-950 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-slate-800 animate-in zoom-in-95 slide-in-from-bottom-4"
+              className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 animate-in zoom-in-95 slide-in-from-bottom-4 dark:bg-slate-950 dark:border-slate-800"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300">
                     <svg
@@ -842,10 +844,10 @@ export default function ProductsPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                       {copy.importModal.title}
                     </h3>
-                    <p className="text-slate-400 text-sm">
+                    <p className="text-slate-600 text-sm dark:text-slate-400">
                       {copy.importModal.subtitle}
                     </p>
                   </div>
@@ -855,7 +857,7 @@ export default function ProductsPage() {
                     setShowImportModal(false);
                     setImportFile(null);
                   }}
-                  className="p-2 rounded-full hover:bg-slate-800 text-slate-400"
+                  className="p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
                   aria-label={t("close") || "Close"}
                 >
                   <svg
@@ -875,8 +877,8 @@ export default function ProductsPage() {
               </div>
 
               <div className="p-6 space-y-6">
-                <div className="bg-slate-900 border border-blue-900 rounded-xl p-5">
-                  <div className="flex items-start gap-3 text-blue-200">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 dark:bg-slate-900 dark:border-slate-800">
+                  <div className="flex items-start gap-3 text-slate-700 dark:text-blue-200">
                     <svg
                       className="w-5 h-5 mt-0.5"
                       fill="none"
@@ -891,10 +893,10 @@ export default function ProductsPage() {
                       />
                     </svg>
                     <div>
-                      <h4 className="font-semibold text-white mb-2">
+                      <h4 className="font-semibold text-slate-900 dark:text-white mb-2">
                         {copy.importModal.instructionsTitle}
                       </h4>
-                      <ol className="list-decimal list-inside space-y-1 text-sm text-blue-100">
+                      <ol className="list-decimal list-inside space-y-1 text-sm text-slate-700 dark:text-blue-100">
                         {copy.importModal.steps.map((step, idx) => (
                           <li key={idx}>{step}</li>
                         ))}
@@ -924,9 +926,9 @@ export default function ProductsPage() {
                     {copy.importModal.downloadTemplate}
                   </button>
                   {importFile && (
-                    <div className="text-sm text-slate-300 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 w-full sm:w-auto">
+                    <div className="text-sm text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2 w-full sm:w-auto dark:text-slate-300 dark:bg-slate-900 dark:border-slate-800">
                       {copy.importModal.selectedFile}{" "}
-                      <span className="font-semibold text-white">
+                      <span className="font-semibold text-slate-900 dark:text-white">
                         {importFile.name}
                       </span>
                     </div>
@@ -940,9 +942,9 @@ export default function ProductsPage() {
                     const file = e.dataTransfer.files?.[0];
                     if (file) setImportFile(file);
                   }}
-                  className="border-2 border-dashed border-slate-700 rounded-xl bg-slate-900 p-8 flex flex-col items-center justify-center text-center gap-4"
+                  className="border-2 border-dashed border-slate-200 rounded-xl bg-white p-8 flex flex-col items-center justify-center text-center gap-4 dark:bg-slate-900 dark:border-slate-800"
                 >
-                  <div className="p-4 rounded-full bg-slate-800 text-slate-200">
+                  <div className="p-4 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                     <svg
                       className="w-8 h-8"
                       fill="none"
@@ -958,10 +960,10 @@ export default function ProductsPage() {
                     </svg>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-slate-200 font-semibold">
+                    <p className="text-slate-800 font-semibold dark:text-slate-200">
                       {copy.importModal.dropTitle}
                     </p>
-                    <p className="text-slate-500 text-sm">
+                    <p className="text-slate-600 text-sm dark:text-slate-500">
                       {copy.importModal.dropSubtitle}
                     </p>
                   </div>
@@ -984,13 +986,13 @@ export default function ProductsPage() {
                   />
                 </div>
 
-                <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-                  <h4 className="text-white font-semibold mb-3">
+                <div className="bg-white border border-slate-200 rounded-xl p-5 dark:bg-slate-900 dark:border-slate-800">
+                  <h4 className="text-slate-900 font-semibold mb-3 dark:text-white">
                     {copy.importModal.csvFormatTitle}
                   </h4>
-                  <div className="grid md:grid-cols-2 gap-4 text-sm text-slate-300">
+                  <div className="grid md:grid-cols-2 gap-4 text-sm text-slate-700 dark:text-slate-300">
                     <div>
-                      <p className="font-semibold text-slate-100 mb-2">
+                      <p className="font-semibold text-slate-800 mb-2 dark:text-slate-100">
                         {copy.importModal.requiredTitle}
                       </p>
                       <ul className="space-y-1">
@@ -1000,7 +1002,7 @@ export default function ProductsPage() {
                       </ul>
                     </div>
                     <div>
-                      <p className="font-semibold text-slate-100 mb-2">
+                      <p className="font-semibold text-slate-800 mb-2 dark:text-slate-100">
                         {copy.importModal.optionalTitle}
                       </p>
                       <ul className="space-y-1">
@@ -1018,7 +1020,7 @@ export default function ProductsPage() {
                       setShowImportModal(false);
                       setImportFile(null);
                     }}
-                    className="w-full sm:w-auto px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-semibold border border-slate-700"
+                    className="w-full sm:w-auto px-4 py-2.5 bg-white text-slate-700 rounded-lg font-semibold border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-800"
                   >
                     {copy.importModal.cancel}
                   </button>
@@ -1039,9 +1041,9 @@ export default function ProductsPage() {
 
         {showForm && (
           <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-            <div className="bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 animate-in zoom-in-95 slide-in-from-bottom-4 border border-slate-800">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 animate-in zoom-in-95 slide-in-from-bottom-4 border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
                   {editingId ? copy.form.editTitle : copy.form.newTitle}
                 </h2>
                 <button
@@ -1063,7 +1065,7 @@ export default function ProductsPage() {
                     });
                     setShowForm(false);
                   }}
-                  className="text-slate-400 hover:text-slate-300 text-2xl"
+                  className="text-slate-500 hover:text-slate-700 text-2xl dark:text-slate-400 dark:hover:text-slate-200"
                 >
                   ✕
                 </button>
@@ -1072,7 +1074,7 @@ export default function ProductsPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Product Name */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     {t("pages.products.productName", "pos")}{" "}
                     <span className="text-red-500">*</span>
                   </label>
@@ -1083,14 +1085,14 @@ export default function ProductsPage() {
                       setFormData({ ...formData, name: e.target.value })
                     }
                     placeholder={copy.form.namePlaceholder}
-                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                     required
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     {t("pages.products.description", "pos")}
                   </label>
                   <textarea
@@ -1100,14 +1102,14 @@ export default function ProductsPage() {
                     }
                     placeholder={copy.form.descPlaceholder}
                     rows={3}
-                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                   />
                 </div>
 
                 {/* Barcode and Category */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {t("pages.products.barcode", "pos")}
                     </label>
                     <input
@@ -1117,11 +1119,11 @@ export default function ProductsPage() {
                         setFormData({ ...formData, barcode: e.target.value })
                       }
                       placeholder={copy.form.barcodePlaceholder}
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {t("pages.products.category", "pos")}
                     </label>
                     <select
@@ -1129,16 +1131,19 @@ export default function ProductsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, category: e.target.value })
                       }
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     >
-                      <option value="" className="bg-slate-800">
+                      <option
+                        value=""
+                        className="bg-white text-slate-900 dark:bg-slate-800 dark:text-white"
+                      >
                         {copy.form.categoryPlaceholder}
                       </option>
                       {categories.map((cat: any) => (
                         <option
                           key={cat._id || cat.id}
                           value={cat.name}
-                          className="bg-slate-800"
+                          className="bg-white text-slate-900 dark:bg-slate-800 dark:text-white"
                         >
                           {cat.name}
                         </option>
@@ -1150,7 +1155,7 @@ export default function ProductsPage() {
                 {/* Cost and Margin */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {copy.form.costLabel}{" "}
                       <span className="text-red-500">*</span>
                     </label>
@@ -1172,12 +1177,12 @@ export default function ProductsPage() {
                       }}
                       placeholder="0.00"
                       step="0.01"
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {copy.form.marginLabel}{" "}
                       <span className="text-red-500">*</span>
                     </label>
@@ -1197,7 +1202,7 @@ export default function ProductsPage() {
                       }}
                       placeholder="0.0"
                       step="0.1"
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                       required
                     />
                   </div>
@@ -1206,7 +1211,7 @@ export default function ProductsPage() {
                 {/* Price and Stock */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {copy.form.priceLabel}{" "}
                       <span className="text-red-500">*</span>
                     </label>
@@ -1226,18 +1231,18 @@ export default function ProductsPage() {
                       }}
                       placeholder="0.00"
                       step="0.01"
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                       required
                     />
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       {copy.form.priceHint}
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {copy.form.stockLabel}{" "}
                       <span className="text-red-500">*</span>
-                      <span className="text-xs text-slate-400 font-normal">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
                         {copy.form.stockUnitHint}
                       </span>
                     </label>
@@ -1248,7 +1253,7 @@ export default function ProductsPage() {
                         setFormData({ ...formData, stock: e.target.value })
                       }
                       placeholder={copy.form.stockPlaceholder}
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                       required
                     />
                   </div>
@@ -1257,9 +1262,9 @@ export default function ProductsPage() {
                 {/* Code and Min Stock */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {copy.form.codeLabel}
-                      <span className="text-xs text-slate-400 font-normal ml-2">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-normal ml-2">
                         {copy.form.codeHint || "(auto si vacío)"}
                       </span>
                     </label>
@@ -1270,14 +1275,14 @@ export default function ProductsPage() {
                         setFormData({ ...formData, code: e.target.value })
                       }
                       placeholder={copy.form.codePlaceholder}
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {copy.form.minStockLabel}{" "}
                       <span className="text-red-500">*</span>
-                      <span className="text-xs text-slate-400 font-normal">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
                         {copy.form.minStockHint}
                       </span>
                     </label>
@@ -1288,17 +1293,17 @@ export default function ProductsPage() {
                         setFormData({ ...formData, minStock: e.target.value })
                       }
                       placeholder={copy.form.minStockPlaceholder}
-                      className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                       required
                     />
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       {copy.form.minStockHelper}
                     </p>
                   </div>
                 </div>
 
                 {/* Checkboxes */}
-                <div className="space-y-3 bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                <div className="space-y-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
@@ -1308,11 +1313,11 @@ export default function ProductsPage() {
                       }
                       className="w-4 h-4 rounded border-slate-600 text-blue-600 cursor-pointer"
                     />
-                    <span className="text-sm text-slate-300">
+                    <span className="text-sm text-slate-700 dark:text-slate-300">
                       {copy.form.activeLabel}
                     </span>
                   </label>
-                  <label className="flex items-center gap-3 cursor-pointer">
+                  <label className="flex items-start gap-3 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.isSoldByWeight}
@@ -1322,11 +1327,18 @@ export default function ProductsPage() {
                           isSoldByWeight: e.target.checked,
                         })
                       }
-                      className="w-4 h-4 rounded border-slate-600 text-blue-600 cursor-pointer"
+                      className="w-4 h-4 rounded border-slate-600 text-blue-600 cursor-pointer mt-0.5"
                     />
-                    <span className="text-sm text-slate-300">
-                      {copy.form.weightLabel}
-                    </span>
+                    <div className="flex-1">
+                      <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">
+                        {copy.form.weightLabel}
+                      </span>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                        {formData.isSoldByWeight
+                          ? "✓ Decimals enabled (max 3 places). Examples: 1.254 kg, 0.750 kg. Use comma or period as separator."
+                          : "Enable for products sold by weight/volume. Supports decimal quantities (max 3 decimal places)."}
+                      </p>
+                    </div>
                   </label>
                 </div>
 
@@ -1352,7 +1364,7 @@ export default function ProductsPage() {
                       });
                       setShowForm(false);
                     }}
-                    className="flex-1 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-semibold transition"
+                    className="flex-1 px-6 py-3 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg font-semibold transition dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700"
                   >
                     {copy.form.cancel}
                   </button>
@@ -1369,32 +1381,32 @@ export default function ProductsPage() {
         )}
 
         {/* Table View only (list) */}
-        <div className="overflow-x-auto bg-slate-900 rounded-xl border border-slate-800 shadow-sm">
+        <div className="overflow-x-auto bg-white rounded-xl border border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="text-left bg-slate-800/50 border-b border-slate-700">
-                <th className="p-3 font-semibold text-slate-200">
+              <tr className="text-left bg-slate-100 border-b border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
+                <th className="p-3 font-semibold text-slate-600 dark:text-slate-200">
                   {copy.table.product}
                 </th>
-                <th className="p-3 font-semibold text-slate-200">
+                <th className="p-3 font-semibold text-slate-600 dark:text-slate-200">
                   {copy.table.code}
                 </th>
-                <th className="p-3 font-semibold text-slate-200">
+                <th className="p-3 font-semibold text-slate-600 dark:text-slate-200">
                   {copy.table.stock}
                 </th>
-                <th className="p-3 font-semibold text-slate-200">
+                <th className="p-3 font-semibold text-slate-600 dark:text-slate-200">
                   {copy.table.status}
                 </th>
-                <th className="p-3 font-semibold text-slate-200">
+                <th className="p-3 font-semibold text-slate-600 dark:text-slate-200">
                   {copy.table.cost}
                 </th>
-                <th className="p-3 font-semibold text-slate-200">
+                <th className="p-3 font-semibold text-slate-600 dark:text-slate-200">
                   {copy.table.price}
                 </th>
-                <th className="p-3 font-semibold text-slate-200">
+                <th className="p-3 font-semibold text-slate-600 dark:text-slate-200">
                   {copy.table.margin}
                 </th>
-                <th className="p-3 font-semibold text-slate-200">
+                <th className="p-3 font-semibold text-slate-600 dark:text-slate-200">
                   {t("labels.actions", "pos")}
                 </th>
               </tr>
@@ -1403,23 +1415,27 @@ export default function ProductsPage() {
               {filteredProducts.map((product) => (
                 <tr
                   key={product._id}
-                  className="border-t border-slate-700 hover:bg-slate-800/50 transition"
+                  className="border-t border-slate-200 hover:bg-slate-50 transition dark:border-slate-700 dark:hover:bg-slate-800/50"
                 >
-                  <td className="p-3 text-white font-medium">{product.name}</td>
-                  <td className="p-3 text-slate-300">{product.code}</td>
-                  <td className="p-3 text-slate-300">
+                  <td className="p-3 text-slate-900 dark:text-white font-medium">
+                    {product.name}
+                  </td>
+                  <td className="p-3 text-slate-600 dark:text-slate-300">
+                    {product.code}
+                  </td>
+                  <td className="p-3 text-slate-600 dark:text-slate-300">
                     <div className="flex flex-col leading-tight">
                       <span
                         className={
                           product.stock <= product.minStock
-                            ? "text-red-400 font-semibold"
-                            : "text-slate-100"
+                            ? "text-red-600 dark:text-red-400 font-semibold"
+                            : "text-slate-900 dark:text-slate-100"
                         }
                       >
                         {product.stock}
                         {product.isSoldByWeight ? " kg" : ""}
                       </span>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-slate-600 dark:text-slate-500">
                         Min: {product.minStock ?? 0}
                         {product.isSoldByWeight ? " kg" : ""}
                       </span>
@@ -1438,10 +1454,10 @@ export default function ProductsPage() {
                         : copy.table.outOfStock}
                     </span>
                   </td>
-                  <td className="p-3 text-slate-400">
+                  <td className="p-3 text-slate-600 dark:text-slate-400">
                     ${product.cost.toFixed(2)}
                   </td>
-                  <td className="p-3 text-slate-400">
+                  <td className="p-3 text-slate-600 dark:text-slate-400">
                     ${product.price.toFixed(2)}
                   </td>
                   <td className="p-3 text-green-400 font-semibold">
@@ -1468,7 +1484,7 @@ export default function ProductsPage() {
                           });
                           setShowForm(true);
                         }}
-                        className="p-2 rounded-full border border-slate-700 bg-slate-800 hover:bg-slate-700 text-blue-400 transition"
+                        className="p-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-blue-600 transition dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-blue-400"
                         title={t("labels.edit", "pos") as string}
                       >
                         <Pencil className="w-4 h-4" />
@@ -1477,7 +1493,7 @@ export default function ProductsPage() {
                         onClick={() =>
                           handleDeleteClick(product._id, product.name)
                         }
-                        className="p-2 rounded-full border border-slate-700 bg-slate-800 hover:bg-slate-700 text-red-400 transition"
+                        className="p-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-red-600 transition dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-red-400"
                         title={t("labels.delete", "pos") as string}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -1491,9 +1507,13 @@ export default function ProductsPage() {
         </div>
 
         {filteredProducts.length === 0 && (
-          <div className="bg-slate-900 rounded-lg shadow-lg p-12 text-center border border-slate-800">
-            <p className="text-slate-400 text-lg">{copy.empty.title}</p>
-            <p className="text-slate-500">{copy.empty.subtitle}</p>
+          <div className="bg-white rounded-lg shadow-lg p-12 text-center border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+            <p className="text-slate-500 dark:text-slate-400 text-lg">
+              {copy.empty.title}
+            </p>
+            <p className="text-slate-600 dark:text-slate-500">
+              {copy.empty.subtitle}
+            </p>
           </div>
         )}
 

@@ -85,16 +85,16 @@ export default function SubscriptionPremiumModal({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-700 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700 sticky top-0 bg-slate-800">
+        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700 sticky top-0 bg-slate-50 dark:bg-slate-800">
           <div className="flex items-center gap-2">
             <Crown className="w-6 h-6 text-yellow-400" />
             <div>
-              <h2 className="text-xl font-bold text-white">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                 Suscripción - {plan.name}
               </h2>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-slate-600 dark:text-gray-400">
                 Información de facturación
               </p>
             </div>
@@ -102,7 +102,7 @@ export default function SubscriptionPremiumModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-white transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
@@ -159,7 +159,7 @@ export default function SubscriptionPremiumModal({
           {/* Billing Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-200 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-2">
                 Nombre de la Empresa *
               </label>
               <input
@@ -168,12 +168,12 @@ export default function SubscriptionPremiumModal({
                 value={formData.businessName}
                 onChange={handleChange}
                 placeholder="Nombre de tu empresa"
-                className="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder-gray-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-200 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-2">
                 CUIT/RUC/DNI *
               </label>
               <input
@@ -182,12 +182,12 @@ export default function SubscriptionPremiumModal({
                 value={formData.cuitRucDni}
                 onChange={handleChange}
                 placeholder="20-12345678-9"
-                className="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder-gray-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-200 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-2">
                 Email de Facturación *
               </label>
               <input
@@ -196,12 +196,12 @@ export default function SubscriptionPremiumModal({
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="facturacion@tuempresa.com"
-                className="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder-gray-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-200 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-2">
                 Teléfono
               </label>
               <input
@@ -210,7 +210,7 @@ export default function SubscriptionPremiumModal({
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="011 1234-5678"
-                className="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder-gray-500"
               />
             </div>
 
@@ -220,7 +220,7 @@ export default function SubscriptionPremiumModal({
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="flex-1 px-4 py-3 border border-slate-600 rounded-lg font-semibold text-gray-300 hover:bg-slate-700 transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-3 border border-slate-300 rounded-lg font-semibold text-slate-800 bg-white hover:bg-slate-50 transition-colors disabled:opacity-50 dark:border-slate-600 dark:text-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700"
               >
                 Cancelar
               </button>

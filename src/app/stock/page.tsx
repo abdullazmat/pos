@@ -36,7 +36,10 @@ const STOCK_COPY = {
       outTitle: "Sin Stock",
       outDesc: "Productos agotados",
     },
-    alert: (count: number) => `• ${count} producto(s) sin stock`,
+    alert: {
+      title: "Alertas de Stock",
+      message: (count: number) => `• ${count} producto(s) sin stock`,
+    },
     filters: {
       label: "Filtrar:",
       all: "Todos",
@@ -73,7 +76,10 @@ const STOCK_COPY = {
       outTitle: "Out of Stock",
       outDesc: "Depleted products",
     },
-    alert: (count: number) => `• ${count} item(s) out of stock`,
+    alert: {
+      title: "Stock Alerts",
+      message: (count: number) => `• ${count} item(s) out of stock`,
+    },
     filters: {
       label: "Filter:",
       all: "All",
@@ -110,7 +116,10 @@ const STOCK_COPY = {
       outTitle: "Sem Estoque",
       outDesc: "Produtos esgotados",
     },
-    alert: (count: number) => `• ${count} item(ns) sem estoque`,
+    alert: {
+      title: "Alertas de Estoque",
+      message: (count: number) => `• ${count} item(ns) sem estoque`,
+    },
     filters: {
       label: "Filtrar:",
       all: "Todos",
@@ -244,8 +253,12 @@ export default function StockPage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">{copy.title}</h1>
-            <p className="text-slate-400">{copy.subtitle}</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+              {copy.title}
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400">
+              {copy.subtitle}
+            </p>
           </div>
           <button
             onClick={async () => {
@@ -280,45 +293,63 @@ export default function StockPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
+          <div className="bg-white border border-slate-200 rounded-lg p-6 dark:bg-slate-900 dark:border-slate-800">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-slate-400">{copy.stats.totalTitle}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {copy.stats.totalTitle}
+              </p>
               <Package className="w-8 h-8 text-blue-400" />
             </div>
-            <p className="text-3xl font-bold text-white">{totalProducts}</p>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-3xl font-bold text-slate-900 dark:text-white">
+              {totalProducts}
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
               {copy.stats.totalDesc}
             </p>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
+          <div className="bg-white border border-slate-200 rounded-lg p-6 dark:bg-slate-900 dark:border-slate-800">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-slate-400">{copy.stats.lowTitle}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {copy.stats.lowTitle}
+              </p>
               <TrendingDown className="w-8 h-8 text-amber-400" />
             </div>
-            <p className="text-3xl font-bold text-white">{lowStock.length}</p>
-            <p className="text-sm text-slate-500 mt-1">{copy.stats.lowDesc}</p>
+            <p className="text-3xl font-bold text-slate-900 dark:text-white">
+              {lowStock.length}
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              {copy.stats.lowDesc}
+            </p>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
+          <div className="bg-white border border-slate-200 rounded-lg p-6 dark:bg-slate-900 dark:border-slate-800">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-slate-400">{copy.stats.outTitle}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {copy.stats.outTitle}
+              </p>
               <AlertTriangle className="w-8 h-8 text-red-400" />
             </div>
-            <p className="text-3xl font-bold text-white">{outOfStock.length}</p>
-            <p className="text-sm text-slate-500 mt-1">{copy.stats.outDesc}</p>
+            <p className="text-3xl font-bold text-slate-900 dark:text-white">
+              {outOfStock.length}
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              {copy.stats.outDesc}
+            </p>
           </div>
         </div>
 
         {/* Stock Alerts */}
         {lowStock.length > 0 && (
-          <div className="bg-amber-900/30 border-l-4 border-amber-500 p-4 mb-6">
+          <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6 dark:bg-amber-900/30">
             <div className="flex items-center">
-              <AlertTriangle className="w-5 h-5 text-amber-500 mr-2" />
+              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-500 mr-2" />
               <div>
-                <p className="font-medium text-amber-100">Alertas de Stock</p>
-                <p className="text-sm text-amber-200">
-                  {copy.alert(lowStock.length)}
+                <p className="font-medium text-amber-900 dark:text-amber-100">
+                  {copy.alert.title}
+                </p>
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  {copy.alert.message(lowStock.length)}
                 </p>
               </div>
             </div>
@@ -327,7 +358,7 @@ export default function StockPage() {
 
         {/* Filter Buttons */}
         <div className="mb-6 flex items-center gap-3">
-          <span className="text-sm font-medium text-slate-300">
+          <span className="text-sm font-medium text-slate-900 dark:text-slate-300">
             {copy.filters.label}
           </span>
           <button
@@ -335,7 +366,7 @@ export default function StockPage() {
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               filterType === "all"
                 ? "bg-blue-600 text-white"
-                : "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700"
+                : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:border-slate-700"
             }`}
           >
             {copy.filters.all} ({safeProducts.length})
@@ -345,7 +376,7 @@ export default function StockPage() {
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               filterType === "low"
                 ? "bg-amber-600 text-white"
-                : "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700"
+                : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:border-slate-700"
             }`}
           >
             {copy.filters.low} ({lowStock.length})
@@ -355,7 +386,7 @@ export default function StockPage() {
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               filterType === "out"
                 ? "bg-red-600 text-white"
-                : "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700"
+                : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:border-slate-700"
             }`}
           >
             {copy.filters.out} ({outOfStock.length})
@@ -368,42 +399,44 @@ export default function StockPage() {
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-12 text-center">
-            <Package className="w-16 h-16 text-slate-700 mx-auto mb-4" />
-            <p className="text-slate-400 text-lg">{copy.empty}</p>
+          <div className="bg-white border border-slate-200 rounded-lg p-12 text-center dark:bg-slate-900 dark:border-slate-800">
+            <Package className="w-16 h-16 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
+            <p className="text-slate-500 dark:text-slate-400 text-lg">
+              {copy.empty}
+            </p>
           </div>
         ) : (
-          <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-            <table className="min-w-full divide-y divide-slate-800">
-              <thead className="bg-slate-800">
+          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+            <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+              <thead className="bg-slate-200 dark:bg-slate-800">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                     {copy.table.product}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                     {copy.table.code}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                     {copy.table.stock}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                     {copy.table.min}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                     {copy.table.status}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                     {copy.table.cost}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                     {copy.table.price}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                     {copy.table.margin}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                 {filteredProducts.map((product) => {
                   const isOutOfStock = product.stock === 0;
                   const isLowStock =
@@ -414,55 +447,58 @@ export default function StockPage() {
                     ((product.price - product.cost) / product.cost) * 100;
 
                   return (
-                    <tr key={product._id} className="hover:bg-slate-800/50">
+                    <tr
+                      key={product._id}
+                      className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         {isOutOfStock && (
                           <AlertTriangle className="w-4 h-4 text-red-500 inline mr-2" />
                         )}
-                        <span className="font-medium text-slate-100">
+                        <span className="font-medium text-slate-900 dark:text-slate-100">
                           {product.name}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
                         {product.code}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`font-bold ${
                             isOutOfStock
-                              ? "text-red-400"
+                              ? "text-red-600 dark:text-red-400"
                               : isLowStock
-                                ? "text-amber-400"
-                                : "text-slate-100"
+                                ? "text-amber-600 dark:text-amber-400"
+                                : "text-slate-900 dark:text-slate-100"
                           }`}
                         >
                           {product.stock}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
                         {typeof product.minStock === "number"
                           ? product.minStock
                           : "-"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {isOutOfStock ? (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-900/30 text-red-400 border border-red-800">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-700 border border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800">
                             {copy.status.out}
                           </span>
                         ) : isLowStock ? (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-900/30 text-amber-400 border border-amber-800">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800">
                             {copy.status.low}
                           </span>
                         ) : (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-900/30 text-emerald-400 border border-emerald-800">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800">
                             {copy.status.ok}
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-slate-100">
                         {formatCurrency(product.cost)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-slate-100">
                         {formatCurrency(product.price)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

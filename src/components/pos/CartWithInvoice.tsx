@@ -11,6 +11,7 @@ interface CartItem {
   unitPrice: number;
   discount: number;
   total: number;
+  isSoldByWeight?: boolean;
 }
 
 interface CartProps {
@@ -46,7 +47,7 @@ export default function Cart({
   const [paymentMethod, setPaymentMethod] =
     useState<CheckoutData["paymentMethod"]>("cash");
   const [invoiceChannel, setInvoiceChannel] = useState<InvoiceChannel>(
-    InvoiceChannel.INTERNAL
+    InvoiceChannel.INTERNAL,
   );
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -57,7 +58,7 @@ export default function Cart({
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.quantity * item.unitPrice,
-    0
+    0,
   );
   const totalDiscount = items.reduce((sum, item) => sum + item.discount, 0);
   const tax = Math.round((subtotal - totalDiscount) * 0.21 * 100) / 100;
@@ -191,14 +192,20 @@ export default function Cart({
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <label className="block text-xs text-gray-600 mb-1">
-                    Cant.
+                    Cant.{item.isSoldByWeight ? " (kg)" : ""}
                   </label>
                   <input
                     type="number"
-                    min="1"
+                    min={item.isSoldByWeight ? "0.01" : "1"}
+                    step={item.isSoldByWeight ? "0.01" : "1"}
                     value={item.quantity}
                     onChange={(e) =>
-                      onUpdateQuantity(item.productId, parseInt(e.target.value))
+                      onUpdateQuantity(
+                        item.productId,
+                        item.isSoldByWeight
+                          ? parseFloat(e.target.value) || 0
+                          : parseInt(e.target.value) || 0,
+                      )
                     }
                     className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
                   />
@@ -215,7 +222,7 @@ export default function Cart({
                     onChange={(e) =>
                       onApplyDiscount(
                         item.productId,
-                        parseFloat(e.target.value)
+                        parseFloat(e.target.value),
                       )
                     }
                     className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
@@ -334,8 +341,8 @@ export default function Cart({
                     )}
                   </select>
                   <p className="text-[11px] text-gray-500 mt-1">
-                    Interna: solo visible en el sistema y no se exporta.
-                    ARCA: requiere datos fiscales y es reportable.
+                    Interna: solo visible en el sistema y no se exporta. ARCA:
+                    requiere datos fiscales y es reportable.
                   </p>
                 </div>
               </div>

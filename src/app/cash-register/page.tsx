@@ -13,6 +13,9 @@ import { isTokenExpiredSoon } from "@/lib/utils/token";
 import WithdrawalModal from "@/components/cash-register/WithdrawalModal";
 import CreditNoteModal from "@/components/cash-register/CreditNoteModal";
 import CloseBoxModal from "@/components/cash-register/CloseBoxModal";
+import CloseTicketModal, {
+  CloseTicketData,
+} from "@/components/cash-register/CloseTicketModal";
 
 const CASH_COPY = {
   es: {
@@ -238,6 +241,9 @@ export default function CashRegisterPage() {
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
   const [showCreditNoteModal, setShowCreditNoteModal] = useState(false);
   const [showCloseBoxModal, setShowCloseBoxModal] = useState(false);
+  const [showCloseTicket, setShowCloseTicket] = useState(false);
+  const [closeTicketData, setCloseTicketData] =
+    useState<CloseTicketData | null>(null);
   const [creditNotesTotal, setCreditNotesTotal] = useState<number>(0);
   const [loadingMovements, setLoadingMovements] = useState(false);
   const isPollingRef = useRef(false);
@@ -683,6 +689,63 @@ export default function CashRegisterPage() {
         return;
       }
 
+      const payload = await response.json();
+      const data = payload?.data ?? payload;
+      const summary = data?.summary;
+      const fallbackExpected =
+        typeof summary?.expected === "number"
+          ? summary.expected
+          : sessionData.expected;
+      const ticket: CloseTicketData = {
+        businessName:
+          summary?.businessName || user?.businessName || "MI NEGOCIO",
+        cashierName:
+          summary?.cashierName || user?.fullName || user?.username || "",
+        sessionId:
+          summary?.sessionId || data?.cashRegister?._id || "SESION-ACTUAL",
+        openedAt: summary?.openedAt || "",
+        closedAt: summary?.closedAt || new Date().toLocaleString(),
+        openingBalance:
+          typeof summary?.openingBalance === "number"
+            ? summary.openingBalance
+            : sessionData.initialAmount,
+        salesTotal:
+          typeof summary?.salesTotal === "number"
+            ? summary.salesTotal
+            : sessionData.salesTotal,
+        withdrawalsTotal:
+          typeof summary?.withdrawalsTotal === "number"
+            ? summary.withdrawalsTotal
+            : sessionData.withdrawalsTotal,
+        creditNotesTotal:
+          typeof summary?.creditNotesTotal === "number"
+            ? summary.creditNotesTotal
+            : creditNotesTotal,
+        expected:
+          typeof summary?.expected === "number"
+            ? summary.expected
+            : sessionData.expected,
+        countedAmount:
+          typeof summary?.countedAmount === "number"
+            ? summary.countedAmount
+            : countedAmount,
+        difference:
+          typeof summary?.difference === "number"
+            ? summary.difference
+            : countedAmount - (fallbackExpected || 0),
+        movements: Array.isArray(summary?.movements)
+          ? summary.movements
+          : movements.map((m) => ({
+              _id: m._id,
+              type: m.type,
+              description: m.description,
+              amount: m.amount,
+              createdAt: m.createdAt,
+            })),
+      };
+
+      setCloseTicketData(ticket);
+      setShowCloseTicket(true);
       setIsOpen(false);
       setShowCloseBoxModal(false);
       setToastType("success");
@@ -712,7 +775,7 @@ export default function CashRegisterPage() {
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         {isOpen === false && (
-          <div className="flex flex-col items-center justify-center bg-slate-900/50 rounded-xl py-20 mb-8 border border-slate-800">
+          <div className="flex flex-col items-center justify-center bg-slate-50 border border-slate-200 rounded-xl py-20 mb-8 dark:bg-slate-900/50 dark:border-slate-800">
             <div className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center mb-6 shadow-lg">
               <svg
                 className="w-10 h-10 text-slate-400"
@@ -722,10 +785,10 @@ export default function CashRegisterPage() {
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
               </svg>
             </div>
-            <p className="text-2xl font-bold text-white mb-2">
+            <p className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
               {copy.noOpenTitle}
             </p>
-            <p className="text-slate-400 mb-8 text-center max-w-md">
+            <p className="text-slate-600 dark:text-slate-400 mb-8 text-center max-w-md">
               {copy.noOpenSubtitle}
             </p>
             <button
@@ -755,11 +818,13 @@ export default function CashRegisterPage() {
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               {/* Monto Inicial */}
-              <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6">
+              <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6 dark:bg-slate-900 dark:border-slate-800">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-slate-400">{copy.stats.initial}</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    {copy.stats.initial}
+                  </p>
                   <svg
-                    className="w-8 h-8 text-blue-400"
+                    className="w-8 h-8 text-blue-500 dark:text-blue-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -772,21 +837,23 @@ export default function CashRegisterPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-white">
+                <p className="text-3xl font-bold text-slate-900 dark:text-white">
                   {formatCurrency(initialAmount)}
                 </p>
-                <p className="text-xs text-slate-500 mt-2">
+                <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">
                   {movements.find((m: any) => m.type === "apertura")
                     ?.createdAt || "-"}
                 </p>
               </div>
 
               {/* Ventas */}
-              <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6">
+              <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6 dark:bg-slate-900 dark:border-slate-800">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-slate-400">{copy.stats.sales}</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    {copy.stats.sales}
+                  </p>
                   <svg
-                    className="w-8 h-8 text-green-400"
+                    className="w-8 h-8 text-green-500 dark:text-green-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -799,19 +866,19 @@ export default function CashRegisterPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-green-400">
+                <p className="text-3xl font-bold text-green-600 dark:text-green-400">
                   {formatCurrency(sales)}
                 </p>
               </div>
 
               {/* Retiros */}
-              <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6">
+              <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6 dark:bg-slate-900 dark:border-slate-800">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     {copy.stats.withdrawals}
                   </p>
                   <svg
-                    className="w-8 h-8 text-red-400"
+                    className="w-8 h-8 text-red-500 dark:text-red-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -824,19 +891,19 @@ export default function CashRegisterPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-red-400">
+                <p className="text-3xl font-bold text-red-600 dark:text-red-400">
                   {formatCurrency(withdrawals)}
                 </p>
               </div>
 
               {/* Esperado en Caja */}
-              <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6">
+              <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6 dark:bg-slate-900 dark:border-slate-800">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     {copy.stats.expected}
                   </p>
                   <svg
-                    className="w-8 h-8 text-purple-400"
+                    className="w-8 h-8 text-purple-500 dark:text-purple-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -849,7 +916,7 @@ export default function CashRegisterPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-purple-400">
+                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                   {formatCurrency(expectedInCash)}
                 </p>
               </div>
@@ -898,7 +965,7 @@ export default function CashRegisterPage() {
               </button>
 
               <button
-                onClick={handleClose}
+                onClick={() => setShowCloseBoxModal(true)}
                 className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2"
               >
                 <svg
@@ -918,51 +985,51 @@ export default function CashRegisterPage() {
               </button>
             </div>
             {/* Movements Table */}
-            <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6 mb-8">
+            <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6 mb-8 dark:bg-slate-900 dark:border-slate-800">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                   {copy.movements.title}
                 </h2>
                 {loadingMovements && (
-                  <div className="flex items-center gap-2 text-sm text-slate-400">
-                    <span className="w-4 h-4 border-2 border-slate-600 border-b-transparent rounded-full animate-spin inline-block" />
+                  <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                    <span className="w-4 h-4 border-2 border-slate-300 border-b-transparent rounded-full animate-spin inline-block dark:border-slate-600" />
                     {copy.movements.updating}
                   </div>
                 )}
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-700">
-                  <thead className="bg-slate-800">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                  <thead className="bg-slate-100 dark:bg-slate-800">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider dark:text-slate-300">
                         {copy.movements.datetime}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider dark:text-slate-300">
                         {copy.movements.type}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider dark:text-slate-300">
                         {copy.movements.description}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider dark:text-slate-300">
                         {copy.movements.amount}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-slate-900 divide-y divide-slate-700">
+                  <tbody className="bg-white divide-y divide-slate-200 dark:bg-slate-900 dark:divide-slate-700">
                     {loadingMovements && movements.length === 0 ? (
                       [...Array(3)].map((_, i) => (
                         <tr key={`skeleton-${i}`}>
                           <td className="px-6 py-4">
-                            <div className="h-4 w-32 bg-slate-800 rounded animate-pulse" />
+                            <div className="h-4 w-32 bg-slate-200 rounded animate-pulse dark:bg-slate-800" />
                           </td>
                           <td className="px-6 py-4">
-                            <div className="h-5 w-24 bg-slate-800 rounded animate-pulse" />
+                            <div className="h-5 w-24 bg-slate-200 rounded animate-pulse dark:bg-slate-800" />
                           </td>
                           <td className="px-6 py-4">
-                            <div className="h-4 w-64 bg-slate-800 rounded animate-pulse" />
+                            <div className="h-4 w-64 bg-slate-200 rounded animate-pulse dark:bg-slate-800" />
                           </td>
                           <td className="px-6 py-4">
-                            <div className="h-4 w-20 bg-slate-800 rounded animate-pulse" />
+                            <div className="h-4 w-20 bg-slate-200 rounded animate-pulse dark:bg-slate-800" />
                           </td>
                         </tr>
                       ))
@@ -970,7 +1037,7 @@ export default function CashRegisterPage() {
                       <tr>
                         <td
                           colSpan={4}
-                          className="px-6 py-8 text-center text-sm text-slate-500"
+                          className="px-6 py-8 text-center text-sm text-slate-600 dark:text-slate-500"
                         >
                           {copy.movements.empty}
                         </td>
@@ -979,23 +1046,23 @@ export default function CashRegisterPage() {
                       movements.map((movement: any, idx: number) => (
                         <tr
                           key={movement._id || idx}
-                          className="hover:bg-slate-800/50"
+                          className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
                         >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">
                             {movement.createdAt}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span
                               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                 movement.type === "apertura"
-                                  ? "bg-blue-900/40 text-blue-300"
+                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
                                   : movement.type === "venta"
-                                    ? "bg-green-900/40 text-green-300"
+                                    ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
                                     : movement.type === "retiro"
-                                      ? "bg-orange-900/40 text-orange-300"
+                                      ? "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"
                                       : movement.type === "cierre"
-                                        ? "bg-slate-700 text-slate-300"
-                                        : "bg-purple-900/40 text-purple-300"
+                                        ? "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
+                                        : "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"
                               }`}
                             >
                               {copy.movements.types[
@@ -1003,10 +1070,10 @@ export default function CashRegisterPage() {
                               ] || movement.type}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-300">
+                          <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
                             {movement.description}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-400">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 dark:text-green-400">
                             {formatCurrency(movement.amount)}
                           </td>
                         </tr>
@@ -1020,61 +1087,66 @@ export default function CashRegisterPage() {
         )}
 
         {/* Historial de Sesiones */}
-        <div className="bg-slate-900 rounded-lg shadow-lg border border-slate-800 p-6 mt-8">
-          <h2 className="text-lg font-bold text-white mb-6">
+        <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6 mt-8 dark:bg-slate-900 dark:border-slate-800">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6">
             {copy.sessions.title}
           </h2>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-700">
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                <tr className="border-b border-slate-200 dark:border-slate-700">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
                     {copy.sessions.openDate}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
                     {copy.sessions.initial}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
                     {copy.sessions.sales}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
                     {copy.sessions.withdrawals}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
                     {copy.sessions.expected}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
                     {copy.sessions.real}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
                     {copy.sessions.diff}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
                     {copy.sessions.status}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                 {sessions && sessions.length > 0 ? (
                   sessions.map((s, idx) => (
-                    <tr key={idx} className="hover:bg-slate-800/50 transition">
-                      <td className="px-6 py-4 text-slate-300">{s.openedAt}</td>
-                      <td className="px-6 py-4 text-slate-300">
+                    <tr
+                      key={idx}
+                      className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition"
+                    >
+                      <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                        {s.openedAt}
+                      </td>
+                      <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
                         {formatCurrency(s.initial ?? 0)}
                       </td>
-                      <td className="px-6 py-4 font-semibold text-green-400">
+                      <td className="px-6 py-4 font-semibold text-green-600 dark:text-green-400">
                         {formatCurrency(s.sales ?? 0)}
                       </td>
-                      <td className="px-6 py-4 font-semibold text-red-400">
+                      <td className="px-6 py-4 font-semibold text-red-600 dark:text-red-400">
                         {formatCurrency(s.withdrawals ?? 0)}
                       </td>
-                      <td className="px-6 py-4 text-slate-300">
+                      <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
                         {formatCurrency(s.expected ?? 0)}
                       </td>
-                      <td className="px-6 py-4 text-slate-300">
+                      <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
                         {s.real == null ? "-" : formatCurrency(Number(s.real))}
                       </td>
-                      <td className="px-6 py-4 text-slate-300">
+                      <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
                         {s.diff == null ? "-" : formatCurrency(Number(s.diff))}
                       </td>
                       <td className="px-6 py-4">
@@ -1090,8 +1162,8 @@ export default function CashRegisterPage() {
                             <span
                               className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
                                 isOpenStatus
-                                  ? "bg-green-900/40 text-green-400"
-                                  : "bg-slate-800 text-slate-400"
+                                  ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+                                  : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
                               }`}
                             >
                               {copy.sessions.statuses[statusKey] || s.status}
@@ -1105,7 +1177,7 @@ export default function CashRegisterPage() {
                   <tr>
                     <td
                       colSpan={8}
-                      className="px-6 py-8 text-center text-sm text-slate-500"
+                      className="px-6 py-8 text-center text-sm text-slate-600 dark:text-slate-500"
                     >
                       {copy.sessions.empty}
                     </td>
@@ -1164,6 +1236,11 @@ export default function CashRegisterPage() {
         salesTotal={sessionData.salesTotal}
         withdrawalsTotal={sessionData.withdrawalsTotal}
         creditNotesTotal={creditNotesTotal}
+      />
+      <CloseTicketModal
+        open={showCloseTicket}
+        onClose={() => setShowCloseTicket(false)}
+        data={closeTicketData}
       />
     </div>
   );

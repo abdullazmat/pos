@@ -76,14 +76,14 @@ export async function POST(req: NextRequest) {
       if (!product) {
         return generateErrorResponse(
           `Product not found: ${item.productId}`,
-          404
+          404,
         );
       }
 
       if (product.stock < item.quantity) {
         return generateErrorResponse(
           `Insufficient stock for ${product.name}`,
-          400
+          400,
         );
       }
 

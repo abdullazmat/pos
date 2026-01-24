@@ -1,6 +1,46 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useLanguage } from "@/lib/context/LanguageContext";
+
+const OPEN_REGISTER_COPY = {
+  es: {
+    title: "Apertura de Caja",
+    description: "Cuenta el efectivo inicial y registra la apertura",
+    bills: "Billetes",
+    coins: "Monedas",
+    total: "TOTAL",
+    billsEmoji: "💵",
+    coinsEmoji: "🪙",
+    counted: "Total Contado",
+    cancel: "Cancelar",
+    continue: "Continuar",
+  },
+  en: {
+    title: "Open Register",
+    description: "Count the initial cash and register the opening",
+    bills: "Bills",
+    coins: "Coins",
+    total: "TOTAL",
+    billsEmoji: "💵",
+    coinsEmoji: "🪙",
+    counted: "Total Counted",
+    cancel: "Cancel",
+    continue: "Continue",
+  },
+  pt: {
+    title: "Abertura de Caixa",
+    description: "Conte o dinheiro inicial e registre a abertura",
+    bills: "Notas",
+    coins: "Moedas",
+    total: "TOTAL",
+    billsEmoji: "💵",
+    coinsEmoji: "🪙",
+    counted: "Total Contado",
+    cancel: "Cancelar",
+    continue: "Continuar",
+  },
+};
 
 interface DenomRowProps {
   label: string;
@@ -12,10 +52,10 @@ function DenomRow({ label, value, onChange }: DenomRowProps) {
   const [qty, setQty] = useState<number>(0);
   const total = qty * value;
   return (
-    <div className="flex items-center justify-between gap-3 bg-gray-800/40 rounded-lg px-4 py-3">
-      <div className="text-gray-200">{label}</div>
+    <div className="flex items-center justify-between gap-3 bg-slate-200 dark:bg-gray-800/40 rounded-lg px-4 py-3">
+      <div className="text-slate-900 dark:text-gray-200">{label}</div>
       <div className="flex items-center gap-3">
-        <span className="text-gray-400">×</span>
+        <span className="text-slate-600 dark:text-gray-400">×</span>
         <input
           type="number"
           min={0}
@@ -25,10 +65,10 @@ function DenomRow({ label, value, onChange }: DenomRowProps) {
             setQty(v);
             onChange(v);
           }}
-          className="w-20 bg-gray-900 border border-gray-700 rounded-md text-gray-100 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-20 bg-white dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded-md text-slate-900 dark:text-gray-100 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
-        <span className="text-gray-400">=</span>
-        <span className="font-semibold text-green-400">
+        <span className="text-slate-600 dark:text-gray-400">=</span>
+        <span className="font-semibold text-green-600 dark:text-green-400">
           ${total.toFixed(2)}
         </span>
       </div>
@@ -45,6 +85,11 @@ export default function OpenRegisterModal({
   onClose: () => void;
   onConfirm: (amount: number) => void;
 }) {
+  const { currentLanguage } = useLanguage();
+  const copy =
+    OPEN_REGISTER_COPY[currentLanguage as keyof typeof OPEN_REGISTER_COPY] ||
+    OPEN_REGISTER_COPY.en;
+
   const [billTotals, setBillTotals] = useState<Record<string, number>>({});
   const [coinTotals, setCoinTotals] = useState<Record<string, number>>({});
 
@@ -61,11 +106,11 @@ export default function OpenRegisterModal({
 
   const totalBills = useMemo(
     () => Object.values(billTotals).reduce((a, b) => a + b, 0),
-    [billTotals]
+    [billTotals],
   );
   const totalCoins = useMemo(
     () => Object.values(coinTotals).reduce((a, b) => a + b, 0),
-    [coinTotals]
+    [coinTotals],
   );
   const total = totalBills + totalCoins;
 
@@ -74,42 +119,48 @@ export default function OpenRegisterModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-full max-w-5xl mx-auto bg-gray-900 rounded-2xl border border-gray-700 shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-          <div className="flex items-center gap-2 text-gray-100 text-xl font-semibold">
-            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-800">
+      <div className="relative w-full max-w-5xl mx-auto bg-white dark:bg-gray-900 rounded-2xl border border-slate-300 dark:border-gray-700 shadow-xl overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-300 dark:border-gray-800 bg-slate-50 dark:bg-gray-800">
+          <div className="flex items-center gap-2 text-slate-900 dark:text-gray-100 text-xl font-semibold">
+            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-200 dark:bg-gray-700">
               $
             </span>
-            Apertura de Caja
+            {copy.title}
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-200"
+            className="text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200"
           >
             ✕
           </button>
         </div>
 
-        <div className="px-6 py-4 text-sm text-gray-400 border-b border-gray-800">
-          Cuenta el efectivo inicial y registra la apertura
+        <div className="px-6 py-4 text-sm text-slate-600 dark:text-gray-400 border-b border-slate-300 dark:border-gray-800">
+          {copy.description}
         </div>
 
         <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-green-900/15 border border-green-700 rounded-lg p-4">
-            <div className="text-gray-300 text-sm">Billetes</div>
-            <div className="text-2xl font-bold text-green-400">
+          <div className="bg-green-100 dark:bg-green-900/15 border border-green-300 dark:border-green-700 rounded-lg p-4">
+            <div className="text-slate-700 dark:text-gray-300 text-sm">
+              {copy.bills}
+            </div>
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               ${totalBills.toFixed(2)}
             </div>
           </div>
-          <div className="bg-blue-900/15 border border-blue-700 rounded-lg p-4">
-            <div className="text-gray-300 text-sm">Monedas</div>
-            <div className="text-2xl font-bold text-blue-400">
+          <div className="bg-blue-100 dark:bg-blue-900/15 border border-blue-300 dark:border-blue-700 rounded-lg p-4">
+            <div className="text-slate-700 dark:text-gray-300 text-sm">
+              {copy.coins}
+            </div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               ${totalCoins.toFixed(2)}
             </div>
           </div>
-          <div className="bg-purple-900/15 border border-purple-700 rounded-lg p-4">
-            <div className="text-gray-300 text-sm">TOTAL</div>
-            <div className="text-2xl font-bold text-purple-400">
+          <div className="bg-purple-100 dark:bg-purple-900/15 border border-purple-300 dark:border-purple-700 rounded-lg p-4">
+            <div className="text-slate-700 dark:text-gray-300 text-sm">
+              {copy.total}
+            </div>
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
               ${total.toFixed(2)}
             </div>
           </div>
@@ -117,11 +168,11 @@ export default function OpenRegisterModal({
 
         <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[52vh] overflow-y-auto">
           <div>
-            <div className="flex items-center gap-2 text-gray-300 mb-3">
-              <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-green-900/40 text-green-300">
-                💵
+            <div className="flex items-center gap-2 text-slate-700 dark:text-gray-300 mb-3">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-green-200 dark:bg-green-900/40 text-green-700 dark:text-green-300">
+                {copy.billsEmoji}
               </span>
-              Billetes
+              {copy.bills}
             </div>
             <div className="space-y-3">
               {bills.map((b) => (
@@ -140,11 +191,11 @@ export default function OpenRegisterModal({
             </div>
           </div>
           <div>
-            <div className="flex items-center gap-2 text-gray-300 mb-3">
-              <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-blue-900/40 text-blue-300">
-                🪙
+            <div className="flex items-center gap-2 text-slate-700 dark:text-gray-300 mb-3">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-blue-200 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
+                {copy.coinsEmoji}
               </span>
-              Monedas
+              {copy.coins}
             </div>
             <div className="space-y-3">
               {coins.map((c) => (
@@ -164,25 +215,27 @@ export default function OpenRegisterModal({
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-800 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-slate-300 dark:border-gray-800 flex items-center justify-between bg-slate-50 dark:bg-gray-800">
           <div>
-            <div className="text-sm text-gray-400">Total Contado</div>
-            <div className="text-3xl font-bold text-gray-100">
+            <div className="text-sm text-slate-600 dark:text-gray-400">
+              {copy.counted}
+            </div>
+            <div className="text-3xl font-bold text-slate-900 dark:text-gray-100">
               ${total.toFixed(2)}
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="px-6 py-2 rounded-lg bg-gray-800 text-gray-200 hover:bg-gray-700"
+              className="px-6 py-2 rounded-lg bg-slate-200 dark:bg-gray-700 text-slate-700 dark:text-gray-200 hover:bg-slate-300 dark:hover:bg-gray-600"
             >
-              Cancelar
+              {copy.cancel}
             </button>
             <button
               onClick={() => onConfirm(total)}
               className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
             >
-              Continuar (${total.toFixed(2)})
+              {copy.continue} (${total.toFixed(2)})
             </button>
           </div>
         </div>

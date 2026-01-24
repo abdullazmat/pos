@@ -11,6 +11,11 @@ export interface IBusiness extends Document {
   website?: string;
   cuitRucDni?: string;
   ticketMessage?: string;
+  paymentMethods?: Array<{
+    id: string;
+    name: string;
+    enabled: boolean;
+  }>;
   city?: string;
   country?: string;
   subscriptionId?: Schema.Types.ObjectId;
@@ -40,6 +45,22 @@ const businessSchema = new Schema<IBusiness>(
     ticketMessage: {
       type: String,
       default: "¡GRACIAS POR SU COMPRA!\nVuelva pronto",
+    },
+    paymentMethods: {
+      type: [
+        {
+          id: String,
+          name: String,
+          enabled: Boolean,
+        },
+      ],
+      default: [
+        { id: "cash", name: "Efectivo", enabled: true },
+        { id: "bankTransfer", name: "Transferencia Bancaria", enabled: true },
+        { id: "qr", name: "Código QR", enabled: true },
+        { id: "card", name: "Tarjeta", enabled: false },
+        { id: "check", name: "Cheque", enabled: false },
+      ],
     },
     city: String,
     country: String,

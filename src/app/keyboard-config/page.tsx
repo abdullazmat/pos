@@ -703,8 +703,8 @@ export default function KeyboardConfigPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-950">
-        <div className="text-slate-400">
+      <div className="flex items-center justify-center h-screen bg-white dark:bg-slate-950">
+        <div className="text-slate-600 dark:text-slate-400">
           {copy.messages.loading || "Cargando..."}
         </div>
       </div>
@@ -719,18 +719,20 @@ export default function KeyboardConfigPage() {
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <Keyboard className="w-7 h-7 text-blue-400" />
-            <h1 className="text-3xl font-bold text-white">{copy.title}</h1>
+            <Keyboard className="w-7 h-7 text-blue-500 dark:text-blue-400" />
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+              {copy.title}
+            </h1>
           </div>
-          <p className="text-slate-400">{copy.subtitle}</p>
+          <p className="text-slate-600 dark:text-slate-400">{copy.subtitle}</p>
         </div>
 
         {/* Instructions */}
-        <div className="p-5 mb-8 bg-blue-900/20 border border-blue-800/50 rounded-xl">
-          <h3 className="text-lg font-semibold text-blue-300 mb-3">
+        <div className="p-5 mb-8 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800/50 rounded-xl">
+          <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-3">
             {copy.messages.instructions}
           </h3>
-          <ul className="space-y-2 text-sm text-blue-200">
+          <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-200">
             <li>• {copy.messages.instructionLine1}</li>
             <li>• {copy.messages.instructionLine2}</li>
             <li>• {copy.messages.instructionLine3}</li>
@@ -742,11 +744,13 @@ export default function KeyboardConfigPage() {
 
         {/* Predefined Profiles */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-purple-400" />
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <Zap className="w-5 h-5 text-purple-500 dark:text-purple-400" />
             {copy.predefinedProfiles}
           </h2>
-          <p className="text-slate-400 text-sm mb-4">{copy.selectProfile}</p>
+          <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
+            {copy.selectProfile}
+          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {profiles.map((profile) => {
@@ -758,19 +762,19 @@ export default function KeyboardConfigPage() {
                   onClick={() => handleProfileSelect(profile.id)}
                   className={`p-5 rounded-xl border-2 transition-all text-left ${
                     isSelected
-                      ? "border-blue-500 bg-blue-900/30"
-                      : "border-slate-800 bg-slate-900 hover:border-slate-700"
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
+                      : "border-slate-300 bg-white hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <Icon
-                      className={`w-6 h-6 ${isSelected ? "text-blue-400" : "text-slate-400"}`}
+                      className={`w-6 h-6 ${isSelected ? "text-blue-600 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"}`}
                     />
-                    <h3 className="text-lg font-bold text-white">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                       {getProfileName(profile.id)}
                     </h3>
                   </div>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     {getProfileDescription(profile.id)}
                   </p>
                 </button>
@@ -781,10 +785,10 @@ export default function KeyboardConfigPage() {
 
         {/* Individual Customization */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-white mb-4">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
             {copy.custom.title}
           </h2>
-          <p className="text-slate-400 text-sm mb-4">
+          <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
             {copy.custom.description}
           </p>
 
@@ -792,35 +796,37 @@ export default function KeyboardConfigPage() {
             {shortcutActions.map((action) => (
               <div
                 key={action.key}
-                className="flex items-center justify-between p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-700 transition-colors"
+                className="flex items-center justify-between p-4 bg-white border border-slate-300 rounded-xl hover:border-slate-400 dark:bg-slate-900 dark:border-slate-800 dark:hover:border-slate-700 transition-colors"
               >
                 <div className="flex-1">
-                  <h3 className="font-semibold text-white mb-1">
+                  <h3 className="font-semibold text-slate-900 dark:text-white mb-1">
                     {action.label}
                   </h3>
-                  <p className="text-sm text-slate-400">{action.description}</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    {action.description}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   {editingKey === action.key ? (
-                    <div className="px-4 py-2 bg-yellow-900/30 border border-yellow-600 rounded-lg font-mono text-sm text-yellow-300 min-w-[120px] text-center animate-pulse">
+                    <div className="px-4 py-2 bg-yellow-100 border border-yellow-400 text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-600 dark:text-yellow-300 rounded-lg font-mono text-sm min-w-[120px] text-center animate-pulse">
                       {copy.messages.pressKey}
                     </div>
                   ) : (
-                    <div className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg font-mono text-sm text-blue-300 min-w-[120px] text-center">
+                    <div className="px-4 py-2 bg-slate-100 border border-slate-300 text-blue-700 dark:bg-slate-800 dark:border-slate-700 dark:text-blue-300 rounded-lg font-mono text-sm min-w-[120px] text-center">
                       {customShortcuts[action.key as keyof KeyboardShortcuts]}
                     </div>
                   )}
                   <button
                     onClick={() => handleKeyEdit(action.key)}
                     disabled={editingKey !== null && editingKey !== action.key}
-                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-900 disabled:cursor-not-allowed text-slate-200 rounded-lg font-medium transition-colors text-sm"
+                    className="px-3 py-2 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:disabled:bg-slate-900 dark:text-slate-200 rounded-lg font-medium transition-colors text-sm"
                   >
                     {copy.messages.edit}
                   </button>
                   <button
                     onClick={() => handleDeleteKey(action.key)}
                     disabled={editingKey !== null}
-                    className="px-3 py-2 bg-red-900/20 hover:bg-red-900/40 disabled:bg-slate-900 disabled:cursor-not-allowed text-red-300 rounded-lg font-medium transition-colors text-sm"
+                    className="px-3 py-2 bg-red-100 hover:bg-red-200 disabled:bg-slate-100 disabled:cursor-not-allowed text-red-700 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:disabled:bg-slate-900 dark:text-red-300 rounded-lg font-medium transition-colors text-sm"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -831,11 +837,11 @@ export default function KeyboardConfigPage() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between gap-4 p-5 bg-slate-900 border border-slate-800 rounded-xl">
+        <div className="flex items-center justify-between gap-4 p-5 bg-white border border-slate-300 dark:bg-slate-900 dark:border-slate-800 rounded-xl">
           <button
             onClick={handleReset}
             disabled={saving || editingKey !== null}
-            className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-900 disabled:cursor-not-allowed text-slate-200 rounded-lg font-semibold transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:disabled:bg-slate-900 dark:text-slate-200 rounded-lg font-semibold transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
             {copy.messages.resetDefaults}
@@ -872,11 +878,11 @@ export default function KeyboardConfigPage() {
         </div>
 
         {/* Tips */}
-        <div className="mt-8 p-5 bg-amber-900/20 border border-amber-800/50 rounded-xl">
-          <h3 className="text-lg font-semibold text-amber-300 mb-3">
+        <div className="mt-8 p-5 bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/50 rounded-xl">
+          <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-300 mb-3">
             {copy.messages.tips}
           </h3>
-          <ul className="space-y-2 text-sm text-amber-200">
+          <ul className="space-y-2 text-sm text-amber-800 dark:text-amber-200">
             <li>• {copy.messages.tip1}</li>
             <li>• {copy.messages.tip2}</li>
             <li>• {copy.messages.tip3}</li>
