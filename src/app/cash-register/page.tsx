@@ -998,8 +998,9 @@ export default function CashRegisterPage() {
                                         : "bg-purple-900/40 text-purple-300"
                               }`}
                             >
-                              {copy.movements.types[movement.type] ||
-                                movement.type}
+                              {copy.movements.types[
+                                movement.type as keyof typeof copy.movements.types
+                              ] || movement.type}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-slate-300">

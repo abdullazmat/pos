@@ -12,10 +12,11 @@ export function useGlobalLanguage() {
 
   useEffect(() => {
     // Subscribe to language changes and trigger re-render
-    const unsubscribe = subscribeToLanguageChange(() => {
+    const unsubscribe = subscribeToLanguageChange((_language) => {
       setLanguageChangeCount((prev) => prev + 1);
     });
 
+    // Return the unsubscribe function as cleanup
     return unsubscribe;
   }, []);
 

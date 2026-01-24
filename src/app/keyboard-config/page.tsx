@@ -127,6 +127,7 @@ const KEYBOARD_COPY = {
     },
     messages: {
       saved: "Configuración guardada correctamente",
+      saving: "Guardando...",
       error: "Error al guardar la configuración",
       reset: "Cambios revertidos",
       duplicateKeys:
@@ -244,6 +245,7 @@ const KEYBOARD_COPY = {
     },
     messages: {
       saved: "Configuration saved successfully",
+      saving: "Saving...",
       error: "Error saving configuration",
       reset: "Changes reverted",
       duplicateKeys:
@@ -359,6 +361,7 @@ const KEYBOARD_COPY = {
     },
     messages: {
       saved: "Configuração salva com sucesso",
+      saving: "Salvando...",
       error: "Erro ao salvar a configuração",
       reset: "Alterações revertidas",
       duplicateKeys:

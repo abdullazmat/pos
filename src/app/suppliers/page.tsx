@@ -761,7 +761,7 @@ export default function SuppliersPage() {
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-slate-300 mb-2">
-                        {copy.labels.address}els.address}
+                        {copy.labels.address}
                       </label>
                       <input
                         type="text"

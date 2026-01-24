@@ -30,7 +30,9 @@ const notifyLanguageChange = (language: Language) => {
 
 export const subscribeToLanguageChange = (listener: LanguageChangeListener) => {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 };
 
 // Comprehensive translations
