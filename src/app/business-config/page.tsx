@@ -293,15 +293,19 @@ export default function BusinessConfigPage() {
       CONFIG_COPY.en.ticket.defaultMessage,
       CONFIG_COPY.pt.ticket.defaultMessage,
     ];
-    
+
     setFormData((prevFormData) => {
       // If current message is empty or is one of the default messages, update to current language's default
-      const isDefaultMessage = defaultMessages.includes(prevFormData.ticketMessage);
+      const isDefaultMessage = defaultMessages.includes(
+        prevFormData.ticketMessage,
+      );
       const shouldUpdate = !prevFormData.ticketMessage || isDefaultMessage;
-      
+
       return {
         ...prevFormData,
-        ticketMessage: shouldUpdate ? copy.ticket.defaultMessage : prevFormData.ticketMessage,
+        ticketMessage: shouldUpdate
+          ? copy.ticket.defaultMessage
+          : prevFormData.ticketMessage,
       };
     });
   }, [currentLanguage, copy]);
@@ -343,7 +347,10 @@ export default function BusinessConfigPage() {
         const data = await response.json();
         const configData = data.data || formData;
         // Ensure ticketMessage always has a value, use default if empty
-        if (!configData.ticketMessage || configData.ticketMessage.trim() === "") {
+        if (
+          !configData.ticketMessage ||
+          configData.ticketMessage.trim() === ""
+        ) {
           configData.ticketMessage = copy.ticket.defaultMessage;
         }
         setFormData(configData);
@@ -575,9 +582,9 @@ export default function BusinessConfigPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100">
+    <div className="min-h-screen text-gray-900 bg-white dark:bg-slate-950 dark:text-slate-100">
       <Header user={user} showBackButton={true} />
-      <div className="px-4 py-6 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div className="px-4 py-6 mx-auto sm:px-6 lg:px-8 max-w-7xl">
         {/* Page header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -590,13 +597,13 @@ export default function BusinessConfigPage() {
         </div>
 
         {/* Content grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Left column */}
           <div className="space-y-6">
             {/* Logo del Negocio */}
-            <section className="bg-white border border-purple-200 dark:bg-slate-900 dark:border-purple-600/30 rounded-xl overflow-hidden hover:border-purple-300 dark:hover:border-purple-600/50 transition-colors">
+            <section className="overflow-hidden transition-colors bg-white border border-purple-200 dark:bg-slate-900 dark:border-purple-600/30 rounded-xl hover:border-purple-300 dark:hover:border-purple-600/50">
               <div className="flex items-center justify-between p-4 border-b border-purple-200 dark:border-purple-600/20">
-                <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                <h2 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
                   🎨 {copy.sections.logo}
                 </h2>
                 <span className="px-2.5 py-1 text-xs font-semibold text-purple-700 bg-purple-100 border border-purple-300 dark:text-purple-300 dark:bg-purple-900/60 dark:border-purple-700/50 rounded-full">
@@ -622,9 +629,9 @@ export default function BusinessConfigPage() {
             </section>
 
             {/* Plan de Suscripción */}
-            <section className="bg-white border border-purple-200 dark:bg-slate-900 dark:border-purple-600/30 rounded-xl overflow-hidden hover:border-purple-300 dark:hover:border-purple-600/50 transition-colors">
+            <section className="overflow-hidden transition-colors bg-white border border-purple-200 dark:bg-slate-900 dark:border-purple-600/30 rounded-xl hover:border-purple-300 dark:hover:border-purple-600/50">
               <div className="p-4 border-b border-purple-200 dark:border-purple-600/20">
-                <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                <h2 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
                   <Crown className="w-5 h-5 text-purple-600 dark:text-purple-400" />{" "}
                   {copy.sections.plans}
                 </h2>
@@ -662,7 +669,7 @@ export default function BusinessConfigPage() {
                           {plan.description}
                         </p>
                       </div>
-                      <div className="text-right ml-4">
+                      <div className="ml-4 text-right">
                         <div className="text-2xl font-bold text-slate-900 dark:text-white">
                           ${plan.price.toLocaleString()}
                         </div>
@@ -672,11 +679,11 @@ export default function BusinessConfigPage() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2 mb-3 flex-wrap">
+                    <div className="flex flex-wrap gap-2 mb-3">
                       {plan.limits.map((limit, idx) => (
                         <span
                           key={idx}
-                          className="px-2 py-1 text-xs text-slate-700 bg-slate-200 dark:text-slate-300 dark:bg-slate-700/50 rounded"
+                          className="px-2 py-1 text-xs rounded text-slate-700 bg-slate-200 dark:text-slate-300 dark:bg-slate-700/50"
                         >
                           {limit}
                         </span>
@@ -706,9 +713,9 @@ export default function BusinessConfigPage() {
             </section>
 
             {/* Configuración del Negocio Form */}
-            <section className="bg-white border border-purple-200 dark:bg-slate-900 dark:border-purple-600/30 rounded-xl overflow-hidden hover:border-purple-300 dark:hover:border-purple-600/50 transition-colors">
+            <section className="overflow-hidden transition-colors bg-white border border-purple-200 dark:bg-slate-900 dark:border-purple-600/30 rounded-xl hover:border-purple-300 dark:hover:border-purple-600/50">
               <div className="p-4 border-b border-purple-200 dark:border-purple-600/20">
-                <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                <h2 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
                   ⚙️ {copy.sections.businessInfo}
                 </h2>
               </div>
@@ -716,7 +723,7 @@ export default function BusinessConfigPage() {
               <div className="p-6 space-y-4">
                 {/* Business Name */}
                 <div>
-                  <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                  <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-900 dark:text-white">
                     📦 {copy.businessForm.businessName}{" "}
                     <span className="text-red-500">*</span>
                   </label>
@@ -727,13 +734,13 @@ export default function BusinessConfigPage() {
                       setFormData({ ...formData, businessName: e.target.value })
                     }
                     placeholder="MI NEGOCIO"
-                    className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
+                    className="w-full px-4 py-2 transition-colors bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 focus:border-purple-500 focus:outline-none"
                   />
                 </div>
 
                 {/* Address */}
                 <div>
-                  <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                  <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-900 dark:text-white">
                     📍 {copy.businessForm.address}
                   </label>
                   <input
@@ -743,14 +750,14 @@ export default function BusinessConfigPage() {
                       setFormData({ ...formData, address: e.target.value })
                     }
                     placeholder="Ej. Av. San Martin 1234, CABA"
-                    className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
+                    className="w-full px-4 py-2 transition-colors bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 focus:border-purple-500 focus:outline-none"
                   />
                 </div>
 
                 {/* Phone and Email */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-900 dark:text-white">
                       ☎️ {copy.businessForm.phone}
                     </label>
                     <input
@@ -760,11 +767,11 @@ export default function BusinessConfigPage() {
                         setFormData({ ...formData, phone: e.target.value })
                       }
                       placeholder="011 1234-5678"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
+                      className="w-full px-4 py-2 transition-colors bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 focus:border-purple-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-900 dark:text-white">
                       📧 {copy.businessForm.email}
                     </label>
                     <input
@@ -774,7 +781,7 @@ export default function BusinessConfigPage() {
                         setFormData({ ...formData, email: e.target.value })
                       }
                       placeholder="info@minegocio.com"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
+                      className="w-full px-4 py-2 transition-colors bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 focus:border-purple-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -782,7 +789,7 @@ export default function BusinessConfigPage() {
                 {/* Website and CUIT/RUC/DNI */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-900 dark:text-white">
                       🌐 {copy.businessForm.website}
                     </label>
                     <input
@@ -792,11 +799,11 @@ export default function BusinessConfigPage() {
                         setFormData({ ...formData, website: e.target.value })
                       }
                       placeholder="www.minegocio.com"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
+                      className="w-full px-4 py-2 transition-colors bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 focus:border-purple-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-900 dark:text-white">
                       📋 {copy.businessForm.cuitRucDni}
                     </label>
                     <input
@@ -809,14 +816,14 @@ export default function BusinessConfigPage() {
                         })
                       }
                       placeholder="20-12345678-9"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
+                      className="w-full px-4 py-2 transition-colors bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 focus:border-purple-500 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 {/* Ticket Message */}
                 <div>
-                  <label className="text-sm font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                  <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-900 dark:text-white">
                     🎟️ {copy.businessForm.ticketMessage}
                   </label>
                   <textarea
@@ -827,9 +834,12 @@ export default function BusinessConfigPage() {
                         ticketMessage: e.target.value,
                       })
                     }
-                    placeholder={copy.ticket.defaultMessage.replace(/\n/g, "&#10;")}
+                    placeholder={copy.ticket.defaultMessage.replace(
+                      /\n/g,
+                      "&#10;",
+                    )}
                     rows={4}
-                    className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 rounded-lg focus:border-purple-500 focus:outline-none transition-colors resize-none"
+                    className="w-full px-4 py-2 transition-colors bg-white border rounded-lg resize-none border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 focus:border-purple-500 focus:outline-none"
                   />
                   <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                     Usa \n para saltos de línea
@@ -837,18 +847,18 @@ export default function BusinessConfigPage() {
                 </div>
 
                 {/* Payment Methods */}
-                <div className="border-t border-slate-300 dark:border-slate-700 pt-6">
-                  <label className="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                <div className="pt-6 border-t border-slate-300 dark:border-slate-700">
+                  <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-900 dark:text-white">
                     💳 {copy.paymentMethods.title}
                   </label>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mb-4">
+                  <p className="mb-4 text-xs text-slate-600 dark:text-slate-400">
                     {copy.paymentMethods.subtitle}
                   </p>
                   <div className="space-y-3">
                     {formData.paymentMethods?.map((method) => (
                       <div
                         key={method.id}
-                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700"
+                        className="flex items-center justify-between p-3 border rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                       >
                         <span className="text-sm font-medium text-slate-900 dark:text-white">
                           {copy.paymentMethods[
@@ -880,7 +890,7 @@ export default function BusinessConfigPage() {
                   <button
                     onClick={handleSaveConfig}
                     disabled={savingConfig}
-                    className="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                    className="flex items-center justify-center flex-1 gap-2 px-4 py-2 font-semibold text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-500"
                   >
                     💾 {savingConfig ? copy.buttons.saving : copy.buttons.save}
                   </button>
@@ -888,7 +898,7 @@ export default function BusinessConfigPage() {
                     onClick={() => {
                       toast.info(copy.messages.previewInfo);
                     }}
-                    className="py-2 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
+                    className="flex items-center gap-2 px-4 py-2 font-semibold transition-colors rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-white"
                   >
                     👁️ Preview
                   </button>
@@ -899,18 +909,18 @@ export default function BusinessConfigPage() {
 
           {/* Right column - Ticket Preview */}
           <div>
-            <section className="bg-white border border-slate-300 dark:bg-slate-900 dark:border-slate-800 rounded-xl overflow-hidden sticky top-20">
+            <section className="sticky overflow-hidden bg-white border border-slate-300 dark:bg-slate-900 dark:border-slate-800 rounded-xl top-20">
               <div className="flex items-center justify-between p-4 border-b border-slate-300 dark:border-slate-800">
-                <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                <h2 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
                   <Eye className="w-4 h-4" /> {copy.sections.ticketPreview}
                 </h2>
               </div>
               <div className="flex items-center justify-center p-6">
                 {/* Ticket Preview - Paper Style for Light Mode, Terminal Style for Dark Mode */}
-                <div className="w-80 bg-white text-slate-800 dark:bg-black dark:text-green-400 rounded-lg shadow-2xl overflow-hidden p-4 text-center text-xs font-mono border border-slate-300 dark:border-green-600/30">
+                <div className="p-4 overflow-hidden font-mono text-xs text-center bg-white border rounded-lg shadow-2xl w-80 text-slate-800 dark:bg-black dark:text-green-400 border-slate-300 dark:border-green-600/30">
                   {/* Header with line decorations */}
                   <div className="mb-2 text-slate-900 dark:text-green-500">
-                    <p className="font-bold text-sm mb-1">
+                    <p className="mb-1 text-sm font-bold">
                       {formData.businessName.toUpperCase()}
                     </p>
                   </div>
@@ -942,7 +952,7 @@ export default function BusinessConfigPage() {
 
                   <div className="my-2 border-t border-slate-300 dark:border-green-600/30"></div>
 
-                  <div className="space-y-1 text-xs text-left text-slate-700 dark:text-green-400 mb-2">
+                  <div className="mb-2 space-y-1 text-xs text-left text-slate-700 dark:text-green-400">
                     <div>
                       <div className="flex justify-between">
                         <span>Coca Cola 1.5L</span>
@@ -967,12 +977,12 @@ export default function BusinessConfigPage() {
 
                   <div className="my-2 border-t border-dashed border-slate-300 dark:border-green-600/30"></div>
 
-                  <div className="flex justify-between font-bold mb-3 text-slate-900 dark:text-green-500">
+                  <div className="flex justify-between mb-3 font-bold text-slate-900 dark:text-green-500">
                     <span>{copy.ticket.totalLabel}</span>
                     <span>$3850.00</span>
                   </div>
 
-                  <div className="text-xs text-slate-600 dark:text-green-600 whitespace-pre-wrap">
+                  <div className="text-xs whitespace-pre-wrap text-slate-600 dark:text-green-600">
                     {formData.ticketMessage}
                   </div>
                 </div>
