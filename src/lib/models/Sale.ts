@@ -19,7 +19,15 @@ export interface ISale extends Document {
   totalWithTax?: number;
   discount: number;
   total: number;
-  paymentMethod: "cash" | "card" | "check" | "online" | "bankTransfer" | "qr" | "mercadopago" | "multiple";
+  paymentMethod:
+    | "cash"
+    | "card"
+    | "check"
+    | "online"
+    | "bankTransfer"
+    | "qr"
+    | "mercadopago"
+    | "multiple";
   paymentStatus: "pending" | "completed" | "failed" | "partial";
   invoice?: Schema.Types.ObjectId;
   cashRegisterId?: Schema.Types.ObjectId;
@@ -91,7 +99,16 @@ const saleSchema = new Schema<ISale>(
     total: Number,
     paymentMethod: {
       type: String,
-      enum: ["cash", "card", "check", "online", "bankTransfer", "qr", "mercadopago", "multiple"],
+      enum: [
+        "cash",
+        "card",
+        "check",
+        "online",
+        "bankTransfer",
+        "qr",
+        "mercadopago",
+        "multiple",
+      ],
       default: "cash",
     },
     paymentStatus: {

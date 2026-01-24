@@ -74,12 +74,16 @@ export async function GET(req: NextRequest) {
 
       const analytics = {
         totalSales: sales.length,
-        totalRevenue: sales.reduce((sum, s) => sum + (s.totalWithTax || s.total), 0),
+        totalRevenue: sales.reduce(
+          (sum, s) => sum + (s.totalWithTax || s.total),
+          0,
+        ),
         totalTax: sales.reduce((sum, s) => sum + (s.tax || 0), 0),
         totalDiscount: sales.reduce((sum, s) => sum + s.discount, 0),
         averageTicket:
           sales.length > 0
-            ? sales.reduce((sum, s) => sum + (s.totalWithTax || s.total), 0) / sales.length
+            ? sales.reduce((sum, s) => sum + (s.totalWithTax || s.total), 0) /
+              sales.length
             : 0,
         byPaymentMethod: {
           cash: sales.filter((s) => s.paymentMethod === "cash").length,
@@ -138,7 +142,7 @@ export async function GET(req: NextRequest) {
     console.error("Get sales error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -194,8 +198,8 @@ export async function PUT(req: NextRequest) {
             paymentStatus === "completed"
               ? "PAID"
               : paymentStatus === "partial"
-              ? "PARTIAL"
-              : "PENDING";
+                ? "PARTIAL"
+                : "PENDING";
           await invoice.save();
         }
       }
@@ -215,7 +219,7 @@ export async function PUT(req: NextRequest) {
     console.error("Update sale error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -257,7 +261,7 @@ export async function DELETE(req: NextRequest) {
     if (!["pending", "failed"].includes(sale.paymentStatus)) {
       return NextResponse.json(
         { error: "Can only delete pending or failed sales" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -277,7 +281,7 @@ export async function DELETE(req: NextRequest) {
     console.error("Delete sale error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

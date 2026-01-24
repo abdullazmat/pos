@@ -304,10 +304,7 @@ export default function ReportsPage() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `reports-${fromDate}-to-${toDate}.csv`,
-    );
+    link.setAttribute("download", `reports-${fromDate}-to-${toDate}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -342,10 +339,17 @@ export default function ReportsPage() {
       <main className="max-w-7xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{copy.title}</h1>
-            <p className="text-slate-600 dark:text-slate-400 text-sm">{copy.subtitle}</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+              {copy.title}
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">
+              {copy.subtitle}
+            </p>
           </div>
-          <button onClick={exportToCSV} className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+          <button
+            onClick={exportToCSV}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/20"
+          >
             <Download className="w-5 h-5" />
             {copy.exportCSV}
           </button>
@@ -504,7 +508,10 @@ export default function ReportsPage() {
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                       {reportData?.recentSales?.length ? (
                         reportData.recentSales.map((sale: any, idx: number) => (
-                          <tr key={sale._id || idx} className="text-slate-900 dark:text-slate-200">
+                          <tr
+                            key={sale._id || idx}
+                            className="text-slate-900 dark:text-slate-200"
+                          >
                             <td className="py-3 px-4">
                               {sale.createdAt?.slice(0, 10) || "-"}
                             </td>
@@ -523,7 +530,8 @@ export default function ReportsPage() {
                         <tr>
                           <td
                             colSpan={4}
-                            className="py-4 px-4 text-center text-slate-600 dark:text-slate-400">
+                            className="py-4 px-4 text-center text-slate-600 dark:text-slate-400"
+                          >
                             {loading ? "Cargando..." : copy.recentSales.noSales}
                           </td>
                         </tr>
@@ -545,16 +553,24 @@ export default function ReportsPage() {
                   <table className="min-w-full text-sm">
                     <thead>
                       <tr className="text-slate-700 border-b border-slate-300 dark:text-slate-400 dark:border-slate-800">
-                        <th className="text-left py-3 px-4">{copy.topProducts.product}</th>
+                        <th className="text-left py-3 px-4">
+                          {copy.topProducts.product}
+                        </th>
                         <th className="text-left py-3 px-4">
                           {copy.topProducts.quantitySold}
                         </th>
                         <th className="text-left py-3 px-4">
                           {copy.topProducts.totalRevenue}
                         </th>
-                        <th className="text-left py-3 px-4">{copy.topProducts.approxCost}</th>
-                        <th className="text-left py-3 px-4">{copy.topProducts.approxProfit}</th>
-                        <th className="text-left py-3 px-4">{copy.topProducts.margin}</th>
+                        <th className="text-left py-3 px-4">
+                          {copy.topProducts.approxCost}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.topProducts.approxProfit}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.topProducts.margin}
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 text-slate-900 dark:divide-slate-800 dark:text-slate-200">
