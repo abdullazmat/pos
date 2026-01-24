@@ -95,6 +95,10 @@ const PRODUCT_COPY = {
       activeLabel: "Producto activo",
       weightLabel:
         "Se vende por peso (kg) - Ej: verduras, fiambres, alimento de perros",
+      weightHelpEnabled:
+        "✓ Decimales habilitados (máx. 3 lugares). Ejemplos: 1.254 kg, 0.750 kg. Usa coma o punto como separador.",
+      weightHelpDisabled:
+        "Habilitar para productos vendidos por peso/volumen. Admite cantidades decimales (máx. 3 decimales).",
       cancel: "Cancelar",
       saveNew: "Crear Producto",
       saveEdit: "Actualizar Producto",
@@ -211,6 +215,10 @@ const PRODUCT_COPY = {
       minStockHelper: "Level for low-stock alerts",
       activeLabel: "Active product",
       weightLabel: "Sold by weight (kg) - e.g., produce, deli, pet food",
+      weightHelpEnabled:
+        "✓ Decimals enabled (max 3 places). Examples: 1.254 kg, 0.750 kg. Use comma or period as separator.",
+      weightHelpDisabled:
+        "Enable for products sold by weight/volume. Supports decimal quantities (max 3 decimal places).",
       cancel: "Cancel",
       saveNew: "Create Product",
       saveEdit: "Update Product",
@@ -327,6 +335,10 @@ const PRODUCT_COPY = {
       minStockHelper: "Nível para alertas de estoque baixo",
       activeLabel: "Produto ativo",
       weightLabel: "Vendido por peso (kg) - Ex.: verduras, frios, ração",
+      weightHelpEnabled:
+        "✓ Decimais habilitados (máx. 3 casas). Exemplos: 1.254 kg, 0.750 kg. Use vírgula ou ponto como separador.",
+      weightHelpDisabled:
+        "Habilitar para produtos vendidos por peso/volume. Suporta quantidades decimais (máx. 3 casas decimais).",
       cancel: "Cancelar",
       saveNew: "Criar Produto",
       saveEdit: "Atualizar Produto",
@@ -705,11 +717,11 @@ export default function ProductsPage() {
     return (
       <div className="min-h-screen bg-white dark:bg-slate-950">
         <Header user={user} showBackButton={true} />
-        <main className="max-w-7xl mx-auto p-6">
-          <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <main className="p-6 mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 gap-6 animate-pulse md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-lg shadow p-6 h-40">
-                <div className="h-6 w-1/2 bg-gray-200 rounded mb-4" />
+              <div key={i} className="h-40 p-6 bg-white rounded-lg shadow">
+                <div className="w-1/2 h-6 mb-4 bg-gray-200 rounded" />
                 <div className="grid grid-cols-2 gap-2">
                   <div className="h-10 bg-gray-200 rounded" />
                   <div className="h-10 bg-gray-200 rounded" />
@@ -728,12 +740,12 @@ export default function ProductsPage() {
     <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton={true} />
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="px-4 py-8 mx-auto max-w-7xl">
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
+              <h1 className="mb-2 text-4xl font-bold text-slate-900 dark:text-white">
                 {copy.headerTitle}
               </h1>
               <p className="text-slate-600 dark:text-slate-400">
@@ -786,7 +798,7 @@ export default function ProductsPage() {
           </div>
 
           {/* Plan Status Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border bg-white border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border rounded-lg shadow-sm border-slate-200 dark:bg-slate-900 dark:border-slate-800">
             <svg
               className="w-4 h-4 text-green-500 dark:text-green-400"
               fill="currentColor"
@@ -807,12 +819,12 @@ export default function ProductsPage() {
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
+            <Search className="absolute w-5 h-5 -translate-y-1/2 left-4 top-1/2 text-slate-400 dark:text-slate-500" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={copy.searchPlaceholder}
-              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100"
+              className="w-full py-3 pl-12 pr-4 bg-white border rounded-lg border-slate-200 text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100"
             />
           </div>
         </div>
@@ -828,7 +840,7 @@ export default function ProductsPage() {
             >
               <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300">
+                  <div className="p-2 border rounded-lg bg-emerald-500/20 border-emerald-500/30 text-emerald-300">
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -847,7 +859,7 @@ export default function ProductsPage() {
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                       {copy.importModal.title}
                     </h3>
-                    <p className="text-slate-600 text-sm dark:text-slate-400">
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
                       {copy.importModal.subtitle}
                     </p>
                   </div>
@@ -877,7 +889,7 @@ export default function ProductsPage() {
               </div>
 
               <div className="p-6 space-y-6">
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 dark:bg-slate-900 dark:border-slate-800">
+                <div className="p-5 border bg-slate-50 border-slate-200 rounded-xl dark:bg-slate-900 dark:border-slate-800">
                   <div className="flex items-start gap-3 text-slate-700 dark:text-blue-200">
                     <svg
                       className="w-5 h-5 mt-0.5"
@@ -893,10 +905,10 @@ export default function ProductsPage() {
                       />
                     </svg>
                     <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white mb-2">
+                      <h4 className="mb-2 font-semibold text-slate-900 dark:text-white">
                         {copy.importModal.instructionsTitle}
                       </h4>
-                      <ol className="list-decimal list-inside space-y-1 text-sm text-slate-700 dark:text-blue-100">
+                      <ol className="space-y-1 text-sm list-decimal list-inside text-slate-700 dark:text-blue-100">
                         {copy.importModal.steps.map((step, idx) => (
                           <li key={idx}>{step}</li>
                         ))}
@@ -905,10 +917,10 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 items-center">
+                <div className="flex flex-col items-center gap-3 sm:flex-row">
                   <button
                     onClick={handleDownloadTemplate}
-                    className="w-full sm:w-auto px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition"
+                    className="flex items-center justify-center w-full gap-2 px-4 py-3 font-semibold text-white transition bg-green-600 rounded-lg sm:w-auto hover:bg-green-700"
                   >
                     <svg
                       className="w-5 h-5"
@@ -926,7 +938,7 @@ export default function ProductsPage() {
                     {copy.importModal.downloadTemplate}
                   </button>
                   {importFile && (
-                    <div className="text-sm text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2 w-full sm:w-auto dark:text-slate-300 dark:bg-slate-900 dark:border-slate-800">
+                    <div className="w-full px-3 py-2 text-sm bg-white border rounded-lg text-slate-700 border-slate-200 sm:w-auto dark:text-slate-300 dark:bg-slate-900 dark:border-slate-800">
                       {copy.importModal.selectedFile}{" "}
                       <span className="font-semibold text-slate-900 dark:text-white">
                         {importFile.name}
@@ -942,7 +954,7 @@ export default function ProductsPage() {
                     const file = e.dataTransfer.files?.[0];
                     if (file) setImportFile(file);
                   }}
-                  className="border-2 border-dashed border-slate-200 rounded-xl bg-white p-8 flex flex-col items-center justify-center text-center gap-4 dark:bg-slate-900 dark:border-slate-800"
+                  className="flex flex-col items-center justify-center gap-4 p-8 text-center bg-white border-2 border-dashed border-slate-200 rounded-xl dark:bg-slate-900 dark:border-slate-800"
                 >
                   <div className="p-4 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                     <svg
@@ -960,10 +972,10 @@ export default function ProductsPage() {
                     </svg>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-slate-800 font-semibold dark:text-slate-200">
+                    <p className="font-semibold text-slate-800 dark:text-slate-200">
                       {copy.importModal.dropTitle}
                     </p>
-                    <p className="text-slate-600 text-sm dark:text-slate-500">
+                    <p className="text-sm text-slate-600 dark:text-slate-500">
                       {copy.importModal.dropSubtitle}
                     </p>
                   </div>
@@ -986,13 +998,13 @@ export default function ProductsPage() {
                   />
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-xl p-5 dark:bg-slate-900 dark:border-slate-800">
-                  <h4 className="text-slate-900 font-semibold mb-3 dark:text-white">
+                <div className="p-5 bg-white border border-slate-200 rounded-xl dark:bg-slate-900 dark:border-slate-800">
+                  <h4 className="mb-3 font-semibold text-slate-900 dark:text-white">
                     {copy.importModal.csvFormatTitle}
                   </h4>
-                  <div className="grid md:grid-cols-2 gap-4 text-sm text-slate-700 dark:text-slate-300">
+                  <div className="grid gap-4 text-sm md:grid-cols-2 text-slate-700 dark:text-slate-300">
                     <div>
-                      <p className="font-semibold text-slate-800 mb-2 dark:text-slate-100">
+                      <p className="mb-2 font-semibold text-slate-800 dark:text-slate-100">
                         {copy.importModal.requiredTitle}
                       </p>
                       <ul className="space-y-1">
@@ -1002,7 +1014,7 @@ export default function ProductsPage() {
                       </ul>
                     </div>
                     <div>
-                      <p className="font-semibold text-slate-800 mb-2 dark:text-slate-100">
+                      <p className="mb-2 font-semibold text-slate-800 dark:text-slate-100">
                         {copy.importModal.optionalTitle}
                       </p>
                       <ul className="space-y-1">
@@ -1014,7 +1026,7 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 justify-end pt-2">
+                <div className="flex flex-col justify-end gap-3 pt-2 sm:flex-row">
                   <button
                     onClick={() => {
                       setShowImportModal(false);
@@ -1065,7 +1077,7 @@ export default function ProductsPage() {
                     });
                     setShowForm(false);
                   }}
-                  className="text-slate-500 hover:text-slate-700 text-2xl dark:text-slate-400 dark:hover:text-slate-200"
+                  className="text-2xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                 >
                   ✕
                 </button>
@@ -1074,7 +1086,7 @@ export default function ProductsPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Product Name */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                     {t("pages.products.productName", "pos")}{" "}
                     <span className="text-red-500">*</span>
                   </label>
@@ -1085,14 +1097,14 @@ export default function ProductsPage() {
                       setFormData({ ...formData, name: e.target.value })
                     }
                     placeholder={copy.form.namePlaceholder}
-                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
+                    className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                     required
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                     {t("pages.products.description", "pos")}
                   </label>
                   <textarea
@@ -1102,14 +1114,14 @@ export default function ProductsPage() {
                     }
                     placeholder={copy.form.descPlaceholder}
                     rows={3}
-                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
+                    className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                   />
                 </div>
 
                 {/* Barcode and Category */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {t("pages.products.barcode", "pos")}
                     </label>
                     <input
@@ -1119,11 +1131,11 @@ export default function ProductsPage() {
                         setFormData({ ...formData, barcode: e.target.value })
                       }
                       placeholder={copy.form.barcodePlaceholder}
-                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {t("pages.products.category", "pos")}
                     </label>
                     <select
@@ -1131,7 +1143,7 @@ export default function ProductsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, category: e.target.value })
                       }
-                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     >
                       <option
                         value=""
@@ -1153,9 +1165,9 @@ export default function ProductsPage() {
                 </div>
 
                 {/* Cost and Margin */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {copy.form.costLabel}{" "}
                       <span className="text-red-500">*</span>
                     </label>
@@ -1177,12 +1189,12 @@ export default function ProductsPage() {
                       }}
                       placeholder="0.00"
                       step="0.01"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {copy.form.marginLabel}{" "}
                       <span className="text-red-500">*</span>
                     </label>
@@ -1202,16 +1214,16 @@ export default function ProductsPage() {
                       }}
                       placeholder="0.0"
                       step="0.1"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                       required
                     />
                   </div>
                 </div>
 
                 {/* Price and Stock */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {copy.form.priceLabel}{" "}
                       <span className="text-red-500">*</span>
                     </label>
@@ -1231,18 +1243,18 @@ export default function ProductsPage() {
                       }}
                       placeholder="0.00"
                       step="0.01"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                       required
                     />
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       {copy.form.priceHint}
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {copy.form.stockLabel}{" "}
                       <span className="text-red-500">*</span>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
+                      <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
                         {copy.form.stockUnitHint}
                       </span>
                     </label>
@@ -1253,18 +1265,18 @@ export default function ProductsPage() {
                         setFormData({ ...formData, stock: e.target.value })
                       }
                       placeholder={copy.form.stockPlaceholder}
-                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                       required
                     />
                   </div>
                 </div>
 
                 {/* Code and Min Stock */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {copy.form.codeLabel}
-                      <span className="text-xs text-slate-500 dark:text-slate-400 font-normal ml-2">
+                      <span className="ml-2 text-xs font-normal text-slate-500 dark:text-slate-400">
                         {copy.form.codeHint || "(auto si vacío)"}
                       </span>
                     </label>
@@ -1275,14 +1287,14 @@ export default function ProductsPage() {
                         setFormData({ ...formData, code: e.target.value })
                       }
                       placeholder={copy.form.codePlaceholder}
-                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {copy.form.minStockLabel}{" "}
                       <span className="text-red-500">*</span>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
+                      <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
                         {copy.form.minStockHint}
                       </span>
                     </label>
@@ -1293,17 +1305,17 @@ export default function ProductsPage() {
                         setFormData({ ...formData, minStock: e.target.value })
                       }
                       placeholder={copy.form.minStockPlaceholder}
-                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                       required
                     />
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       {copy.form.minStockHelper}
                     </p>
                   </div>
                 </div>
 
                 {/* Checkboxes */}
-                <div className="space-y-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                <div className="p-4 space-y-3 border rounded-lg bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
@@ -1311,7 +1323,7 @@ export default function ProductsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, active: e.target.checked })
                       }
-                      className="w-4 h-4 rounded border-slate-600 text-blue-600 cursor-pointer"
+                      className="w-4 h-4 text-blue-600 rounded cursor-pointer border-slate-600"
                     />
                     <span className="text-sm text-slate-700 dark:text-slate-300">
                       {copy.form.activeLabel}
@@ -1330,13 +1342,13 @@ export default function ProductsPage() {
                       className="w-4 h-4 rounded border-slate-600 text-blue-600 cursor-pointer mt-0.5"
                     />
                     <div className="flex-1">
-                      <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                         {copy.form.weightLabel}
                       </span>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                      <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                         {formData.isSoldByWeight
-                          ? "✓ Decimals enabled (max 3 places). Examples: 1.254 kg, 0.750 kg. Use comma or period as separator."
-                          : "Enable for products sold by weight/volume. Supports decimal quantities (max 3 decimal places)."}
+                          ? copy.form.weightHelpEnabled
+                          : copy.form.weightHelpDisabled}
                       </p>
                     </div>
                   </label>
@@ -1364,13 +1376,13 @@ export default function ProductsPage() {
                       });
                       setShowForm(false);
                     }}
-                    className="flex-1 px-6 py-3 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg font-semibold transition dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700"
+                    className="flex-1 px-6 py-3 font-semibold transition bg-white border rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700"
                   >
                     {copy.form.cancel}
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition"
+                    className="flex-1 px-6 py-3 font-semibold text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"
                   >
                     {editingId ? copy.form.saveEdit : copy.form.saveNew}
                   </button>
@@ -1381,10 +1393,10 @@ export default function ProductsPage() {
         )}
 
         {/* Table View only (list) */}
-        <div className="overflow-x-auto bg-white rounded-xl border border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800">
+        <div className="overflow-x-auto bg-white border shadow-sm rounded-xl border-slate-200 dark:bg-slate-900 dark:border-slate-800">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="text-left bg-slate-100 border-b border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
+              <tr className="text-left border-b bg-slate-100 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
                 <th className="p-3 font-semibold text-slate-600 dark:text-slate-200">
                   {copy.table.product}
                 </th>
@@ -1415,9 +1427,9 @@ export default function ProductsPage() {
               {filteredProducts.map((product) => (
                 <tr
                   key={product._id}
-                  className="border-t border-slate-200 hover:bg-slate-50 transition dark:border-slate-700 dark:hover:bg-slate-800/50"
+                  className="transition border-t border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                 >
-                  <td className="p-3 text-slate-900 dark:text-white font-medium">
+                  <td className="p-3 font-medium text-slate-900 dark:text-white">
                     {product.name}
                   </td>
                   <td className="p-3 text-slate-600 dark:text-slate-300">
@@ -1460,11 +1472,11 @@ export default function ProductsPage() {
                   <td className="p-3 text-slate-600 dark:text-slate-400">
                     ${product.price.toFixed(2)}
                   </td>
-                  <td className="p-3 text-green-400 font-semibold">
+                  <td className="p-3 font-semibold text-green-400">
                     {product.margin?.toFixed(1)}%
                   </td>
                   <td className="p-3 text-right">
-                    <div className="flex gap-2 justify-end">
+                    <div className="flex justify-end gap-2">
                       <button
                         onClick={() => {
                           setEditingId(product._id);
@@ -1484,7 +1496,7 @@ export default function ProductsPage() {
                           });
                           setShowForm(true);
                         }}
-                        className="p-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-blue-600 transition dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-blue-400"
+                        className="p-2 text-blue-600 transition bg-white border rounded-full border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-blue-400"
                         title={t("labels.edit", "pos") as string}
                       >
                         <Pencil className="w-4 h-4" />
@@ -1493,7 +1505,7 @@ export default function ProductsPage() {
                         onClick={() =>
                           handleDeleteClick(product._id, product.name)
                         }
-                        className="p-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-red-600 transition dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-red-400"
+                        className="p-2 text-red-600 transition bg-white border rounded-full border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-red-400"
                         title={t("labels.delete", "pos") as string}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -1507,8 +1519,8 @@ export default function ProductsPage() {
         </div>
 
         {filteredProducts.length === 0 && (
-          <div className="bg-white rounded-lg shadow-lg p-12 text-center border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
-            <p className="text-slate-500 dark:text-slate-400 text-lg">
+          <div className="p-12 text-center bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+            <p className="text-lg text-slate-500 dark:text-slate-400">
               {copy.empty.title}
             </p>
             <p className="text-slate-600 dark:text-slate-500">
@@ -1542,11 +1554,11 @@ export default function ProductsPage() {
             onClick={() => setShowDeleteModal(false)}
           >
             <div
-              className="bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 slide-in-from-bottom-4 border border-slate-800"
+              className="w-full max-w-md p-6 border shadow-2xl bg-slate-900 rounded-2xl animate-in zoom-in-95 slide-in-from-bottom-4 border-slate-800"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-4 mb-4">
-                <div className="bg-red-500/20 border border-red-500/30 p-3 rounded-full">
+                <div className="p-3 border rounded-full bg-red-500/20 border-red-500/30">
                   <Trash2 className="w-6 h-6 text-red-500" />
                 </div>
                 <div>
@@ -1559,7 +1571,7 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 mb-6">
+              <div className="p-4 mb-6 border rounded-lg bg-slate-800/50 border-slate-700">
                 <p className="text-slate-300">
                   {copy.deleteModal.question}{" "}
                   <span className="font-semibold text-white">
