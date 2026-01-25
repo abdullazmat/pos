@@ -73,6 +73,16 @@ const SUPPLIER_COPY = {
       actions: "Acciones",
     },
     statusActive: "Activo",
+    toasts: {
+      limitReached: (max: string | number) =>
+        `Límite de proveedores alcanzado (${max})`,
+      createSuccess: "Proveedor creado",
+      updateSuccess: "Proveedor actualizado",
+      saveError: "Error al guardar proveedor",
+      deleteSuccess: "Proveedor eliminado",
+      deleteError: "Error al eliminar proveedor",
+      importError: "Error al importar proveedores",
+    },
     delete: {
       title: "Eliminar Proveedor",
       subtitle: "Esta acción no se puede deshacer",
@@ -138,6 +148,15 @@ const SUPPLIER_COPY = {
       actions: "Actions",
     },
     statusActive: "Active",
+    toasts: {
+      limitReached: (max: string | number) => `Supplier limit reached (${max})`,
+      createSuccess: "Supplier created",
+      updateSuccess: "Supplier updated",
+      saveError: "Error saving supplier",
+      deleteSuccess: "Supplier deleted",
+      deleteError: "Error deleting supplier",
+      importError: "Error importing suppliers",
+    },
     delete: {
       title: "Delete Supplier",
       subtitle: "This action cannot be undone",
@@ -203,6 +222,16 @@ const SUPPLIER_COPY = {
       actions: "Ações",
     },
     statusActive: "Ativo",
+    toasts: {
+      limitReached: (max: string | number) =>
+        `Limite de fornecedores atingido (${max})`,
+      createSuccess: "Fornecedor criado",
+      updateSuccess: "Fornecedor atualizado",
+      saveError: "Erro ao salvar fornecedor",
+      deleteSuccess: "Fornecedor excluído",
+      deleteError: "Erro ao excluir fornecedor",
+      importError: "Erro ao importar fornecedores",
+    },
     delete: {
       title: "Excluir Fornecedor",
       subtitle: "Esta ação não pode ser desfeita",
@@ -327,9 +356,7 @@ export default function SuppliersPage() {
       isLimitReached(currentPlan, "maxSuppliers", suppliers.length)
     ) {
       setShowLimitPrompt(true);
-      toast.info(
-        `Límite de proveedores alcanzado (${planConfig.maxSuppliers})`,
-      );
+      toast.info(copy.toasts.limitReached(planConfig.maxSuppliers));
       return;
     }
 
@@ -350,7 +377,9 @@ export default function SuppliersPage() {
 
       if (response.ok) {
         const data = await response.json();
-        toast.success(editingId ? "Proveedor actualizado" : "Proveedor creado");
+        toast.success(
+          editingId ? copy.toasts.updateSuccess : copy.toasts.createSuccess,
+        );
         await fetchSuppliers();
         setShowForm(false);
         setEditingId(null);
@@ -363,11 +392,11 @@ export default function SuppliersPage() {
         });
       } else {
         const errorData = await response.json();
-        toast.error(errorData.error || "Error al guardar proveedor");
+        toast.error(errorData.error || copy.toasts.saveError);
       }
     } catch (error) {
       console.error("Error saving supplier:", error);
-      toast.error(t("errorSavingSupplier", "errors"));
+      toast.error(copy.toasts.saveError);
     }
   };
 
@@ -399,15 +428,15 @@ export default function SuppliersPage() {
       });
 
       if (response.ok) {
-        toast.success(t("supplierDeletedSuccess", "errors"));
+        toast.success(copy.toasts.deleteSuccess);
         await fetchSuppliers();
       } else {
         const errorData = await response.json();
-        toast.error(errorData.error || "Error al eliminar proveedor");
+        toast.error(errorData.error || copy.toasts.deleteError);
       }
     } catch (error) {
       console.error("Error deleting supplier:", error);
-      toast.error(t("errorDeletingSupplier", "errors"));
+      toast.error(copy.toasts.deleteError);
     } finally {
       setShowDeleteModal(false);
       setSupplierToDelete(null);
@@ -541,11 +570,11 @@ export default function SuppliersPage() {
         setUploadFile(null);
       } else {
         const errorData = await response.json();
-        toast.error(errorData.error || "Error al importar proveedores");
+        toast.error(errorData.error || copy.toasts.importError);
       }
     } catch (error) {
       console.error("Error processing CSV:", error);
-      toast.error(t("errorProcessingCSV", "errors"));
+      toast.error(copy.toasts.importError);
     } finally {
       setUploadProgress(false);
     }

@@ -5,6 +5,7 @@ import Invoice, { InvoiceChannel, InvoiceType } from "@/lib/models/Invoice";
 import Product from "@/lib/models/Product";
 import StockHistory from "@/lib/models/StockHistory";
 import CashRegister from "@/lib/models/CashRegister";
+import CashMovement from "@/lib/models/CashMovement";
 import Payment from "@/lib/models/Payment";
 import MercadoPagoService from "@/lib/services/payment/MercadoPagoService";
 import { verifyToken } from "@/lib/utils/jwt";
@@ -97,8 +98,8 @@ export async function POST(req: NextRequest) {
     if (cashRegisterId) {
       const register = await CashRegister.findOne({
         _id: cashRegisterId,
-        business: decoded.businessId,
-        isOpen: true,
+        businessId: decoded.businessId,
+        status: "open",
       });
 
       if (!register) {
@@ -119,7 +120,7 @@ export async function POST(req: NextRequest) {
     for (const item of items) {
       const product = await Product.findOne({
         _id: item.productId,
-        business: decoded.businessId,
+        businessId: decoded.businessId,
       });
 
       if (!product) {
@@ -217,8 +218,8 @@ export async function POST(req: NextRequest) {
 
     // Create sale record
     const sale = new Sale({
-      business: decoded.businessId,
-      user: decoded.userId,
+      businessId: decoded.businessId,
+      userId: decoded.userId,
       items: saleItems,
       subtotal,
       discount,
@@ -233,12 +234,61 @@ export async function POST(req: NextRequest) {
           ? "completed"
           : "pending", // Mercado Pago will be pending
       invoice: invoice?._id,
-      cashRegister: cashRegisterId,
+      cashRegisterId: cashRegisterId,
       notes,
       createdAt: new Date(),
     });
 
     await sale.save();
+
+    // Record cash movement when a register is open
+    // Attach to open cash register (session) if available or provided
+    let resolvedCashRegisterId = cashRegisterId;
+    let openRegister = null;
+
+    if (!resolvedCashRegisterId) {
+      openRegister = await CashRegister.findOne({
+        businessId: decoded.businessId,
+        status: "open",
+      });
+      if (openRegister) {
+        resolvedCashRegisterId = openRegister._id;
+      }
+    } else {
+      openRegister = await CashRegister.findOne({
+        _id: resolvedCashRegisterId,
+        businessId: decoded.businessId,
+        status: "open",
+      });
+    }
+
+    if (openRegister) {
+      try {
+        // Update sale with resolved cash register ID if it wasn't provided
+        if (!cashRegisterId && resolvedCashRegisterId) {
+          sale.cashRegisterId = openRegister._id;
+          await sale.save();
+        }
+
+        // Update register balances and totals
+        openRegister.currentBalance =
+          (openRegister.currentBalance || 0) + totalWithTax;
+        openRegister.salesTotal = (openRegister.salesTotal || 0) + totalWithTax;
+        await openRegister.save();
+
+        await CashMovement.create({
+          businessId: decoded.businessId,
+          cashRegisterId: openRegister._id,
+          type: "venta",
+          description: "Venta POS",
+          amount: totalWithTax,
+          createdBy: decoded.userId,
+        });
+      } catch (movementError) {
+        console.error("Cash movement error:", movementError);
+        // Log error but don't fail the sale
+      }
+    }
 
     // Now deduct stock and record history (after sale is persisted)
     try {
@@ -248,8 +298,8 @@ export async function POST(req: NextRequest) {
 
         // Record stock history
         await StockHistory.create({
-          business: decoded.businessId,
-          product: product._id,
+          businessId: decoded.businessId,
+          productId: product._id,
           type: "sale",
           quantity: -quantity,
           reference: sale._id,
@@ -336,12 +386,15 @@ export async function POST(req: NextRequest) {
           id: sale._id.toString(),
           invoiceNumber: invoice?.invoiceNumber,
           invoiceId: invoice?._id.toString(),
+          createdAt: sale.createdAt,
+          total: totalAmount,
           totalWithTax,
           tax: taxAmount,
           subtotal,
           discount,
           paymentMethod,
           paymentStatus: sale.paymentStatus,
+          cashRegisterId: resolvedCashRegisterId,
           customerName,
           items: saleItems,
           ...paymentData,
@@ -385,10 +438,9 @@ export async function GET(req: NextRequest) {
       // Get specific sale
       const sale = await Sale.findOne({
         _id: saleId,
-        business: decoded.businessId,
+        businessId: decoded.businessId,
       })
         .populate("invoice")
-        .populate("cashRegister")
         .lean();
 
       if (!sale) {
@@ -399,7 +451,7 @@ export async function GET(req: NextRequest) {
     } else {
       // List all sales
       const sales = await Sale.find({
-        business: decoded.businessId,
+        businessId: decoded.businessId,
       })
         .sort({ createdAt: -1 })
         .limit(limit)
@@ -408,7 +460,7 @@ export async function GET(req: NextRequest) {
         .lean();
 
       const total = await Sale.countDocuments({
-        business: decoded.businessId,
+        businessId: decoded.businessId,
       });
 
       return NextResponse.json({

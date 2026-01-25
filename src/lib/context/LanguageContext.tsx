@@ -572,6 +572,8 @@ const translationsEs = {
       checkoutSuccess: "¡Venta completada exitosamente!",
       checkoutError: "Error al completar la venta",
       checkoutProcessError: "Error al procesar la venta. Intenta nuevamente.",
+      print: "Imprimir",
+      close: "Cerrar",
       roles: {
         admin: "Administrador",
         supervisor: "Supervisor",

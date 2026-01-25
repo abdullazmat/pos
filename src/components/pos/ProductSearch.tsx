@@ -160,14 +160,19 @@ export default function ProductSearch({
               <div
                 key={product._id}
                 className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 bg-white dark:bg-slate-800 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/50 hover:border-blue-300 dark:hover:border-blue-600 transition cursor-pointer"
-                onClick={() =>
+                onClick={() => {
+                  const normalizedPrice = product.isSoldByWeight
+                    ? product.price >= 1000
+                      ? product.price / 1000 // normalize to price per kg if stored per gram
+                      : product.price
+                    : product.price;
                   onAddToCart(
                     product._id,
                     product.name,
-                    product.price,
+                    normalizedPrice,
                     product.isSoldByWeight,
-                  )
-                }
+                  );
+                }}
               >
                 <h3 className="font-semibold text-gray-800 dark:text-white mb-2">
                   {product.name}
@@ -180,15 +185,22 @@ export default function ProductSearch({
                 </p>
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-green-600 dark:text-green-400">
-                    ${product.price.toFixed(2)}
+                    {product.isSoldByWeight
+                      ? `${(product.price >= 1000 ? product.price / 1000 : product.price).toFixed(3)} / kg`
+                      : `$${product.price.toFixed(2)}`}
                   </span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      const normalizedPrice = product.isSoldByWeight
+                        ? product.price >= 1000
+                          ? product.price / 1000
+                          : product.price
+                        : product.price;
                       onAddToCart(
                         product._id,
                         product.name,
-                        product.price,
+                        normalizedPrice,
                         product.isSoldByWeight,
                       );
                     }}

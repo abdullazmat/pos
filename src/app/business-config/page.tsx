@@ -7,6 +7,7 @@ import Header from "@/components/layout/Header";
 import SubscriptionProModal from "@/components/business-config/SubscriptionProModal";
 import SubscriptionFreePlanModal from "@/components/business-config/SubscriptionFreePlanModal";
 import SubscriptionPremiumModal from "@/components/business-config/SubscriptionPremiumModal";
+import DigitalCertificatesSection from "@/components/business-config/DigitalCertificatesSection";
 import { Eye, Star, Crown } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -257,12 +258,12 @@ export default function BusinessConfigPage() {
 
   const [formData, setFormData] = useState<BusinessConfig>({
     businessName: "MI NEGOCIO",
-    address: copy.ticket.address,
+    address: "",
     phone: "(sin teléfono)",
     email: "correo@ejemplo.com",
     website: "www.minegocio.com",
     cuitRucDni: "00-00000000-0",
-    ticketMessage: copy.ticket.defaultMessage,
+    ticketMessage: "",
     paymentMethods: [
       { id: "cash", name: "Efectivo", enabled: true },
       { id: "bankTransfer", name: "Transferencia Bancaria", enabled: true },
@@ -292,6 +293,7 @@ export default function BusinessConfigPage() {
       CONFIG_COPY.es.ticket.defaultMessage,
       CONFIG_COPY.en.ticket.defaultMessage,
       CONFIG_COPY.pt.ticket.defaultMessage,
+      "", // Empty string is also considered default
     ];
 
     setFormData((prevFormData) => {
@@ -303,6 +305,7 @@ export default function BusinessConfigPage() {
 
       return {
         ...prevFormData,
+        address: prevFormData.address || copy.ticket.address,
         ticketMessage: shouldUpdate
           ? copy.ticket.defaultMessage
           : prevFormData.ticketMessage,
@@ -346,13 +349,25 @@ export default function BusinessConfigPage() {
       if (response.ok) {
         const data = await response.json();
         const configData = data.data || formData;
-        // Ensure ticketMessage always has a value, use default if empty
-        if (
+
+        // List of all default messages in all languages
+        const allDefaultMessages = [
+          CONFIG_COPY.es.ticket.defaultMessage,
+          CONFIG_COPY.en.ticket.defaultMessage,
+          CONFIG_COPY.pt.ticket.defaultMessage,
+        ];
+
+        // If ticketMessage is empty or is a default message in any language,
+        // replace it with the current language's default
+        const isDefaultOrEmpty =
           !configData.ticketMessage ||
-          configData.ticketMessage.trim() === ""
-        ) {
+          configData.ticketMessage.trim() === "" ||
+          allDefaultMessages.includes(configData.ticketMessage);
+
+        if (isDefaultOrEmpty) {
           configData.ticketMessage = copy.ticket.defaultMessage;
         }
+
         setFormData(configData);
       }
     } catch (error) {
@@ -905,6 +920,9 @@ export default function BusinessConfigPage() {
                 </div>
               </div>
             </section>
+
+            {/* Digital Certificates Section */}
+            <DigitalCertificatesSection />
           </div>
 
           {/* Right column - Ticket Preview */}

@@ -274,9 +274,11 @@ export default function UpgradePage() {
       }
     } catch (error) {
       console.error("Upgrade error:", error);
-      toast.error(
-        error instanceof Error ? error.message : copy.payment.canceledDesc,
+      const msg = getPaymentErrorMessage(
+        error instanceof Error ? error.message : String(error),
+        currentLanguage,
       );
+      toast.error(msg);
       setUpgrading(false);
     }
   };
@@ -312,13 +314,63 @@ export default function UpgradePage() {
       }
     } catch (error) {
       console.error("Upgrade Mercado Pago error:", error);
-      toast.error(
-        error instanceof Error ? error.message : copy.payment.canceledDesc,
+      const msg = getPaymentErrorMessage(
+        error instanceof Error ? error.message : String(error),
+        currentLanguage,
       );
+      toast.error(msg);
     } finally {
       setMpUpgrading(false);
     }
   };
+
+  // Localized payment error mapping
+  function getPaymentErrorMessage(raw: string, lang: "es" | "en" | "pt") {
+    const M = {
+      es: {
+        createFailed: "No se pudo crear el pago",
+        checkoutFailed: "No se pudo crear la sesión de pago",
+        linkMissing: "No se recibió el enlace de pago",
+        unauthorized: "No autorizado. Inicia sesión nuevamente.",
+        invalidToken: "Token inválido. Inicia sesión nuevamente.",
+        invalidPlan: "Plan inválido o no disponible.",
+        missingFields: "Faltan datos requeridos.",
+        generic: "Ocurrió un error al procesar el pago",
+      },
+      en: {
+        createFailed: "Failed to create payment",
+        checkoutFailed: "Failed to create checkout session",
+        linkMissing: "Payment link was not received",
+        unauthorized: "Unauthorized. Please sign in again.",
+        invalidToken: "Invalid token. Please sign in again.",
+        invalidPlan: "Invalid or unavailable plan.",
+        missingFields: "Missing required fields.",
+        generic: "An error occurred while processing the payment",
+      },
+      pt: {
+        createFailed: "Não foi possível criar o pagamento",
+        checkoutFailed: "Não foi possível criar a sessão de pagamento",
+        linkMissing: "O link de pagamento não foi recebido",
+        unauthorized: "Não autorizado. Entre novamente.",
+        invalidToken: "Token inválido. Entre novamente.",
+        invalidPlan: "Plano inválido ou indisponível.",
+        missingFields: "Faltam dados obrigatórios.",
+        generic: "Ocorreu um erro ao processar o pagamento",
+      },
+    } as const;
+
+    const L = M[lang] || M.en;
+    const s = (raw || "").toLowerCase();
+    if (s.includes("failed to create payment")) return L.createFailed;
+    if (s.includes("failed to create checkout")) return L.checkoutFailed;
+    if (s.includes("no checkout url") || s.includes("enlace de pago"))
+      return L.linkMissing;
+    if (s.includes("unauthorized")) return L.unauthorized;
+    if (s.includes("invalid token")) return L.invalidToken;
+    if (s.includes("invalid or unavailable plan")) return L.invalidPlan;
+    if (s.includes("missing required fields")) return L.missingFields;
+    return L.generic;
+  }
 
   if (!mounted || loading) {
     return (

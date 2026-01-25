@@ -361,7 +361,7 @@ export default function ClientsPage() {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={() => router.push("/upgrade")}
+                  onClick={() => router.push("/business-config")}
                   className="px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-5 h-5" />

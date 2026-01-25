@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { apiFetch } from "@/lib/utils/apiFetch";
 import Header from "@/components/layout/Header";
 import {
   Calendar,
@@ -210,38 +211,88 @@ export default function ReportsPage() {
     start.setDate(today.getDate() - 30);
     setFromDate(fmt(start));
     setToDate(fmt(today));
-
-    fetchReportData();
   }, [router]);
 
+  useEffect(() => {
+    if (fromDate && toDate) {
+      fetchReportData();
+    }
+  }, [fromDate, toDate]);
+
   const fetchReportData = async () => {
+    setLoading(true);
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch("/api/sales", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const url = `/api/sales?startDate=${fromDate}&endDate=${toDate}`;
+      console.log(`[REPORTS_NEW PAGE] Fetching: ${url}`);
+      const response = await apiFetch(url);
+
+      console.log(`[REPORTS_NEW PAGE] Response status: ${response.status}`);
 
       if (response.ok) {
         const data = await response.json();
-        // Mock report data
-        const totalSales = data.sales?.length || 52;
-        const totalRevenue =
-          data.sales?.reduce((sum: number, s: any) => sum + s.total, 0) || 0;
-        const totalItems =
-          data.sales?.reduce(
-            (sum: number, s: any) => sum + s.items.length,
-            0,
-          ) || 1577;
+        console.log(
+          `[REPORTS_NEW PAGE] API returned:`,
+          JSON.stringify(data, null, 2),
+        );
+
+        // Parse sales data
+        const sales = data.data?.sales || data.sales || [];
+        console.log(
+          `[REPORTS_NEW PAGE] Parsed sales array - count: ${sales.length}`,
+        );
+
+        const totalSales = sales.length;
+        const totalRevenue = sales.reduce((sum: number, s: any) => {
+          const gross =
+            typeof s.total === "number"
+              ? s.total
+              : typeof s.totalWithTax === "number"
+                ? s.totalWithTax
+                : typeof s.amount === "number"
+                  ? s.amount
+                  : 0;
+          return sum + gross;
+        }, 0);
+        const totalItems = sales.reduce(
+          (sum: number, s: any) =>
+            sum +
+            (s.items?.reduce(
+              (itemSum: number, item: any) => itemSum + (item.quantity || 0),
+              0,
+            ) || 0),
+          0,
+        );
+        const avgTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
+
+        console.log(
+          `[REPORTS_NEW PAGE] KPIs - Sales: ${totalSales}, Revenue: ${totalRevenue}, Items: ${totalItems}, Avg: ${avgTicket}`,
+        );
 
         setReportData({
           totalSales,
           totalRevenue,
           totalItems,
-          avgTicket: totalRevenue / (totalSales || 1),
+          avgTicket,
+        });
+      } else {
+        console.error(
+          `[REPORTS_NEW PAGE] API error: ${response.status} ${response.statusText}`,
+        );
+        setReportData({
+          totalSales: 0,
+          totalRevenue: 0,
+          totalItems: 0,
+          avgTicket: 0,
         });
       }
     } catch (error) {
-      console.error("Error fetching report data:", error);
+      console.error("[REPORTS_NEW PAGE] Error fetching report data:", error);
+      setReportData({
+        totalSales: 0,
+        totalRevenue: 0,
+        totalItems: 0,
+        avgTicket: 0,
+      });
     } finally {
       setLoading(false);
     }

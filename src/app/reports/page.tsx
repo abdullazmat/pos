@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { apiFetch } from "@/lib/utils/apiFetch";
 import Header from "@/components/layout/Header";
 import { useSubscription } from "@/lib/hooks/useSubscription";
 import {
@@ -237,22 +238,42 @@ export default function ReportsPage() {
   }, [fromDate, toDate]);
 
   const fetchReportData = async () => {
+    setLoading(true);
     try {
-      const token = localStorage.getItem("accessToken");
-      const url = `/api/sales?from=${fromDate}&to=${toDate}`;
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const url = `/api/sales?startDate=${fromDate}&endDate=${toDate}`;
+      console.log(`[REPORTS PAGE] Fetching: ${url}`);
+      const response = await apiFetch(url);
+
+      console.log(`[REPORTS PAGE] Response status: ${response.status}`);
 
       if (response.ok) {
         const data = await response.json();
-        // Calculate actual data from database
-        const sales = data.sales || [];
-        const totalSales = sales.length;
-        const totalRevenue = sales.reduce(
-          (sum: number, s: any) => sum + (s.total || 0),
-          0,
+        console.log(
+          `[REPORTS PAGE] API returned:`,
+          JSON.stringify(data, null, 2),
         );
+
+        // Calculate actual data from database
+        const sales = data.data?.sales || data.sales || [];
+        console.log(
+          `[REPORTS PAGE] Parsed sales array - count: ${sales.length}`,
+        );
+        if (sales.length > 0) {
+          console.log(`[REPORTS PAGE] First sale:`, sales[0]);
+        }
+
+        const totalSales = sales.length;
+        const totalRevenue = sales.reduce((sum: number, s: any) => {
+          const gross =
+            typeof s.total === "number"
+              ? s.total
+              : typeof s.totalWithTax === "number"
+                ? s.totalWithTax
+                : typeof s.amount === "number"
+                  ? s.amount
+                  : 0;
+          return sum + gross;
+        }, 0);
         const totalItems = sales.reduce(
           (sum: number, s: any) =>
             sum +
@@ -264,16 +285,131 @@ export default function ReportsPage() {
         );
         const avgTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
 
+        console.log(
+          `[REPORTS PAGE] KPIs - Sales: ${totalSales}, Revenue: ${totalRevenue}, Items: ${totalItems}, Avg: ${avgTicket}`,
+        );
+
+        // Build top products aggregation (best effort from sale items)
+        const productMap: Record<
+          string,
+          {
+            name: string;
+            quantity: number;
+            revenue: number;
+            productId?: string;
+          }
+        > = {};
+
+        sales.forEach((sale: any) => {
+          (sale.items || []).forEach((item: any) => {
+            const name =
+              item.productName || item.name || item.title || "Unnamed product";
+            const qty = Number(item.quantity) || 0;
+            const revenue =
+              typeof item.total === "number"
+                ? item.total
+                : typeof item.totalWithTax === "number"
+                  ? item.totalWithTax
+                  : (Number(item.unitPrice) || 0) * qty;
+
+            if (!productMap[name]) {
+              productMap[name] = {
+                name,
+                quantity: 0,
+                revenue: 0,
+                productId: item.productId?.toString(),
+              };
+            }
+            productMap[name].quantity += qty;
+            productMap[name].revenue += revenue;
+          });
+        });
+
+        const topProducts = Object.values(productMap)
+          .sort((a, b) => b.quantity - a.quantity || b.revenue - a.revenue)
+          .slice(0, 5);
+
+        // Fetch product cost data for top products
+        const topProductsWithCosts = await Promise.all(
+          topProducts.map(async (product) => {
+            try {
+              if (product.productId) {
+                const productRes = await apiFetch(
+                  `/api/products/${product.productId}`,
+                );
+                if (productRes.ok) {
+                  const productData = await productRes.json();
+                  const cost = productData.data?.cost || 0;
+                  const totalCost = cost * product.quantity;
+                  const profit = product.revenue - totalCost;
+                  const margin =
+                    product.revenue > 0 ? (profit / product.revenue) * 100 : 0;
+
+                  return {
+                    ...product,
+                    cost,
+                    totalCost,
+                    profit,
+                    margin,
+                  };
+                }
+              }
+            } catch (err) {
+              console.error(
+                `Failed to fetch product ${product.productId}:`,
+                err,
+              );
+            }
+            return {
+              ...product,
+              cost: 0,
+              totalCost: 0,
+              profit: 0,
+              margin: 0,
+            };
+          }),
+        );
+
+        console.log(
+          `[REPORTS PAGE] Setting report data with: Sales=${totalSales}, Revenue=${totalRevenue}, Items=${totalItems}`,
+        );
+
         setReportData({
           totalSales,
           totalRevenue,
           totalItems,
           avgTicket,
           recentSales: sales.slice(0, 5),
+          topProducts: topProductsWithCosts,
+        });
+
+        console.log(
+          `[REPORTS PAGE] Report data has been set. Check re-render.`,
+        );
+      } else {
+        console.error(
+          `[REPORTS PAGE] API error: ${response.status} ${response.statusText}`,
+        );
+        // If the API responds with an error, still reset report data to avoid stale UI
+        setReportData({
+          totalSales: 0,
+          totalRevenue: 0,
+          totalItems: 0,
+          avgTicket: 0,
+          recentSales: [],
+          topProducts: [],
         });
       }
     } catch (error) {
       console.error("Error fetching report data:", error);
+      setReportData({
+        totalSales: 0,
+        totalRevenue: 0,
+        totalItems: 0,
+        avgTicket: 0,
+        recentSales: [],
+        topProducts: [],
+      });
     } finally {
       setLoading(false);
     }
@@ -575,14 +711,32 @@ export default function ReportsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 text-slate-900 dark:divide-slate-800 dark:text-slate-200">
-                      <tr>
-                        <td className="py-3 px-4">-</td>
-                        <td className="py-3 px-4">-</td>
-                        <td className="py-3 px-4">-</td>
-                        <td className="py-3 px-4">-</td>
-                        <td className="py-3 px-4">-</td>
-                        <td className="py-3 px-4">-</td>
-                      </tr>
+                      {reportData?.topProducts?.length ? (
+                        reportData.topProducts.map((p: any, idx: number) => (
+                          <tr key={`${p.name}-${idx}`}>
+                            <td className="py-3 px-4">{p.name}</td>
+                            <td className="py-3 px-4">{p.quantity}</td>
+                            <td className="py-3 px-4">
+                              {formatCurrency(p.revenue)}
+                            </td>
+                            <td className="py-3 px-4">
+                              {formatCurrency(p.totalCost || 0)}
+                            </td>
+                            <td className="py-3 px-4">
+                              {formatCurrency(p.profit || 0)}
+                            </td>
+                            <td className="py-3 px-4">
+                              {(p.margin || 0) > 0 ? p.margin.toFixed(1) : 0}%
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td className="py-3 px-4" colSpan={6}>
+                            {loading ? "..." : "-"}
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

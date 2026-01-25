@@ -2,7 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import Sale from "@/lib/models/Sale";
 import Invoice from "@/lib/models/Invoice";
+import Business from "@/lib/models/Business";
 import { verifyToken } from "@/lib/utils/jwt";
+
+// Default ticket messages by language
+const DEFAULT_TICKET_MESSAGES: Record<string, string> = {
+  es: "¡GRACIAS POR SU COMPRA!\nVuelva pronto",
+  en: "THANK YOU FOR YOUR PURCHASE!\nCome back soon",
+  pt: "OBRIGADO PELA SUA COMPRA!\nVolte em breve",
+};
 
 /**
  * GET - Generate receipt/invoice for sale
@@ -23,11 +31,12 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const saleId = searchParams.get("saleId");
     const format = searchParams.get("format") || "json"; // json or pdf
+    const lang = searchParams.get("lang") || "en"; // Get language preference
 
     if (!saleId) {
       return NextResponse.json(
         { error: "Sale ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -44,12 +53,38 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Sale not found" }, { status: 404 });
     }
 
+    // Fetch business config to get custom ticket message
+    const businessConfig = await Business.findOne({
+      _id: decoded.businessId,
+    }).lean<import("@/lib/models/Business").IBusiness>();
+
     const invoice = (sale as any).invoice;
+
+    // Determine ticket message to use
+    let ticketMessage =
+      DEFAULT_TICKET_MESSAGES[lang] || DEFAULT_TICKET_MESSAGES.en;
+
+    if (businessConfig?.ticketMessage) {
+      // Check if the saved message is a default in any language
+      const isDefault = Object.values(DEFAULT_TICKET_MESSAGES).includes(
+        businessConfig.ticketMessage,
+      );
+
+      if (isDefault) {
+        // Use current language's default
+        ticketMessage =
+          DEFAULT_TICKET_MESSAGES[lang] || DEFAULT_TICKET_MESSAGES.en;
+      } else {
+        // Use custom message
+        ticketMessage = businessConfig.ticketMessage;
+      }
+    }
 
     // Format receipt data
     const receiptData = {
       receiptNumber:
-        invoice?.invoiceNumber || `VENTA-${(sale as any)._id.toString().slice(-6)}`,
+        invoice?.invoiceNumber ||
+        `VENTA-${(sale as any)._id.toString().slice(-6)}`,
       date: new Date((sale as any).createdAt).toLocaleString("es-AR"),
       items: (sale as any).items.map((item: any) => ({
         description: item.productName,
@@ -67,6 +102,7 @@ export async function GET(req: NextRequest) {
       customerName: invoice?.customerName || "Cliente",
       customerCuit: invoice?.customerCuit,
       notes: invoice?.notes,
+      ticketMessage, // Add the ticket message
     };
 
     if (format === "json") {
@@ -87,7 +123,7 @@ export async function GET(req: NextRequest) {
     console.error("Get receipt error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -290,7 +326,7 @@ function generateHTMLReceipt(data: any): string {
                     <div class="item-qty">${item.quantity}</div>
                     <div class="item-price">${formatCurrency(item.total)}</div>
                 </div>
-            `
+            `,
               )
               .join("")}
         </div>
@@ -327,12 +363,12 @@ function generateHTMLReceipt(data: any): string {
               data.paymentMethod === "mercadopago"
                 ? "Mercado Pago"
                 : data.paymentMethod === "cash"
-                ? "Efectivo"
-                : data.paymentMethod === "card"
-                ? "Tarjeta"
-                : data.paymentMethod === "transfer"
-                ? "Transferencia"
-                : data.paymentMethod
+                  ? "Efectivo"
+                  : data.paymentMethod === "card"
+                    ? "Tarjeta"
+                    : data.paymentMethod === "transfer"
+                      ? "Transferencia"
+                      : data.paymentMethod
             }
         </div>
         
@@ -351,9 +387,9 @@ function generateHTMLReceipt(data: any): string {
         }
         
         <div class="footer">
-            <div>¡Gracias por su compra!</div>
+            <div style="white-space: pre-wrap;">${data.ticketMessage || "¡Gracias por su compra!"}</div>
             <div style="margin-top: 5px;">${new Date().toLocaleString(
-              "es-AR"
+              "es-AR",
             )}</div>
         </div>
     </div>

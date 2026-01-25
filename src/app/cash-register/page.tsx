@@ -246,26 +246,80 @@ export default function CashRegisterPage() {
       const movementType = movementKey.trim();
       const reason = reasonKey.trim();
 
-      // Map movement types to translation keys
-      const movementTypeMap: Record<string, string> = {
-        opening: "cashRegister.movements.opening",
-        withdrawal: "cashRegister.movements.withdrawal",
-        creditNote: "cashRegister.movements.creditNote",
+      // Map movement types to display labels
+      const movementTypeLabels: Record<string, Record<string, string>> = {
+        es: {
+          opening: "Apertura",
+          withdrawal: "Retiro",
+          creditNote: "Nota de crédito",
+        },
+        en: {
+          opening: "Opening",
+          withdrawal: "Withdrawal",
+          creditNote: "Credit note",
+        },
+        pt: {
+          opening: "Abertura",
+          withdrawal: "Saque",
+          creditNote: "Nota de crédito",
+        },
       };
 
-      const movementTypeKey = movementTypeMap[movementType] || movementType;
-      // Use 'ui' namespace where the movements translations are stored
-      const movementTypeLabel = t(movementTypeKey, "ui");
+      const movementTypeLabel =
+        movementTypeLabels[currentLanguage]?.[movementType] ||
+        movementTypeLabels.en[movementType] ||
+        movementType;
 
-      // Map reason keys to translation keys
-      const reasonKeyMap: Record<string, string> = {
-        noReason: "cashRegister.movements.noReason",
+      // Map reason values to display labels - handle both keys and translated strings
+      const reasonLabels: Record<string, Record<string, string>> = {
+        es: {
+          noReason: "Sin especificar",
+          "Pago a proveedores": "Pago a proveedores",
+          "Gastos operacionales": "Gastos operacionales",
+          "Depósito bancario": "Depósito bancario",
+          Otro: "Otro",
+          "Supplier payment": "Pago a proveedores",
+          "Operational expenses": "Gastos operacionales",
+          "Bank deposit": "Depósito bancario",
+          Other: "Otro",
+          "Pagamento a fornecedores": "Pago a proveedores",
+          "Despesas operacionais": "Gastos operacionales",
+          "Depósito bancário": "Depósito bancario",
+          Outro: "Outro",
+        },
+        en: {
+          noReason: "No reason specified",
+          "Pago a proveedores": "Supplier payment",
+          "Gastos operacionales": "Operational expenses",
+          "Depósito bancario": "Bank deposit",
+          "Supplier payment": "Supplier payment",
+          "Operational expenses": "Operational expenses",
+          "Bank deposit": "Bank deposit",
+          Other: "Other",
+          "Pagamento a fornecedores": "Supplier payment",
+          "Despesas operacionais": "Operational expenses",
+          "Depósito bancário": "Bank deposit",
+        },
+        pt: {
+          noReason: "Sem especificar",
+          "Pago a proveedores": "Pagamento a fornecedores",
+          "Gastos operacionales": "Despesas operacionais",
+          "Depósito bancario": "Depósito bancário",
+          Otro: "Outro",
+          "Supplier payment": "Pagamento a fornecedores",
+          "Operational expenses": "Despesas operacionais",
+          "Bank deposit": "Depósito bancário",
+          Other: "Outro",
+          "Pagamento a fornecedores": "Pagamento a fornecedores",
+          "Despesas operacionais": "Despesas operacionais",
+          "Depósito bancário": "Depósito bancário",
+        },
       };
 
-      // If reason is a known key, translate it; otherwise use it as-is
-      const reasonLabel = reasonKeyMap[reason]
-        ? t(reasonKeyMap[reason], "ui")
-        : reason;
+      const reasonLabel =
+        reasonLabels[currentLanguage]?.[reason] ||
+        reasonLabels.en[reason] ||
+        reason;
 
       return `${movementTypeLabel} - ${reasonLabel}`;
     }

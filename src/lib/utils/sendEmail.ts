@@ -7,19 +7,17 @@ interface SendEmailOptions {
   html: string;
 }
 
-// Create reusable transporter with sane defaults and TLS handling
+// Create reusable transporter with explicit STARTTLS (port 587)
 const createTransporter = (override?: Partial<SMTPTransport.Options>) => {
   const host = process.env.EMAIL_HOST || "smtp.gmail.com";
+  // Force 587 STARTTLS unless explicitly overridden
   const port = Number(process.env.EMAIL_PORT) || 587;
-
-  // If port is 465 (SMTPS), use secure true; otherwise STARTTLS on 587
-  const secure = port === 465;
 
   const baseOptions: SMTPTransport.Options = {
     host,
     port,
-    secure,
-    requireTLS: !secure, // require STARTTLS when not using SMTPS
+    secure: false, // STARTTLS
+    requireTLS: true, // enforce STARTTLS upgrade
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD,
@@ -28,6 +26,8 @@ const createTransporter = (override?: Partial<SMTPTransport.Options>) => {
     connectionTimeout: 15000,
     greetingTimeout: 10000,
     socketTimeout: 20000,
+    // Reduce certificate-related failures in some cloud egress paths
+    tls: { rejectUnauthorized: false },
     // Helpful logs in non-production to diagnose connection issues
     logger: process.env.NODE_ENV !== "production",
   };
@@ -39,8 +39,22 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions) {
   try {
     let transporter = createTransporter();
 
-    // Verify transporter configuration
-    await transporter.verify();
+    // Verify transporter configuration with clear logging
+    try {
+      await transporter.verify();
+    } catch (verifyError: any) {
+      console.error(
+        "SMTP verify failed",
+        {
+          host: (transporter as any).options?.host,
+          port: (transporter as any).options?.port,
+          secure: (transporter as any).options?.secure,
+          requireTLS: (transporter as any).options?.requireTLS,
+        },
+        verifyError,
+      );
+      throw verifyError;
+    }
 
     // Send email
     const info = await transporter.sendMail({
@@ -53,35 +67,6 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions) {
     console.log("Email sent successfully:", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error: any) {
-    // If connection timed out on 587, retry with SMTPS on 465
-    const currentPort = Number(process.env.EMAIL_PORT) || 587;
-    const isConnTimeout =
-      error?.code === "ETIMEDOUT" ||
-      error?.code === "ECONN" ||
-      error?.code === "ECONNRESET" ||
-      error?.command === "CONN";
-
-    if (isConnTimeout && currentPort !== 465) {
-      try {
-        const fallbackTransporter = createTransporter({
-          port: 465,
-          secure: true,
-          requireTLS: false,
-        });
-        await fallbackTransporter.verify();
-        const info = await fallbackTransporter.sendMail({
-          from: `"POS SaaS" <${process.env.EMAIL_USER}>`,
-          to,
-          subject,
-          html,
-        });
-        console.log("Email sent successfully via SMTPS (465):", info.messageId);
-        return { success: true, messageId: info.messageId };
-      } catch (fallbackError) {
-        console.error("Fallback to SMTPS (465) failed:", fallbackError);
-      }
-    }
-
     console.error("Error sending email:", error);
     throw error;
   }

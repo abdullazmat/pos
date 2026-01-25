@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import { CreditCard, Check, AlertCircle, Loader } from "lucide-react";
 import { getAllPlans } from "@/lib/services/subscriptions/PlanConfig";
 
@@ -23,6 +24,7 @@ interface PlanConfig {
 
 export default function SubscriptionPage() {
   const router = useRouter();
+  const { currentLanguage } = useGlobalLanguage();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [plans, setPlans] = useState<PlanConfig[]>([]);
@@ -74,7 +76,12 @@ export default function SubscriptionPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Error creating payment preference");
+        setError(
+          getPaymentErrorMessage(
+            data.error || "Error creating payment preference",
+            currentLanguage,
+          ),
+        );
         return;
       }
 
@@ -83,11 +90,61 @@ export default function SubscriptionPage() {
         window.location.href = data.payment.preferenceLink;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error processing payment");
+      const raw = err instanceof Error ? err.message : String(err);
+      setError(getPaymentErrorMessage(raw, currentLanguage));
     } finally {
       setProcessing(false);
     }
   };
+
+  // Localized payment error mapping
+  function getPaymentErrorMessage(raw: string, lang: "es" | "en" | "pt") {
+    const M = {
+      es: {
+        createFailed: "No se pudo crear el pago",
+        preferenceFailed: "Error al crear la preferencia de pago",
+        linkMissing: "No se recibió el enlace de pago",
+        unauthorized: "No autorizado. Inicia sesión nuevamente.",
+        invalidToken: "Token inválido. Inicia sesión nuevamente.",
+        invalidPlan: "Plan inválido o no disponible.",
+        missingFields: "Faltan datos requeridos.",
+        generic: "Ocurrió un error al procesar el pago",
+      },
+      en: {
+        createFailed: "Failed to create payment",
+        preferenceFailed: "Error creating payment preference",
+        linkMissing: "Payment link was not received",
+        unauthorized: "Unauthorized. Please sign in again.",
+        invalidToken: "Invalid token. Please sign in again.",
+        invalidPlan: "Invalid or unavailable plan.",
+        missingFields: "Missing required fields.",
+        generic: "An error occurred while processing the payment",
+      },
+      pt: {
+        createFailed: "Não foi possível criar o pagamento",
+        preferenceFailed: "Erro ao criar a preferência de pagamento",
+        linkMissing: "O link de pagamento não foi recebido",
+        unauthorized: "Não autorizado. Entre novamente.",
+        invalidToken: "Token inválido. Entre novamente.",
+        invalidPlan: "Plano inválido ou indisponível.",
+        missingFields: "Faltam dados obrigatórios.",
+        generic: "Ocorreu um erro ao processar o pagamento",
+      },
+    } as const;
+
+    const L = M[lang] || M.en;
+    const s = (raw || "").toLowerCase();
+    if (s.includes("failed to create payment")) return L.createFailed;
+    if (s.includes("error creating payment preference"))
+      return L.preferenceFailed;
+    if (s.includes("no checkout url") || s.includes("enlace de pago"))
+      return L.linkMissing;
+    if (s.includes("unauthorized")) return L.unauthorized;
+    if (s.includes("invalid token")) return L.invalidToken;
+    if (s.includes("invalid or unavailable plan")) return L.invalidPlan;
+    if (s.includes("missing required fields")) return L.missingFields;
+    return L.generic;
+  }
 
   if (loading) {
     return (

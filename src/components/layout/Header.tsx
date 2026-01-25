@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { apiFetch } from "@/lib/utils/apiFetch";
 import {
   BarChart3,
   CheckCircle2,
@@ -162,9 +163,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
       try {
         const token = localStorage.getItem("accessToken");
         if (!token) return;
-        const res = await fetch("/api/cash-register", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiFetch("/api/cash-register");
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.data) {

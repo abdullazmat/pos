@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { apiFetch } from "@/lib/utils/apiFetch";
 import ProductSearch from "@/components/pos/ProductSearch";
 import Cart from "@/components/pos/Cart";
 import Header from "@/components/layout/Header";
@@ -30,6 +31,26 @@ export default function POSPage() {
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [lastSale, setLastSale] = useState<any>(null);
   const [businessConfig, setBusinessConfig] = useState<any>(null);
+
+  const getReceiptLabel = (key: string, defaultText: string) => {
+    const label = t(key, "pos");
+    // If translation returns the key itself (not translated), use default
+    return label === key ? defaultText : label;
+  };
+
+  const getPaymentMethodLabel = (method: string): string => {
+    const methodMap: Record<string, string> = {
+      cash: t("ui.paymentOptions.cash", "pos") || "Cash",
+      card: t("ui.paymentOptions.card", "pos") || "Card",
+      check: t("ui.paymentOptions.check", "pos") || "Check",
+      online: t("ui.paymentOptions.online", "pos") || "Online",
+      bankTransfer:
+        t("ui.paymentOptions.bankTransfer", "pos") || "Bank Transfer",
+      qr: t("ui.paymentOptions.qr", "pos") || "QR",
+      mercadopago: t("ui.paymentOptions.mercadopago", "pos") || "Mercado Pago",
+    };
+    return methodMap[method] || method;
+  };
 
   useEffect(() => {
     const userStr = localStorage.getItem("user");
@@ -110,6 +131,11 @@ export default function POSPage() {
   ) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.productId === productId);
+      const normalizedPrice = isSoldByWeight
+        ? price >= 1000
+          ? price / 1000
+          : price
+        : price;
       if (existing) {
         return prev.map((item) =>
           item.productId === productId
@@ -122,7 +148,7 @@ export default function POSPage() {
                   (item.isSoldByWeight
                     ? item.quantity + 0.1
                     : item.quantity + 1) *
-                    item.unitPrice -
+                    normalizedPrice -
                   item.discount,
               }
             : item,
@@ -134,9 +160,9 @@ export default function POSPage() {
           productId,
           productName: name,
           quantity: isSoldByWeight ? 0.1 : 1,
-          unitPrice: price,
+          unitPrice: normalizedPrice,
           discount: 0,
-          total: isSoldByWeight ? price * 0.1 : price,
+          total: isSoldByWeight ? normalizedPrice * 0.1 : normalizedPrice,
           isSoldByWeight: isSoldByWeight || false,
         },
       ];
@@ -203,7 +229,15 @@ export default function POSPage() {
       }
 
       const data = await response.json();
-      const sale = data.data || data.sale;
+      const sale = data.data?.sale || data.sale;
+
+      console.log("Sale response data:", { data, sale });
+
+      if (!sale) {
+        console.error("No sale data in response:", data);
+        toast.error(t("ui.checkoutError", "pos"));
+        return;
+      }
 
       toast.success(t("ui.checkoutSuccess", "pos"));
       setLastSale(sale);
@@ -307,15 +341,23 @@ export default function POSPage() {
                     {/* Receipt Content */}
                     <div className="border-t border-b py-4 space-y-2 text-sm mb-4">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Fecha:</span>
+                        <span className="text-gray-600">
+                          {getReceiptLabel("receipt.date", "Date:")}
+                        </span>
                         <span className="font-semibold">
-                          {new Date(lastSale.createdAt).toLocaleDateString()}
+                          {lastSale?.createdAt
+                            ? new Date(lastSale.createdAt).toLocaleDateString()
+                            : "-"}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Hora:</span>
+                        <span className="text-gray-600">
+                          {getReceiptLabel("receipt.time", "Time:")}
+                        </span>
                         <span className="font-semibold">
-                          {new Date(lastSale.createdAt).toLocaleTimeString()}
+                          {lastSale?.createdAt
+                            ? new Date(lastSale.createdAt).toLocaleTimeString()
+                            : "-"}
                         </span>
                       </div>
                     </div>
@@ -323,61 +365,71 @@ export default function POSPage() {
                     {/* Items */}
                     <div className="mb-4 text-sm">
                       <h3 className="font-semibold text-gray-900 mb-2">
-                        Artículos
+                        {getReceiptLabel("receipt.items", "Items")}
                       </h3>
                       <div className="space-y-1 text-gray-700">
-                        {lastSale.items?.map((item: any, idx: number) => (
-                          <div key={idx} className="flex justify-between">
-                            <div>
-                              <div>{item.productName}</div>
-                              <div className="text-xs text-gray-500">
-                                {item.quantity} x ${item.unitPrice.toFixed(2)}
+                        {lastSale?.items && lastSale.items.length > 0 ? (
+                          lastSale.items.map((item: any, idx: number) => (
+                            <div key={idx} className="flex justify-between">
+                              <div>
+                                <div>{item.productName}</div>
+                                <div className="text-xs text-gray-500">
+                                  {item.quantity} x ${item.unitPrice.toFixed(2)}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                $
+                                {(
+                                  item.quantity * item.unitPrice -
+                                  (item.discount || 0)
+                                ).toFixed(2)}
                               </div>
                             </div>
-                            <div className="text-right">
-                              $
-                              {(
-                                item.quantity * item.unitPrice -
-                                (item.discount || 0)
-                              ).toFixed(2)}
-                            </div>
+                          ))
+                        ) : (
+                          <div className="text-gray-400 italic">
+                            {getReceiptLabel("receipt.noItems", "No items")}
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
 
                     {/* Totals */}
                     <div className="border-t pt-3 space-y-1 text-sm mb-4">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Subtotal:</span>
-                        <span>${lastSale.subtotal?.toFixed(2) || "0.00"}</span>
+                        <span className="text-gray-600">
+                          {getReceiptLabel("receipt.subtotal", "Subtotal:")}
+                        </span>
+                        <span>${lastSale?.subtotal?.toFixed(2) || "0.00"}</span>
                       </div>
-                      {lastSale.discount > 0 && (
+                      {(lastSale?.discount || 0) > 0 && (
                         <div className="flex justify-between text-red-600">
-                          <span>Descuento:</span>
-                          <span>-${lastSale.discount.toFixed(2)}</span>
+                          <span>
+                            {getReceiptLabel("receipt.discount", "Discount:")}
+                          </span>
+                          <span>-${(lastSale?.discount || 0).toFixed(2)}</span>
                         </div>
                       )}
                       <div className="flex justify-between font-bold text-gray-900">
-                        <span>Total:</span>
-                        <span>${lastSale.total?.toFixed(2) || "0.00"}</span>
+                        <span>
+                          {getReceiptLabel("receipt.total", "Total:")}
+                        </span>
+                        <span>${lastSale?.total?.toFixed(2) || "0.00"}</span>
                       </div>
                     </div>
 
                     {/* Payment Method */}
                     <div className="text-sm text-gray-700 mb-6 p-2 bg-gray-50 rounded">
-                      <span className="text-gray-600">Método de Pago: </span>
-                      <span className="font-semibold">
-                        {lastSale.paymentMethod}
+                      <span className="text-gray-600">
+                        {getReceiptLabel(
+                          "receipt.paymentMethod",
+                          "Payment Method:",
+                        )}
+                      </span>
+                      <span className="font-semibold ml-2">
+                        {getPaymentMethodLabel(lastSale?.paymentMethod)}
                       </span>
                     </div>
-
-                    {/* Thank you message */}
-                    {businessConfig?.ticketMessage && (
-                      <div className="text-xs text-center text-gray-600 mb-6 p-2 bg-gray-50 rounded whitespace-pre-wrap">
-                        {businessConfig.ticketMessage}
-                      </div>
-                    )}
 
                     {/* Buttons */}
                     <div className="flex gap-3">
@@ -398,13 +450,13 @@ export default function POSPage() {
                             d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4H7a2 2 0 01-2-2v-4a2 2 0 012-2h10a2 2 0 012 2v4a2 2 0 01-2 2zm-6-4h.01M7 11h.01"
                           />
                         </svg>
-                        {t("ui.print", "pos") || "Imprimir"}
+                        {getReceiptLabel("ui.print", "Print")}
                       </button>
                       <button
                         onClick={() => setShowReceiptModal(false)}
                         className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 rounded-lg transition"
                       >
-                        {t("ui.close", "pos") || "Cerrar"}
+                        {getReceiptLabel("ui.close", "Close")}
                       </button>
                     </div>
                   </div>

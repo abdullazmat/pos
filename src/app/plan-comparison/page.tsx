@@ -92,6 +92,17 @@ const PLAN_COMPARISON_COPY = {
     buttons: {
       select: "Seleccionar Plan",
       current: "Plan Actual",
+      subscribe: "Click para suscribirse →",
+    },
+    planNames: {
+      free: "Gratuito",
+      pro: "Pro",
+    },
+    billing: {
+      perMonth: "/mes",
+    },
+    labels: {
+      popular: "Popular",
     },
   },
   en: {
@@ -159,6 +170,17 @@ const PLAN_COMPARISON_COPY = {
     buttons: {
       select: "Select Plan",
       current: "Current Plan",
+      subscribe: "Subscribe now →",
+    },
+    planNames: {
+      free: "Free",
+      pro: "Pro",
+    },
+    billing: {
+      perMonth: "/month",
+    },
+    labels: {
+      popular: "Popular",
     },
   },
   pt: {
@@ -226,6 +248,17 @@ const PLAN_COMPARISON_COPY = {
     buttons: {
       select: "Selecionar Plano",
       current: "Plano Atual",
+      subscribe: "Clique para assinar →",
+    },
+    planNames: {
+      free: "Gratuito",
+      pro: "Pro",
+    },
+    billing: {
+      perMonth: "/mês",
+    },
+    labels: {
+      popular: "Popular",
     },
   },
 };
@@ -417,15 +450,15 @@ export default function PlanComparisonPage() {
 
   const freePlan = plans.find((p) => p.id === "FREE") || {
     id: "FREE",
-    name: "Gratuito",
+    name: copy.planNames.free,
     price: 0,
-    billing: "/mes",
+    billing: copy.billing.perMonth,
   };
   const proPlan = plans.find((p) => p.id === "PRO") || {
     id: "PRO",
-    name: "Pro",
+    name: copy.planNames.pro,
     price: 24990,
-    billing: "/mes",
+    billing: copy.billing.perMonth,
     popular: true,
   };
 
@@ -461,7 +494,8 @@ export default function PlanComparisonPage() {
               {freePlan.name}
             </div>
             <div className="mt-1 text-slate-700 dark:text-slate-300 text-sm">
-              $ {freePlan.price}/mes
+              $ {freePlan.price}
+              {copy.billing.perMonth}
             </div>
             <div className="mt-4">
               <button
@@ -481,14 +515,15 @@ export default function PlanComparisonPage() {
             <div className="flex items-center gap-2 mb-2">
               <Star className="w-4 h-4 text-yellow-500 dark:text-yellow-300" />
               <span className="px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 border border-yellow-300 dark:text-yellow-300 dark:bg-yellow-900/40 dark:border-yellow-700/50 rounded">
-                Popular
+                {copy.labels.popular}
               </span>
             </div>
             <div className="text-slate-900 dark:text-white font-semibold">
               {proPlan.name}
             </div>
             <div className="mt-1 text-slate-700 dark:text-slate-300 text-sm">
-              $ {proPlan.price.toLocaleString()}/mes
+              $ {proPlan.price.toLocaleString()}
+              {copy.billing.perMonth}
             </div>
             <div className="mt-4">
               <Link
@@ -497,7 +532,7 @@ export default function PlanComparisonPage() {
               >
                 {subscription?.planId === "PRO"
                   ? copy.buttons.current
-                  : "Click para suscribirse →"}
+                  : copy.buttons.subscribe}
               </Link>
             </div>
           </div>

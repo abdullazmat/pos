@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/utils/apiFetch";
 
 export interface SubscriptionData {
   planId: string;
@@ -35,11 +36,8 @@ export function useSubscription() {
           return;
         }
 
-        const response = await fetch("/api/subscriptions/status", {
+        const response = await apiFetch("/api/subscriptions/status", {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         });
 
         if (!response.ok) {
