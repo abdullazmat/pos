@@ -27,6 +27,9 @@ export default function POSPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [registerOpen, setRegisterOpen] = useState<boolean | null>(null);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [lastSale, setLastSale] = useState<any>(null);
+  const [businessConfig, setBusinessConfig] = useState<any>(null);
 
   useEffect(() => {
     const userStr = localStorage.getItem("user");
@@ -70,6 +73,19 @@ export default function POSPage() {
           const payload = await res.json();
           const data = payload?.data ?? payload;
           setRegisterOpen(Boolean(data?.isOpen));
+        }
+
+        // Fetch business config
+        try {
+          const configRes = await fetch("/api/business-config", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (configRes.ok) {
+            const configData = await configRes.json();
+            setBusinessConfig(configData.data || configData);
+          }
+        } catch (e) {
+          console.error("Failed to get business config", e);
         }
       } catch (e) {
         if ((e as any).name !== "AbortError") {
@@ -186,7 +202,12 @@ export default function POSPage() {
         return;
       }
 
+      const data = await response.json();
+      const sale = data.data || data.sale;
+
       toast.success(t("ui.checkoutSuccess", "pos"));
+      setLastSale(sale);
+      setShowReceiptModal(true);
       setCartItems([]);
     } catch (error) {
       console.error("Checkout error:", error);
@@ -240,20 +261,157 @@ export default function POSPage() {
         )}
 
         {registerOpen === true && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <ProductSearch onAddToCart={handleAddToCart} />
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <ProductSearch onAddToCart={handleAddToCart} />
+              </div>
+              <div>
+                <Cart
+                  items={cartItems}
+                  onRemove={handleRemoveFromCart}
+                  onUpdateQuantity={handleUpdateQuantity}
+                  onApplyDiscount={handleApplyDiscount}
+                  onCheckout={handleCheckout}
+                />
+              </div>
             </div>
-            <div>
-              <Cart
-                items={cartItems}
-                onRemove={handleRemoveFromCart}
-                onUpdateQuantity={handleUpdateQuantity}
-                onApplyDiscount={handleApplyDiscount}
-                onCheckout={handleCheckout}
-              />
-            </div>
-          </div>
+
+            {/* Receipt Modal */}
+            {showReceiptModal && lastSale && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-96 overflow-y-auto">
+                  <div className="p-6">
+                    {/* Business Header */}
+                    <div className="text-center mb-4 border-b pb-4">
+                      <h2 className="text-xl font-bold text-gray-900">
+                        {businessConfig?.businessName || "Recibo de Venta"}
+                      </h2>
+                      {businessConfig?.address && (
+                        <p className="text-xs text-gray-600 mt-1">
+                          {businessConfig.address}
+                        </p>
+                      )}
+                      {businessConfig?.phone && (
+                        <p className="text-xs text-gray-600">
+                          Tel: {businessConfig.phone}
+                        </p>
+                      )}
+                      {businessConfig?.email && (
+                        <p className="text-xs text-gray-600">
+                          {businessConfig.email}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Receipt Content */}
+                    <div className="border-t border-b py-4 space-y-2 text-sm mb-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Fecha:</span>
+                        <span className="font-semibold">
+                          {new Date(lastSale.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Hora:</span>
+                        <span className="font-semibold">
+                          {new Date(lastSale.createdAt).toLocaleTimeString()}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Items */}
+                    <div className="mb-4 text-sm">
+                      <h3 className="font-semibold text-gray-900 mb-2">
+                        Artículos
+                      </h3>
+                      <div className="space-y-1 text-gray-700">
+                        {lastSale.items?.map((item: any, idx: number) => (
+                          <div key={idx} className="flex justify-between">
+                            <div>
+                              <div>{item.productName}</div>
+                              <div className="text-xs text-gray-500">
+                                {item.quantity} x ${item.unitPrice.toFixed(2)}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              $
+                              {(
+                                item.quantity * item.unitPrice -
+                                (item.discount || 0)
+                              ).toFixed(2)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Totals */}
+                    <div className="border-t pt-3 space-y-1 text-sm mb-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Subtotal:</span>
+                        <span>${lastSale.subtotal?.toFixed(2) || "0.00"}</span>
+                      </div>
+                      {lastSale.discount > 0 && (
+                        <div className="flex justify-between text-red-600">
+                          <span>Descuento:</span>
+                          <span>-${lastSale.discount.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between font-bold text-gray-900">
+                        <span>Total:</span>
+                        <span>${lastSale.total?.toFixed(2) || "0.00"}</span>
+                      </div>
+                    </div>
+
+                    {/* Payment Method */}
+                    <div className="text-sm text-gray-700 mb-6 p-2 bg-gray-50 rounded">
+                      <span className="text-gray-600">Método de Pago: </span>
+                      <span className="font-semibold">
+                        {lastSale.paymentMethod}
+                      </span>
+                    </div>
+
+                    {/* Thank you message */}
+                    {businessConfig?.ticketMessage && (
+                      <div className="text-xs text-center text-gray-600 mb-6 p-2 bg-gray-50 rounded whitespace-pre-wrap">
+                        {businessConfig.ticketMessage}
+                      </div>
+                    )}
+
+                    {/* Buttons */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => window.print()}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition flex items-center justify-center gap-2"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4H7a2 2 0 01-2-2v-4a2 2 0 012-2h10a2 2 0 012 2v4a2 2 0 01-2 2zm-6-4h.01M7 11h.01"
+                          />
+                        </svg>
+                        {t("ui.print", "pos") || "Imprimir"}
+                      </button>
+                      <button
+                        onClick={() => setShowReceiptModal(false)}
+                        className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 rounded-lg transition"
+                      >
+                        {t("ui.close", "pos") || "Cerrar"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

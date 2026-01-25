@@ -9,6 +9,8 @@ export interface IUser extends Document {
   role: "admin" | "supervisor" | "cashier";
   isActive: boolean;
   businessId: Schema.Types.ObjectId;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,10 +56,16 @@ const userSchema = new Schema<IUser>(
       ref: "Business",
       required: true,
     },
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordExpires: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default models.User || model<IUser>("User", userSchema);

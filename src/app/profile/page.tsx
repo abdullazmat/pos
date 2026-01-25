@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 import Loading from "@/components/common/Loading";
+import { useLanguage } from "@/lib/context/LanguageContext";
 
 interface UserProfile {
   fullName: string;
@@ -16,6 +17,7 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [form, setForm] = useState<UserProfile>({
     fullName: "",
     email: "",
@@ -98,23 +100,23 @@ export default function ProfilePage() {
       });
 
       if (!res.ok) {
-        throw new Error("No se pudo actualizar el perfil");
+        throw new Error(String(t("profile.updateErrorGeneric", "ui")));
       }
 
       const updatedUser = { ...form };
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setPassword("");
-      setMessage("Perfil actualizado correctamente");
+      setMessage(String(t("profile.updateSuccess", "ui")));
     } catch (err) {
       console.error("Error updating profile", err);
-      setMessage("No se pudo guardar. Intenta nuevamente.");
+      setMessage(String(t("profile.updateError", "ui")));
     } finally {
       setSaving(false);
     }
   };
 
   if (loading) {
-    return <Loading label="Cargando perfil" />;
+    return <Loading label={String(t("profile.loading", "ui"))} />;
   }
 
   return (
@@ -124,13 +126,17 @@ export default function ProfilePage() {
           <button
             onClick={() => router.back()}
             className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
-            aria-label="Volver"
+            aria-label={String(t("profile.back", "ui"))}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <p className="text-xs text-gray-500">Cuenta</p>
-            <h1 className="text-xl font-semibold text-gray-900">Perfil</h1>
+            <p className="text-xs text-gray-500">
+              {String(t("profile.account", "ui"))}
+            </p>
+            <h1 className="text-xl font-semibold text-gray-900">
+              {String(t("profile.title", "ui"))}
+            </h1>
           </div>
         </div>
       </div>
@@ -147,20 +153,20 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <p className="text-xs uppercase tracking-wide text-gray-500">
-                Información personal
+                {String(t("profile.personalInfo", "ui"))}
               </p>
               <h2 className="text-lg font-semibold text-gray-900">
-                Datos del usuario
+                {String(t("profile.userData", "ui"))}
               </h2>
               <p className="text-sm text-gray-500">
-                Actualiza tu nombre y correo. La contraseña es opcional.
+                {String(t("profile.updateDescription", "ui"))}
               </p>
             </div>
             <Link
               href="/dashboard"
               className="text-sm font-medium text-blue-600 hover:text-blue-700"
             >
-              Ir al panel
+              {String(t("profile.goToDashboard", "ui"))}
             </Link>
           </div>
 
@@ -168,7 +174,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre completo
+                  {String(t("profile.fullName", "ui"))}
                 </label>
                 <input
                   type="text"
@@ -182,7 +188,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Correo electrónico
+                  {String(t("profile.email", "ui"))}
                 </label>
                 <input
                   type="email"
@@ -194,7 +200,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Teléfono
+                  {String(t("profile.phone", "ui"))}
                 </label>
                 <input
                   type="tel"
@@ -203,12 +209,12 @@ export default function ProfilePage() {
                     setForm({ ...form, phoneNumber: e.target.value })
                   }
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                  placeholder="Ej: +54 9 11 1234 5678"
+                  placeholder={String(t("profile.phonePlaceholder", "ui"))}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Rol
+                  {String(t("profile.role", "ui"))}
                 </label>
                 <input
                   type="text"
@@ -219,7 +225,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre del negocio
+                  {String(t("profile.businessName", "ui"))}
                 </label>
                 <input
                   type="text"
@@ -228,18 +234,18 @@ export default function ProfilePage() {
                     setForm({ ...form, businessName: e.target.value })
                   }
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                  placeholder="Tu comercio"
+                  placeholder={String(t("profile.businessPlaceholder", "ui"))}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Contraseña (opcional)
+                  {String(t("profile.password", "ui"))}
                 </label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Dejar en blanco para mantener"
+                  placeholder={String(t("profile.passwordPlaceholder", "ui"))}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                   minLength={6}
                 />
@@ -253,7 +259,7 @@ export default function ProfilePage() {
                 className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 disabled={saving}
               >
-                Restablecer
+                {String(t("profile.reset", "ui"))}
               </button>
               <button
                 type="submit"
@@ -261,7 +267,7 @@ export default function ProfilePage() {
                 disabled={saving}
               >
                 {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                Guardar cambios
+                {String(t("profile.save", "ui"))}
               </button>
             </div>
           </form>

@@ -46,3 +46,32 @@ html.dark textarea,
 html.dark select {
   @apply bg-slate-900 text-slate-50 border-slate-700;
 }
+
+/* Print styles for receipts */
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .receipt-modal {
+    position: static;
+    background: white;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .receipt-container {
+    max-width: 80mm;
+    margin: 0 auto;
+    padding: 0;
+    font-family: monospace;
+    font-size: 12pt;
+  }
+}

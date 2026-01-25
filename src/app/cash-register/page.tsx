@@ -254,7 +254,8 @@ export default function CashRegisterPage() {
       };
 
       const movementTypeKey = movementTypeMap[movementType] || movementType;
-      const movementTypeLabel = t(movementTypeKey);
+      // Use 'ui' namespace where the movements translations are stored
+      const movementTypeLabel = t(movementTypeKey, "ui");
 
       // Map reason keys to translation keys
       const reasonKeyMap: Record<string, string> = {
@@ -263,7 +264,7 @@ export default function CashRegisterPage() {
 
       // If reason is a known key, translate it; otherwise use it as-is
       const reasonLabel = reasonKeyMap[reason]
-        ? t(reasonKeyMap[reason])
+        ? t(reasonKeyMap[reason], "ui")
         : reason;
 
       return `${movementTypeLabel} - ${reasonLabel}`;

@@ -8,7 +8,7 @@ import {
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 import { checkPlanLimit } from "@/lib/utils/planValidation";
-import { generateProductCodeWithBusinessId } from "@/lib/utils/productCodeGenerator";
+import { generateSimple4DigitCode } from "@/lib/utils/productCodeGenerator";
 
 export async function GET(req: NextRequest) {
   try {
@@ -85,17 +85,17 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse(planCheck.message, 403);
     }
 
-    // Auto-generate code if not provided
+    // Auto-generate 4-digit code
     let finalCode = code;
     if (!finalCode) {
-      finalCode = generateProductCodeWithBusinessId(businessId);
+      finalCode = await generateSimple4DigitCode(businessId);
       // Ensure the generated code is unique
       let attempts = 0;
       while (
         (await Product.findOne({ businessId, code: finalCode })) &&
         attempts < 10
       ) {
-        finalCode = generateProductCodeWithBusinessId(businessId);
+        finalCode = await generateSimple4DigitCode(businessId);
         attempts++;
       }
     }

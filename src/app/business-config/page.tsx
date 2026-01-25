@@ -926,7 +926,7 @@ export default function BusinessConfigPage() {
                   </div>
 
                   <div className="text-xs text-slate-600 dark:text-green-600 space-y-0.5 mb-2">
-                    {formData.address && <p>{copy.ticket.address}</p>}
+                    {formData.address && <p>{formData.address}</p>}
                     {formData.phone && <p>Tel: {formData.phone}</p>}
                     {formData.email && <p>{formData.email}</p>}
                     {formData.website && <p>{formData.website}</p>}

@@ -240,18 +240,21 @@ export default function Cart({
                     onChange={(e) =>
                       onApplyDiscount(
                         item.productId,
-                        parseFloat(e.target.value),
+                        parseFloat(e.target.value) || 0,
                       )
                     }
-                    className="w-full px-2 py-1 border border-gray-300 dark:border-slate-600 rounded text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    className="w-full px-2 py-1 border border-gray-300 dark:border-slate-600 rounded text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400"
                   />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
                     {t("ui.total", "pos")}
                   </label>
-                  <div className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 rounded text-sm font-semibold text-gray-900 dark:text-white">
-                    ${item.total.toFixed(2)}
+                  <div className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 rounded text-sm font-semibold text-gray-900 dark:text-white border border-blue-200 dark:border-blue-800">
+                    $
+                    {(item.quantity * item.unitPrice - item.discount).toFixed(
+                      2,
+                    )}
                   </div>
                 </div>
               </div>

@@ -61,7 +61,7 @@ const PRODUCT_COPY = {
       ],
       optionalTitle: "Opcionales:",
       optionalList: [
-        "6. codigo (texto, opcional - se autogenera si está vacío)",
+        "6. codigo (texto, opcional - se autogenera automáticamente)",
         "7. minStock (número)",
         "8. categoria (texto)",
         "9. activo (true/false)",
@@ -86,8 +86,8 @@ const PRODUCT_COPY = {
       stockUnitHint: "(en unidades)",
       stockPlaceholder: "Ej: 100",
       codeLabel: "Código",
-      codePlaceholder: "Código (se autogenera si lo dejas vacío)",
-      codeHint: "Se autogenera si lo dejas vacío",
+      codePlaceholder: "Código automático de 4 dígitos",
+      codeHint: "Se asigna automáticamente (ej: 0001, 0002...)",
       minStockLabel: "Stock Mínimo",
       minStockHint: "(en unidades)",
       minStockPlaceholder: "5",
@@ -182,7 +182,7 @@ const PRODUCT_COPY = {
       ],
       optionalTitle: "Optional:",
       optionalList: [
-        "6. codigo (text, optional - auto-generated if empty)",
+        "6. codigo (text, optional - auto-generated automatically)",
         "7. minStock (number)",
         "8. categoria (text)",
         "9. activo (true/false)",
@@ -207,8 +207,8 @@ const PRODUCT_COPY = {
       stockUnitHint: "(units)",
       stockPlaceholder: "e.g., 100",
       codeLabel: "Code",
-      codePlaceholder: "Code (auto-generated if left empty)",
-      codeHint: "Auto-generated if empty",
+      codePlaceholder: "Automatic 4-digit code",
+      codeHint: "Automatically assigned (e.g: 0001, 0002...)",
       minStockLabel: "Min Stock",
       minStockHint: "(units)",
       minStockPlaceholder: "5",
@@ -302,7 +302,7 @@ const PRODUCT_COPY = {
       ],
       optionalTitle: "Opcionais:",
       optionalList: [
-        "6. codigo (texto, opcional - será gerado automaticamente se vazio)",
+        "6. codigo (texto, opcional - será gerado automaticamente)",
         "7. minStock (número)",
         "8. categoria (texto)",
         "9. activo (true/false)",
@@ -327,8 +327,8 @@ const PRODUCT_COPY = {
       stockUnitHint: "(em unidades)",
       stockPlaceholder: "Ex.: 100",
       codeLabel: "Código",
-      codePlaceholder: "Código (gerado automaticamente se deixar vazio)",
-      codeHint: "Gerado automaticamente se vazio",
+      codePlaceholder: "Código automático de 4 dígitos",
+      codeHint: "Atribuído automaticamente (ex: 0001, 0002...)",
       minStockLabel: "Estoque Mínimo",
       minStockHint: "(em unidades)",
       minStockPlaceholder: "5",
@@ -622,10 +622,11 @@ export default function ProductsPage() {
         id: editingId || undefined,
       };
 
-      // If code is empty, drop it so the backend auto-generates
-      if (!payload.code || String(payload.code).trim() === "") {
+      // Always drop code on POST (creation) - it will be auto-generated
+      if (!editingId) {
         delete payload.code;
       }
+
       const response = await fetch("/api/products", {
         method: editingId ? "PUT" : "POST",
         headers: {
@@ -1277,18 +1278,31 @@ export default function ProductsPage() {
                     <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {copy.form.codeLabel}
                       <span className="ml-2 text-xs font-normal text-slate-500 dark:text-slate-400">
-                        {copy.form.codeHint || "(auto si vacío)"}
+                        {copy.form.codeHint || "(Generado automáticamente)"}
                       </span>
                     </label>
-                    <input
-                      type="text"
-                      value={formData.code}
-                      onChange={(e) =>
-                        setFormData({ ...formData, code: e.target.value })
-                      }
-                      placeholder={copy.form.codePlaceholder}
-                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
-                    />
+                    <div className="flex items-center w-full px-4 py-2 bg-slate-100 border rounded-lg border-slate-300 text-slate-600 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-300">
+                      <svg
+                        className="w-5 h-5 mr-2 text-slate-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                        />
+                      </svg>
+                      <span className="text-sm">
+                        {editingId
+                          ? editingId
+                            ? formData.code || "..."
+                            : "..."
+                          : "Se asignará automáticamente"}
+                      </span>
+                    </div>
                   </div>
                   <div>
                     <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">

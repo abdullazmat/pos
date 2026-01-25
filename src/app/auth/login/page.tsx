@@ -162,6 +162,16 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {/* Forgot Password Link */}
+            <div className="flex justify-end">
+              <Link
+                href="/auth/forgot-password"
+                className="text-sm text-blue-400 transition-colors hover:text-blue-300"
+              >
+                {String(t("login.forgotPassword", "auth"))}
+              </Link>
+            </div>
+
             {/* Buttons Row */}
             <div className="grid grid-cols-2 gap-4">
               {/* Back Button */}
