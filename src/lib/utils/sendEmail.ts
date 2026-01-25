@@ -7,17 +7,20 @@ interface SendEmailOptions {
   html: string;
 }
 
-// Create reusable transporter with explicit STARTTLS (port 587)
+// Create reusable transporter with sensible defaults for Gmail/SMTP
 const createTransporter = (override?: Partial<SMTPTransport.Options>) => {
   const host = process.env.EMAIL_HOST || "smtp.gmail.com";
-  // Force 587 STARTTLS unless explicitly overridden
   const port = Number(process.env.EMAIL_PORT) || 587;
+
+  // Port 465 requires implicit TLS (secure: true). Port 587 prefers STARTTLS.
+  const isImplicitTLS = port === 465 || process.env.EMAIL_SECURE === "true";
 
   const baseOptions: SMTPTransport.Options = {
     host,
     port,
-    secure: false, // STARTTLS
-    requireTLS: true, // enforce STARTTLS upgrade
+    secure: isImplicitTLS,
+    // STARTTLS only when not using implicit TLS
+    requireTLS: !isImplicitTLS,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD,
