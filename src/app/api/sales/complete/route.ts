@@ -113,7 +113,9 @@ export async function POST(req: NextRequest) {
     let subtotal = 0;
     const saleItems = [];
     const invoiceItems = [];
+    const stockUpdates: Array<{ product: any; quantity: number }> = [];
 
+    // First pass: validate all items and calculate totals
     for (const item of items) {
       const product = await Product.findOne({
         _id: item.productId,
@@ -157,17 +159,10 @@ export async function POST(req: NextRequest) {
         discount: itemDiscount,
       });
 
-      // Deduct stock
-      product.stock -= item.quantity;
-      await product.save();
-
-      // Record stock history
-      await StockHistory.create({
-        business: decoded.businessId,
-        product: item.productId,
-        type: "sale",
-        quantity: -item.quantity,
-        reference: null,
+      // Store for later stock updates
+      stockUpdates.push({
+        product,
+        quantity: item.quantity,
       });
     }
 
@@ -244,6 +239,27 @@ export async function POST(req: NextRequest) {
     });
 
     await sale.save();
+
+    // Now deduct stock and record history (after sale is persisted)
+    try {
+      for (const { product, quantity } of stockUpdates) {
+        product.stock -= quantity;
+        await product.save();
+
+        // Record stock history
+        await StockHistory.create({
+          business: decoded.businessId,
+          product: product._id,
+          type: "sale",
+          quantity: -quantity,
+          reference: sale._id,
+        });
+      }
+    } catch (stockError) {
+      console.error("Stock update error:", stockError);
+      // Log this error but don't fail the sale - stock was already deducted conceptually
+      // This is a non-critical operation that should be retried asynchronously
+    }
 
     // For Mercado Pago, create payment preference
     let paymentData = null;

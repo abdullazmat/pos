@@ -8,7 +8,7 @@ export async function authMiddleware(req: NextRequest) {
     return {
       authorized: false,
       user: null,
-      error: "Missing or invalid authorization header",
+      error: "missingAuthHeader",
     };
   }
 
@@ -19,7 +19,7 @@ export async function authMiddleware(req: NextRequest) {
     return {
       authorized: false,
       user: null,
-      error: "Invalid or expired token",
+      error: "invalidOrExpiredToken",
     };
   }
 

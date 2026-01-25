@@ -124,6 +124,8 @@ const KEYBOARD_COPY = {
       hint3: "Usa teclas cercanas para mayor rapidez",
       hint4:
         "Asigna teclas cercanas al teclado numérico si usas scanner de códigos",
+      avoidF5:
+        "⚠️ Evita usar F5 (recarga la página), F1 (ayuda del navegador) y F11 (pantalla completa)",
     },
     messages: {
       saved: "Configuración guardada correctamente",
@@ -242,6 +244,8 @@ const KEYBOARD_COPY = {
       hint3: "Use adjacent keys for faster input",
       hint4:
         "Assign keys close to the numeric keypad if you use barcode scanner",
+      avoidF5:
+        "⚠️ Avoid F5 (reloads page), F1 (browser help) and F11 (fullscreen)",
     },
     messages: {
       saved: "Configuration saved successfully",
@@ -358,6 +362,8 @@ const KEYBOARD_COPY = {
       hint3: "Use teclas adjacentes para inserção mais rápida",
       hint4:
         "Atribua teclas próximas ao teclado numérico se usar leitor de código de barras",
+      avoidF5:
+        "⚠️ Evite F5 (recarrega a página), F1 (ajuda do navegador) e F11 (tela cheia)",
     },
     messages: {
       saved: "Configuração salva com sucesso",
@@ -399,7 +405,7 @@ const KEYBOARD_COPY = {
 
 export default function KeyboardConfigPage() {
   const router = useRouter();
-  const { currentLanguage } = useGlobalLanguage();
+  const { currentLanguage, t } = useGlobalLanguage();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -413,8 +419,8 @@ export default function KeyboardConfigPage() {
     searchProduct: "F2",
     quantity: "F3",
     applyDiscount: "F4",
-    paymentMethod: "F5",
-    finalizeSale: "F9",
+    paymentMethod: "F7",
+    finalizeSale: "F6",
     cancelSale: "F10",
     removeLastItem: "F8",
     openDrawer: "F11",
@@ -434,8 +440,8 @@ export default function KeyboardConfigPage() {
         searchProduct: "F2",
         quantity: "F3",
         applyDiscount: "F4",
-        paymentMethod: "F5",
-        finalizeSale: "F9",
+        paymentMethod: "F7",
+        finalizeSale: "F6",
         cancelSale: "F10",
         removeLastItem: "F8",
         openDrawer: "F11",
@@ -450,8 +456,8 @@ export default function KeyboardConfigPage() {
         searchProduct: "F2",
         quantity: "F3",
         applyDiscount: "F4",
-        paymentMethod: "F5",
-        finalizeSale: "F9",
+        paymentMethod: "F7",
+        finalizeSale: "F6",
         cancelSale: "F10",
         removeLastItem: "F8",
         openDrawer: "F11",
@@ -552,6 +558,33 @@ export default function KeyboardConfigPage() {
           keyString += e.key;
         }
 
+        // Warn about problematic keys
+        const problematicKeys = ["F5", "F11", "F1"];
+        const warnings = {
+          F5:
+            currentLanguage === "es"
+              ? "F5 recarga la página del navegador. Se recomienda usar otra tecla como F7."
+              : currentLanguage === "pt"
+                ? "F5 recarrega a página do navegador. Recomenda-se usar outra tecla como F7."
+                : "F5 reloads the browser page. It's recommended to use another key like F7.",
+          F11:
+            currentLanguage === "es"
+              ? "F11 activa pantalla completa en el navegador. Úsala solo si es necesario."
+              : currentLanguage === "pt"
+                ? "F11 ativa tela cheia no navegador. Use apenas se necessário."
+                : "F11 activates fullscreen in the browser. Use only if necessary.",
+          F1:
+            currentLanguage === "es"
+              ? "F1 abre la ayuda del navegador. Se recomienda usar otra tecla."
+              : currentLanguage === "pt"
+                ? "F1 abre a ajuda do navegador. Recomenda-se usar outra tecla."
+                : "F1 opens browser help. It's recommended to use another key.",
+        };
+
+        if (problematicKeys.includes(keyString)) {
+          toast.warning(warnings[keyString as keyof typeof warnings]);
+        }
+
         handleKeyChange(editingKey, keyString);
       };
 
@@ -560,7 +593,7 @@ export default function KeyboardConfigPage() {
     }
 
     return undefined;
-  }, [editingKey]);
+  }, [editingKey, currentLanguage]);
 
   const fetchConfig = async () => {
     try {
@@ -579,12 +612,12 @@ export default function KeyboardConfigPage() {
           setHasChanges(false);
         }
       } else if (response.status === 401) {
-        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        toast.error(t("sessionExpired", "errors"));
         router.push("/auth/login");
       }
     } catch (error) {
       console.error("Error fetching config:", error);
-      toast.error("Error al cargar configuración");
+      toast.error(t("errorLoadingConfig", "errors"));
     } finally {
       setLoading(false);
     }
@@ -628,7 +661,7 @@ export default function KeyboardConfigPage() {
         setHasChanges(false);
         fetchConfig();
       } else if (response.status === 401) {
-        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        toast.error(t("sessionExpired", "errors"));
         router.push("/auth/login");
       } else {
         const data = await response.json();
@@ -683,8 +716,8 @@ export default function KeyboardConfigPage() {
       searchProduct: "F2",
       quantity: "F3",
       applyDiscount: "F4",
-      paymentMethod: "F5",
-      finalizeSale: "F9",
+      paymentMethod: "F7",
+      finalizeSale: "F6",
       cancelSale: "F10",
       removeLastItem: "F8",
       openDrawer: "F11",
@@ -888,6 +921,11 @@ export default function KeyboardConfigPage() {
             <li>• {copy.messages.tip3}</li>
             <li>• {copy.messages.tip4}</li>
           </ul>
+          <div className="mt-4 p-3 bg-red-50 border border-red-300 dark:bg-red-900/20 dark:border-red-700 rounded-lg">
+            <p className="text-sm font-semibold text-red-800 dark:text-red-300">
+              {copy.hints.avoidF5}
+            </p>
+          </div>
         </div>
       </main>
     </div>

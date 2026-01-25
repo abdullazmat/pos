@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import { toast } from "react-toastify";
 
 export default function PurchasesPage() {
   const router = useRouter();
+  const { t } = useGlobalLanguage();
   const [purchases, setPurchases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -83,7 +85,7 @@ export default function PurchasesPage() {
         return;
       }
 
-      toast.success("¡Compra registrada exitosamente!");
+      toast.success(t("purchaseRegisteredSuccess", "errors"));
       setFormData({
         productId: "",
         quantity: "",
@@ -96,7 +98,7 @@ export default function PurchasesPage() {
       loadPurchases();
     } catch (error) {
       console.error("Create purchase error:", error);
-      toast.error("Error al registrar la compra");
+      toast.error(t("errorRegisteringPurchase", "errors"));
     }
   };
 

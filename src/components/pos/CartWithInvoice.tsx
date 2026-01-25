@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { InvoiceChannel } from "@/lib/models/Invoice";
 import { toast } from "react-toastify";
+import { useLanguage } from "@/lib/context/LanguageContext";
 
 interface CartItem {
   productId: string;
@@ -44,6 +45,7 @@ export default function Cart({
   canUseMercadoPago = true,
   canUseArcaInvoicing = true,
 }: CartProps) {
+  const { t } = useLanguage();
   const [paymentMethod, setPaymentMethod] =
     useState<CheckoutData["paymentMethod"]>("cash");
   const [invoiceChannel, setInvoiceChannel] = useState<InvoiceChannel>(
@@ -66,17 +68,17 @@ export default function Cart({
 
   const handleCheckout = useCallback(async () => {
     if (!customerName.trim()) {
-      toast.error("Debes ingresar el nombre del cliente");
+      toast.error(t("clientNameRequired", "errors"));
       return;
     }
 
     if (invoiceChannel === InvoiceChannel.ARCA && !customerCuit.trim()) {
-      toast.error("CUIT es requerido para facturas ARCA");
+      toast.error(t("cuitRequired", "errors"));
       return;
     }
 
     if (invoiceChannel === InvoiceChannel.ARCA && !ivaType) {
-      toast.error("Selecciona el tipo de IVA para facturas ARCA");
+      toast.error(t("ivaTypeRequired", "errors"));
       return;
     }
 

@@ -168,14 +168,14 @@ export async function PUT(req: NextRequest) {
 
     const product = await Product.findOne({ _id: id, businessId });
     if (!product) {
-      return generateErrorResponse("Producto no encontrado", 404);
+      return generateErrorResponse("Product not found", 404);
     }
 
     // Ensure code uniqueness within business
     if (code && code !== product.code) {
       const conflict = await Product.findOne({ businessId, code });
       if (conflict) {
-        return generateErrorResponse("El código ya existe", 409);
+        return generateErrorResponse("Product code already exists", 409);
       }
     }
 
@@ -225,13 +225,13 @@ export async function DELETE(req: NextRequest) {
 
     const product = await Product.findOne({ _id: id, businessId });
     if (!product) {
-      return generateErrorResponse("Producto no encontrado", 404);
+      return generateErrorResponse("Product not found", 404);
     }
 
     await Product.deleteOne({ _id: id, businessId });
 
     return generateSuccessResponse({
-      message: "Producto eliminado exitosamente",
+      message: "Product deleted successfully",
     });
   } catch (error) {
     console.error("Delete product error:", error);

@@ -86,17 +86,20 @@ export default function SalesPage() {
       }
     } catch (error) {
       console.error("Error fetching sales:", error);
-      toast.error("Error al cargar las ventas");
+      toast.error(t("errorLoadingSales", "errors"));
     } finally {
       setLoading(false);
     }
   };
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("es-AR", {
+  const formatCurrency = (value: number) => {
+    // Use locale-aware formatting based on current language
+    const locale = t("__locale__", "common") || "es-AR"; // Fallback to es-AR
+    return new Intl.NumberFormat(String(locale), {
       style: "currency",
       currency: "ARS",
     }).format(value);
+  };
 
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("es-AR", {
@@ -108,14 +111,15 @@ export default function SalesPage() {
     });
 
   const getPaymentMethodLabel = (method: string) => {
-    const labels: any = {
-      cash: "💵 Efectivo",
-      card: "💳 Tarjeta",
-      check: "📋 Cheque",
-      online: "🏦 Online",
-      mercadopago: "🟔 Mercado Pago",
+    const emojis: any = {
+      cash: "💵 ",
+      card: "💳 ",
+      check: "📋 ",
+      online: "🏦 ",
+      mercadopago: "🟔 ",
     };
-    return labels[method] || method;
+    const methodKey = `paymentOptions.${method}` as const;
+    return `${emojis[method] || ""}${String(t(methodKey, "pos"))}`;
   };
 
   const getStatusBadge = (status: string) => {
@@ -125,19 +129,14 @@ export default function SalesPage() {
       failed: "bg-red-100 text-red-800",
       partial: "bg-orange-100 text-orange-800",
     };
-    const labels: any = {
-      completed: "Completada",
-      pending: "Pendiente",
-      failed: "Fallida",
-      partial: "Parcial",
-    };
+    const statusKey = `pos.labels.${status}` as const;
     return (
       <span
         className={`px-3 py-1 rounded-full text-xs font-medium ${
           classes[status] || ""
         }`}
       >
-        {labels[status] || status}
+        {String(t(statusKey, "pos"))}
       </span>
     );
   };

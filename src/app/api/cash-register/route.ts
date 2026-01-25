@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
         cashRegisterId: cashRegister._id,
         businessId,
         type: "apertura",
-        description: "Apertura de caja",
+        description: "opening",
         amount: amount || 0,
         createdBy: userId,
       });

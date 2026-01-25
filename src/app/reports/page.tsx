@@ -178,8 +178,9 @@ const REPORTS_COPY = {
 };
 
 export default function ReportsPage() {
-  const router = useRouter();
+  const { t } = useGlobalLanguage();
   const { currentLanguage } = useGlobalLanguage();
+  const router = useRouter();
   const { subscription, loading: subLoading } = useSubscription();
   const [activeTab, setActiveTab] = useState("general");
   const [user, setUser] = useState<any>(null);
@@ -280,7 +281,7 @@ export default function ReportsPage() {
 
   const exportToCSV = () => {
     if (!reportData || !reportData.recentSales) {
-      alert("No data to export");
+      alert(t("noDataToExport", "errors"));
       return;
     }
 

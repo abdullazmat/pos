@@ -11,6 +11,7 @@ import Loading from "@/components/common/Loading";
 import { isTokenExpiredSoon } from "@/lib/utils/token";
 import { toast } from "react-toastify";
 import { UpgradePrompt } from "@/components/common/UpgradePrompt";
+import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 
 interface CartItem {
   productId: string;
@@ -23,6 +24,7 @@ interface CartItem {
 
 export default function POSPage() {
   const router = useRouter();
+  const { t } = useGlobalLanguage();
   const [mounted, setMounted] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [user, setUser] = useState<any>(null);
@@ -115,8 +117,8 @@ export default function POSPage() {
     subscription?.planId?.toUpperCase() === "PROFESSIONAL"
       ? "PROFESSIONAL"
       : subscription?.planId?.toUpperCase() === "ENTERPRISE"
-      ? "ENTERPRISE"
-      : "BASIC";
+        ? "ENTERPRISE"
+        : "BASIC";
   const canUseMercadoPago = currentPlan === "PROFESSIONAL";
   const canUseArcaInvoicing = currentPlan === "PROFESSIONAL";
 
@@ -131,7 +133,7 @@ export default function POSPage() {
                 quantity: item.quantity + 1,
                 total: (item.quantity + 1) * item.unitPrice - item.discount,
               }
-            : item
+            : item,
         );
       }
       return [
@@ -165,8 +167,8 @@ export default function POSPage() {
               quantity,
               total: quantity * item.unitPrice - item.discount,
             }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
@@ -179,8 +181,8 @@ export default function POSPage() {
               discount,
               total: item.quantity * item.unitPrice - discount,
             }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
@@ -236,12 +238,12 @@ export default function POSPage() {
             window.open(
               `/api/sales/receipt?saleId=${result.sale.id}&format=html`,
               "_blank",
-              "width=400,height=600"
+              "width=400,height=600",
             );
           }, 500);
 
           toast.info(
-            "Se abrió Mercado Pago. Completa el pago para confirmar la venta."
+            "Se abrió Mercado Pago. Completa el pago para confirmar la venta.",
           );
           setCartItems([]);
         }
@@ -279,16 +281,16 @@ export default function POSPage() {
       const receiptWindow = window.open(
         `/api/sales/receipt?saleId=${result.sale.id}&format=html`,
         "_blank",
-        "width=400,height=600"
+        "width=400,height=600",
       );
 
       toast.success(
-        "¡Venta completada! Se abrió el comprobante para imprimir."
+        "¡Venta completada! Se abrió el comprobante para imprimir.",
       );
       setCartItems([]);
     } catch (error) {
       console.error("Checkout error:", error);
-      toast.error("Error al procesar la venta. Intenta nuevamente.");
+      toast.error(t("errorProcessingSale", "errors"));
     }
   };
 

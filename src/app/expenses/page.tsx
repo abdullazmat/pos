@@ -48,8 +48,9 @@ const EXPENSE_COPY = {
 } as const;
 
 export default function ExpensesPage() {
-  const router = useRouter();
+  const { t } = useGlobalLanguage();
   const { currentLanguage } = useGlobalLanguage();
+  const router = useRouter();
   const copy = (EXPENSE_COPY[currentLanguage] ||
     EXPENSE_COPY.en) as typeof EXPENSE_COPY.en;
   const { subscription, loading: subLoading } = useSubscription();
@@ -128,7 +129,7 @@ export default function ExpensesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar este gasto?")) return;
+    if (!confirm(t("confirmDeleteExpense", "errors"))) return;
 
     try {
       const token = localStorage.getItem("accessToken");

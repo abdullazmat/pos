@@ -41,16 +41,15 @@ export async function POST(req: NextRequest) {
 
     // Create movement
     const movementType = action === "withdrawal" ? "retiro" : "nota_credito";
-    const description =
-      action === "withdrawal"
-        ? `Retiro de caja - ${reason || "Sin motivo especificado"}`
-        : `Nota de crédito - ${reason || "Sin motivo especificado"}`;
+    const movementDescription =
+      action === "withdrawal" ? "withdrawal" : "creditNote";
+    const movementReason = reason || "noReason";
 
     const movement = new CashMovement({
       cashRegisterId: openSession._id,
       businessId,
       type: movementType,
-      description,
+      description: `${movementDescription}:${movementReason}`,
       amount,
       createdBy: userId,
       notes,
@@ -107,7 +106,7 @@ export async function POST(req: NextRequest) {
           withdrawalsTotal -
           creditNotesTotal,
       },
-      201
+      201,
     );
   } catch (error) {
     console.error("Cash movement error:", error);

@@ -232,7 +232,7 @@ const SUPPLIER_COPY = {
 
 export default function SuppliersPage() {
   const router = useRouter();
-  const { currentLanguage } = useGlobalLanguage();
+  const { currentLanguage, t } = useGlobalLanguage();
   const copy = (SUPPLIER_COPY[currentLanguage] ||
     SUPPLIER_COPY.en) as typeof SUPPLIER_COPY.en;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -367,7 +367,7 @@ export default function SuppliersPage() {
       }
     } catch (error) {
       console.error("Error saving supplier:", error);
-      toast.error("Error al guardar proveedor");
+      toast.error(t("errorSavingSupplier", "errors"));
     }
   };
 
@@ -399,7 +399,7 @@ export default function SuppliersPage() {
       });
 
       if (response.ok) {
-        toast.success("Proveedor eliminado exitosamente");
+        toast.success(t("supplierDeletedSuccess", "errors"));
         await fetchSuppliers();
       } else {
         const errorData = await response.json();
@@ -407,7 +407,7 @@ export default function SuppliersPage() {
       }
     } catch (error) {
       console.error("Error deleting supplier:", error);
-      toast.error("Error al eliminar proveedor");
+      toast.error(t("errorDeletingSupplier", "errors"));
     } finally {
       setShowDeleteModal(false);
       setSupplierToDelete(null);
@@ -432,7 +432,7 @@ export default function SuppliersPage() {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
-        toast.error("Por favor selecciona un archivo CSV válido");
+        toast.error(t("selectValidCSV", "errors"));
         return;
       }
       setUploadFile(file);
@@ -444,7 +444,7 @@ export default function SuppliersPage() {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
-        toast.error("Por favor selecciona un archivo CSV válido");
+        toast.error(t("selectValidCSV", "errors"));
         return;
       }
       setUploadFile(file);
@@ -460,7 +460,7 @@ export default function SuppliersPage() {
       const lines = text.split("\n").filter((line) => line.trim());
 
       if (lines.length < 2) {
-        toast.error("El archivo CSV está vacío o no tiene datos");
+        toast.error(t("emptyCSVFile", "errors"));
         setUploadProgress(false);
         return;
       }
@@ -474,7 +474,7 @@ export default function SuppliersPage() {
       );
 
       if (!hasRequiredHeaders) {
-        toast.error('El CSV debe contener al menos la columna "nombre"');
+        toast.error(t("csvMustContainName", "errors"));
         setUploadProgress(false);
         return;
       }
@@ -499,7 +499,7 @@ export default function SuppliersPage() {
       }
 
       if (suppliers.length === 0) {
-        toast.error("No se encontraron proveedores válidos en el archivo");
+        toast.error(t("noValidSuppliersFound", "errors"));
         setUploadProgress(false);
         return;
       }
@@ -507,7 +507,7 @@ export default function SuppliersPage() {
       // Send to API
       const token = localStorage.getItem("accessToken");
       if (!token) {
-        toast.error("Sesión expirada. Inicia sesión para continuar.");
+        toast.error(String(t("sessionExpired", "errors")));
         setUploadProgress(false);
         router.push("/auth/login");
         return;
@@ -522,7 +522,7 @@ export default function SuppliersPage() {
       });
 
       if (response.status === 401) {
-        toast.error("Sesión expirada. Inicia sesión para continuar.");
+        toast.error(String(t("sessionExpired", "errors")));
         setUploadProgress(false);
         router.push("/auth/login");
         return;
@@ -530,7 +530,12 @@ export default function SuppliersPage() {
 
       if (response.ok) {
         const data = await response.json();
-        toast.success(`${data.count} proveedores importados exitosamente`);
+        const successMsg = t("suppliersImportedSuccess", "errors");
+        toast.success(
+          typeof successMsg === "function"
+            ? successMsg(data.count)
+            : `${data.count} proveedores importados exitosamente`,
+        );
         await fetchSuppliers();
         setShowBulkUpload(false);
         setUploadFile(null);
@@ -540,7 +545,7 @@ export default function SuppliersPage() {
       }
     } catch (error) {
       console.error("Error processing CSV:", error);
-      toast.error("Error al procesar el archivo CSV");
+      toast.error(t("errorProcessingCSV", "errors"));
     } finally {
       setUploadProgress(false);
     }

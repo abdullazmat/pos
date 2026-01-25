@@ -117,7 +117,12 @@ export default function CloseTicketModal({
     CLOSE_TICKET_COPY[currentLanguage as keyof typeof CLOSE_TICKET_COPY] ||
     CLOSE_TICKET_COPY.en;
 
-  if (!open || !data) return null;
+  // Early return with safety checks
+  if (!open) return null;
+  if (!data) {
+    console.warn("CloseTicketModal opened without data");
+    return null;
+  }
 
   const handlePrint = () => {
     window.print();
@@ -234,7 +239,7 @@ export default function CloseTicketModal({
                 {copy.movements}
               </div>
               <div className="max-h-52 overflow-y-auto border border-gray-900">
-                {data.movements && data.movements.length ? (
+                {Array.isArray(data.movements) && data.movements.length > 0 ? (
                   <table className="w-full text-[11px]">
                     <thead>
                       <tr className="bg-gray-200 text-gray-900">
@@ -247,21 +252,25 @@ export default function CloseTicketModal({
                       </tr>
                     </thead>
                     <tbody>
-                      {data.movements.map((m) => (
+                      {data.movements.map((m, index) => (
                         <tr
-                          key={m._id || `${m.type}-${m.createdAt}-${m.amount}`}
+                          key={
+                            m._id || `movement-${index}-${m.type}-${m.amount}`
+                          }
                         >
-                          <td className="px-2 py-1 align-top">{m.createdAt}</td>
+                          <td className="px-2 py-1 align-top">
+                            {m.createdAt || "-"}
+                          </td>
                           <td className="px-2 py-1 align-top capitalize">
-                            {m.type}
+                            {m.type || "-"}
                           </td>
                           <td className="px-2 py-1 align-top">
-                            {m.description}
+                            {m.description || "-"}
                           </td>
                           <td className="px-2 py-1 align-top text-right">
                             {m.type === "retiro" || m.type === "nota_credito"
-                              ? `-${formatAmount(m.amount)}`
-                              : formatAmount(m.amount)}
+                              ? `-${formatAmount(m.amount || 0)}`
+                              : formatAmount(m.amount || 0)}
                           </td>
                         </tr>
                       ))}

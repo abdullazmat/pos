@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { X, Crown } from "lucide-react";
 import { toast } from "react-toastify";
-
+import { useLanguage } from "@/lib/context/LanguageContext";
 interface SubscriptionPremiumModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -29,6 +29,7 @@ export default function SubscriptionPremiumModal({
   onConfirm,
   plan,
 }: SubscriptionPremiumModalProps) {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<BillingData>({
     businessName: "",
@@ -46,15 +47,15 @@ export default function SubscriptionPremiumModal({
     e.preventDefault();
 
     if (!formData.businessName) {
-      toast.error("Nombre de la empresa es requerido");
+      toast.error(t("companyNameRequired", "errors"));
       return;
     }
     if (!formData.cuitRucDni) {
-      toast.error("CUIT/RUC/DNI es requerido");
+      toast.error(t("cuitRucDniRequired", "errors"));
       return;
     }
     if (!formData.email) {
-      toast.error("Email de facturación es requerido");
+      toast.error(t("billingEmailRequired", "errors"));
       return;
     }
 

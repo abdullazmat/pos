@@ -208,6 +208,23 @@ const CURRENCY_LOCALE = {
   pt: "pt-BR",
 } as const;
 
+// Withdrawal reasons in all supported languages, kept in the same order to allow cross-language mapping
+const WITHDRAWAL_REASONS = {
+  es: [
+    "Pago a proveedores",
+    "Gastos operacionales",
+    "Depósito bancario",
+    "Otro",
+  ],
+  en: ["Supplier payment", "Operational expenses", "Bank deposit", "Other"],
+  pt: [
+    "Pagamento a fornecedores",
+    "Despesas operacionais",
+    "Depósito bancário",
+    "Outro",
+  ],
+} as const;
+
 export default function CashRegisterPage() {
   const router = useRouter();
   const { t, currentLanguage } = useGlobalLanguage();
@@ -218,6 +235,65 @@ export default function CashRegisterPage() {
       style: "currency",
       currency: "ARS",
     }).format(value);
+
+  // Translate movement descriptions stored as "movementType:reason" format
+  const translateMovementDescription = (raw: string): string => {
+    if (!raw) return "";
+
+    // Check if description uses new format (movementType:reason)
+    if (raw.includes(":")) {
+      const [movementKey, reasonKey] = raw.split(":");
+      const movementType = movementKey.trim();
+      const reason = reasonKey.trim();
+
+      // Map movement types to translation keys
+      const movementTypeMap: Record<string, string> = {
+        opening: "cashRegister.movements.opening",
+        withdrawal: "cashRegister.movements.withdrawal",
+        creditNote: "cashRegister.movements.creditNote",
+      };
+
+      const movementTypeKey = movementTypeMap[movementType] || movementType;
+      const movementTypeLabel = t(movementTypeKey);
+
+      // Map reason keys to translation keys
+      const reasonKeyMap: Record<string, string> = {
+        noReason: "cashRegister.movements.noReason",
+      };
+
+      // If reason is a known key, translate it; otherwise use it as-is
+      const reasonLabel = reasonKeyMap[reason]
+        ? t(reasonKeyMap[reason])
+        : reason;
+
+      return `${movementTypeLabel} - ${reasonLabel}`;
+    }
+
+    // Fallback for old format (prefix - reason)
+    const [maybePrefix, ...rest] = raw.split("-");
+    const prefix = rest.length ? maybePrefix.trim() : "";
+    const reasonCandidate = rest.length ? rest.join("-").trim() : raw.trim();
+
+    const findTranslatedReason = () => {
+      const languages = Object.keys(WITHDRAWAL_REASONS) as Array<
+        keyof typeof WITHDRAWAL_REASONS
+      >;
+
+      for (const lang of languages) {
+        const idx = WITHDRAWAL_REASONS[lang].findIndex(
+          (r) => r.toLowerCase() === reasonCandidate.toLowerCase(),
+        );
+        if (idx >= 0) {
+          return WITHDRAWAL_REASONS[currentLanguage][idx];
+        }
+      }
+      return reasonCandidate;
+    };
+
+    const translatedReason = findTranslatedReason();
+    if (prefix) return `${prefix} - ${translatedReason}`;
+    return translatedReason;
+  };
   const [isOpen, setIsOpen] = useState<boolean | null>(null);
   const [opening, setOpening] = useState("");
   const [movements, setMovements] = useState<any[]>([]);
@@ -684,7 +760,7 @@ export default function CashRegisterPage() {
       if (!response.ok) {
         const error = await response.json();
         setToastType("error");
-        setToastMsg(`Error: ${error.error}`);
+        setToastMsg(`Error: ${error.error || "Error al cerrar la caja"}`);
         setToastOpen(true);
         return;
       }
@@ -696,6 +772,27 @@ export default function CashRegisterPage() {
         typeof summary?.expected === "number"
           ? summary.expected
           : sessionData.expected;
+
+      // Ensure movements is always a valid array with proper formatting
+      let formattedMovements = [];
+      if (Array.isArray(summary?.movements) && summary.movements.length > 0) {
+        formattedMovements = summary.movements.map((m: any) => ({
+          _id: m._id || "",
+          type: m.type || "",
+          description: m.description || "",
+          amount: typeof m.amount === "number" ? m.amount : 0,
+          createdAt: m.createdAt || new Date().toLocaleString(),
+        }));
+      } else if (Array.isArray(movements) && movements.length > 0) {
+        formattedMovements = movements.map((m: any) => ({
+          _id: m._id || "",
+          type: m.type || "",
+          description: m.description || "",
+          amount: typeof m.amount === "number" ? m.amount : 0,
+          createdAt: m.createdAt || new Date().toLocaleString(),
+        }));
+      }
+
       const ticket: CloseTicketData = {
         businessName:
           summary?.businessName || user?.businessName || "MI NEGOCIO",
@@ -733,15 +830,7 @@ export default function CashRegisterPage() {
           typeof summary?.difference === "number"
             ? summary.difference
             : countedAmount - (fallbackExpected || 0),
-        movements: Array.isArray(summary?.movements)
-          ? summary.movements
-          : movements.map((m) => ({
-              _id: m._id,
-              type: m.type,
-              description: m.description,
-              amount: m.amount,
-              createdAt: m.createdAt,
-            })),
+        movements: formattedMovements,
       };
 
       setCloseTicketData(ticket);
@@ -1071,7 +1160,7 @@ export default function CashRegisterPage() {
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
-                            {movement.description}
+                            {translateMovementDescription(movement.description)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 dark:text-green-400">
                             {formatCurrency(movement.amount)}
