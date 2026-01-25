@@ -6,22 +6,37 @@ interface SendEmailOptions {
   html: string;
 }
 
-// Create reusable transporter
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || "smtp.gmail.com",
-    port: Number(process.env.EMAIL_PORT) || 587,
-    secure: false, // true for 465, false for other ports
+// Create reusable transporter with sane defaults and TLS handling
+const createTransporter = (override?: Partial<nodemailer.TransportOptions>) => {
+  const host = process.env.EMAIL_HOST || "smtp.gmail.com";
+  const port = Number(process.env.EMAIL_PORT) || 587;
+
+  // If port is 465 (SMTPS), use secure true; otherwise STARTTLS on 587
+  const secure = port === 465;
+
+  const baseOptions: nodemailer.TransportOptions = {
+    host,
+    port,
+    secure,
+    requireTLS: !secure, // require STARTTLS when not using SMTPS
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD,
     },
-  });
+    // Connection timeouts to fail fast on unreachable hosts
+    connectionTimeout: 15000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000,
+    // Helpful logs in non-production to diagnose connection issues
+    logger: process.env.NODE_ENV !== "production",
+  };
+
+  return nodemailer.createTransport({ ...baseOptions, ...(override || {}) });
 };
 
 export async function sendEmail({ to, subject, html }: SendEmailOptions) {
   try {
-    const transporter = createTransporter();
+    let transporter = createTransporter();
 
     // Verify transporter configuration
     await transporter.verify();
@@ -37,6 +52,35 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions) {
     console.log("Email sent successfully:", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
+    // If connection timed out on 587, retry with SMTPS on 465
+    const currentPort = Number(process.env.EMAIL_PORT) || 587;
+    const isConnTimeout =
+      error?.code === "ETIMEDOUT" ||
+      error?.code === "ECONN" ||
+      error?.code === "ECONNRESET" ||
+      error?.command === "CONN";
+
+    if (isConnTimeout && currentPort !== 465) {
+      try {
+        const fallbackTransporter = createTransporter({
+          port: 465,
+          secure: true,
+          requireTLS: false,
+        });
+        await fallbackTransporter.verify();
+        const info = await fallbackTransporter.sendMail({
+          from: `"POS SaaS" <${process.env.EMAIL_USER}>`,
+          to,
+          subject,
+          html,
+        });
+        console.log("Email sent successfully via SMTPS (465):", info.messageId);
+        return { success: true, messageId: info.messageId };
+      } catch (fallbackError) {
+        console.error("Fallback to SMTPS (465) failed:", fallbackError);
+      }
+    }
+
     console.error("Error sending email:", error);
     throw error;
   }
