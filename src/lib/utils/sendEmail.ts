@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import SMTPTransport from "nodemailer/lib/smtp-transport";
 
 interface SendEmailOptions {
   to: string;
@@ -7,14 +8,14 @@ interface SendEmailOptions {
 }
 
 // Create reusable transporter with sane defaults and TLS handling
-const createTransporter = (override?: Partial<nodemailer.TransportOptions>) => {
+const createTransporter = (override?: Partial<SMTPTransport.Options>) => {
   const host = process.env.EMAIL_HOST || "smtp.gmail.com";
   const port = Number(process.env.EMAIL_PORT) || 587;
 
   // If port is 465 (SMTPS), use secure true; otherwise STARTTLS on 587
   const secure = port === 465;
 
-  const baseOptions: nodemailer.TransportOptions = {
+  const baseOptions: SMTPTransport.Options = {
     host,
     port,
     secure,
@@ -51,7 +52,7 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions) {
 
     console.log("Email sent successfully:", info.messageId);
     return { success: true, messageId: info.messageId };
-  } catch (error) {
+  } catch (error: any) {
     // If connection timed out on 587, retry with SMTPS on 465
     const currentPort = Number(process.env.EMAIL_PORT) || 587;
     const isConnTimeout =
