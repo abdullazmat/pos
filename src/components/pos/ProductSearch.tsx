@@ -19,6 +19,7 @@ export default function ProductSearch({
 }: ProductSearchProps) {
   const { t } = useGlobalLanguage();
   const [searchQuery, setSearchQuery] = useState("");
+  const [barcodeQuery, setBarcodeQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -47,10 +48,94 @@ export default function ProductSearch({
     [onSearch],
   );
 
+  const handleBarcodeSearch = useCallback(
+    async (barcode: string) => {
+      if (barcode.trim().length === 0) {
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const token = localStorage.getItem("accessToken");
+        const encodedBarcode = encodeURIComponent(barcode.trim());
+        const response = await fetch(`/api/products?search=${encodedBarcode}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        console.log("Barcode search response:", data);
+        const products = data.data?.products || [];
+
+        console.log("Found products:", products.length);
+
+        // Try to find an exact match by barcode or code (ignoring dashes/spaces)
+        const normalize = (s: string | undefined) =>
+          (s || "").replace(/[-\s]/g, "");
+        const normalizedQuery = normalize(barcode);
+
+        const exact = products.find(
+          (p: any) =>
+            normalize(p.barcode) === normalizedQuery ||
+            normalize(p.code) === normalizedQuery,
+        );
+
+        const target = exact || (products.length === 1 ? products[0] : null);
+
+        if (target) {
+          console.log("Adding product to cart:", target);
+          const normalizedPrice = target.isSoldByWeight
+            ? target.price >= 1000
+              ? target.price / 1000
+              : target.price
+            : target.price;
+          onAddToCart(
+            target._id,
+            target.name,
+            normalizedPrice,
+            target.isSoldByWeight,
+          );
+          setBarcodeQuery("");
+          setResults([]);
+          return;
+        }
+
+        if (products.length > 0) {
+          console.log("No exact match; showing candidates");
+          setResults(products);
+        } else {
+          console.log("No products found for barcode:", barcode);
+          setResults([]);
+          setSearchQuery(barcode);
+        }
+      } catch (error) {
+        console.error("Barcode search error:", error);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [onAddToCart],
+  );
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
     handleSearch(query);
+  };
+
+  const handleBarcodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setBarcodeQuery(value);
+    // Clear search query when typing in barcode field
+    setSearchQuery("");
+  };
+
+  const handleBarcodeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      console.log("Enter pressed, searching for barcode:", barcodeQuery);
+      handleBarcodeSearch(barcodeQuery);
+      // Clear barcode query when typing in search field
+      setBarcodeQuery("");
+    }
   };
 
   return (
@@ -74,6 +159,10 @@ export default function ProductSearch({
           <input
             type="text"
             placeholder={t("ui.scanPlaceholder", "pos")}
+            value={barcodeQuery}
+            onChange={handleBarcodeChange}
+            onKeyDown={handleBarcodeKeyDown}
+            autoComplete="off"
             className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
           />
         </div>

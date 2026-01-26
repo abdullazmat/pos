@@ -129,13 +129,21 @@ export default function POSPage() {
     price: number,
     isSoldByWeight?: boolean,
   ) => {
+    console.log("handleAddToCart called", {
+      productId,
+      name,
+      price,
+      isSoldByWeight,
+    });
     setCartItems((prev) => {
+      console.log("Previous cart items", prev);
       const existing = prev.find((item) => item.productId === productId);
       const normalizedPrice = isSoldByWeight
         ? price >= 1000
           ? price / 1000
           : price
         : price;
+      console.log("normalizedPrice", normalizedPrice);
       if (existing) {
         return prev.map((item) =>
           item.productId === productId
