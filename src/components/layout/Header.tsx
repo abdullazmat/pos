@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   CreditCard,
   DollarSign,
+  FileText,
   Keyboard,
   LogOut,
   Moon,
@@ -77,6 +78,11 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
     { href: "/suppliers", label: t("nav.suppliers", "pos"), icon: Truck },
     { href: "/expenses", label: t("nav.expenses", "pos"), icon: Receipt },
     { href: "/reports", label: t("nav.reports", "pos"), icon: BarChart3 },
+    {
+      href: "/reportes-fiscales",
+      label: t("nav.fiscalReports", "pos"),
+      icon: FileText,
+    },
     { href: "/admin", label: t("nav.users", "pos"), icon: UserCog },
     {
       href: "/keyboard-config",

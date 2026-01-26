@@ -40,9 +40,11 @@ export interface IFiscalConfiguration extends Document {
   cuit?: string; // CUIT (Código Único de Identificación Tributaria)
   cuil?: string; // CUIL (Code for individuals)
   cdi?: string; // CDI (for some regions)
+  fiscalId?: string; // Generic fiscal ID (CUIT/RUT/RFC/RUC)
 
   // VAT Configuration
   defaultIvaRate: number; // Default VAT rate (21, 10.5, 0, etc.)
+  taxRate?: number; // Configurable tax rate for reports
 
   // Invoicing Configuration
   pointOfSale: number; // Punto de Venta (e.g., 1, 2, 3...)
@@ -135,9 +137,16 @@ const FiscalConfigurationSchema = new Schema<IFiscalConfiguration>(
     cuit: String,
     cuil: String,
     cdi: String,
+    fiscalId: String,
 
     // VAT Configuration
     defaultIvaRate: {
+      type: Number,
+      default: 21,
+      min: 0,
+      max: 100,
+    },
+    taxRate: {
       type: Number,
       default: 21,
       min: 0,

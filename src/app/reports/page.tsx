@@ -581,7 +581,13 @@ export default function ReportsPage() {
                     <Package className="w-5 h-5 text-purple-400" />
                   </div>
                   <div className="text-3xl font-bold text-slate-900 dark:text-white">
-                    {loading ? "..." : reportData?.totalItems || 0}
+                    {loading
+                      ? "..."
+                      : reportData?.totalItems
+                        ? Number(reportData.totalItems) % 1 === 0
+                          ? Math.round(reportData.totalItems)
+                          : Number(reportData.totalItems).toFixed(1)
+                        : 0}
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
                     {copy.kpis.itemsSold.desc}

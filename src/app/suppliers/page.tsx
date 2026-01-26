@@ -987,14 +987,14 @@ export default function SuppliersPage() {
       {/* Bulk Upload Modal */}
       {showBulkUpload && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-2xl p-8 border shadow-2xl bg-slate-900 border-slate-800 rounded-2xl">
+          <div className="w-full max-w-2xl p-8 border shadow-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-2xl">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
                   {copy.bulk.title}
                 </h2>
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                   {copy.bulk.subtitle}
                 </p>
               </div>
@@ -1003,7 +1003,7 @@ export default function SuppliersPage() {
                   setShowBulkUpload(false);
                   setUploadFile(null);
                 }}
-                className="transition-colors text-slate-400 hover:text-white"
+                className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -1075,7 +1075,7 @@ export default function SuppliersPage() {
             {/* Download Template Button */}
             <button
               onClick={downloadTemplate}
-              className="flex items-center justify-center w-full gap-2 px-4 py-3 mb-6 font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-slate-800 border border-blue-600 dark:border-slate-700 dark:hover:bg-slate-700 transition-colors rounded-lg"
+              className="flex items-center justify-center w-full gap-2 px-4 py-3 mb-6 font-medium text-white bg-blue-600 hover:bg-blue-700 border border-blue-600 dark:bg-blue-600 dark:border-blue-600 dark:hover:bg-blue-700 transition-colors rounded-lg"
             >
               <Download className="w-5 h-5" />
               {copy.bulk.downloadTemplate}
@@ -1085,10 +1085,10 @@ export default function SuppliersPage() {
             <div
               onDrop={handleFileDrop}
               onDragOver={(e) => e.preventDefault()}
-              className="p-8 text-center transition-colors border-2 border-dashed rounded-lg cursor-pointer border-slate-300 dark:border-slate-700 hover:border-purple-500 dark:hover:border-purple-500"
+              className="p-8 text-center transition-colors border-2 border-dashed rounded-lg cursor-pointer border-slate-300 dark:border-slate-700 hover:border-purple-500 dark:hover:border-purple-500 bg-slate-50 dark:bg-slate-800"
               onClick={() => fileInputRef.current?.click()}
             >
-              <Upload className="w-12 h-12 mx-auto mb-4 text-slate-500" />
+              <Upload className="w-12 h-12 mx-auto mb-4 text-slate-400 dark:text-slate-500" />
               {uploadFile ? (
                 <div>
                   <p className="mb-1 font-medium text-slate-900 dark:text-white">
@@ -1130,14 +1130,14 @@ export default function SuppliersPage() {
                   setShowBulkUpload(false);
                   setUploadFile(null);
                 }}
-                className="flex-1 px-4 py-2.5 bg-white border border-slate-300 text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                className="flex-1 px-4 py-2.5 bg-slate-100 border border-slate-300 text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
               >
                 {copy.bulk.close}
               </button>
               <button
                 onClick={processCSV}
                 disabled={!uploadFile || uploadProgress}
-                className="flex-1 px-4 py-2.5 bg-purple-600 border border-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:border-purple-500"
+                className="flex-1 px-4 py-2.5 bg-purple-600 border border-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {uploadProgress ? copy.bulk.processing : copy.bulk.importAction}
               </button>
