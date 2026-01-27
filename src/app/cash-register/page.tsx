@@ -53,6 +53,8 @@ const CASH_COPY = {
       type: "Tipo",
       description: "Descripción",
       amount: "Monto",
+      operator: "Operador",
+      noOperator: "Sin operador",
       empty: "No hay movimientos registrados en esta sesión",
       types: {
         apertura: "Apertura",
@@ -113,6 +115,8 @@ const CASH_COPY = {
       type: "Type",
       description: "Description",
       amount: "Amount",
+      operator: "Operator",
+      noOperator: "No operator info",
       empty: "No movements recorded in this session",
       types: {
         apertura: "Opening",
@@ -174,6 +178,8 @@ const CASH_COPY = {
       type: "Tipo",
       description: "Descrição",
       amount: "Valor",
+      operator: "Operador",
+      noOperator: "Sem operador",
       empty: "Nenhum movimento registrado nesta sessão",
       types: {
         apertura: "Abertura",
@@ -837,6 +843,7 @@ export default function CashRegisterPage() {
           description: m.description || "",
           amount: typeof m.amount === "number" ? m.amount : 0,
           createdAt: m.createdAt || new Date().toLocaleString(),
+          operator: m.operator || null,
         }));
       } else if (Array.isArray(movements) && movements.length > 0) {
         formattedMovements = movements.map((m: any) => ({
@@ -845,6 +852,7 @@ export default function CashRegisterPage() {
           description: m.description || "",
           amount: typeof m.amount === "number" ? m.amount : 0,
           createdAt: m.createdAt || new Date().toLocaleString(),
+          operator: m.operator || null,
         }));
       }
 
@@ -1157,6 +1165,9 @@ export default function CashRegisterPage() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider dark:text-slate-300">
                         {copy.movements.amount}
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider dark:text-slate-300">
+                        {copy.movements.operator}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-slate-200 dark:bg-slate-900 dark:divide-slate-700">
@@ -1219,6 +1230,11 @@ export default function CashRegisterPage() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 dark:text-green-400">
                             {formatCurrency(movement.amount)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">
+                            {movement.operator
+                              ? `${movement.operator.visible_name || "-"} (${movement.operator.role || "-"})`
+                              : copy.movements.noOperator}
                           </td>
                         </tr>
                       ))

@@ -5,19 +5,23 @@ A complete, production-ready SaaS Point of Sale system built with Next.js 14, Mo
 ## Features
 
 - **Authentication & Authorization**
-
   - JWT-based authentication (access + refresh tokens)
   - Multi-role user system (Admin, Supervisor, Cashier)
   - Password hashing with bcryptjs
 
 - **Plan System**
-
   - Free plan: 1 user, 50 products max
   - PRO plan: unlimited users and products
   - Backend enforces plan limits
 
 - **POS Fast Sale Screen** (Core MVP)
-
+  - **NEW: Keyboard-Only Supermarket Mode** 🎹
+    - Quantity-first workflow (no mouse required)
+    - Multiplier support: `50*CODE` for bulk items
+    - Decimal quantities for weight-based products
+    - Customer management shortcuts (Shift+C/F/N/X)
+    - Auto-focus management for rapid scanning
+    - [Quick Reference](KEYBOARD_POS_QUICK_REFERENCE.md) | [Full Documentation](KEYBOARD_POS_IMPLEMENTATION.md)
   - Real-time product search (by name, code, barcode)
   - Shopping cart with quantity management
   - Per-product and order discounts
@@ -26,28 +30,24 @@ A complete, production-ready SaaS Point of Sale system built with Next.js 14, Mo
   - Quick checkout workflow
 
 - **Products Management**
-
   - CRUD operations
   - Stock tracking with low-stock alerts
   - Automatic margin calculation
   - Barcode support
 
 - **Stock & Purchases**
-
   - Automatic stock reduction on sales
   - Purchase orders to increase stock
   - Cost updates on purchases
   - Stock movement history
 
 - **Cash Register (Caja)**
-
   - Open/Close cash register
   - Cash in/out tracking
   - Movement history
   - User-linked transactions
 
 - **Reports**
-
   - Daily sales summary (Free plan)
   - Advanced reports (PRO plan):
     - Sales by day/week/month
@@ -57,7 +57,6 @@ A complete, production-ready SaaS Point of Sale system built with Next.js 14, Mo
     - CSV export
 
 - **Subscription System**
-
   - Stripe integration
   - Auto-renewal management
   - Failed payment detection
@@ -97,6 +96,26 @@ cp .env.local.example .env.local
 # Run development server
 npm run dev
 ```
+
+## 🎹 Keyboard POS Documentation
+
+The system includes a complete keyboard-only supermarket POS mode for maximum efficiency:
+
+- **[Quick Reference Card](KEYBOARD_POS_QUICK_REFERENCE.md)** - Print and keep at workstation
+- **[Implementation Guide](KEYBOARD_POS_IMPLEMENTATION.md)** - Technical documentation
+- **[Testing Guide](KEYBOARD_POS_TESTING_GUIDE.md)** - 37 comprehensive test cases
+- **[Visual Workflow](KEYBOARD_POS_VISUAL_GUIDE.md)** - Diagrams and animations
+- **[Summary](KEYBOARD_POS_SUMMARY.md)** - Complete feature overview
+
+**Key Features:**
+
+- ⌨️ 100% keyboard operation (no mouse)
+- 📊 Quantity-first workflow
+- ✖️ Multiplier support: `50*CODE`
+- ⚖️ Decimal quantities for weight products
+- 👥 Customer shortcuts: Shift+C/F/N/X
+- 🎯 Auto-focus management
+- 🌍 Multi-language support
 
 ## Project Structure
 

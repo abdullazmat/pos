@@ -110,6 +110,7 @@ export async function GET(req: NextRequest) {
       description: m.description,
       amount: m.amount,
       createdAt: m.createdAt?.toLocaleString("es-AR") || "-",
+      operator: m.operator || null,
     }));
 
     return generateSuccessResponse({
@@ -137,10 +138,20 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse(authResult.error || "Unauthorized", 401);
     }
 
-    const { businessId, userId } = authResult.user!;
+    const { businessId, userId, role } = authResult.user!;
+    // Always fetch user fullName from DB (not present in JWT)
+    const userDoc = await User.findById(userId).select("fullName");
+    const fullName = userDoc?.fullName || "";
     const body = await req.json();
     const { action, amount, reason, countedAmount } = body;
 
+    // Permissions enforcement
+    if (role === "cashier" && action !== "open" && action !== "close") {
+      return generateErrorResponse(
+        "Cashiers can only open/close register",
+        403,
+      );
+    }
     if (!action || !["open", "close"].includes(action)) {
       return generateErrorResponse("Invalid action", 400);
     }
@@ -176,7 +187,7 @@ export async function POST(req: NextRequest) {
 
       await cashRegister.save();
 
-      // Create opening movement
+      // Use cashRegister._id as session_id for operator
       const movement = new CashMovement({
         cashRegisterId: cashRegister._id,
         businessId,
@@ -184,6 +195,12 @@ export async function POST(req: NextRequest) {
         description: "opening",
         amount: amount || 0,
         createdBy: userId,
+        operator: {
+          user_id: userId,
+          visible_name: fullName,
+          role: role || "cashier",
+          session_id: cashRegister._id.toString(),
+        },
       });
 
       await movement.save();
@@ -247,7 +264,7 @@ export async function POST(req: NextRequest) {
 
       await cashRegister.save();
 
-      // Create closing movement
+      // Use cashRegister._id as session_id for operator
       const movement = new CashMovement({
         cashRegisterId: cashRegister._id,
         businessId,
@@ -255,6 +272,12 @@ export async function POST(req: NextRequest) {
         description: "Cierre de caja",
         amount: closingBalance || expected,
         createdBy: userId,
+        operator: {
+          user_id: userId,
+          visible_name: fullName,
+          role: role || "cashier",
+          session_id: cashRegister._id.toString(),
+        },
       });
 
       await movement.save();
@@ -265,6 +288,7 @@ export async function POST(req: NextRequest) {
         description: m.description,
         amount: m.amount,
         createdAt: m.createdAt?.toLocaleString("es-AR") || "-",
+        operator: m.operator || null,
       }));
       formattedMovements.push({
         _id: movement._id,
@@ -272,6 +296,7 @@ export async function POST(req: NextRequest) {
         description: movement.description,
         amount: movement.amount,
         createdAt: movement.createdAt?.toLocaleString("es-AR") || "-",
+        operator: movement.operator || null,
       });
 
       return generateSuccessResponse({

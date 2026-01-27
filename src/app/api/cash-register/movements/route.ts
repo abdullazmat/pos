@@ -15,9 +15,25 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse(authResult.error || "Unauthorized", 401);
     }
 
-    const { businessId, userId } = authResult.user!;
+    const { businessId, userId, role } = authResult.user!;
+    // Always fetch user fullName from DB (not present in JWT)
+    const userDoc = await (await import("@/lib/models/User")).default
+      .findById(userId)
+      .select("fullName");
+    const fullName = userDoc?.fullName || "";
     const body = await req.json();
     const { action, amount, reason, notes } = body;
+
+    // Permissions enforcement
+    if (role === "cashier" && action !== "venta") {
+      return generateErrorResponse("Cashiers can only perform sales", 403);
+    }
+    if (role === "supervisor" && action === "credit_note") {
+      return generateErrorResponse(
+        "Supervisors cannot issue credit notes",
+        403,
+      );
+    }
 
     if (!action || !["withdrawal", "credit_note"].includes(action)) {
       return generateErrorResponse("Invalid action", 400);
@@ -53,6 +69,12 @@ export async function POST(req: NextRequest) {
       amount,
       createdBy: userId,
       notes,
+      operator: {
+        user_id: userId,
+        visible_name: fullName,
+        role: role || "cashier",
+        session_id: openSession._id.toString(),
+      },
     });
 
     await movement.save();
@@ -89,6 +111,7 @@ export async function POST(req: NextRequest) {
       description: m.description,
       amount: m.amount,
       createdAt: m.createdAt?.toLocaleString("es-AR") || "-",
+      operator: m.operator || null,
     }));
 
     return generateSuccessResponse(

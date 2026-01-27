@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import { apiFetch } from "@/lib/utils/apiFetch";
 import ProductSearch from "@/components/pos/ProductSearch";
+import KeyboardPOSInput from "@/components/pos/KeyboardPOSInput";
 import Cart from "@/components/pos/Cart";
 import Header from "@/components/layout/Header";
 import Loading from "@/components/common/Loading";
@@ -127,14 +128,21 @@ export default function POSPage() {
     productId: string,
     name: string,
     price: number,
+    quantity?: number,
     isSoldByWeight?: boolean,
   ) => {
+    // Support both old (without quantity) and new (with quantity) signatures
+    const actualQuantity =
+      quantity !== undefined ? quantity : isSoldByWeight ? 0.1 : 1;
+
     console.log("handleAddToCart called", {
       productId,
       name,
       price,
+      quantity: actualQuantity,
       isSoldByWeight,
     });
+
     setCartItems((prev) => {
       console.log("Previous cart items", prev);
       const existing = prev.find((item) => item.productId === productId);
@@ -144,33 +152,32 @@ export default function POSPage() {
           : price
         : price;
       console.log("normalizedPrice", normalizedPrice);
+
       if (existing) {
+        // Add to existing item
         return prev.map((item) =>
           item.productId === productId
             ? {
                 ...item,
-                quantity: item.isSoldByWeight
-                  ? item.quantity + 0.1
-                  : item.quantity + 1,
+                quantity: item.quantity + actualQuantity,
                 total:
-                  (item.isSoldByWeight
-                    ? item.quantity + 0.1
-                    : item.quantity + 1) *
-                    normalizedPrice -
+                  (item.quantity + actualQuantity) * normalizedPrice -
                   item.discount,
               }
             : item,
         );
       }
+
+      // Add new item
       return [
         ...prev,
         {
           productId,
           productName: name,
-          quantity: isSoldByWeight ? 0.1 : 1,
+          quantity: actualQuantity,
           unitPrice: normalizedPrice,
           discount: 0,
-          total: isSoldByWeight ? normalizedPrice * 0.1 : normalizedPrice,
+          total: actualQuantity * normalizedPrice,
           isSoldByWeight: isSoldByWeight || false,
         },
       ];
@@ -211,6 +218,73 @@ export default function POSPage() {
           : item,
       ),
     );
+  };
+
+  const handleCustomerAction = (
+    action: "change" | "search" | "new" | "remove",
+  ) => {
+    try {
+      switch (action) {
+        case "change":
+          toast.info(
+            t("ui.changeCustomerType", "pos") !== "ui.changeCustomerType"
+              ? t("ui.changeCustomerType", "pos")
+              : "Change customer type",
+            {
+              autoClose: 2000,
+              position: "top-center",
+            },
+          );
+          // TODO: Implement customer type change modal
+          console.log("Customer action: change type");
+          break;
+        case "search":
+          toast.info(
+            t("ui.searchCustomer", "pos") !== "ui.searchCustomer"
+              ? t("ui.searchCustomer", "pos")
+              : "Search customer",
+            {
+              autoClose: 2000,
+              position: "top-center",
+            },
+          );
+          // TODO: Implement customer search modal
+          console.log("Customer action: search");
+          break;
+        case "new":
+          toast.info(
+            t("ui.newCustomer", "pos") !== "ui.newCustomer"
+              ? t("ui.newCustomer", "pos")
+              : "New customer",
+            {
+              autoClose: 2000,
+              position: "top-center",
+            },
+          );
+          // TODO: Implement new customer modal
+          console.log("Customer action: new customer");
+          break;
+        case "remove":
+          toast.success(
+            t("ui.removeCustomer", "pos") !== "ui.removeCustomer"
+              ? t("ui.removeCustomer", "pos")
+              : "Customer removed",
+            {
+              autoClose: 2000,
+              position: "top-center",
+            },
+          );
+          // TODO: Implement remove current customer
+          console.log("Customer action: remove customer");
+          break;
+        default:
+          console.warn("Unknown customer action:", action);
+          toast.warning("Unknown customer action");
+      }
+    } catch (error) {
+      console.error("Error handling customer action:", error);
+      toast.error("Failed to process customer action");
+    }
   };
 
   const handleCheckout = async (paymentMethod: string) => {
@@ -305,8 +379,48 @@ export default function POSPage() {
         {registerOpen === true && (
           <>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <ProductSearch onAddToCart={handleAddToCart} />
+              <div className="lg:col-span-2 space-y-6">
+                {/* New Keyboard-First Input */}
+                <KeyboardPOSInput
+                  onAddToCart={handleAddToCart}
+                  onCustomerAction={handleCustomerAction}
+                />
+
+                {/* Legacy Product Search (collapsible) */}
+                <details className="group">
+                  <summary className="cursor-pointer list-none">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                      <div className="flex items-center gap-2">
+                        <svg
+                          className="w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform group-open:rotate-90"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                          {t("ui.advancedSearch", "pos") !== "ui.advancedSearch"
+                            ? t("ui.advancedSearch", "pos")
+                            : "Advanced Search"}
+                        </span>
+                      </div>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {t("ui.clickToExpand", "pos") !== "ui.clickToExpand"
+                          ? t("ui.clickToExpand", "pos")
+                          : "Click to expand"}
+                      </span>
+                    </div>
+                  </summary>
+                  <div className="mt-4">
+                    <ProductSearch onAddToCart={handleAddToCart} />
+                  </div>
+                </details>
               </div>
               <div>
                 <Cart

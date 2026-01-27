@@ -8,6 +8,7 @@ interface ProductSearchProps {
     productId: string,
     name: string,
     price: number,
+    quantity?: number,
     isSoldByWeight?: boolean,
   ) => void;
   onSearch?: (query: string) => void;
