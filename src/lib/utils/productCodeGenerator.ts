@@ -49,6 +49,31 @@ export async function generateSequentialProductCode(
 }
 
 /**
+ * Generates a date-based product code with a 3-digit business prefix
+ * Format: BBB-YYYYMMDD-XXXXX (e.g., 697-20260125-40100)
+ */
+export async function generateDateBasedProductCode(
+  businessId: string,
+): Promise<string> {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const date = `${year}${month}${day}`;
+
+  // Derive a stable 3-digit prefix from businessId
+  const raw = String(businessId || "");
+  let hash = 0;
+  for (let i = 0; i < raw.length; i += 1) {
+    hash = (hash * 31 + raw.charCodeAt(i)) % 1000;
+  }
+  const prefix = String(hash).padStart(3, "0");
+
+  const random = String(Math.floor(Math.random() * 100000)).padStart(5, "0");
+  return `${prefix}-${date}-${random}`;
+}
+
+/**
  * Generates a simple 4-digit sequential product code
  * Format: XXXX (e.g., 0001, 0002, etc.)
  */

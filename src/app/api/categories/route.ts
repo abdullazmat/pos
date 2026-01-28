@@ -30,7 +30,7 @@ export async function GET(request: Request) {
         error: "Failed to fetch categories",
         details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     if (!token) {
       return NextResponse.json(
         { error: "Unauthorized - No token provided" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     if (!decoded.businessId) {
       return NextResponse.json(
         { error: "Business ID not found in token" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     if (!name || !name.trim()) {
       return NextResponse.json(
         { error: "Category name is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     const planCheck = await checkPlanLimit(
       decoded.businessId,
       "maxCategories",
-      categoryCount
+      categoryCount,
     );
     if (!planCheck.allowed) {
       return NextResponse.json({ error: planCheck.message }, { status: 403 });
@@ -89,8 +89,8 @@ export async function POST(request: Request) {
 
     if (existingCategory) {
       return NextResponse.json(
-        { error: "Category with this name already exists" },
-        { status: 400 }
+        { error: { key: "duplicateCategoryName" } },
+        { status: 409 },
       );
     }
 
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { category, message: "Category created successfully" },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Create category error:", error);
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
         error: "Failed to create category",
         details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -133,7 +133,7 @@ export async function PUT(request: Request) {
     if (!id || !name || !name.trim()) {
       return NextResponse.json(
         { error: "Category ID and name are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -148,21 +148,21 @@ export async function PUT(request: Request) {
 
     if (existingCategory) {
       return NextResponse.json(
-        { error: "Another category with this name already exists" },
-        { status: 400 }
+        { error: { key: "duplicateCategoryName" } },
+        { status: 409 },
       );
     }
 
     const category = await Category.findOneAndUpdate(
       { _id: id, business: decoded.businessId },
       { name: name.trim() },
-      { new: true }
+      { new: true },
     );
 
     if (!category) {
       return NextResponse.json(
         { error: "Category not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -177,7 +177,7 @@ export async function PUT(request: Request) {
         error: "Failed to update category",
         details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -200,7 +200,7 @@ export async function DELETE(request: Request) {
     if (!id) {
       return NextResponse.json(
         { error: "Category ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -214,7 +214,7 @@ export async function DELETE(request: Request) {
     if (!category) {
       return NextResponse.json(
         { error: "Category not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -226,7 +226,7 @@ export async function DELETE(request: Request) {
         error: "Failed to delete category",
         details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

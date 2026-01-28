@@ -5,6 +5,8 @@ import Subscription from "@/lib/models/Subscription";
 import User from "@/lib/models/User";
 import { getPlanConfig } from "@/lib/services/subscriptions/PlanConfig";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const sessionId = req.nextUrl.searchParams.get("session_id");

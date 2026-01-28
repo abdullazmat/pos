@@ -21,6 +21,8 @@ export default function CategoriesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: "", description: "" });
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [subscription, setSubscription] = useState<any>(null);
   const [showLimitPrompt, setShowLimitPrompt] = useState(false);
@@ -114,12 +116,12 @@ export default function CategoriesPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!formData.name.trim()) {
-      notify.error("El nombre de la categoría es requerido");
+      notify.error(copy.toasts.nameRequired);
       return;
     }
 
     try {
-      setLoading(true);
+      setIsSaving(true);
       const token = localStorage.getItem("accessToken");
       const method = editingId ? "PUT" : "POST";
       const response = await fetch("/api/categories", {
@@ -136,22 +138,30 @@ export default function CategoriesPage() {
       });
 
       if (response.ok) {
-        notify.success(
-          editingId ? "Categoría actualizada" : "Categoría creada",
-        );
+        notify.success(editingId ? copy.toasts.updated : copy.toasts.created);
         setShowModal(false);
         setFormData({ name: "", description: "" });
         setEditingId(null);
         await fetchCategories();
       } else {
         const data = await response.json();
-        notify.error(data.message || "Error al guardar la categoría");
+        if (data?.error && typeof data.error === "object" && data.error.key) {
+          const errorKey =
+            typeof data.error.key === "string" ? data.error.key : null;
+          const message = errorKey
+            ? copy.toasts[errorKey as keyof typeof copy.toasts] ||
+              copy.toasts.saveError
+            : copy.toasts.saveError;
+          notify.error(message);
+        } else {
+          notify.error(data?.error || data?.message || copy.toasts.saveError);
+        }
       }
     } catch (error) {
       console.error("Error saving category:", error);
-      notify.error("Error al guardar la categoría");
+      notify.error(copy.toasts.saveError);
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   }
 
@@ -173,7 +183,7 @@ export default function CategoriesPage() {
     if (!deleteTarget) return;
 
     try {
-      setLoading(true);
+      setIsDeleting(true);
       const token = localStorage.getItem("accessToken");
       const response = await fetch(
         `/api/categories?id=${encodeURIComponent(deleteTarget.id)}`,
@@ -184,18 +194,18 @@ export default function CategoriesPage() {
       );
 
       if (response.ok) {
-        notify.success("Categoría eliminada");
+        notify.success(copy.toasts.deleted);
         setShowDeleteModal(false);
         setDeleteTarget(null);
         await fetchCategories();
       } else {
-        notify.error("Error al eliminar la categoría");
+        notify.error(copy.toasts.deleteError);
       }
     } catch (error) {
       console.error("Error deleting category:", error);
-      notify.error("Error al eliminar la categoría");
+      notify.error(copy.toasts.deleteError);
     } finally {
-      setLoading(false);
+      setIsDeleting(false);
     }
   }
 
@@ -424,10 +434,10 @@ export default function CategoriesPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={isSaving}
                     className="flex-1 px-6 py-3 font-semibold text-white transition-colors bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading
+                    {isSaving
                       ? copy.saving
                       : editingId
                         ? copy.update
@@ -476,14 +486,19 @@ export default function CategoriesPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowDeleteModal(false)}
-                  className="flex-1 px-4 py-2.5 font-medium transition-colors border rounded-lg text-slate-700 bg-white border-slate-300 hover:bg-slate-100 dark:text-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800"
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2.5 font-medium transition-colors border rounded-lg text-slate-700 bg-white border-slate-300 hover:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed dark:text-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800"
                 >
                   {t("labels.cancel", "pos")}
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="flex-1 px-4 py-2.5 font-medium text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700"
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2.5 font-medium text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
+                  {isDeleting && (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  )}
                   {t("labels.delete", "pos")}
                 </button>
               </div>
@@ -516,6 +531,15 @@ const CATEGORIES_COPY = {
     deleteTitle: "Eliminar Categoría",
     deleteSubtitle: "Esta acción no se puede deshacer",
     deleteQuestion: "¿Estás seguro de que deseas eliminar la categoría",
+    toasts: {
+      nameRequired: "El nombre de la categoría es requerido",
+      duplicateCategoryName: "Ya existe una categoría con ese nombre",
+      created: "Categoría creada",
+      updated: "Categoría actualizada",
+      deleted: "Categoría eliminada",
+      saveError: "Error al guardar la categoría",
+      deleteError: "Error al eliminar la categoría",
+    },
   },
   en: {
     title: "Category Management",
@@ -537,6 +561,15 @@ const CATEGORIES_COPY = {
     deleteTitle: "Delete Category",
     deleteSubtitle: "This action cannot be undone",
     deleteQuestion: "Are you sure you want to delete category",
+    toasts: {
+      nameRequired: "Category name is required",
+      duplicateCategoryName: "A category with that name already exists",
+      created: "Category created",
+      updated: "Category updated",
+      deleted: "Category deleted",
+      saveError: "Error saving category",
+      deleteError: "Error deleting category",
+    },
   },
   pt: {
     title: "Gestão de Categorias",
@@ -558,5 +591,14 @@ const CATEGORIES_COPY = {
     deleteTitle: "Excluir Categoria",
     deleteSubtitle: "Esta ação não pode ser desfeita",
     deleteQuestion: "Tem certeza de que deseja excluir a categoria",
+    toasts: {
+      nameRequired: "O nome da categoria é obrigatório",
+      duplicateCategoryName: "Já existe uma categoria com esse nome",
+      created: "Categoria criada",
+      updated: "Categoria atualizada",
+      deleted: "Categoria excluída",
+      saveError: "Erro ao salvar a categoria",
+      deleteError: "Erro ao excluir a categoria",
+    },
   },
 };

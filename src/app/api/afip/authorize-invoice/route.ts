@@ -8,6 +8,8 @@ import {
 } from "@/lib/utils/helpers";
 import AFIPService from "@/lib/services/afipService";
 
+export const dynamic = "force-dynamic";
+
 /**
  * POST /api/afip/authorize-invoice
  * Authorize an invoice with AFIP (get CAE)

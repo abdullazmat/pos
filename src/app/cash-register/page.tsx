@@ -11,7 +11,9 @@ import Loading from "@/components/common/Loading";
 import { isTokenExpiredSoon } from "@/lib/utils/token";
 
 import WithdrawalModal from "@/components/cash-register/WithdrawalModal";
+import WithdrawalTicket from "@/components/cash-register/WithdrawalTicket";
 import CreditNoteModal from "@/components/cash-register/CreditNoteModal";
+import CreditNoteTicket from "@/components/cash-register/CreditNoteTicket";
 import CloseBoxModal from "@/components/cash-register/CloseBoxModal";
 import CloseTicketModal, {
   CloseTicketData,
@@ -20,6 +22,10 @@ import CloseTicketModal, {
 const CASH_COPY = {
   es: {
     loading: "Cargando Control de Caja...",
+    businessFallback: "Mi Negocio",
+    sessionFallback: "Sesión Actual",
+    receiptPrint: "Imprimir",
+    receiptClose: "Cerrar comprobante",
     toastAlreadyOpen: "Caja ya estaba abierta, sincronizando estado...",
     sessionExpired: "Sesión expirada. Por favor inicia sesión nuevamente.",
     openSuccess: "¡Caja abierta exitosamente!",
@@ -83,6 +89,10 @@ const CASH_COPY = {
   },
   en: {
     loading: "Loading Cash Register...",
+    businessFallback: "My Business",
+    sessionFallback: "Current Session",
+    receiptPrint: "Print",
+    receiptClose: "Close receipt",
     toastAlreadyOpen: "Register was already open, syncing state...",
     sessionExpired: "Session expired. Please sign in again.",
     openSuccess: "Cash register opened successfully!",
@@ -145,6 +155,10 @@ const CASH_COPY = {
   },
   pt: {
     loading: "Carregando Controle de Caixa...",
+    businessFallback: "Meu Negócio",
+    sessionFallback: "Sessão Atual",
+    receiptPrint: "Imprimir",
+    receiptClose: "Fechar comprovante",
     toastAlreadyOpen: "Caixa já estava aberta, sincronizando estado...",
     sessionExpired: "Sessão expirada. Faça login novamente.",
     openSuccess: "Caixa aberta com sucesso!",
@@ -232,8 +246,21 @@ const WITHDRAWAL_REASONS = {
 } as const;
 
 export default function CashRegisterPage() {
+  // Withdrawal ticket state
+  const [showWithdrawalTicket, setShowWithdrawalTicket] = useState(false);
+  const [withdrawalTicketData, setWithdrawalTicketData] = useState<{
+    amount: number;
+    reason: string;
+  } | null>(null);
+  const [showCreditNoteTicket, setShowCreditNoteTicket] = useState(false);
+  const [creditNoteTicketData, setCreditNoteTicketData] = useState<{
+    amount: number;
+    reason: string;
+    notes?: string;
+    createdAt?: string;
+  } | null>(null);
   const router = useRouter();
-  const { t, currentLanguage } = useGlobalLanguage();
+  const { currentLanguage } = useGlobalLanguage();
   const copy = (CASH_COPY[currentLanguage] ||
     CASH_COPY.en) as typeof CASH_COPY.en;
   const formatCurrency = (value: number) =>
@@ -245,115 +272,17 @@ export default function CashRegisterPage() {
   // Translate movement descriptions stored as "movementType:reason" format
   const translateMovementDescription = (raw: string): string => {
     if (!raw) return "";
-
-    // Check if description uses new format (movementType:reason)
+    // If description is in the format "type:reason", split and present both parts
     if (raw.includes(":")) {
-      const [movementKey, reasonKey] = raw.split(":");
-      const movementType = movementKey.trim();
-      const reason = reasonKey.trim();
-
-      // Map movement types to display labels
-      const movementTypeLabels: Record<string, Record<string, string>> = {
-        es: {
-          opening: "Apertura",
-          withdrawal: "Retiro",
-          creditNote: "Nota de crédito",
-        },
-        en: {
-          opening: "Opening",
-          withdrawal: "Withdrawal",
-          creditNote: "Credit note",
-        },
-        pt: {
-          opening: "Abertura",
-          withdrawal: "Saque",
-          creditNote: "Nota de crédito",
-        },
-      };
-
-      const movementTypeLabel =
-        movementTypeLabels[currentLanguage]?.[movementType] ||
-        movementTypeLabels.en[movementType] ||
-        movementType;
-
-      // Map reason values to display labels - handle both keys and translated strings
-      const reasonLabels: Record<string, Record<string, string>> = {
-        es: {
-          noReason: "Sin especificar",
-          "Pago a proveedores": "Pago a proveedores",
-          "Gastos operacionales": "Gastos operacionales",
-          "Depósito bancario": "Depósito bancario",
-          Otro: "Otro",
-          "Supplier payment": "Pago a proveedores",
-          "Operational expenses": "Gastos operacionales",
-          "Bank deposit": "Depósito bancario",
-          Other: "Otro",
-          "Pagamento a fornecedores": "Pago a proveedores",
-          "Despesas operacionais": "Gastos operacionales",
-          "Depósito bancário": "Depósito bancario",
-          Outro: "Outro",
-        },
-        en: {
-          noReason: "No reason specified",
-          "Pago a proveedores": "Supplier payment",
-          "Gastos operacionales": "Operational expenses",
-          "Depósito bancario": "Bank deposit",
-          "Supplier payment": "Supplier payment",
-          "Operational expenses": "Operational expenses",
-          "Bank deposit": "Bank deposit",
-          Other: "Other",
-          "Pagamento a fornecedores": "Supplier payment",
-          "Despesas operacionais": "Operational expenses",
-          "Depósito bancário": "Bank deposit",
-        },
-        pt: {
-          noReason: "Sem especificar",
-          "Pago a proveedores": "Pagamento a fornecedores",
-          "Gastos operacionales": "Despesas operacionais",
-          "Depósito bancario": "Depósito bancário",
-          Otro: "Outro",
-          "Supplier payment": "Pagamento a fornecedores",
-          "Operational expenses": "Despesas operacionais",
-          "Bank deposit": "Depósito bancário",
-          Other: "Outro",
-          "Pagamento a fornecedores": "Pagamento a fornecedores",
-          "Despesas operacionais": "Despesas operacionais",
-          "Depósito bancário": "Depósito bancário",
-        },
-      };
-
-      const reasonLabel =
-        reasonLabels[currentLanguage]?.[reason] ||
-        reasonLabels.en[reason] ||
-        reason;
-
-      return `${movementTypeLabel} - ${reasonLabel}`;
+      const [typePart, ...rest] = raw.split(":");
+      const reasonPart = rest.join(":").trim();
+      const typeLabel = typePart
+        ? typePart.charAt(0).toUpperCase() + typePart.slice(1)
+        : "";
+      if (typeLabel && reasonPart) return `${typeLabel} - ${reasonPart}`;
+      return reasonPart || typeLabel || raw;
     }
-
-    // Fallback for old format (prefix - reason)
-    const [maybePrefix, ...rest] = raw.split("-");
-    const prefix = rest.length ? maybePrefix.trim() : "";
-    const reasonCandidate = rest.length ? rest.join("-").trim() : raw.trim();
-
-    const findTranslatedReason = () => {
-      const languages = Object.keys(WITHDRAWAL_REASONS) as Array<
-        keyof typeof WITHDRAWAL_REASONS
-      >;
-
-      for (const lang of languages) {
-        const idx = WITHDRAWAL_REASONS[lang].findIndex(
-          (r) => r.toLowerCase() === reasonCandidate.toLowerCase(),
-        );
-        if (idx >= 0) {
-          return WITHDRAWAL_REASONS[currentLanguage][idx];
-        }
-      }
-      return reasonCandidate;
-    };
-
-    const translatedReason = findTranslatedReason();
-    if (prefix) return `${prefix} - ${translatedReason}`;
-    return translatedReason;
+    return raw;
   };
   const [isOpen, setIsOpen] = useState<boolean | null>(null);
   const [opening, setOpening] = useState("");
@@ -375,6 +304,13 @@ export default function CashRegisterPage() {
     withdrawalsTotal: 0,
     expected: 0,
   });
+  // Derived shorthand values for templates
+  const {
+    initialAmount,
+    salesTotal: sales,
+    withdrawalsTotal: withdrawals,
+    expected: expectedInCash,
+  } = sessionData;
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
   const [showCreditNoteModal, setShowCreditNoteModal] = useState(false);
   const [showCloseBoxModal, setShowCloseBoxModal] = useState(false);
@@ -384,6 +320,19 @@ export default function CashRegisterPage() {
   const [creditNotesTotal, setCreditNotesTotal] = useState<number>(0);
   const [loadingMovements, setLoadingMovements] = useState(false);
   const isPollingRef = useRef(false);
+
+  // Operator filter state and filteredMovements logic
+  const [operatorFilter, setOperatorFilter] = useState("");
+  const filteredMovements =
+    operatorFilter.trim().length === 0
+      ? movements
+      : movements.filter((m: any) => {
+          if (!m.operator) return false;
+          const name = (m.operator.visible_name || "").toLowerCase();
+          const role = (m.operator.role || "").toLowerCase();
+          const filter = operatorFilter.toLowerCase();
+          return name.includes(filter) || role.includes(filter);
+        });
 
   useEffect(() => {
     const userStr = localStorage.getItem("user");
@@ -745,6 +694,10 @@ export default function CashRegisterPage() {
       setToastType("success");
       setToastMsg(copy.withdrawSuccess(formatCurrency(amount)));
       setToastOpen(true);
+
+      // Show withdrawal ticket
+      setWithdrawalTicketData({ amount, reason });
+      setShowWithdrawalTicket(true);
     } catch (error) {
       console.error("Withdrawal error:", error);
       setToastType("error");
@@ -795,6 +748,14 @@ export default function CashRegisterPage() {
       setToastType("success");
       setToastMsg(copy.creditSuccess(formatCurrency(amount)));
       setToastOpen(true);
+
+      setCreditNoteTicketData({
+        amount,
+        reason,
+        notes,
+        createdAt: new Date().toLocaleString(),
+      });
+      setShowCreditNoteTicket(true);
     } catch (error) {
       console.error("Credit note error:", error);
       setToastType("error");
@@ -858,11 +819,11 @@ export default function CashRegisterPage() {
 
       const ticket: CloseTicketData = {
         businessName:
-          summary?.businessName || user?.businessName || "MI NEGOCIO",
+          summary?.businessName || user?.businessName || copy.businessFallback,
         cashierName:
           summary?.cashierName || user?.fullName || user?.username || "",
         sessionId:
-          summary?.sessionId || data?.cashRegister?._id || "SESION-ACTUAL",
+          summary?.sessionId || data?.cashRegister?._id || copy.sessionFallback,
         openedAt: summary?.openedAt || "",
         closedAt: summary?.closedAt || new Date().toLocaleString(),
         openingBalance:
@@ -907,155 +868,44 @@ export default function CashRegisterPage() {
       console.error("Close box error:", error);
       setToastType("error");
       setToastMsg(copy.closeError);
+
       setToastOpen(true);
     }
   };
 
-  if (loading || isOpen === null) {
-    return <Loading label={copy.loading} />;
-  }
-
-  // Real data from backend
-  const initialAmount = sessionData.initialAmount;
-  const sales = sessionData.salesTotal;
-  const withdrawals = sessionData.withdrawalsTotal;
-  const expectedInCash = sessionData.expected;
+  const isLoading = loading || isOpen === null;
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton={true} />
-
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {isOpen === false && (
-          <div className="flex flex-col items-center justify-center bg-slate-50 border border-slate-200 rounded-xl py-20 mb-8 dark:bg-slate-900/50 dark:border-slate-800">
-            <div className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center mb-6 shadow-lg">
-              <svg
-                className="w-10 h-10 text-slate-400"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
-              </svg>
-            </div>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-              {copy.noOpenTitle}
-            </p>
-            <p className="text-slate-600 dark:text-slate-400 mb-8 text-center max-w-md">
-              {copy.noOpenSubtitle}
-            </p>
-            <button
-              onClick={() => setShowOpenModal(true)}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg flex items-center gap-2 shadow-lg hover:shadow-xl transition"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              {copy.openButton}
-            </button>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loading label={copy.loading} />
           </div>
-        )}
-
-        {isOpen === true && (
+        ) : (
           <>
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              {/* Monto Inicial */}
-              <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6 dark:bg-slate-900 dark:border-slate-800">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {copy.stats.initial}
-                  </p>
-                  <svg
-                    className="w-8 h-8 text-blue-500 dark:text-blue-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <p className="text-3xl font-bold text-slate-900 dark:text-white">
-                  {formatCurrency(initialAmount)}
+            {isOpen === false && (
+              <div className="flex flex-col items-center justify-center py-16">
+                <svg
+                  className="w-10 h-10 text-slate-400"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
+                </svg>
+                <p className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">
+                  {copy.noOpenTitle}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">
-                  {movements.find((m: any) => m.type === "apertura")
-                    ?.createdAt || "-"}
+                <p className="max-w-md mb-8 text-center text-slate-600 dark:text-slate-400">
+                  {copy.noOpenSubtitle}
                 </p>
-              </div>
-
-              {/* Ventas */}
-              <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6 dark:bg-slate-900 dark:border-slate-800">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {copy.stats.sales}
-                  </p>
+                <button
+                  onClick={() => setShowOpenModal(true)}
+                  className="flex items-center gap-2 px-8 py-3 font-bold text-white transition bg-green-600 rounded-lg shadow-lg hover:bg-green-700 hover:shadow-xl"
+                >
                   <svg
-                    className="w-8 h-8 text-green-500 dark:text-green-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                    />
-                  </svg>
-                </div>
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                  {formatCurrency(sales)}
-                </p>
-              </div>
-
-              {/* Retiros */}
-              <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6 dark:bg-slate-900 dark:border-slate-800">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {copy.stats.withdrawals}
-                  </p>
-                  <svg
-                    className="w-8 h-8 text-red-500 dark:text-red-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
-                    />
-                  </svg>
-                </div>
-                <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                  {formatCurrency(withdrawals)}
-                </p>
-              </div>
-
-              {/* Esperado en Caja */}
-              <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6 dark:bg-slate-900 dark:border-slate-800">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {copy.stats.expected}
-                  </p>
-                  <svg
-                    className="w-8 h-8 text-purple-500 dark:text-purple-400"
+                    className="w-5 h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1067,177 +917,407 @@ export default function CashRegisterPage() {
                       d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                </div>
-                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                  {formatCurrency(expectedInCash)}
-                </p>
+                  {copy.openButton}
+                </button>
               </div>
-            </div>
+            )}
 
-            {/* Action Buttons */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <button
-                onClick={() => setShowWithdrawalModal(true)}
-                className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-                {copy.actions.withdrawal}
-              </button>
-
-              <button
-                onClick={() => setShowCreditNoteModal(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                {copy.actions.creditNote}
-              </button>
-
-              <button
-                onClick={() => setShowCloseBoxModal(true)}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-                {copy.actions.close}
-              </button>
-            </div>
-            {/* Movements Table */}
-            <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6 mb-8 dark:bg-slate-900 dark:border-slate-800">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                  {copy.movements.title}
-                </h2>
-                {loadingMovements && (
-                  <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                    <span className="w-4 h-4 border-2 border-slate-300 border-b-transparent rounded-full animate-spin inline-block dark:border-slate-600" />
-                    {copy.movements.updating}
+            {isOpen === true && (
+              <>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-4">
+                  {/* Monto Inicial */}
+                  <div className="p-6 bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        {copy.stats.initial}
+                      </p>
+                      <svg
+                        className="w-8 h-8 text-blue-500 dark:text-blue-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-3xl font-bold text-slate-900 dark:text-white">
+                      {formatCurrency(initialAmount)}
+                    </p>
+                    <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
+                      {movements.find((m: any) => m.type === "apertura")
+                        ?.createdAt || "-"}
+                    </p>
                   </div>
-                )}
-              </div>
+
+                  {/* Ventas */}
+                  <div className="p-6 bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        {copy.stats.sales}
+                      </p>
+                      <svg
+                        className="w-8 h-8 text-green-500 dark:text-green-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                      {formatCurrency(sales)}
+                    </p>
+                  </div>
+
+                  {/* Retiros */}
+                  <div className="p-6 bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        {copy.stats.withdrawals}
+                      </p>
+                      <svg
+                        className="w-8 h-8 text-red-500 dark:text-red-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-3xl font-bold text-red-600 dark:text-red-400">
+                      {formatCurrency(withdrawals)}
+                    </p>
+                  </div>
+
+                  {/* Esperado en Caja */}
+                  <div className="p-6 bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        {copy.stats.expected}
+                      </p>
+                      <svg
+                        className="w-8 h-8 text-purple-500 dark:text-purple-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                      {formatCurrency(expectedInCash)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-3">
+                  <button
+                    onClick={() => setShowWithdrawalModal(true)}
+                    className="flex items-center justify-center gap-2 px-6 py-3 font-bold text-white transition bg-orange-600 rounded-lg shadow-lg hover:bg-orange-700 hover:shadow-xl"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                    {copy.actions.withdrawal}
+                  </button>
+
+                  <button
+                    onClick={() => setShowCreditNoteModal(true)}
+                    className="flex items-center justify-center gap-2 px-6 py-3 font-bold text-white transition bg-purple-600 rounded-lg shadow-lg hover:bg-purple-700 hover:shadow-xl"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    {copy.actions.creditNote}
+                  </button>
+
+                  <button
+                    onClick={() => setShowCloseBoxModal(true)}
+                    className="flex items-center justify-center gap-2 px-6 py-3 font-bold text-white transition bg-red-600 rounded-lg shadow-lg hover:bg-red-700 hover:shadow-xl"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    {copy.actions.close}
+                  </button>
+                </div>
+                {/* Movements Table with Operator Filter */}
+                <div className="p-6 mb-8 bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+                  <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                      {copy.movements.title}
+                    </h2>
+                    <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                      <input
+                        type="text"
+                        placeholder="Filtrar por operador o rol..."
+                        className="px-3 py-2 text-sm border rounded border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                        value={operatorFilter}
+                        onChange={(e) => setOperatorFilter(e.target.value)}
+                      />
+                      {loadingMovements && (
+                        <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                          <span className="inline-block w-4 h-4 border-2 rounded-full border-slate-300 border-b-transparent animate-spin dark:border-slate-600" />
+                          {copy.movements.updating}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                      <thead className="bg-slate-100 dark:bg-slate-800">
+                        <tr>
+                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                            {copy.movements.datetime}
+                          </th>
+                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                            {copy.movements.type}
+                          </th>
+                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                            {copy.movements.description}
+                          </th>
+                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                            {copy.movements.amount}
+                          </th>
+                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                            {copy.movements.operator}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-slate-200 dark:bg-slate-900 dark:divide-slate-700">
+                        {loadingMovements && filteredMovements.length === 0 ? (
+                          [...Array(3)].map((_, i) => (
+                            <tr key={`skeleton-${i}`}>
+                              <td className="px-6 py-4">
+                                <div className="w-32 h-4 rounded bg-slate-200 animate-pulse dark:bg-slate-800" />
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="w-24 h-5 rounded bg-slate-200 animate-pulse dark:bg-slate-800" />
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="w-64 h-4 rounded bg-slate-200 animate-pulse dark:bg-slate-800" />
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="w-20 h-4 rounded bg-slate-200 animate-pulse dark:bg-slate-800" />
+                              </td>
+                            </tr>
+                          ))
+                        ) : filteredMovements.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={5}
+                              className="px-6 py-8 text-sm text-center text-slate-600 dark:text-slate-500"
+                            >
+                              {copy.movements.empty}
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredMovements.map(
+                            (movement: any, idx: number) => (
+                              <tr
+                                key={movement._id || idx}
+                                className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                              >
+                                <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-700 dark:text-slate-300">
+                                  {movement.createdAt}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span
+                                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                      movement.type === "apertura"
+                                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                                        : movement.type === "venta"
+                                          ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                                          : movement.type === "retiro"
+                                            ? "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"
+                                            : movement.type === "cierre"
+                                              ? "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
+                                              : "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"
+                                    }`}
+                                  >
+                                    {copy.movements.types[
+                                      movement.type as keyof typeof copy.movements.types
+                                    ] || movement.type}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
+                                  {translateMovementDescription(
+                                    movement.description,
+                                  )}
+                                </td>
+                                <td className="px-6 py-4 text-sm font-semibold text-green-600 whitespace-nowrap dark:text-green-400">
+                                  {formatCurrency(movement.amount)}
+                                </td>
+                                <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-700 dark:text-slate-300">
+                                  {movement.operator
+                                    ? `${movement.operator.visible_name || "-"} (${movement.operator.role || "-"})`
+                                    : copy.movements.noOperator}
+                                </td>
+                              </tr>
+                            ),
+                          )
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            )}
+            {/* Historial de Sesiones */}
+            <div className="p-6 mt-8 bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+              <h2 className="mb-6 text-lg font-bold text-slate-900 dark:text-white">
+                {copy.sessions.title}
+              </h2>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                  <thead className="bg-slate-100 dark:bg-slate-800">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                        {copy.movements.datetime}
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-700">
+                      <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                        {copy.sessions.openDate}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                        {copy.movements.type}
+                      <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                        {copy.sessions.initial}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                        {copy.movements.description}
+                      <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                        {copy.sessions.sales}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                        {copy.movements.amount}
+                      <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                        {copy.sessions.withdrawals}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                        {copy.movements.operator}
+                      <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                        {copy.sessions.expected}
+                      </th>
+                      <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                        {copy.sessions.real}
+                      </th>
+                      <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                        {copy.sessions.diff}
+                      </th>
+                      <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-700 dark:text-slate-300">
+                        {copy.sessions.status}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-slate-200 dark:bg-slate-900 dark:divide-slate-700">
-                    {loadingMovements && movements.length === 0 ? (
-                      [...Array(3)].map((_, i) => (
-                        <tr key={`skeleton-${i}`}>
-                          <td className="px-6 py-4">
-                            <div className="h-4 w-32 bg-slate-200 rounded animate-pulse dark:bg-slate-800" />
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                    {sessions && sessions.length > 0 ? (
+                      sessions.map((s, idx) => (
+                        <tr
+                          key={idx}
+                          className="transition hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                        >
+                          <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                            {s.openedAt}
+                          </td>
+                          <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                            {formatCurrency(s.initial ?? 0)}
+                          </td>
+                          <td className="px-6 py-4 font-semibold text-green-600 dark:text-green-400">
+                            {formatCurrency(s.sales ?? 0)}
+                          </td>
+                          <td className="px-6 py-4 font-semibold text-red-600 dark:text-red-400">
+                            {formatCurrency(s.withdrawals ?? 0)}
+                          </td>
+                          <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                            {formatCurrency(s.expected ?? 0)}
+                          </td>
+                          <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                            {s.real == null
+                              ? "-"
+                              : formatCurrency(Number(s.real))}
+                          </td>
+                          <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                            {s.diff == null
+                              ? "-"
+                              : formatCurrency(Number(s.diff))}
                           </td>
                           <td className="px-6 py-4">
-                            <div className="h-5 w-24 bg-slate-200 rounded animate-pulse dark:bg-slate-800" />
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="h-4 w-64 bg-slate-200 rounded animate-pulse dark:bg-slate-800" />
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="h-4 w-20 bg-slate-200 rounded animate-pulse dark:bg-slate-800" />
+                            {(() => {
+                              const statusRaw = (s.status || "").toLowerCase();
+                              const isOpenStatus = [
+                                "abierta",
+                                "open",
+                                "aberta",
+                              ].includes(statusRaw);
+                              const statusKey = isOpenStatus
+                                ? "open"
+                                : "closed";
+                              return (
+                                <span
+                                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                                    isOpenStatus
+                                      ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+                                      : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                                  }`}
+                                >
+                                  {copy.sessions.statuses[statusKey] ||
+                                    s.status}
+                                </span>
+                              );
+                            })()}
                           </td>
                         </tr>
                       ))
-                    ) : movements.length === 0 ? (
+                    ) : (
                       <tr>
                         <td
-                          colSpan={4}
-                          className="px-6 py-8 text-center text-sm text-slate-600 dark:text-slate-500"
+                          colSpan={8}
+                          className="px-6 py-8 text-sm text-center text-slate-600 dark:text-slate-500"
                         >
-                          {copy.movements.empty}
+                          {copy.sessions.empty}
                         </td>
                       </tr>
-                    ) : (
-                      movements.map((movement: any, idx: number) => (
-                        <tr
-                          key={movement._id || idx}
-                          className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">
-                            {movement.createdAt}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span
-                              className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                movement.type === "apertura"
-                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-                                  : movement.type === "venta"
-                                    ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
-                                    : movement.type === "retiro"
-                                      ? "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"
-                                      : movement.type === "cierre"
-                                        ? "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
-                                        : "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"
-                              }`}
-                            >
-                              {copy.movements.types[
-                                movement.type as keyof typeof copy.movements.types
-                              ] || movement.type}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
-                            {translateMovementDescription(movement.description)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 dark:text-green-400">
-                            {formatCurrency(movement.amount)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">
-                            {movement.operator
-                              ? `${movement.operator.visible_name || "-"} (${movement.operator.role || "-"})`
-                              : copy.movements.noOperator}
-                          </td>
-                        </tr>
-                      ))
                     )}
                   </tbody>
                 </table>
@@ -1245,108 +1325,6 @@ export default function CashRegisterPage() {
             </div>
           </>
         )}
-
-        {/* Historial de Sesiones */}
-        <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6 mt-8 dark:bg-slate-900 dark:border-slate-800">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6">
-            {copy.sessions.title}
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700">
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                    {copy.sessions.openDate}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                    {copy.sessions.initial}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                    {copy.sessions.sales}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                    {copy.sessions.withdrawals}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                    {copy.sessions.expected}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                    {copy.sessions.real}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                    {copy.sessions.diff}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider dark:text-slate-300">
-                    {copy.sessions.status}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {sessions && sessions.length > 0 ? (
-                  sessions.map((s, idx) => (
-                    <tr
-                      key={idx}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition"
-                    >
-                      <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                        {s.openedAt}
-                      </td>
-                      <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                        {formatCurrency(s.initial ?? 0)}
-                      </td>
-                      <td className="px-6 py-4 font-semibold text-green-600 dark:text-green-400">
-                        {formatCurrency(s.sales ?? 0)}
-                      </td>
-                      <td className="px-6 py-4 font-semibold text-red-600 dark:text-red-400">
-                        {formatCurrency(s.withdrawals ?? 0)}
-                      </td>
-                      <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                        {formatCurrency(s.expected ?? 0)}
-                      </td>
-                      <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                        {s.real == null ? "-" : formatCurrency(Number(s.real))}
-                      </td>
-                      <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                        {s.diff == null ? "-" : formatCurrency(Number(s.diff))}
-                      </td>
-                      <td className="px-6 py-4">
-                        {(() => {
-                          const statusRaw = (s.status || "").toLowerCase();
-                          const isOpenStatus = [
-                            "abierta",
-                            "open",
-                            "aberta",
-                          ].includes(statusRaw);
-                          const statusKey = isOpenStatus ? "open" : "closed";
-                          return (
-                            <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                                isOpenStatus
-                                  ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
-                                  : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                              }`}
-                            >
-                              {copy.sessions.statuses[statusKey] || s.status}
-                            </span>
-                          );
-                        })()}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={8}
-                      className="px-6 py-8 text-center text-sm text-slate-600 dark:text-slate-500"
-                    >
-                      {copy.sessions.empty}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </main>
       <OpenRegisterModal
         open={showOpenModal}
@@ -1380,6 +1358,72 @@ export default function CashRegisterPage() {
         onConfirm={handleWithdrawal}
         currentBalance={sessionData.expected}
       />
+
+      {/* Withdrawal Ticket Print Modal */}
+      {showWithdrawalTicket && withdrawalTicketData && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setShowWithdrawalTicket(false)}
+        >
+          <div
+            className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <WithdrawalTicket
+              amount={withdrawalTicketData.amount}
+              reason={withdrawalTicketData.reason}
+            />
+            <div className="flex items-center justify-center gap-3 p-4 border-t border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => window.print()}
+                className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition"
+              >
+                {copy.receiptPrint}
+              </button>
+              <button
+                onClick={() => setShowWithdrawalTicket(false)}
+                className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg transition"
+              >
+                {copy.receiptClose}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Credit Note Ticket Print Modal */}
+      {showCreditNoteTicket && creditNoteTicketData && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setShowCreditNoteTicket(false)}
+        >
+          <div
+            className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CreditNoteTicket
+              amount={creditNoteTicketData.amount}
+              reason={creditNoteTicketData.reason}
+              notes={creditNoteTicketData.notes}
+              createdAt={creditNoteTicketData.createdAt}
+            />
+            <div className="flex items-center justify-center gap-3 p-4 border-t border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => window.print()}
+                className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition"
+              >
+                {copy.receiptPrint}
+              </button>
+              <button
+                onClick={() => setShowCreditNoteTicket(false)}
+                className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg transition"
+              >
+                {copy.receiptClose}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <CreditNoteModal
         isOpen={showCreditNoteModal}

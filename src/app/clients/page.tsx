@@ -181,7 +181,12 @@ export default function ClientsPage() {
       router.push("/auth/login");
       return;
     }
-    setUser(JSON.parse(userStr));
+    const parsedUser = JSON.parse(userStr);
+    setUser(parsedUser);
+    if (parsedUser?.role !== "admin") {
+      router.push("/dashboard");
+      return;
+    }
     fetchClients();
     loadSubscription();
   }, [router, mounted]);
@@ -313,13 +318,13 @@ export default function ClientsPage() {
     return (
       <div className="min-h-screen bg-slate-950">
         <Header user={user} showBackButton={true} />
-        <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-slate-800 rounded w-1/4"></div>
-            <div className="h-12 bg-slate-800 rounded"></div>
+        <main className="px-4 py-8 mx-auto max-w-7xl">
+          <div className="space-y-4 animate-pulse">
+            <div className="w-1/4 h-8 rounded bg-slate-800"></div>
+            <div className="h-12 rounded bg-slate-800"></div>
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-12 bg-slate-800 rounded"></div>
+                <div key={i} className="h-12 rounded bg-slate-800"></div>
               ))}
             </div>
           </div>
@@ -344,32 +349,32 @@ export default function ClientsPage() {
       <div className="min-h-screen bg-white dark:bg-slate-950">
         <Header user={user} showBackButton />
 
-        <main className="max-w-7xl mx-auto px-4 py-8">
+        <main className="px-4 py-8 mx-auto max-w-7xl">
           <div className="flex items-center justify-center min-h-[70vh]">
-            <div className="max-w-2xl w-full border-2 border-dashed border-amber-500 dark:border-amber-600 rounded-2xl p-12 text-center bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-900/50 dark:to-slate-800/30">
+            <div className="w-full max-w-2xl p-12 text-center border-2 border-dashed border-amber-500 dark:border-amber-600 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-900/50 dark:to-slate-800/30">
               <div className="relative inline-block mb-6">
-                <UserPlus className="w-20 h-20 text-amber-600 dark:text-amber-400 mx-auto" />
-                <Sparkles className="w-8 h-8 text-amber-600 dark:text-amber-400 absolute -top-1 -right-1" />
+                <UserPlus className="w-20 h-20 mx-auto text-amber-600 dark:text-amber-400" />
+                <Sparkles className="absolute w-8 h-8 text-amber-600 dark:text-amber-400 -top-1 -right-1" />
               </div>
 
-              <h2 className="text-3xl font-bold text-amber-700 dark:text-amber-400 mb-3">
+              <h2 className="mb-3 text-3xl font-bold text-amber-700 dark:text-amber-400">
                 {copy.premiumTitle}
               </h2>
-              <p className="text-amber-800 dark:text-amber-200 mb-8 text-lg">
+              <p className="mb-8 text-lg text-amber-800 dark:text-amber-200">
                 {copy.premiumDescription}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col justify-center gap-4 sm:flex-row">
                 <button
                   onClick={() => router.push("/business-config")}
-                  className="px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+                  className="flex items-center justify-center gap-2 px-8 py-3 font-semibold text-white transition-colors bg-amber-600 hover:bg-amber-700 rounded-xl"
                 >
                   <Sparkles className="w-5 h-5" />
                   {copy.upgradeButtons.enterprise}
                 </button>
                 <button
                   onClick={() => router.push("/upgrade")}
-                  className="px-8 py-3 bg-amber-700 hover:bg-amber-800 text-white font-semibold rounded-xl transition-colors"
+                  className="px-8 py-3 font-semibold text-white transition-colors bg-amber-700 hover:bg-amber-800 rounded-xl"
                 >
                   {copy.upgradeButtons.upgrade}
                 </button>
@@ -393,9 +398,9 @@ export default function ClientsPage() {
       <div className="min-h-screen bg-white dark:bg-slate-950">
         <Header user={user} showBackButton />
 
-        <main className="max-w-7xl mx-auto px-4 py-8">
+        <main className="px-4 py-8 mx-auto max-w-7xl">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            <h1 className="mb-2 text-3xl font-bold text-slate-900 dark:text-white">
               {copy.title}
             </h1>
             <p className="text-slate-600 dark:text-slate-400">
@@ -404,15 +409,15 @@ export default function ClientsPage() {
           </div>
 
           {/* Actions Bar */}
-          <div className="bg-white border border-slate-200 rounded-lg p-4 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between dark:bg-slate-900 dark:border-slate-800">
+          <div className="flex flex-col items-center justify-between gap-4 p-4 mb-6 bg-white border rounded-lg border-slate-200 sm:flex-row dark:bg-slate-900 dark:border-slate-800">
             <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400 w-5 h-5" />
+              <Search className="absolute w-5 h-5 transform -translate-y-1/2 left-3 top-1/2 text-slate-500 dark:text-slate-400" />
               <input
                 type="text"
                 placeholder={copy.searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-300 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-400"
+                className="w-full py-2 pl-10 pr-4 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-400"
               />
             </div>
             <button
@@ -443,14 +448,14 @@ export default function ClientsPage() {
 
           {/* Form */}
           {showForm && (
-            <div className="bg-white border border-slate-200 rounded-lg p-6 mb-6 dark:bg-slate-900 dark:border-slate-800">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
+            <div className="p-6 mb-6 bg-white border rounded-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+              <h2 className="mb-4 text-xl font-bold text-slate-900 dark:text-white">
                 {editingId ? copy.formTitleEdit : copy.formTitleNew}
               </h2>
               <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 gap-4 mb-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {copy.labels.name}
                     </label>
                     <input
@@ -459,12 +464,12 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-slate-300 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {copy.labels.document}
                     </label>
                     <input
@@ -473,11 +478,11 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, document: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-slate-300 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {copy.labels.phone}
                     </label>
                     <input
@@ -486,11 +491,11 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-slate-300 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {copy.labels.email}
                     </label>
                     <input
@@ -499,11 +504,11 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-slate-300 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                       {copy.labels.address}
                     </label>
                     <input
@@ -512,14 +517,14 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, address: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-slate-300 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     />
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <button
                     type="submit"
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700"
+                    className="px-6 py-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                   >
                     {editingId ? copy.actions.update : copy.actions.create}
                   </button>
@@ -529,7 +534,7 @@ export default function ClientsPage() {
                       setShowForm(false);
                       setEditingId(null);
                     }}
-                    className="bg-white border border-slate-300 text-slate-700 px-6 py-2 rounded-lg font-medium hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
+                    className="px-6 py-2 font-medium bg-white border rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
                   >
                     {copy.actions.cancel}
                   </button>
@@ -540,31 +545,31 @@ export default function ClientsPage() {
 
           {/* Clients Table */}
           {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="py-12 text-center">
+              <div className="inline-block w-8 h-8 border-b-2 border-blue-600 rounded-full animate-spin"></div>
             </div>
           ) : filteredClients.length === 0 ? (
-            <div className="bg-white border border-slate-200 rounded-lg p-12 text-center dark:bg-slate-900 dark:border-slate-800">
-              <Users className="w-16 h-16 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
-              <p className="text-slate-500 dark:text-slate-400 text-lg">
+            <div className="p-12 text-center bg-white border rounded-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+              <Users className="w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-700" />
+              <p className="text-lg text-slate-500 dark:text-slate-400">
                 {searchTerm ? copy.empty.search : copy.empty.none}
               </p>
             </div>
           ) : (
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+            <div className="overflow-hidden bg-white border rounded-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
               <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
                 <thead className="bg-slate-100 dark:bg-slate-800">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-600 dark:text-slate-300">
                       {copy.table.name}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-600 dark:text-slate-300">
                       {copy.table.document}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-600 dark:text-slate-300">
                       {copy.table.contact}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-600 dark:text-slate-300">
                       {copy.table.actions}
                     </th>
                   </tr>
@@ -580,25 +585,25 @@ export default function ClientsPage() {
                           {client.name}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
+                      <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-600 dark:text-slate-400">
                         {client.document || "-"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
+                      <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-600 dark:text-slate-400">
                         <div>{client.phone || "-"}</div>
                         <div className="text-xs text-slate-500 dark:text-slate-400">
                           {client.email || ""}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm flex gap-2">
+                      <td className="flex gap-2 px-6 py-4 text-sm whitespace-nowrap">
                         <button
                           onClick={() => handleEdit(client)}
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
+                          className="p-2 text-blue-600 rounded dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(client._id)}
-                          className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
+                          className="p-2 text-red-600 rounded dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

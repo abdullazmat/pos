@@ -9,6 +9,7 @@ import CashMovement from "@/lib/models/CashMovement";
 import Payment from "@/lib/models/Payment";
 import MercadoPagoService from "@/lib/services/payment/MercadoPagoService";
 import { verifyToken } from "@/lib/utils/jwt";
+import User from "@/lib/models/User";
 
 interface SaleItemRequest {
   productId: string;
@@ -264,6 +265,13 @@ export async function POST(req: NextRequest) {
 
     if (openRegister) {
       try {
+        const operatorUser = await User.findById(decoded.userId).select(
+          "fullName role",
+        );
+        const operatorName =
+          operatorUser?.fullName || decoded.email || "Usuario";
+        const operatorRole = operatorUser?.role || decoded.role || "cashier";
+
         // Update sale with resolved cash register ID if it wasn't provided
         if (!cashRegisterId && resolvedCashRegisterId) {
           sale.cashRegisterId = openRegister._id;
@@ -283,6 +291,12 @@ export async function POST(req: NextRequest) {
           description: "Venta POS",
           amount: totalWithTax,
           createdBy: decoded.userId,
+          operator: {
+            user_id: decoded.userId,
+            visible_name: operatorName,
+            role: operatorRole,
+            session_id: openRegister._id.toString(),
+          },
         });
       } catch (movementError) {
         console.error("Cash movement error:", movementError);

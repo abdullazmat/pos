@@ -5,6 +5,8 @@ import Subscription from "@/lib/models/Subscription";
 import Product from "@/lib/models/Product";
 import Client from "@/lib/models/Client";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/subscription/limits
  * Get current usage and limits for the business

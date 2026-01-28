@@ -76,6 +76,7 @@ const SUPPLIER_COPY = {
     toasts: {
       limitReached: (max: string | number) =>
         `Límite de proveedores alcanzado (${max})`,
+      duplicateSupplierName: "Ya existe un proveedor con ese nombre",
       createSuccess: "Proveedor creado",
       updateSuccess: "Proveedor actualizado",
       saveError: "Error al guardar proveedor",
@@ -150,6 +151,7 @@ const SUPPLIER_COPY = {
     statusActive: "Active",
     toasts: {
       limitReached: (max: string | number) => `Supplier limit reached (${max})`,
+      duplicateSupplierName: "A supplier with that name already exists",
       createSuccess: "Supplier created",
       updateSuccess: "Supplier updated",
       saveError: "Error saving supplier",
@@ -225,6 +227,7 @@ const SUPPLIER_COPY = {
     toasts: {
       limitReached: (max: string | number) =>
         `Limite de fornecedores atingido (${max})`,
+      duplicateSupplierName: "Já existe um fornecedor com esse nome",
       createSuccess: "Fornecedor criado",
       updateSuccess: "Fornecedor atualizado",
       saveError: "Erro ao salvar fornecedor",
@@ -392,7 +395,24 @@ export default function SuppliersPage() {
         });
       } else {
         const errorData = await response.json();
-        toast.error(errorData.error || copy.toasts.saveError);
+        if (
+          errorData?.error &&
+          typeof errorData.error === "object" &&
+          errorData.error.key
+        ) {
+          const errorKey =
+            typeof errorData.error.key === "string"
+              ? errorData.error.key
+              : null;
+          const toastValue = errorKey
+            ? copy.toasts[errorKey as keyof typeof copy.toasts]
+            : null;
+          const message =
+            typeof toastValue === "string" ? toastValue : copy.toasts.saveError;
+          toast.error(message);
+        } else {
+          toast.error(errorData?.error || copy.toasts.saveError);
+        }
       }
     } catch (error) {
       console.error("Error saving supplier:", error);
@@ -987,7 +1007,7 @@ export default function SuppliersPage() {
       {/* Bulk Upload Modal */}
       {showBulkUpload && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-2xl p-8 border shadow-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-2xl">
+          <div className="w-full max-w-2xl p-8 bg-white border shadow-2xl dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-2xl">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -1003,7 +1023,7 @@ export default function SuppliersPage() {
                   setShowBulkUpload(false);
                   setUploadFile(null);
                 }}
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                className="transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -1075,7 +1095,7 @@ export default function SuppliersPage() {
             {/* Download Template Button */}
             <button
               onClick={downloadTemplate}
-              className="flex items-center justify-center w-full gap-2 px-4 py-3 mb-6 font-medium text-white bg-blue-600 hover:bg-blue-700 border border-blue-600 dark:bg-blue-600 dark:border-blue-600 dark:hover:bg-blue-700 transition-colors rounded-lg"
+              className="flex items-center justify-center w-full gap-2 px-4 py-3 mb-6 font-medium text-white transition-colors bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 dark:bg-blue-600 dark:border-blue-600 dark:hover:bg-blue-700"
             >
               <Download className="w-5 h-5" />
               {copy.bulk.downloadTemplate}

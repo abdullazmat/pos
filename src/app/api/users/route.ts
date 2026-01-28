@@ -1,12 +1,14 @@
 import { NextRequest } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import User from "@/lib/models/User";
+import Subscription from "@/lib/models/Subscription";
 import { authMiddleware } from "@/lib/middleware/auth";
 import {
   generateErrorResponse,
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 import bcrypt from "bcryptjs";
+import { PLAN_FEATURES } from "@/lib/utils/planFeatures";
 
 // GET - Fetch all users for the business
 export async function GET(req: NextRequest) {
@@ -261,10 +263,47 @@ export async function PATCH(req: NextRequest) {
       return generateErrorResponse("User not found", 404);
     }
 
+    const nextEmail = email ? email.toLowerCase() : null;
+    const nextUsername = username ? username.toLowerCase() : null;
+
+    if (nextEmail || nextUsername) {
+      const existingUser = await User.findOne({
+        _id: { $ne: userId },
+        $or: [
+          ...(nextEmail ? [{ email: nextEmail }] : []),
+          ...(nextUsername ? [{ username: nextUsername }] : []),
+        ],
+      });
+
+      if (existingUser) {
+        const emailInUse = nextEmail && existingUser.email === nextEmail;
+        const usernameInUse =
+          nextUsername && existingUser.username === nextUsername;
+
+        if (emailInUse && usernameInUse) {
+          return generateErrorResponse(
+            "El email y nombre de usuario ya están en uso",
+            400,
+          );
+        }
+
+        if (emailInUse) {
+          return generateErrorResponse("El email ya está en uso", 400);
+        }
+
+        if (usernameInUse) {
+          return generateErrorResponse(
+            "El nombre de usuario ya está en uso",
+            400,
+          );
+        }
+      }
+    }
+
     // Update fields
-    if (email) userToUpdate.email = email.toLowerCase();
+    if (email) userToUpdate.email = nextEmail!;
     if (fullName) userToUpdate.fullName = fullName;
-    if (username) userToUpdate.username = username.toLowerCase();
+    if (username) userToUpdate.username = nextUsername!;
     if (phone !== undefined) userToUpdate.phone = phone;
     if (userRole) userToUpdate.role = userRole;
     if (password && password.length >= 6) {

@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     console.error("Get suppliers error:", error);
     return NextResponse.json(
       { error: "Failed to fetch suppliers" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -49,14 +49,26 @@ export async function POST(request: Request) {
     if (!name) {
       return NextResponse.json(
         { error: "Supplier name is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     await dbConnect();
 
+    const existingSupplier = await Supplier.findOne({
+      business: decoded.businessId,
+      name: { $regex: new RegExp(`^${name.trim()}$`, "i") },
+    });
+
+    if (existingSupplier) {
+      return NextResponse.json(
+        { error: { key: "duplicateSupplierName" } },
+        { status: 409 },
+      );
+    }
+
     const supplier = await Supplier.create({
-      name,
+      name: name.trim(),
       document,
       phone,
       email,
@@ -69,7 +81,7 @@ export async function POST(request: Request) {
     console.error("Create supplier error:", error);
     return NextResponse.json(
       { error: "Failed to create supplier" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -92,22 +104,35 @@ export async function PUT(request: Request) {
     if (!id || !name) {
       return NextResponse.json(
         { error: "Supplier ID and name are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     await dbConnect();
 
+    const existingSupplier = await Supplier.findOne({
+      business: decoded.businessId,
+      name: { $regex: new RegExp(`^${name.trim()}$`, "i") },
+      _id: { $ne: id },
+    });
+
+    if (existingSupplier) {
+      return NextResponse.json(
+        { error: { key: "duplicateSupplierName" } },
+        { status: 409 },
+      );
+    }
+
     const supplier = await Supplier.findOneAndUpdate(
       { _id: id, business: decoded.businessId },
-      { name, document, phone, email, address },
-      { new: true }
+      { name: name.trim(), document, phone, email, address },
+      { new: true },
     );
 
     if (!supplier) {
       return NextResponse.json(
         { error: "Supplier not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -116,7 +141,7 @@ export async function PUT(request: Request) {
     console.error("Update supplier error:", error);
     return NextResponse.json(
       { error: "Failed to update supplier" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -139,7 +164,7 @@ export async function DELETE(request: Request) {
     if (!id) {
       return NextResponse.json(
         { error: "Supplier ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -153,7 +178,7 @@ export async function DELETE(request: Request) {
     if (!supplier) {
       return NextResponse.json(
         { error: "Supplier not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -162,7 +187,7 @@ export async function DELETE(request: Request) {
     console.error("Delete supplier error:", error);
     return NextResponse.json(
       { error: "Failed to delete supplier" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import { toast } from "react-toastify";
@@ -375,10 +376,13 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
 };
 
 export default function FiscalReportsPage() {
+  const router = useRouter();
   const { currentLanguage } = useGlobalLanguage();
   const t =
     TRANSLATIONS[currentLanguage as keyof typeof TRANSLATIONS] ||
     TRANSLATIONS.es;
+
+  const [user, setUser] = useState<any>(null);
 
   const [activeTab, setActiveTab] = useState("resumen");
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -402,6 +406,24 @@ export default function FiscalReportsPage() {
     fiscalRegime?: string;
     fiscalId?: string;
   }>({});
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (!userStr) {
+      router.push("/auth/login");
+      return;
+    }
+
+    try {
+      const parsedUser = JSON.parse(userStr);
+      setUser(parsedUser);
+      if (parsedUser?.role !== "admin") {
+        router.push("/dashboard");
+      }
+    } catch {
+      router.push("/auth/login");
+    }
+  }, [router]);
 
   // Fetch report data
   const generateReport = async (
@@ -680,7 +702,7 @@ export default function FiscalReportsPage() {
 
   return (
     <>
-      <Header />
+      <Header user={user} />
       <div className="min-h-screen p-6 text-gray-900 bg-gray-50 dark:bg-gray-950 dark:text-white">
         <div className="mx-auto max-w-7xl">
           {/* Header */}
@@ -820,7 +842,7 @@ export default function FiscalReportsPage() {
                   <thead>
                     <tr className="border-b border-gray-300 dark:border-gray-700">
                       <th className="py-3 text-left text-gray-600 dark:text-gray-400">
-                        Alícuota
+                        {t.libroIVA.columns.aliquot}
                       </th>
                       <th className="py-3 text-right text-gray-600 dark:text-gray-400">
                         {t.libroIVA.columns.baseAmount}

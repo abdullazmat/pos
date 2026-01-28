@@ -13,6 +13,8 @@ import {
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/fiscal-config/certificates/status
  * Check certificate status and expiry

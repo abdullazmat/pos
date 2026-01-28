@@ -4,6 +4,8 @@ import {
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 
+export const dynamic = "force-dynamic";
+
 const PLANS_DATA = {
   es: [
     {

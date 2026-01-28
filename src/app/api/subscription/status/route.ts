@@ -3,6 +3,8 @@ import dbConnect from "@/lib/db/connect";
 import Subscription from "@/lib/models/Subscription";
 import { verifyToken } from "@/lib/utils/jwt";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   try {
     const token = request.headers.get("authorization")?.split(" ")[1];
@@ -52,7 +54,7 @@ export async function GET(request: Request) {
     console.error("Get subscription status error:", error);
     return NextResponse.json(
       { error: "Failed to fetch subscription status" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

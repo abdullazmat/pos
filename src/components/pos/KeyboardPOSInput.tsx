@@ -26,13 +26,75 @@ export default function KeyboardPOSInput({
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const quantityInputRef = useRef<HTMLInputElement>(null);
   const productInputRef = useRef<HTMLInputElement>(null);
+  const pendingMultiplierQtyRef = useRef<number | null>(null);
 
   // Focus on quantity field on mount and after adding product
   useEffect(() => {
     quantityInputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+
+      const target = event.target as HTMLElement | null;
+      const isEditable =
+        !!target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
+      const isInsideKeyboardPOS = !!(
+        target && containerRef.current?.contains(target)
+      );
+
+      if (isEditable && !isInsideKeyboardPOS) return;
+
+      if (event.shiftKey) {
+        switch (event.key.toLowerCase()) {
+          case "c":
+            event.preventDefault();
+            onCustomerAction?.("change");
+            return;
+          case "f":
+            event.preventDefault();
+            onCustomerAction?.("search");
+            return;
+          case "n":
+            event.preventDefault();
+            onCustomerAction?.("new");
+            return;
+          case "x":
+            event.preventDefault();
+            onCustomerAction?.("remove");
+            return;
+        }
+      }
+
+      if (
+        event.key === "*" ||
+        event.key === "Multiply" ||
+        event.code === "NumpadMultiply"
+      ) {
+        if (target === productInputRef.current) {
+          return;
+        }
+        event.preventDefault();
+        productInputRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        productInputRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleGlobalKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleGlobalKeyDown);
+    };
+  }, [onCustomerAction]);
 
   // Parse quantity with multiplier support
   const parseQuantityInput = (
@@ -139,8 +201,11 @@ export default function KeyboardPOSInput({
 
       const exactMatch = products.find(
         (p: any) =>
-          normalize(p.barcode) === normalizedQuery ||
-          normalize(p.code) === normalizedQuery,
+          normalize(p.code) === normalizedQuery ||
+          (Array.isArray(p.barcodes) &&
+            p.barcodes.some(
+              (barcode: string) => normalize(barcode) === normalizedQuery,
+            )),
       );
 
       // Return exact match or first result if only one found
@@ -162,7 +227,16 @@ export default function KeyboardPOSInput({
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Allow numbers, comma, period, and asterisk
-    if (/^[0-9.,*\s]*$/.test(value) || value === "") {
+    if (value === "") {
+      setQuantity(value);
+      return;
+    }
+
+    const allowed = value.includes("*")
+      ? /^[0-9.,*\sA-Za-z-]*$/.test(value)
+      : /^[0-9.,\s]*$/.test(value);
+
+    if (allowed) {
       setQuantity(value);
     }
   };
@@ -171,6 +245,7 @@ export default function KeyboardPOSInput({
   const handleQuantityKeyDown = async (
     e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
+    if (e.defaultPrevented) return;
     // Global shortcuts (work in any field)
     if (e.shiftKey) {
       switch (e.key.toLowerCase()) {
@@ -221,6 +296,30 @@ export default function KeyboardPOSInput({
       }
     }
 
+    // Focus product code input when * or NumpadMultiply is pressed
+    if (e.key === "*" || e.key === "Multiply" || e.code === "NumpadMultiply") {
+      if (quantity.includes("*")) {
+        return;
+      }
+
+      e.preventDefault();
+
+      const qtyString = quantity.trim().replace(",", ".");
+      const parsedQty = parseFloat(qtyString);
+      if (!isNaN(parsedQty) && parsedQty > 0) {
+        pendingMultiplierQtyRef.current = parsedQty;
+      } else {
+        pendingMultiplierQtyRef.current = null;
+      }
+
+      productInputRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      productInputRef.current?.focus();
+      return;
+    }
+
     if (e.key === "Enter") {
       e.preventDefault();
 
@@ -257,6 +356,7 @@ export default function KeyboardPOSInput({
   const handleProductKeyDown = async (
     e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
+    if (e.defaultPrevented) return;
     // Global shortcuts
     if (e.shiftKey) {
       switch (e.key.toLowerCase()) {
@@ -310,6 +410,16 @@ export default function KeyboardPOSInput({
     if (e.key === "Enter") {
       e.preventDefault();
 
+      const multiplierFromProduct = parseQuantityInput(productCode);
+      if (multiplierFromProduct) {
+        pendingMultiplierQtyRef.current = null;
+        await processProductAddition(
+          multiplierFromProduct.productCode,
+          multiplierFromProduct.quantity,
+        );
+        return;
+      }
+
       const code = productCode.trim();
       if (!code) {
         toast.warning(
@@ -321,8 +431,12 @@ export default function KeyboardPOSInput({
       // Parse quantity (support decimal with comma or period)
       const qtyValue = quantity.trim() || "1";
       const parsedQty = parseFloat(qtyValue.replace(",", "."));
+      const effectiveQty =
+        pendingMultiplierQtyRef.current !== null
+          ? pendingMultiplierQtyRef.current
+          : parsedQty;
 
-      if (isNaN(parsedQty) || parsedQty <= 0) {
+      if (isNaN(effectiveQty) || effectiveQty <= 0) {
         toast.error(
           t("ui.invalidQuantity", "pos") !== "ui.invalidQuantity"
             ? t("ui.invalidQuantity", "pos")
@@ -331,11 +445,13 @@ export default function KeyboardPOSInput({
         return;
       }
 
-      await processProductAddition(code, parsedQty);
+      pendingMultiplierQtyRef.current = null;
+      await processProductAddition(code, effectiveQty);
     } else if (e.key === "Escape") {
       e.preventDefault();
       setProductCode("");
       setQuantity("1");
+      pendingMultiplierQtyRef.current = null;
       quantityInputRef.current?.focus();
     }
   };
@@ -439,7 +555,10 @@ export default function KeyboardPOSInput({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md dark:shadow-lg dark:shadow-black/50 p-6 space-y-4">
+    <div
+      ref={containerRef}
+      className="bg-white dark:bg-slate-900 rounded-lg shadow-md dark:shadow-lg dark:shadow-black/50 p-6 space-y-4"
+    >
       {/* Title */}
       <div className="border-b border-gray-200 dark:border-slate-700 pb-3">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">

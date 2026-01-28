@@ -3,7 +3,7 @@ import { Schema, model, Document, models } from "mongoose";
 interface SaleItem {
   productId: Schema.Types.ObjectId;
   productName: string;
-  quantity: number; // Supports integers for unit sales and decimals (max 3 places) for weight sales. E.g., 1 for unit, 1.254 for 1.254 kg
+  quantity: any; // Decimal128 for precision (up to 4 decimals)
   unitPrice: number;
   discount: number;
   total: number;
@@ -46,17 +46,25 @@ const saleItemSchema = new Schema<SaleItem>(
     },
     productName: String,
     quantity: {
-      type: Number,
+      type: Schema.Types.Decimal128,
       required: true,
-      min: 0.001, // Allows both integers and decimals up to 3 places (e.g., 1.254 kg)
+      min: 0.0001, // Allows up to 4 decimals (e.g., 1.5600 kg)
       validate: {
-        validator: function (value: number) {
-          // Check for maximum 3 decimal places
-          // Multiply by 1000, round, then check if it equals the result
-          return Math.round(value * 1000) / 1000 === value;
+        validator: function (value: any) {
+          // Accept both string and Decimal128
+          const num = typeof value === "string" ? value : value?.toString();
+          if (!num) return false;
+          // Check for max 4 decimals
+          const parts = num.split(".");
+          return (
+            parts.length === 1 ||
+            (parts[1].length >= 3 && parts[1].length <= 4) ||
+            parts[1].length === 0 ||
+            parts[1].length <= 4
+          );
         },
         message:
-          "Quantity must have a maximum of 3 decimal places (e.g., 1.254)",
+          "Quantity must have 3 or 4 decimal places (e.g., 1.560 or 1.5600)",
       },
     },
     unitPrice: Number,

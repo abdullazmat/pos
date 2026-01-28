@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import { apiFetch } from "@/lib/utils/apiFetch";
 import ProductSearch from "@/components/pos/ProductSearch";
 import KeyboardPOSInput from "@/components/pos/KeyboardPOSInput";
 import Cart from "@/components/pos/Cart";
+import ClientSelector from "@/components/pos/ClientSelector";
 import Header from "@/components/layout/Header";
 import Loading from "@/components/common/Loading";
 import { isTokenExpiredSoon } from "@/lib/utils/token";
@@ -23,8 +24,9 @@ interface CartItem {
 }
 
 export default function POSPage() {
+  const [selectedClient, setSelectedClient] = useState<any>(null);
   const router = useRouter();
-  const { t } = useGlobalLanguage();
+  const { t, currentLanguage } = useGlobalLanguage();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -32,6 +34,7 @@ export default function POSPage() {
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [lastSale, setLastSale] = useState<any>(null);
   const [businessConfig, setBusinessConfig] = useState<any>(null);
+  const clientSelectRef = useRef<HTMLSelectElement>(null);
 
   const getReceiptLabel = (key: string, defaultText: string) => {
     const label = t(key, "pos");
@@ -107,10 +110,21 @@ export default function POSPage() {
             setBusinessConfig(configData.data || configData);
           }
         } catch (e) {
+          toast.error(
+            t("ui.businessConfigError", "pos") !== "ui.businessConfigError"
+              ? t("ui.businessConfigError", "pos")
+              : "Error al cargar configuración del negocio",
+          );
           console.error("Failed to get business config", e);
         }
       } catch (e) {
         if ((e as any).name !== "AbortError") {
+          toast.error(
+            t("ui.cashRegisterStatusError", "pos") !==
+              "ui.cashRegisterStatusError"
+              ? t("ui.cashRegisterStatusError", "pos")
+              : "Error al cargar estado de caja",
+          );
           console.error("Failed to get cash register status", e);
         }
       } finally {
@@ -123,6 +137,29 @@ export default function POSPage() {
       controller.abort();
     };
   }, [router]);
+
+  useEffect(() => {
+    const handleDeleteKey = (event: KeyboardEvent) => {
+      if (event.key !== "Delete") return;
+
+      const target = event.target as HTMLElement | null;
+      const isEditable =
+        !!target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
+
+      if (!isEditable) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    document.addEventListener("keydown", handleDeleteKey);
+    return () => {
+      document.removeEventListener("keydown", handleDeleteKey);
+    };
+  }, []);
 
   const handleAddToCart = (
     productId: string,
@@ -226,45 +263,21 @@ export default function POSPage() {
     try {
       switch (action) {
         case "change":
-          toast.info(
-            t("ui.changeCustomerType", "pos") !== "ui.changeCustomerType"
-              ? t("ui.changeCustomerType", "pos")
-              : "Change customer type",
-            {
-              autoClose: 2000,
-              position: "top-center",
-            },
-          );
-          // TODO: Implement customer type change modal
-          console.log("Customer action: change type");
+          clientSelectRef.current?.focus();
+          clientSelectRef.current?.click();
           break;
         case "search":
-          toast.info(
-            t("ui.searchCustomer", "pos") !== "ui.searchCustomer"
-              ? t("ui.searchCustomer", "pos")
-              : "Search customer",
-            {
-              autoClose: 2000,
-              position: "top-center",
-            },
-          );
-          // TODO: Implement customer search modal
-          console.log("Customer action: search");
+          clientSelectRef.current?.focus();
+          clientSelectRef.current?.click();
           break;
         case "new":
-          toast.info(
-            t("ui.newCustomer", "pos") !== "ui.newCustomer"
-              ? t("ui.newCustomer", "pos")
-              : "New customer",
-            {
-              autoClose: 2000,
-              position: "top-center",
-            },
-          );
-          // TODO: Implement new customer modal
-          console.log("Customer action: new customer");
+          router.push("/clients");
           break;
         case "remove":
+          setSelectedClient(null);
+          if (clientSelectRef.current) {
+            clientSelectRef.current.value = "";
+          }
           toast.success(
             t("ui.removeCustomer", "pos") !== "ui.removeCustomer"
               ? t("ui.removeCustomer", "pos")
@@ -274,8 +287,6 @@ export default function POSPage() {
               position: "top-center",
             },
           );
-          // TODO: Implement remove current customer
-          console.log("Customer action: remove customer");
           break;
         default:
           console.warn("Unknown customer action:", action);
@@ -289,16 +300,23 @@ export default function POSPage() {
 
   const handleCheckout = async (paymentMethod: string) => {
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch("/api/sales", {
+      const defaultCustomerName =
+        currentLanguage === "en"
+          ? "Final Consumer"
+          : currentLanguage === "pt"
+            ? "Consumidor Final"
+            : "Consumidor Final";
+      const response = await apiFetch("/api/sales/complete", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           items: cartItems,
           paymentMethod,
+          customerName: selectedClient?.name || defaultCustomerName,
+          customerEmail: selectedClient?.email || undefined,
+          customerCuit: selectedClient?.document || undefined,
         }),
       });
 
@@ -346,13 +364,13 @@ export default function POSPage() {
     <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton={true} />
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+      <main className="px-4 py-6 mx-auto max-w-7xl">
+        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
           {title}
         </h1>
         {registerOpen === false && (
           <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-16 h-16 rounded-full bg-orange-600 dark:bg-orange-500 flex items-center justify-center mb-4">
+            <div className="flex items-center justify-center w-16 h-16 mb-4 bg-orange-600 rounded-full dark:bg-orange-500">
               <svg
                 className="w-8 h-8 text-white"
                 fill="none"
@@ -367,7 +385,7 @@ export default function POSPage() {
                 />
               </svg>
             </div>
-            <p className="text-lg font-semibold text-gray-800 dark:text-white mb-1">
+            <p className="mb-1 text-lg font-semibold text-gray-800 dark:text-white">
               {t("ui.closedTitle", "pos")}
             </p>
             <p className="text-gray-600 dark:text-gray-400">
@@ -378,8 +396,16 @@ export default function POSPage() {
 
         {registerOpen === true && (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <div className="space-y-6 lg:col-span-2">
+                {/* Client Selector */}
+                <div className="mb-2">
+                  <ClientSelector
+                    value={selectedClient}
+                    onChange={setSelectedClient}
+                    selectRef={clientSelectRef}
+                  />
+                </div>
                 {/* New Keyboard-First Input */}
                 <KeyboardPOSInput
                   onAddToCart={handleAddToCart}
@@ -388,11 +414,11 @@ export default function POSPage() {
 
                 {/* Legacy Product Search (collapsible) */}
                 <details className="group">
-                  <summary className="cursor-pointer list-none">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                  <summary className="list-none cursor-pointer">
+                    <div className="flex items-center justify-between p-4 transition rounded-lg bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700">
                       <div className="flex items-center gap-2">
                         <svg
-                          className="w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform group-open:rotate-90"
+                          className="w-5 h-5 text-gray-600 transition-transform dark:text-gray-400 group-open:rotate-90"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -435,16 +461,16 @@ export default function POSPage() {
 
             {/* Receipt Modal */}
             {showReceiptModal && lastSale && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-96 overflow-y-auto">
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+                <div className="w-full max-w-md overflow-y-auto bg-white rounded-lg shadow-lg max-h-96">
                   <div className="p-6">
                     {/* Business Header */}
-                    <div className="text-center mb-4 border-b pb-4">
+                    <div className="pb-4 mb-4 text-center border-b">
                       <h2 className="text-xl font-bold text-gray-900">
                         {businessConfig?.businessName || "Recibo de Venta"}
                       </h2>
                       {businessConfig?.address && (
-                        <p className="text-xs text-gray-600 mt-1">
+                        <p className="mt-1 text-xs text-gray-600">
                           {businessConfig.address}
                         </p>
                       )}
@@ -461,7 +487,7 @@ export default function POSPage() {
                     </div>
 
                     {/* Receipt Content */}
-                    <div className="border-t border-b py-4 space-y-2 text-sm mb-4">
+                    <div className="py-4 mb-4 space-y-2 text-sm border-t border-b">
                       <div className="flex justify-between">
                         <span className="text-gray-600">
                           {getReceiptLabel("receipt.date", "Date:")}
@@ -486,7 +512,7 @@ export default function POSPage() {
 
                     {/* Items */}
                     <div className="mb-4 text-sm">
-                      <h3 className="font-semibold text-gray-900 mb-2">
+                      <h3 className="mb-2 font-semibold text-gray-900">
                         {getReceiptLabel("receipt.items", "Items")}
                       </h3>
                       <div className="space-y-1 text-gray-700">
@@ -509,7 +535,7 @@ export default function POSPage() {
                             </div>
                           ))
                         ) : (
-                          <div className="text-gray-400 italic">
+                          <div className="italic text-gray-400">
                             {getReceiptLabel("receipt.noItems", "No items")}
                           </div>
                         )}
@@ -517,7 +543,7 @@ export default function POSPage() {
                     </div>
 
                     {/* Totals */}
-                    <div className="border-t pt-3 space-y-1 text-sm mb-4">
+                    <div className="pt-3 mb-4 space-y-1 text-sm border-t">
                       <div className="flex justify-between">
                         <span className="text-gray-600">
                           {getReceiptLabel("receipt.subtotal", "Subtotal:")}
@@ -541,14 +567,14 @@ export default function POSPage() {
                     </div>
 
                     {/* Payment Method */}
-                    <div className="text-sm text-gray-700 mb-6 p-2 bg-gray-50 rounded">
+                    <div className="p-2 mb-6 text-sm text-gray-700 rounded bg-gray-50">
                       <span className="text-gray-600">
                         {getReceiptLabel(
                           "receipt.paymentMethod",
                           "Payment Method:",
                         )}
                       </span>
-                      <span className="font-semibold ml-2">
+                      <span className="ml-2 font-semibold">
                         {getPaymentMethodLabel(lastSale?.paymentMethod)}
                       </span>
                     </div>
@@ -557,7 +583,7 @@ export default function POSPage() {
                     <div className="flex gap-3">
                       <button
                         onClick={() => window.print()}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition flex items-center justify-center gap-2"
+                        className="flex items-center justify-center flex-1 gap-2 py-2 font-semibold text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"
                       >
                         <svg
                           className="w-5 h-5"
@@ -576,7 +602,7 @@ export default function POSPage() {
                       </button>
                       <button
                         onClick={() => setShowReceiptModal(false)}
-                        className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 rounded-lg transition"
+                        className="flex-1 py-2 font-semibold text-gray-800 transition bg-gray-300 rounded-lg hover:bg-gray-400"
                       >
                         {getReceiptLabel("ui.close", "Close")}
                       </button>

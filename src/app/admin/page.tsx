@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 import Header from "@/components/layout/Header";
 import { UserCog, Edit, Trash2, X } from "lucide-react";
 import { toast } from "react-toastify";
@@ -95,6 +96,11 @@ const ADMIN_COPY = {
       updateError: "Error al actualizar usuario",
       deleteSuccess: "Usuario eliminado exitosamente",
       deleteError: "Error al eliminar usuario",
+      userLimitReached:
+        "El límite de usuarios en el plan gratuito es 2/2. Actualiza tu plan para agregar más usuarios.",
+      cannotDelete: "No puedes eliminar tu propio usuario.",
+      emailInUse: "El email ya está en uso",
+      usernameInUse: "El nombre de usuario ya está en uso",
     },
     footer: "Sistema POS © 2025 - Desarrollado para negocios pequeños",
     roleOptions: {
@@ -173,6 +179,11 @@ const ADMIN_COPY = {
       updateError: "Error updating user",
       deleteSuccess: "User deleted successfully",
       deleteError: "Error deleting user",
+      userLimitReached:
+        "The free plan user limit is 2/2. Upgrade your plan to add more users.",
+      cannotDelete: "You cannot delete your own user.",
+      emailInUse: "Email is already in use",
+      usernameInUse: "Username is already in use",
     },
     footer: "POS System © 2025 - Developed for small businesses",
     roleOptions: {
@@ -251,6 +262,11 @@ const ADMIN_COPY = {
       updateError: "Erro ao atualizar usuário",
       deleteSuccess: "Usuário deletado com sucesso",
       deleteError: "Erro ao deletar usuário",
+      userLimitReached:
+        "O limite de usuários no plano gratuito é 2/2. Atualize seu plano para adicionar mais usuários.",
+      cannotDelete: "Você não pode excluir seu próprio usuário.",
+      emailInUse: "O e-mail já está em uso",
+      usernameInUse: "O nome de usuário já está em uso",
     },
     footer: "Sistema POS © 2025 - Desenvolvido para pequenas empresas",
     roleOptions: {
@@ -266,6 +282,7 @@ export default function AdminPage() {
   const router = useRouter();
   const { currentLanguage } = useGlobalLanguage();
   const copy = ADMIN_COPY[currentLanguage] || ADMIN_COPY["es"];
+  const { subscription } = useSubscription();
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -296,10 +313,47 @@ export default function AdminPage() {
     role: "cashier" as "admin" | "supervisor" | "cashier",
   });
 
+  const planId = (subscription?.planId || "BASIC").toUpperCase();
+  const isFreePlan = planId === "BASIC";
+  const planUserLimit = subscription?.features?.maxUsers || 2;
+  const userLimit = isFreePlan ? 2 : planUserLimit;
+  const currentUsers = Math.min(users.length, userLimit);
   const currentPlan = {
     name: copy.planName,
-    userLimit: 2,
-    currentUsers: users.length,
+    userLimit,
+    currentUsers,
+  };
+
+  const resolveUserErrorKey = (error: unknown) => {
+    if (typeof error !== "string") return null;
+    const normalized = error.toLowerCase();
+
+    if (normalized.includes("cannot delete yourself")) return "cannotDelete";
+    if (normalized.includes("email") && normalized.includes("en uso"))
+      return "emailInUse";
+    if (
+      normalized.includes("nombre de usuario") &&
+      normalized.includes("en uso")
+    )
+      return "usernameInUse";
+    if (normalized.includes("email") && normalized.includes("already"))
+      return "emailInUse";
+    if (normalized.includes("username") && normalized.includes("already"))
+      return "usernameInUse";
+
+    return null;
+  };
+
+  const normalizeUsername = (value: string) => value.trim().toLowerCase();
+
+  const hasDuplicateUsername = (value: string, excludeId?: string) => {
+    const normalized = normalizeUsername(value);
+    if (!normalized) return false;
+    return users.some(
+      (existing) =>
+        normalizeUsername(existing.username) === normalized &&
+        existing._id !== excludeId,
+    );
   };
 
   useEffect(() => {
@@ -350,6 +404,12 @@ export default function AdminPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
+    if (hasDuplicateUsername(formData.username)) {
+      toast.error(copy.toasts.usernameInUse);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/users", {
@@ -361,7 +421,7 @@ export default function AdminPage() {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (response.ok) {
         toast.success(copy.toasts.createSuccess);
@@ -383,7 +443,12 @@ export default function AdminPage() {
         setShowModal(false);
         router.push("/auth/login");
       } else {
-        toast.error(data.error || copy.toasts.createError);
+        const mappedKey = resolveUserErrorKey(data?.error);
+        toast.error(
+          copy.toasts[mappedKey as keyof typeof copy.toasts] ||
+            data?.error ||
+            copy.toasts.createError,
+        );
       }
     } catch (error) {
       console.error("Error creating user:", error);
@@ -412,6 +477,12 @@ export default function AdminPage() {
 
     setIsSubmitting(true);
 
+    if (hasDuplicateUsername(editFormData.username, userToEdit._id)) {
+      toast.error(copy.toasts.usernameInUse);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/users", {
@@ -426,7 +497,7 @@ export default function AdminPage() {
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (response.ok) {
         toast.success(copy.toasts.updateSuccess);
@@ -449,7 +520,12 @@ export default function AdminPage() {
         setShowEditModal(false);
         router.push("/auth/login");
       } else {
-        toast.error(data.error || copy.toasts.updateError);
+        const mappedKey = resolveUserErrorKey(data?.error);
+        toast.error(
+          copy.toasts[mappedKey as keyof typeof copy.toasts] ||
+            data?.error ||
+            copy.toasts.updateError,
+        );
       }
     } catch (error) {
       console.error("Error updating user:", error);
@@ -488,7 +564,12 @@ export default function AdminPage() {
         router.push("/auth/login");
       } else {
         const data = await response.json();
-        toast.error(data.error || copy.toasts.deleteError);
+        const mappedKey = resolveUserErrorKey(data.error);
+        toast.error(
+          copy.toasts[mappedKey as keyof typeof copy.toasts] ||
+            data.error ||
+            copy.toasts.deleteError,
+        );
       }
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -548,7 +629,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100">
+    <div className="min-h-screen text-gray-900 bg-white dark:bg-slate-950 dark:text-slate-100">
       <Header user={user} showBackButton={true} />
 
       <main className="p-6 mx-auto max-w-7xl">
@@ -560,11 +641,11 @@ export default function AdminPage() {
                 {copy.title}
               </h1>
             </div>
-            <p className="text-slate-600 dark:text-slate-400 text-sm">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
               {copy.subtitle}
             </p>
-            <div className="mt-3 inline-flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-100 border border-slate-300 dark:bg-slate-900 dark:border-slate-800">
-              <span className="text-sm text-slate-900 font-semibold dark:text-slate-200">
+            <div className="inline-flex items-center gap-3 px-3 py-2 mt-3 border rounded-lg bg-slate-100 border-slate-300 dark:bg-slate-900 dark:border-slate-800">
+              <span className="text-sm font-semibold text-slate-900 dark:text-slate-200">
                 {currentPlan.currentUsers}/{currentPlan.userLimit}{" "}
                 {copy.userCount} · {currentPlan.name}
               </span>
@@ -580,8 +661,20 @@ export default function AdminPage() {
           </div>
 
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              if (users.length >= userLimit) {
+                toast.error(copy.toasts.userLimitReached);
+                return;
+              }
+              setShowModal(true);
+            }}
             className="flex items-center gap-2 px-4 py-2.5 font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg shadow-sm"
+            disabled={users.length >= userLimit}
+            style={
+              users.length >= userLimit
+                ? { opacity: 0.5, cursor: "not-allowed" }
+                : {}
+            }
           >
             <span className="text-lg leading-none">+</span>
             <span>{copy.newUserButton}</span>
@@ -591,7 +684,7 @@ export default function AdminPage() {
         <div className="overflow-hidden bg-white border border-slate-200 rounded-xl dark:bg-slate-900 dark:border-slate-800">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-100 border-b border-slate-300 text-slate-700 dark:bg-slate-900/80 dark:border-slate-800 dark:text-slate-300">
+              <thead className="border-b bg-slate-100 border-slate-300 text-slate-700 dark:bg-slate-900/80 dark:border-slate-800 dark:text-slate-300">
                 <tr>
                   <th className="px-6 py-3 text-left">
                     {copy.tableHeaders.name}
@@ -658,7 +751,7 @@ export default function AdminPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="px-2 py-1 font-mono text-xs bg-slate-100 border border-slate-300 rounded text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
+                        <span className="px-2 py-1 font-mono text-xs border rounded bg-slate-100 border-slate-300 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
                           {systemUser.username}
                         </span>
                       </td>
@@ -675,7 +768,7 @@ export default function AdminPage() {
                         {copy.notDefined}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="inline-block px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full border border-green-300 dark:text-green-200 dark:bg-green-900/40 dark:border-green-700/50">
+                        <span className="inline-block px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 border border-green-300 rounded-full dark:text-green-200 dark:bg-green-900/40 dark:border-green-700/50">
                           {systemUser.isActive ? copy.active : copy.inactive}
                         </span>
                       </td>
@@ -692,7 +785,7 @@ export default function AdminPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleEditClick(systemUser)}
-                            className="p-2 text-blue-400 hover:text-blue-300 hover:bg-slate-800 rounded-lg"
+                            className="p-2 text-blue-400 rounded-lg hover:text-blue-300 hover:bg-slate-800"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
@@ -703,7 +796,7 @@ export default function AdminPage() {
                                 systemUser.fullName,
                               )
                             }
-                            className="p-2 text-red-400 hover:text-red-300 hover:bg-slate-800 rounded-lg"
+                            className="p-2 text-red-400 rounded-lg hover:text-red-300 hover:bg-slate-800"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -720,7 +813,7 @@ export default function AdminPage() {
         {/* Add User Modal */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white border border-slate-200 rounded-lg shadow-xl w-full max-w-md mx-4 dark:bg-slate-900 dark:border-slate-800">
+            <div className="w-full max-w-md mx-4 bg-white border rounded-lg shadow-xl border-slate-200 dark:bg-slate-900 dark:border-slate-800">
               <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                   {copy.modal.newUser}
@@ -735,7 +828,7 @@ export default function AdminPage() {
 
               <form onSubmit={handleAddUser} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-300">
+                  <label className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">
                     {copy.modal.fullName}{" "}
                     <span className="text-red-600 dark:text-red-400">
                       {copy.modal.required}
@@ -747,7 +840,7 @@ export default function AdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, fullName: e.target.value })
                     }
-                    className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     placeholder={copy.modal.placeholders.fullName}
                     required
                     minLength={2}
@@ -755,7 +848,7 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-300">
+                  <label className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">
                     {copy.modal.username}{" "}
                     <span className="text-red-600 dark:text-red-400">
                       {copy.modal.required}
@@ -767,18 +860,18 @@ export default function AdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, username: e.target.value })
                     }
-                    className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     placeholder={copy.modal.placeholders.username}
                     required
                     minLength={3}
                   />
-                  <p className="text-xs text-slate-600 mt-1 dark:text-slate-400">
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                     {copy.modal.hints.usernameUnique}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-300">
+                  <label className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">
                     {copy.modal.email}{" "}
                     <span className="text-red-600 dark:text-red-400">
                       {copy.modal.required}
@@ -790,17 +883,17 @@ export default function AdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     placeholder={copy.modal.placeholders.email}
                     required
                   />
-                  <p className="text-xs text-slate-600 mt-1 dark:text-slate-400">
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                     {copy.modal.hints.emailUnique}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-300">
+                  <label className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">
                     {copy.modal.password}{" "}
                     <span className="text-red-600 dark:text-red-400">
                       {copy.modal.required}
@@ -812,7 +905,7 @@ export default function AdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, password: e.target.value })
                     }
-                    className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     placeholder={copy.modal.placeholders.password}
                     required
                     minLength={6}
@@ -820,7 +913,7 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-300">
+                  <label className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">
                     {copy.modal.phone}
                   </label>
                   <input
@@ -829,13 +922,13 @@ export default function AdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
                     }
-                    className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     placeholder={copy.modal.placeholders.phone}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1 dark:text-slate-300">
+                  <label className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">
                     {copy.modal.role}{" "}
                     <span className="text-red-600 dark:text-red-400">
                       {copy.modal.required}
@@ -846,7 +939,7 @@ export default function AdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, role: e.target.value as any })
                     }
-                    className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     required
                   >
                     <option value="cashier">{copy.roleOptions.cashier}</option>
@@ -861,14 +954,14 @@ export default function AdminPage() {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="flex-1 px-4 py-2 text-slate-700 bg-slate-200 rounded-lg hover:bg-slate-300 font-medium dark:text-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700"
+                    className="flex-1 px-4 py-2 font-medium rounded-lg text-slate-700 bg-slate-200 hover:bg-slate-300 dark:text-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700"
                     disabled={isSubmitting}
                   >
                     {copy.modal.buttons.cancel}
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isSubmitting}
                   >
                     {isSubmitting
@@ -884,7 +977,7 @@ export default function AdminPage() {
         {/* Edit User Modal */}
         {showEditModal && userToEdit && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
+            <div className="w-full max-w-md mx-4 bg-white border rounded-lg shadow-xl dark:bg-slate-900 border-slate-200 dark:border-slate-800">
               <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                   {copy.modal.editUser}
@@ -902,7 +995,7 @@ export default function AdminPage() {
 
               <form onSubmit={handleUpdateUser} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-900 dark:text-slate-300 mb-1">
+                  <label className="block mb-1 text-sm font-medium text-slate-900 dark:text-slate-300">
                     {copy.modal.fullName}{" "}
                     <span className="text-red-600 dark:text-red-400">
                       {copy.modal.required}
@@ -917,14 +1010,14 @@ export default function AdminPage() {
                         fullName: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     placeholder={copy.modal.placeholders.fullName}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-900 dark:text-slate-300 mb-1">
+                  <label className="block mb-1 text-sm font-medium text-slate-900 dark:text-slate-300">
                     {copy.modal.username}{" "}
                     <span className="text-red-600 dark:text-red-400">
                       {copy.modal.required}
@@ -939,14 +1032,14 @@ export default function AdminPage() {
                         username: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     placeholder={copy.modal.placeholders.usernameEdit}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-900 dark:text-slate-300 mb-1">
+                  <label className="block mb-1 text-sm font-medium text-slate-900 dark:text-slate-300">
                     {copy.modal.email}{" "}
                     <span className="text-red-600 dark:text-red-400">
                       {copy.modal.required}
@@ -961,14 +1054,14 @@ export default function AdminPage() {
                         email: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     placeholder={copy.modal.placeholders.emailEdit}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-900 dark:text-slate-300 mb-1">
+                  <label className="block mb-1 text-sm font-medium text-slate-900 dark:text-slate-300">
                     {copy.modal.passwordOptional}
                   </label>
                   <input
@@ -980,14 +1073,14 @@ export default function AdminPage() {
                         password: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     placeholder={copy.modal.placeholders.password}
                     minLength={6}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-900 dark:text-slate-300 mb-1">
+                  <label className="block mb-1 text-sm font-medium text-slate-900 dark:text-slate-300">
                     {copy.modal.phone}
                   </label>
                   <input
@@ -999,13 +1092,13 @@ export default function AdminPage() {
                         phone: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     placeholder={copy.modal.placeholders.phone}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-900 dark:text-slate-300 mb-1">
+                  <label className="block mb-1 text-sm font-medium text-slate-900 dark:text-slate-300">
                     {copy.modal.role}{" "}
                     <span className="text-red-600 dark:text-red-400">
                       {copy.modal.required}
@@ -1019,7 +1112,7 @@ export default function AdminPage() {
                         role: e.target.value as any,
                       })
                     }
-                    className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     required
                   >
                     <option value="cashier">{copy.roleOptions.cashier}</option>
@@ -1037,14 +1130,14 @@ export default function AdminPage() {
                       setShowEditModal(false);
                       setUserToEdit(null);
                     }}
-                    className="flex-1 px-4 py-2 text-slate-700 bg-slate-200 rounded-lg hover:bg-slate-300 font-medium dark:text-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700"
+                    className="flex-1 px-4 py-2 font-medium rounded-lg text-slate-700 bg-slate-200 hover:bg-slate-300 dark:text-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700"
                     disabled={isSubmitting}
                   >
                     {copy.modal.buttons.cancel}
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isSubmitting}
                   >
                     {isSubmitting
@@ -1060,15 +1153,15 @@ export default function AdminPage() {
         {/* Delete Confirmation Modal */}
         {showDeleteModal && userToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white border border-slate-200 rounded-lg shadow-xl w-full max-w-md mx-4 dark:bg-slate-900 dark:border-slate-800">
+            <div className="w-full max-w-md mx-4 bg-white border rounded-lg shadow-xl border-slate-200 dark:bg-slate-900 dark:border-slate-800">
               <div className="p-6">
                 <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full dark:bg-red-900/30">
                   <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
-                <h2 className="text-xl font-bold text-center text-slate-900 mb-2 dark:text-white">
+                <h2 className="mb-2 text-xl font-bold text-center text-slate-900 dark:text-white">
                   {copy.modal.deleteConfirm}
                 </h2>
-                <p className="text-center text-slate-600 mb-6 dark:text-slate-400">
+                <p className="mb-6 text-center text-slate-600 dark:text-slate-400">
                   {copy.modal.deleteMessage}{" "}
                   <span className="font-semibold text-slate-900 dark:text-white">
                     "{userToDelete.name}"
@@ -1082,14 +1175,14 @@ export default function AdminPage() {
                       setShowDeleteModal(false);
                       setUserToDelete(null);
                     }}
-                    className="flex-1 px-4 py-2 text-slate-300 bg-slate-800 rounded-lg hover:bg-slate-700 font-medium"
+                    className="flex-1 px-4 py-2 font-medium rounded-lg text-slate-300 bg-slate-800 hover:bg-slate-700"
                   >
                     {copy.modal.buttons.cancel}
                   </button>
                   <button
                     type="button"
                     onClick={confirmDelete}
-                    className="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-500 font-medium"
+                    className="flex-1 px-4 py-2 font-medium text-white bg-red-600 rounded-lg hover:bg-red-500"
                   >
                     {copy.modal.buttons.delete}
                   </button>

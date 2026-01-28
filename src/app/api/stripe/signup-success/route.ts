@@ -8,6 +8,8 @@ import Subscription from "@/lib/models/Subscription";
 import { hashPassword } from "@/lib/utils/password";
 import { createAccessToken, createRefreshToken } from "@/lib/utils/jwt";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -15,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     if (!sessionId) {
       return NextResponse.redirect(
-        new URL("/auth/register?error=missing_session", req.url)
+        new URL("/auth/register?error=missing_session", req.url),
       );
     }
 
@@ -24,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     if (session.payment_status !== "paid") {
       return NextResponse.redirect(
-        new URL("/auth/register?error=payment_failed", req.url)
+        new URL("/auth/register?error=payment_failed", req.url),
       );
     }
 
@@ -32,7 +34,7 @@ export async function GET(req: NextRequest) {
 
     if (!email || !fullName || !password) {
       return NextResponse.redirect(
-        new URL("/auth/register?error=invalid_metadata", req.url)
+        new URL("/auth/register?error=invalid_metadata", req.url),
       );
     }
 
@@ -42,7 +44,7 @@ export async function GET(req: NextRequest) {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.redirect(
-        new URL("/auth/login?message=account_exists", req.url)
+        new URL("/auth/login?message=account_exists", req.url),
       );
     }
 
@@ -52,7 +54,7 @@ export async function GET(req: NextRequest) {
     const paidPlan = await Plan.findOne({ name: "pro" });
     if (!paidPlan) {
       return NextResponse.redirect(
-        new URL("/auth/register?error=plan_not_found", req.url)
+        new URL("/auth/register?error=plan_not_found", req.url),
       );
     }
 
@@ -128,7 +130,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Signup success error:", error);
     return NextResponse.redirect(
-      new URL("/auth/register?error=server_error", req.url)
+      new URL("/auth/register?error=server_error", req.url),
     );
   }
 }

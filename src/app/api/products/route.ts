@@ -8,7 +8,7 @@ import {
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 import { checkPlanLimit } from "@/lib/utils/planValidation";
-import { generateSimple4DigitCode } from "@/lib/utils/productCodeGenerator";
+import { generateDateBasedProductCode } from "@/lib/utils/productCodeGenerator";
 
 export async function GET(req: NextRequest) {
   try {
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
         { code: { $regex: search, $options: "i" } },
-        { barcode: { $regex: search, $options: "i" } },
+        { barcodes: { $regex: search, $options: "i" } },
       ];
     }
     if (category) {
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       cost,
       price,
       stock,
-      barcode,
+      barcodes,
       category,
       description,
       minStock,
@@ -69,8 +69,26 @@ export async function POST(req: NextRequest) {
       margin,
     } = body;
 
-    if (!name || !cost || !price) {
+    if (!name || typeof cost !== "number" || typeof price !== "number") {
       return generateErrorResponse("Missing required fields", 400);
+    }
+
+    if (cost < 0 || price < 0) {
+      return generateErrorResponse("Price and cost must be 0 or greater", 400);
+    }
+
+    // Check for duplicate name or barcode
+    const duplicate = await Product.findOne({
+      businessId,
+      $or: [
+        { name: { $regex: `^${name}$`, $options: "i" } },
+        ...(Array.isArray(barcodes) && barcodes.length > 0
+          ? [{ barcodes: { $in: barcodes.filter(Boolean) } }]
+          : []),
+      ],
+    });
+    if (duplicate) {
+      return generateErrorResponse({ key: "duplicateNameOrBarcode" }, 409);
     }
 
     await dbConnect();
@@ -85,29 +103,34 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse(planCheck.message, 403);
     }
 
-    // Auto-generate 4-digit code
+    // Auto-generate date-based code
     let finalCode = code;
     if (!finalCode) {
-      finalCode = await generateSimple4DigitCode(businessId);
+      finalCode = await generateDateBasedProductCode(businessId);
       // Ensure the generated code is unique
       let attempts = 0;
       while (
         (await Product.findOne({ businessId, code: finalCode })) &&
         attempts < 10
       ) {
-        finalCode = await generateSimple4DigitCode(businessId);
+        finalCode = await generateDateBasedProductCode(businessId);
         attempts++;
       }
     }
 
-    const calculatedMargin = margin || ((price - cost) / price) * 100;
+    const calculatedMargin =
+      typeof margin === "number"
+        ? margin
+        : price > 0
+          ? ((price - cost) / price) * 100
+          : 0;
 
     const existingProduct = await Product.findOne({
       businessId,
       code: finalCode,
     });
     if (existingProduct) {
-      return generateErrorResponse("Product code already exists", 409);
+      return generateErrorResponse({ key: "duplicateCode" }, 409);
     }
 
     const product = new Product({
@@ -118,7 +141,7 @@ export async function POST(req: NextRequest) {
       price,
       margin: calculatedMargin,
       stock: stock || 0,
-      barcode,
+      barcodes: Array.isArray(barcodes) ? barcodes.filter(Boolean) : [],
       category,
       description,
       minStock: minStock || 0,
@@ -151,7 +174,7 @@ export async function PUT(req: NextRequest) {
       cost,
       price,
       stock,
-      barcode,
+      barcodes,
       category,
       description,
       minStock,
@@ -181,20 +204,36 @@ export async function PUT(req: NextRequest) {
 
     product.name = name ?? product.name;
     product.code = code ?? product.code;
-    if (typeof cost === "number") product.cost = cost;
-    if (typeof price === "number") product.price = price;
+    if (typeof cost === "number") {
+      if (cost < 0) {
+        return generateErrorResponse("Cost must be 0 or greater", 400);
+      }
+      product.cost = cost;
+    }
+    if (typeof price === "number") {
+      if (price < 0) {
+        return generateErrorResponse("Price must be 0 or greater", 400);
+      }
+      product.price = price;
+    }
     if (typeof stock === "number") product.stock = stock;
     if (category !== undefined) product.category = category;
-    if (barcode !== undefined) product.barcode = barcode;
+    if (Array.isArray(barcodes)) {
+      product.barcodes = barcodes.filter(Boolean);
+    }
     if (description !== undefined) product.description = description;
     if (typeof minStock === "number") product.minStock = minStock;
     if (typeof active === "boolean") product.active = active;
     if (typeof isSoldByWeight === "boolean")
       product.isSoldByWeight = isSoldByWeight;
 
-    if (product.price && product.cost) {
+    if (typeof product.price === "number" && typeof product.cost === "number") {
       product.margin =
-        margin || ((product.price - product.cost) / product.price) * 100;
+        typeof margin === "number"
+          ? margin
+          : product.price > 0
+            ? ((product.price - product.cost) / product.price) * 100
+            : 0;
     }
 
     await product.save();

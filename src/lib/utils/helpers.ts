@@ -1,4 +1,7 @@
-export function generateErrorResponse(message: string, status: number = 400) {
+export function generateErrorResponse(
+  message: string | Record<string, unknown>,
+  status: number = 400,
+) {
   return new Response(JSON.stringify({ error: message }), {
     status,
     headers: { "Content-Type": "application/json" },

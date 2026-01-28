@@ -65,70 +65,94 @@ export default function SubscriptionFreePlanModal({
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Plan Summary */}
-          <div className="bg-gradient-to-r from-blue-900/40 to-blue-700/40 border border-blue-600/50 rounded-xl p-6">
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6 dark:from-blue-900/40 dark:to-blue-700/40 dark:border-blue-600/50">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <span className="text-3xl">FREE</span>
+                <span className="text-3xl text-slate-700 dark:text-white">
+                  FREE
+                </span>
                 <div>
-                  <h3 className="text-xl font-bold text-white">Gratuito</h3>
-                  <p className="text-sm text-gray-300">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                    Gratuito
+                  </h3>
+                  <p className="text-sm text-slate-600 dark:text-gray-300">
                     Perfecto para empezar y probar el sistema sin costo
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-blue-300">$0</div>
-                <div className="text-xs text-gray-400">/mes</div>
+                <div className="text-3xl font-bold text-blue-700 dark:text-blue-300">
+                  $0
+                </div>
+                <div className="text-xs text-slate-600 dark:text-gray-400">
+                  /mes
+                </div>
               </div>
             </div>
 
             {/* Features Grid */}
-            <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-blue-600/30">
+            <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-blue-200 dark:border-blue-600/30">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-300">100</div>
-                <div className="text-xs text-gray-400">Productos</div>
+                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                  100
+                </div>
+                <div className="text-xs text-slate-600 dark:text-gray-400">
+                  Productos
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-300">2</div>
-                <div className="text-xs text-gray-400">Usuarios</div>
+                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                  2
+                </div>
+                <div className="text-xs text-slate-600 dark:text-gray-400">
+                  Usuarios
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-300">0%</div>
-                <div className="text-xs text-gray-400">Descuento</div>
+                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                  0%
+                </div>
+                <div className="text-xs text-slate-600 dark:text-gray-400">
+                  Descuento
+                </div>
               </div>
             </div>
           </div>
 
           {/* Plan Details */}
-          <div className="bg-teal-900/30 border border-teal-600/50 rounded-xl p-6">
+          <div className="bg-teal-50 border border-teal-200 rounded-xl p-6 dark:bg-teal-900/30 dark:border-teal-600/50">
             <div className="flex items-center gap-3 mb-4">
               <Crown className="w-6 h-6 text-teal-400" />
-              <h3 className="text-lg font-bold text-white">Plan Gratuito</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Plan Gratuito
+              </h3>
             </div>
 
-            <p className="text-sm text-gray-300 mb-6">
+            <p className="text-sm text-slate-600 dark:text-gray-300 mb-6">
               El plan gratuito está activo por defecto. Prueba todas las
               funciones básicas sin costo.
             </p>
 
-            <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4 space-y-3">
-              <div className="text-sm font-semibold text-gray-200">
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3 dark:bg-slate-900/50 dark:border-slate-700">
+              <div className="text-sm font-semibold text-slate-800 dark:text-gray-200">
                 Incluye:
               </div>
               <ul className="space-y-2">
-                <li className="flex items-center gap-2 text-sm text-gray-300">
-                  <span className="text-teal-400">✓</span> Hasta 100 productos
+                <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
+                  <span className="text-teal-600 dark:text-teal-400">✓</span>
+                  Hasta 100 productos
                 </li>
-                <li className="flex items-center gap-2 text-sm text-gray-300">
-                  <span className="text-teal-400">✓</span> 2 usuarios
+                <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
+                  <span className="text-teal-600 dark:text-teal-400">✓</span> 2
+                  usuarios
                 </li>
-                <li className="flex items-center gap-2 text-sm text-gray-300">
-                  <span className="text-teal-400">✓</span> POS básico con
-                  escaneo de código de barras
+                <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
+                  <span className="text-teal-600 dark:text-teal-400">✓</span>
+                  POS básico con escaneo de código de barras
                 </li>
-                <li className="flex items-center gap-2 text-sm text-gray-300">
-                  <span className="text-teal-400">✓</span> Control de caja y
-                  reportes básicos
+                <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
+                  <span className="text-teal-600 dark:text-teal-400">✓</span>
+                  Control de caja y reportes básicos
                 </li>
               </ul>
             </div>

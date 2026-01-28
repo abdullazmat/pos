@@ -8,7 +8,7 @@ import {
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 import { checkPlanLimit } from "@/lib/utils/planValidation";
-import { generateSimple4DigitCode } from "@/lib/utils/productCodeGenerator";
+import { generateDateBasedProductCode } from "@/lib/utils/productCodeGenerator";
 
 type ParsedRow = {
   [key: string]: string | undefined;
@@ -141,10 +141,10 @@ export async function POST(req: NextRequest) {
       }
 
       if (!finalCode) {
-        // Auto-generate 4-digit code and ensure uniqueness
+        // Auto-generate date-based code and ensure uniqueness
         let attempts = 0;
         do {
-          finalCode = await generateSimple4DigitCode(businessId);
+          finalCode = await generateDateBasedProductCode(businessId);
           attempts++;
         } while (
           attempts < 10 &&

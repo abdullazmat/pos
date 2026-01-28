@@ -102,6 +102,7 @@ const CONFIG_COPY = {
       selectPlan: "Seleccionar Plan",
       processing: "Procesando...",
       subscribeClick: "Click para suscribirse →",
+      subscribed: "Suscrito",
     },
     messages: {
       saved: "Configuración guardada exitosamente",
@@ -163,6 +164,7 @@ const CONFIG_COPY = {
       selectPlan: "Select Plan",
       processing: "Processing...",
       subscribeClick: "Click to subscribe →",
+      subscribed: "Subscribed",
     },
     messages: {
       saved: "Configuration saved successfully",
@@ -224,6 +226,7 @@ const CONFIG_COPY = {
       selectPlan: "Selecionar Plano",
       processing: "Processando...",
       subscribeClick: "Clique para se inscrever →",
+      subscribed: "Inscrito",
     },
     messages: {
       saved: "Configuração salva com sucesso",
@@ -281,7 +284,12 @@ export default function BusinessConfigPage() {
       router.push("/auth/login");
       return;
     }
-    setUser(JSON.parse(storedUser));
+    const parsedUser = JSON.parse(storedUser);
+    setUser(parsedUser);
+    if (parsedUser?.role !== "admin") {
+      router.push("/dashboard");
+      return;
+    }
     fetchPlans();
     fetchSubscription();
     fetchBusinessConfig();
@@ -424,16 +432,44 @@ export default function BusinessConfigPage() {
     }));
   };
 
+  const normalizePlanId = (planId?: string | null) => {
+    const normalized = (planId || "").toUpperCase();
+
+    if (normalized === "FREE") return "BASIC";
+    if (normalized === "PRO") return "PROFESSIONAL";
+    if (normalized === "PREMIUM") return "ENTERPRISE";
+
+    return normalized;
+  };
+
+  const resolveSubscriptionPlanId = (plan?: Plan | null) => {
+    if (!plan) return null;
+    return normalizePlanId(plan.id);
+  };
+
+  const isCurrentPlanSelected = (plan: Plan) => {
+    const normalizedCurrentPlanId = normalizePlanId(
+      currentSubscription?.planId,
+    );
+    const normalizedPlanId = resolveSubscriptionPlanId(plan);
+
+    return Boolean(
+      normalizedCurrentPlanId &&
+      normalizedPlanId &&
+      normalizedCurrentPlanId === normalizedPlanId,
+    );
+  };
+
   const handleSubscribe = async (planId: string) => {
     const plan = plans.find((p) => p.id === planId);
     if (!plan) return;
 
-    if (currentSubscription?.planId === planId) {
+    const planNameLower = plan.name.toLowerCase();
+
+    if (isCurrentPlanSelected(plan)) {
       toast.info(copy.messages.alreadySubscribed);
       return;
     }
-
-    const planNameLower = plan.name.toLowerCase();
 
     // Show modal for Free plan
     if (planNameLower === "free" || planNameLower === "gratuito") {
@@ -459,6 +495,12 @@ export default function BusinessConfigPage() {
     // For other plans, proceed directly
     setSubscribing(true);
     try {
+      const resolvedPlanId = resolveSubscriptionPlanId(plan);
+      if (!resolvedPlanId) {
+        toast.error(copy.messages.subscriptionError);
+        return;
+      }
+
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/subscription/upgrade", {
         method: "POST",
@@ -466,7 +508,7 @@ export default function BusinessConfigPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ planId }),
+        body: JSON.stringify({ planId: resolvedPlanId }),
       });
 
       if (response.ok) {
@@ -488,29 +530,32 @@ export default function BusinessConfigPage() {
     setSubscribing(true);
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await fetch("/api/subscription/upgrade", {
+      const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          planId: selectedPlanForModal?.id,
-          billingData,
+          email: billingData?.email || user?.email,
+          fullName: user?.fullName || billingData?.businessName,
         }),
       });
 
-      if (response.ok) {
-        toast.success(
-          copy.messages.subscriptionUpdated(selectedPlanForModal?.name || ""),
-        );
-        setShowSubscriptionModal(false);
-        setSelectedPlanForModal(null);
-        fetchSubscription();
-      } else {
-        const data = await response.json();
+      const data = await response.json();
+
+      if (!response.ok) {
         toast.error(data.error || copy.messages.subscriptionError);
+        return;
       }
+
+      const checkoutUrl = data.data?.url;
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+        return;
+      }
+
+      toast.error(copy.messages.subscriptionError);
     } catch (error) {
       console.error("Error subscribing:", error);
       toast.error(copy.messages.subscriptionError);
@@ -522,6 +567,12 @@ export default function BusinessConfigPage() {
   const handleFreePlanConfirm = async () => {
     setSubscribing(true);
     try {
+      const resolvedPlanId = resolveSubscriptionPlanId(selectedPlanForModal);
+      if (!resolvedPlanId) {
+        toast.error(copy.messages.subscriptionError);
+        return;
+      }
+
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/subscription/upgrade", {
         method: "POST",
@@ -530,7 +581,7 @@ export default function BusinessConfigPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          planId: selectedPlanForModal?.id,
+          planId: resolvedPlanId,
         }),
       });
 
@@ -556,6 +607,12 @@ export default function BusinessConfigPage() {
   const handlePremiumConfirm = async (billingData: any) => {
     setSubscribing(true);
     try {
+      const resolvedPlanId = resolveSubscriptionPlanId(selectedPlanForModal);
+      if (!resolvedPlanId) {
+        toast.error(copy.messages.subscriptionError);
+        return;
+      }
+
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/subscription/upgrade", {
         method: "POST",
@@ -564,7 +621,7 @@ export default function BusinessConfigPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          planId: selectedPlanForModal?.id,
+          planId: resolvedPlanId,
           billingData,
         }),
       });
@@ -657,7 +714,7 @@ export default function BusinessConfigPage() {
                   <div
                     key={plan.id}
                     className={`p-4 rounded-lg border-2 transition-all ${
-                      currentSubscription?.planId === plan.id
+                      isCurrentPlanSelected(plan)
                         ? "border-purple-400 bg-purple-50 dark:border-purple-600/60 dark:bg-purple-900/30"
                         : "border-slate-300 bg-slate-50 hover:border-slate-400 dark:border-slate-700/50 dark:bg-slate-800/30 dark:hover:border-slate-600/50"
                     }`}
@@ -674,11 +731,11 @@ export default function BusinessConfigPage() {
                               Popular
                             </span>
                           )}
-                          {currentSubscription?.planId === plan.id && (
+                          {isCurrentPlanSelected(plan) ? (
                             <span className="px-2 py-0.5 text-xs font-semibold text-green-700 bg-green-100 border border-green-300 dark:text-green-300 dark:bg-green-900/50 dark:border-green-700/50 rounded-full">
-                              {copy.buttons.selectPlan}
+                              {copy.buttons.subscribed}
                             </span>
-                          )}
+                          ) : null}
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-400">
                           {plan.description}
@@ -707,19 +764,17 @@ export default function BusinessConfigPage() {
 
                     <button
                       onClick={() => handleSubscribe(plan.id)}
-                      disabled={
-                        subscribing || currentSubscription?.planId === plan.id
-                      }
+                      disabled={subscribing || isCurrentPlanSelected(plan)}
                       className={`w-full py-2 px-4 rounded-lg font-semibold text-sm transition-colors ${
-                        currentSubscription?.planId === plan.id
+                        isCurrentPlanSelected(plan)
                           ? "bg-slate-300 text-slate-500 cursor-not-allowed dark:bg-slate-700 dark:text-slate-400"
                           : "bg-purple-600 hover:bg-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                       }`}
                     >
                       {subscribing
                         ? copy.buttons.processing
-                        : currentSubscription?.planId === plan.id
-                          ? copy.buttons.selectPlan
+                        : isCurrentPlanSelected(plan)
+                          ? copy.buttons.subscribed
                           : copy.buttons.subscribeClick}
                     </button>
                   </div>

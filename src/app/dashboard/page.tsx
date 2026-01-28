@@ -19,17 +19,32 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { subscription, loading: subLoading } = useSubscription();
+  const { subscription } = useSubscription();
   const { t } = useLanguage();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
+      setLoading(false);
       router.push("/auth/login");
       return;
     }
-    setUser(JSON.parse(storedUser));
-    setLoading(false);
+
+    try {
+      const parsedUser = JSON.parse(storedUser) as User;
+      if (!parsedUser?.id || !parsedUser?.email) {
+        localStorage.removeItem("user");
+        setLoading(false);
+        router.push("/auth/login");
+        return;
+      }
+      setUser(parsedUser);
+    } catch {
+      localStorage.removeItem("user");
+      router.push("/auth/login");
+    } finally {
+      setLoading(false);
+    }
   }, [router]);
 
   if (loading) {
@@ -47,6 +62,15 @@ export default function Dashboard() {
       : subscription?.planId === "ENTERPRISE"
         ? String(t("planEnterprise", "dashboard"))
         : String(t("planBasic", "dashboard"));
+
+  const nextRenewalDate = subscription?.currentPeriodEnd
+    ? new Date(subscription.currentPeriodEnd)
+    : null;
+  const nextRenewalLabel = nextRenewalDate
+    ? Number.isNaN(nextRenewalDate.getTime())
+      ? "N/A"
+      : nextRenewalDate.toLocaleDateString()
+    : "N/A";
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
@@ -113,9 +137,7 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2 mt-1">
                   <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                   <p className="font-bold text-gray-900 dark:text-white">
-                    {new Date(
-                      subscription.currentPeriodEnd,
-                    ).toLocaleDateString()}
+                    {nextRenewalLabel}
                   </p>
                 </div>
               </div>

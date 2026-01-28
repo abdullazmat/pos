@@ -73,7 +73,12 @@ export default function ExpensesPage() {
       router.push("/auth/login");
       return;
     }
-    setUser(JSON.parse(userStr));
+    const parsedUser = JSON.parse(userStr);
+    setUser(parsedUser);
+    if (parsedUser?.role !== "admin") {
+      router.push("/dashboard");
+      return;
+    }
     fetchExpenses();
   }, [router]);
 

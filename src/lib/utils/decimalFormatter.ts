@@ -32,14 +32,14 @@ export function parseQuantity(value: string): number | null {
   if (isNaN(parsed)) return null;
   if (parsed < 0) return null;
 
-  // Check for maximum 3 decimal places
+  // Check for maximum 4 decimal places
   const decimalPlaces = (normalized.split(".")[1] || "").length;
-  if (decimalPlaces > 3) {
+  if (decimalPlaces > 4) {
     return null; // Invalid - too many decimal places
   }
 
-  // Round to 3 decimal places to avoid floating point errors
-  return Math.round(parsed * 1000) / 1000;
+  // Do not round, return as-is (up to 4 decimals)
+  return parsed;
 }
 
 /**
@@ -51,22 +51,20 @@ export function parseQuantity(value: string): number | null {
  */
 export function formatQuantity(
   value: number,
-  decimalPlaces: number = 3,
+  decimalPlaces: number = 4,
 ): string {
   if (typeof value !== "number" || isNaN(value)) return "0";
-
-  // Round to specified decimal places
-  const rounded =
-    Math.round(value * Math.pow(10, decimalPlaces)) /
-    Math.pow(10, decimalPlaces);
-
-  // Convert to string with maximum decimal places
-  const str = rounded.toFixed(decimalPlaces);
-
-  // Remove trailing zeros but keep at least one decimal if originally has decimals
-  const trimmed = str.replace(/\.?0+$/, "");
-
-  return trimmed || "0";
+  // Show up to 4 decimals, do not round
+  let str = value.toString();
+  if (str.includes(".")) {
+    // Limit to 4 decimals, but do not pad
+    const [intPart, decPart] = str.split(".");
+    str = intPart + "." + decPart.slice(0, 4);
+    // Remove trailing zeros
+    str = str.replace(/(\.\d*?[1-9])0+$/, "$1");
+    str = str.replace(/\.$/, "");
+  }
+  return str;
 }
 
 /**
@@ -88,13 +86,13 @@ export function validateQuantity(
   }
 
   if (isSoldByWeight) {
-    // For weight products: allow decimals up to 3 places
+    // For weight products: allow decimals up to 4 places, minimum 3
     const decimalPlaces = (quantity.toString().split(".")[1] || "").length;
-    if (decimalPlaces > 3) {
+    if (decimalPlaces < 3 || decimalPlaces > 4) {
       return {
         isValid: false,
         error:
-          "Maximum 3 decimal places allowed for weight products (e.g., 1.254 kg)",
+          "Quantity must have 3 or 4 decimal places for weight products (e.g., 1.560 or 1.5600)",
       };
     }
     // Minimum weight: 0.001 kg (1 gram)
@@ -178,15 +176,15 @@ export function getInputPlaceholder(
   const placeholders = {
     en: {
       unit: "e.g., 5 units",
-      weight: "e.g., 1.254 kg (or 1,254)",
+      weight: "e.g., 1.560 kg (or 1,560)",
     },
     es: {
       unit: "ej: 5 unidades",
-      weight: "ej: 1.254 kg (o 1,254)",
+      weight: "ej: 1.560 kg (o 1,560)",
     },
     pt: {
       unit: "ex: 5 unidades",
-      weight: "ex: 1.254 kg (ou 1,254)",
+      weight: "ex: 1.560 kg (ou 1,560)",
     },
   };
 

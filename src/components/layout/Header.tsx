@@ -64,7 +64,27 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
     router.push("/");
   };
 
-  const navItems = [
+  // Only admin can access these sections
+  const adminOnlyRoutes = [
+    "/clients",
+    "/expenses",
+    "/reports",
+    "/reportes-fiscales",
+    "/admin",
+    "/business-config",
+    "/plan-comparison",
+  ];
+
+  const cashierNavItems = [
+    { href: "/pos", label: t("nav.posSale", "pos"), icon: ShoppingCart },
+    {
+      href: "/cash-register",
+      label: t("nav.cashRegister", "pos"),
+      icon: DollarSign,
+    },
+  ];
+
+  const supervisorNavItems = [
     { href: "/pos", label: t("nav.posSale", "pos"), icon: ShoppingCart },
     {
       href: "/cash-register",
@@ -74,8 +94,17 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
     { href: "/products", label: t("nav.products", "pos"), icon: Package },
     { href: "/categories", label: t("nav.categories", "pos"), icon: Tag },
     { href: "/stock", label: t("nav.stock", "pos"), icon: Package },
-    { href: "/clients", label: t("nav.clients", "pos"), icon: Users },
     { href: "/suppliers", label: t("nav.suppliers", "pos"), icon: Truck },
+    {
+      href: "/keyboard-config",
+      label: t("nav.keyboardConfig", "pos"),
+      icon: Keyboard,
+    },
+  ];
+
+  const adminNavItems = [
+    ...supervisorNavItems,
+    { href: "/clients", label: t("nav.clients", "pos"), icon: Users },
     { href: "/expenses", label: t("nav.expenses", "pos"), icon: Receipt },
     { href: "/reports", label: t("nav.reports", "pos"), icon: BarChart3 },
     {
@@ -84,11 +113,6 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
       icon: FileText,
     },
     { href: "/admin", label: t("nav.users", "pos"), icon: UserCog },
-    {
-      href: "/keyboard-config",
-      label: t("nav.keyboardConfig", "pos"),
-      icon: Keyboard,
-    },
     {
       href: "/business-config",
       label: t("nav.businessConfig", "pos"),
@@ -100,6 +124,13 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
       icon: CreditCard,
     },
   ];
+
+  const navItems =
+    user?.role === "admin"
+      ? adminNavItems
+      : user?.role === "supervisor"
+        ? supervisorNavItems
+        : cashierNavItems;
 
   const isActive = (href: string) => pathname === href;
 
@@ -122,10 +153,20 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
   const planInfo = getPlanInfo();
 
   const getRoleLabel = () => {
-    if (user?.role === "admin") return "Administrador";
-    if (user?.role === "supervisor") return "Supervisor";
-    if (user?.role === "cashier") return "Cajero";
-    return user?.role || "Usuario";
+    const roleKey = String(user?.role || "user").toLowerCase();
+    const roleMap: Record<string, string> = {
+      admin: t("roles.admin", "pos"),
+      supervisor: t("roles.supervisor", "pos"),
+      cashier: t("roles.cashier", "pos"),
+      user: t("roles.user", "pos"),
+    };
+
+    const resolved = roleMap[roleKey] || roleMap.user;
+    if (resolved === `roles.${roleKey}` || resolved === "roles.user") {
+      return roleKey.charAt(0).toUpperCase() + roleKey.slice(1);
+    }
+
+    return resolved;
   };
 
   const roleLabel = getRoleLabel();
@@ -190,12 +231,12 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-40 bg-white dark:bg-slate-950 shadow-md dark:shadow-lg dark:shadow-black/50">
-      <div className="bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-800">
+    <nav className="sticky top-0 z-40 bg-white shadow-md dark:bg-slate-950 dark:shadow-lg dark:shadow-black/50">
+      <div className="bg-white border-b border-gray-200 dark:bg-slate-950 dark:border-slate-800">
         <div className="px-4 py-3 mx-auto max-w-7xl">
           <div className="flex items-center justify-between">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="bg-blue-600 dark:bg-blue-500 p-2 rounded-lg">
+              <div className="p-2 bg-blue-600 rounded-lg dark:bg-blue-500">
                 <Store className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -221,7 +262,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
 
             <div className="flex items-center gap-4">
               {cashRegister?.isOpen && (
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 px-4 py-2 rounded-lg hidden md:flex items-center gap-2">
+                <div className="items-center hidden gap-2 px-4 py-2 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800 md:flex">
                   <span className="text-sm font-medium text-green-800 dark:text-green-300">
                     Caja Abierta - ${cashRegister.expected.toFixed(2)}
                   </span>
@@ -233,11 +274,11 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                 <button
                   ref={languageButtonRef}
                   onClick={() => setShowLanguageMenu((prev) => !prev)}
-                  className="flex items-center gap-2 p-2 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-slate-800"
+                  className="flex items-center gap-2 p-2 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800"
                   title={t("language", "common")}
                 >
                   <Globe className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <span className="text-sm font-medium text-gray-700 uppercase dark:text-gray-300">
                     {currentLanguage}
                   </span>
                 </button>
@@ -277,7 +318,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                   onClick={() =>
                     setTheme(resolvedTheme === "dark" ? "light" : "dark")
                   }
-                  className="p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-slate-800"
+                  className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
                   title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
                 >
                   {resolvedTheme === "dark" ? (
@@ -290,7 +331,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
 
               {user && (
                 <div
-                  className="relative flex items-center gap-2 p-2 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-slate-800"
+                  className="relative flex items-center gap-2 p-2 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800"
                   onMouseEnter={() => setShowUserCard(true)}
                   onMouseLeave={() => {
                     setShowUserCard(false);
@@ -301,14 +342,14 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                   }}
                   tabIndex={0}
                 >
-                  <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full">
+                  <div className="p-2 bg-blue-100 rounded-full dark:bg-blue-900/30">
                     <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <div className="text-left hidden md:block">
+                  <div className="hidden text-left md:block">
                     <p className="text-sm font-semibold text-gray-900 dark:text-white">
                       {user.fullName || "Usuario"}
                     </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 capitalize">
+                    <p className="text-xs text-gray-600 capitalize dark:text-gray-400">
                       {roleLabel}
                     </p>
                   </div>
@@ -324,35 +365,35 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                   >
                     <div className="p-4 space-y-3">
                       <div className="flex items-center gap-3">
-                        <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-2 rounded-full">
+                        <div className="p-2 text-blue-600 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">
                           <User className="w-4 h-4" />
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-gray-900 dark:text-white">
                             {user.fullName || "Usuario"}
                           </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 capitalize">
+                          <p className="text-xs text-gray-600 capitalize dark:text-gray-400">
                             {roleLabel}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-2 rounded-full">
+                        <div className="p-2 text-purple-600 bg-purple-100 rounded-full dark:bg-purple-900/30 dark:text-purple-400">
                           <Shield className="w-4 h-4" />
                         </div>
                         <div className="flex-1">
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             {t("status", "common")}
                           </p>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                          <p className="text-sm font-medium text-gray-900 capitalize dark:text-white">
                             {roleLabel}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <div className="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 p-2 rounded-full">
+                        <div className="p-2 text-orange-600 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">
                           <CreditCard className="w-4 h-4" />
                         </div>
                         <div className="flex-1">
@@ -405,7 +446,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
 
               <button
                 onClick={handleLogout}
-                className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-lg transition-colors"
+                className="p-2 text-red-600 transition-colors rounded-lg dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                 title={t("logout", "common")}
               >
                 <LogOut className="w-5 h-5" />
@@ -415,7 +456,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-800 overflow-x-auto">
+      <div className="overflow-x-auto bg-white border-b border-gray-200 dark:bg-slate-950 dark:border-slate-800">
         <div className="px-4 mx-auto max-w-7xl">
           <div className="flex gap-1">
             {navItems.map((item) => {

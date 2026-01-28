@@ -3,7 +3,7 @@ import { Schema, model, Document, models } from "mongoose";
 export interface IProduct extends Document {
   name: string;
   code: string;
-  barcode?: string;
+  barcodes?: string[];
   description?: string;
   cost: number;
   price: number;
@@ -28,7 +28,7 @@ const productSchema = new Schema<IProduct>(
       type: String,
       required: true,
     },
-    barcode: String,
+    barcodes: [String],
     description: String,
     cost: {
       type: Number,
@@ -76,6 +76,6 @@ const productSchema = new Schema<IProduct>(
 );
 
 productSchema.index({ businessId: 1, code: 1 }, { unique: true });
-productSchema.index({ businessId: 1, barcode: 1 });
+productSchema.index({ businessId: 1, barcodes: 1 });
 
 export default models.Product || model<IProduct>("Product", productSchema);

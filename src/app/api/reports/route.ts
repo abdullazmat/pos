@@ -8,6 +8,8 @@ import {
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const authResult = await authMiddleware(req);
@@ -72,7 +74,7 @@ export async function GET(req: NextRequest) {
       });
 
       const dailyData = Object.values(dailyStats).sort((a, b) =>
-        a.date.localeCompare(b.date)
+        a.date.localeCompare(b.date),
       );
 
       return generateSuccessResponse({

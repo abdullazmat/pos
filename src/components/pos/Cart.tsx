@@ -96,8 +96,25 @@ export default function Cart({
     }
   }, [paymentMethod, onCheckout]);
 
+  // Prevent Delete key from clearing the cart
+  // Only allow the clear cart button to do this
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // Prevent Delete key from clearing the cart
+    if (
+      e.key === "Delete" &&
+      document.activeElement?.tagName !== "INPUT" &&
+      document.activeElement?.tagName !== "TEXTAREA"
+    ) {
+      e.preventDefault();
+    }
+  };
+
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md dark:shadow-lg dark:shadow-black/50 p-6 h-full flex flex-col">
+    <div
+      className="bg-white dark:bg-slate-900 rounded-lg shadow-md dark:shadow-lg dark:shadow-black/50 p-6 h-full flex flex-col"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+    >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
           <svg
@@ -189,7 +206,7 @@ export default function Cart({
                       item.isSoldByWeight || false,
                       "en",
                     )}
-                    value={formatQuantity(item.quantity)}
+                    value={formatQuantity(item.quantity, 4)}
                     onChange={(e) => {
                       const normalized = normalizeDecimalSeparator(
                         e.target.value,
@@ -206,9 +223,6 @@ export default function Cart({
                           onUpdateQuantity(item.productId, parsed);
                         }
                         // If invalid, silently reject (don't update)
-                      } else if (e.target.value === "") {
-                        // Allow clearing the input
-                        onUpdateQuantity(item.productId, 0);
                       }
                     }}
                     onBlur={(e) => {
@@ -224,7 +238,7 @@ export default function Cart({
                   />
                   {item.isSoldByWeight && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Use comma or period (1,254 or 1.254)
+                      Use comma or period (e.g., 1,560 or 1.560)
                     </p>
                   )}
                 </div>

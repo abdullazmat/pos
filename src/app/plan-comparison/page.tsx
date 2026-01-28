@@ -91,7 +91,7 @@ const PLAN_COMPARISON_COPY = {
     },
     buttons: {
       select: "Seleccionar Plan",
-      current: "Plan Actual",
+      current: "Plan seleccionado",
       subscribe: "Click para suscribirse →",
     },
     planNames: {
@@ -169,7 +169,7 @@ const PLAN_COMPARISON_COPY = {
     },
     buttons: {
       select: "Select Plan",
-      current: "Current Plan",
+      current: "Selected plan",
       subscribe: "Subscribe now →",
     },
     planNames: {
@@ -247,7 +247,7 @@ const PLAN_COMPARISON_COPY = {
     },
     buttons: {
       select: "Selecionar Plano",
-      current: "Plano Atual",
+      current: "Plano selecionado",
       subscribe: "Clique para assinar →",
     },
     planNames: {
@@ -275,13 +275,39 @@ export default function PlanComparisonPage() {
       currentLanguage as keyof typeof PLAN_COMPARISON_COPY
     ] || PLAN_COMPARISON_COPY.es;
 
+  const normalizePlanId = (planId?: string | null) => {
+    const normalized = (planId || "").toUpperCase();
+
+    if (normalized === "FREE") return "BASIC";
+    if (normalized === "PRO") return "PROFESSIONAL";
+    if (normalized === "PREMIUM") return "ENTERPRISE";
+
+    return normalized;
+  };
+
+  const isCurrentPlan = (planId: string) => {
+    const normalizedCurrentPlan = normalizePlanId(subscription?.planId);
+    const normalizedPlan = normalizePlanId(planId);
+
+    return Boolean(
+      normalizedCurrentPlan &&
+      normalizedPlan &&
+      normalizedCurrentPlan === normalizedPlan,
+    );
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
       router.push("/auth/login");
       return;
     }
-    setUser(JSON.parse(storedUser));
+    const parsedUser = JSON.parse(storedUser);
+    setUser(parsedUser);
+    if (parsedUser?.role !== "admin") {
+      router.push("/dashboard");
+      return;
+    }
     fetchPlans();
     fetchSubscription();
   }, [router]);
@@ -316,8 +342,14 @@ export default function PlanComparisonPage() {
   };
 
   const currentPlanName = (() => {
-    const plan = plans.find((p) => p.id === subscription?.planId);
-    return plan?.name || (subscription?.planId === "PRO" ? "Pro" : copy.free);
+    const normalizedCurrentPlan = normalizePlanId(subscription?.planId);
+    const plan = plans.find(
+      (p) => normalizePlanId(p.id) === normalizedCurrentPlan,
+    );
+    return (
+      plan?.name ||
+      (normalizedCurrentPlan === "PROFESSIONAL" ? "Pro" : copy.free)
+    );
   })();
 
   if (loading) {
@@ -483,7 +515,7 @@ export default function PlanComparisonPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
           {/* Free */}
           <div
-            className={`rounded-xl border ${subscription?.planId === "FREE" ? "border-purple-600" : "border-slate-300 dark:border-slate-800"} bg-white dark:bg-slate-900 p-5`}
+            className={`rounded-xl border ${isCurrentPlan("FREE") ? "border-purple-600" : "border-slate-300 dark:border-slate-800"} bg-white dark:bg-slate-900 p-5`}
           >
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2 py-0.5 text-xs font-semibold bg-slate-200 border border-slate-300 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 rounded">
@@ -499,9 +531,9 @@ export default function PlanComparisonPage() {
             </div>
             <div className="mt-4">
               <button
-                className={`w-full py-2 rounded-lg text-sm font-semibold ${subscription?.planId === "FREE" ? "bg-purple-700 text-white" : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300"}`}
+                className={`w-full py-2 rounded-lg text-sm font-semibold ${isCurrentPlan("FREE") ? "bg-purple-700 text-white" : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300"}`}
               >
-                {subscription?.planId === "FREE"
+                {isCurrentPlan("FREE")
                   ? copy.buttons.current
                   : copy.buttons.select}
               </button>
@@ -510,7 +542,7 @@ export default function PlanComparisonPage() {
 
           {/* Pro */}
           <div
-            className={`rounded-xl border ${subscription?.planId === "PRO" ? "border-purple-600" : "border-slate-300 dark:border-slate-800"} bg-white dark:bg-slate-900 p-5`}
+            className={`rounded-xl border ${isCurrentPlan("PRO") ? "border-purple-600" : "border-slate-300 dark:border-slate-800"} bg-white dark:bg-slate-900 p-5`}
           >
             <div className="flex items-center gap-2 mb-2">
               <Star className="w-4 h-4 text-yellow-500 dark:text-yellow-300" />
@@ -528,9 +560,9 @@ export default function PlanComparisonPage() {
             <div className="mt-4">
               <Link
                 href="/business-config"
-                className={`block w-full py-2 rounded-lg text-sm font-semibold ${subscription?.planId === "PRO" ? "bg-purple-700 text-white" : "bg-purple-600 hover:bg-purple-500 text-white"}`}
+                className={`block w-full py-2 rounded-lg text-sm font-semibold ${isCurrentPlan("PRO") ? "bg-purple-700 text-white" : "bg-purple-600 hover:bg-purple-500 text-white"}`}
               >
-                {subscription?.planId === "PRO"
+                {isCurrentPlan("PRO")
                   ? copy.buttons.current
                   : copy.buttons.subscribe}
               </Link>

@@ -7,6 +7,8 @@ import {
 } from "@/lib/utils/helpers";
 import AFIPService from "@/lib/services/afipService";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/afip/config
  * Get AFIP configuration and available options

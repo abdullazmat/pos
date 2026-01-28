@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { InvoiceChannel } from "@/lib/models/Invoice";
 import { toast } from "react-toastify";
 import { useLanguage } from "@/lib/context/LanguageContext";
+import { formatQuantity } from "@/lib/utils/decimalFormatter";
 
 interface CartItem {
   productId: string;
@@ -197,18 +198,38 @@ export default function Cart({
                     Cant.{item.isSoldByWeight ? " (kg)" : ""}
                   </label>
                   <input
-                    type="number"
-                    min={item.isSoldByWeight ? "0.01" : "1"}
-                    step={item.isSoldByWeight ? "0.01" : "1"}
-                    value={item.quantity}
-                    onChange={(e) =>
-                      onUpdateQuantity(
-                        item.productId,
-                        item.isSoldByWeight
-                          ? parseFloat(e.target.value) || 0
-                          : parseInt(e.target.value) || 0,
-                      )
+                    type="text"
+                    inputMode={item.isSoldByWeight ? "decimal" : "numeric"}
+                    placeholder={
+                      item.isSoldByWeight
+                        ? "e.g., 1.560 kg (or 1,560)"
+                        : "e.g., 5 units"
                     }
+                    value={formatQuantity(item.quantity, 4)}
+                    onChange={(e) => {
+                      const normalized = e.target.value.replace(",", ".");
+                      const parsed = parseFloat(normalized);
+                      if (item.isSoldByWeight) {
+                        // Allow up to 4 decimals, no rounding
+                        if (
+                          /^\d+(\.|,)?\d{0,4}$/.test(
+                            e.target.value.replace(",", "."),
+                          )
+                        ) {
+                          onUpdateQuantity(item.productId, parsed || 0);
+                        }
+                      } else {
+                        if (
+                          /^\d+$/.test(e.target.value) ||
+                          e.target.value === ""
+                        ) {
+                          onUpdateQuantity(
+                            item.productId,
+                            parseInt(e.target.value) || 0,
+                          );
+                        }
+                      }
+                    }}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
                   />
                 </div>

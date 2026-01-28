@@ -4,7 +4,7 @@ export interface IStockHistory extends Document {
   businessId: Schema.Types.ObjectId;
   productId: Schema.Types.ObjectId;
   type: "sale" | "purchase" | "adjustment";
-  quantity: number;
+  quantity: Schema.Types.Decimal128 | number | string;
   reference?: Schema.Types.ObjectId;
   referenceModel?: string;
   notes?: string;
@@ -29,8 +29,9 @@ const stockHistorySchema = new Schema<IStockHistory>(
       required: true,
     },
     quantity: {
-      type: Number,
+      type: Schema.Types.Decimal128,
       required: true,
+      min: 0.0001,
     },
     reference: Schema.Types.ObjectId,
     referenceModel: String,
@@ -38,7 +39,7 @@ const stockHistorySchema = new Schema<IStockHistory>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 stockHistorySchema.index({ businessId: 1, productId: 1 });

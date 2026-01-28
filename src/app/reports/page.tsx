@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import { apiFetch } from "@/lib/utils/apiFetch";
 import Header from "@/components/layout/Header";
-import { useSubscription } from "@/lib/hooks/useSubscription";
 import {
   Calendar,
   Download,
@@ -182,7 +181,6 @@ export default function ReportsPage() {
   const { t } = useGlobalLanguage();
   const { currentLanguage } = useGlobalLanguage();
   const router = useRouter();
-  const { subscription, loading: subLoading } = useSubscription();
   const [activeTab, setActiveTab] = useState("general");
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -218,10 +216,31 @@ export default function ReportsPage() {
   useEffect(() => {
     const userStr = localStorage.getItem("user");
     if (!userStr) {
+      setLoading(false);
       router.push("/auth/login");
       return;
     }
-    setUser(JSON.parse(userStr));
+
+    try {
+      const parsedUser = JSON.parse(userStr);
+      if (!parsedUser?.id || !parsedUser?.email) {
+        localStorage.removeItem("user");
+        setLoading(false);
+        router.push("/auth/login");
+        return;
+      }
+      setUser(parsedUser);
+      if (parsedUser?.role !== "admin") {
+        setLoading(false);
+        router.push("/dashboard");
+        return;
+      }
+    } catch {
+      localStorage.removeItem("user");
+      setLoading(false);
+      router.push("/auth/login");
+      return;
+    }
 
     // Set default range to last 30 days
     const today = new Date();
@@ -274,11 +293,22 @@ export default function ReportsPage() {
                   : 0;
           return sum + gross;
         }, 0);
+        const parseQuantity = (value: any) => {
+          if (typeof value === "number") return value;
+          if (typeof value === "string") {
+            const normalized = value.replace(",", ".");
+            const parsed = Number.parseFloat(normalized);
+            return Number.isFinite(parsed) ? parsed : 0;
+          }
+          return 0;
+        };
+
         const totalItems = sales.reduce(
           (sum: number, s: any) =>
             sum +
             (s.items?.reduce(
-              (itemSum: number, item: any) => itemSum + (item.quantity || 0),
+              (itemSum: number, item: any) =>
+                itemSum + parseQuantity(item.quantity),
               0,
             ) || 0),
           0,
@@ -304,7 +334,7 @@ export default function ReportsPage() {
           (sale.items || []).forEach((item: any) => {
             const name =
               item.productName || item.name || item.title || "Unnamed product";
-            const qty = Number(item.quantity) || 0;
+            const qty = parseQuantity(item.quantity);
             const revenue =
               typeof item.total === "number"
                 ? item.total
@@ -584,9 +614,7 @@ export default function ReportsPage() {
                     {loading
                       ? "..."
                       : reportData?.totalItems
-                        ? Number(reportData.totalItems) % 1 === 0
-                          ? Math.round(reportData.totalItems)
-                          : Number(reportData.totalItems).toFixed(1)
+                        ? Math.floor(Number(reportData.totalItems))
                         : 0}
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">

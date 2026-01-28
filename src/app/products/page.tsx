@@ -86,8 +86,8 @@ const PRODUCT_COPY = {
       stockUnitHint: "(en unidades)",
       stockPlaceholder: "Ej: 100",
       codeLabel: "Código",
-      codePlaceholder: "Código automático de 4 dígitos",
-      codeHint: "Se asigna automáticamente (ej: 0001, 0002...)",
+      codePlaceholder: "Código automático (ej: 697-20260125-40100)",
+      codeHint: "Se asigna automáticamente (ej: 697-20260125-40100)",
       minStockLabel: "Stock Mínimo",
       minStockHint: "(en unidades)",
       minStockPlaceholder: "5",
@@ -135,6 +135,11 @@ const PRODUCT_COPY = {
       limitName: "Productos",
     },
     toast: {
+      duplicateNameOrBarcode:
+        "Ya existe un producto con el mismo nombre o código de barras.",
+      duplicateCode: "Ya existe un producto con el mismo código.",
+      missingRequired: "Faltan campos obligatorios.",
+      productNotFound: "Producto no encontrado.",
       selectFile: "Selecciona un archivo CSV o Excel",
       sessionExpired: "Sesión expirada. Inicia sesión nuevamente.",
       importing: "Importando archivo...",
@@ -207,8 +212,8 @@ const PRODUCT_COPY = {
       stockUnitHint: "(units)",
       stockPlaceholder: "e.g., 100",
       codeLabel: "Code",
-      codePlaceholder: "Automatic 4-digit code",
-      codeHint: "Automatically assigned (e.g: 0001, 0002...)",
+      codePlaceholder: "Automatic code (e.g: 697-20260125-40100)",
+      codeHint: "Automatically assigned (e.g: 697-20260125-40100)",
       minStockLabel: "Min Stock",
       minStockHint: "(units)",
       minStockPlaceholder: "5",
@@ -255,6 +260,11 @@ const PRODUCT_COPY = {
       limitName: "Products",
     },
     toast: {
+      duplicateNameOrBarcode:
+        "A product with the same name or barcode already exists.",
+      duplicateCode: "A product with the same code already exists.",
+      missingRequired: "Missing required fields.",
+      productNotFound: "Product not found.",
       selectFile: "Select a CSV or Excel file",
       sessionExpired: "Session expired. Please sign in again.",
       importing: "Importing file...",
@@ -327,8 +337,8 @@ const PRODUCT_COPY = {
       stockUnitHint: "(em unidades)",
       stockPlaceholder: "Ex.: 100",
       codeLabel: "Código",
-      codePlaceholder: "Código automático de 4 dígitos",
-      codeHint: "Atribuído automaticamente (ex: 0001, 0002...)",
+      codePlaceholder: "Código automático (ex: 697-20260125-40100)",
+      codeHint: "Atribuído automaticamente (ex: 697-20260125-40100)",
       minStockLabel: "Estoque Mínimo",
       minStockHint: "(em unidades)",
       minStockPlaceholder: "5",
@@ -375,6 +385,11 @@ const PRODUCT_COPY = {
       limitName: "Produtos",
     },
     toast: {
+      duplicateNameOrBarcode:
+        "Já existe um produto com o mesmo nome ou código de barras.",
+      duplicateCode: "Já existe um produto com o mesmo código.",
+      missingRequired: "Campos obrigatórios ausentes.",
+      productNotFound: "Produto não encontrado.",
       selectFile: "Selecione um arquivo CSV ou Excel",
       sessionExpired: "Sessão expirada. Faça login novamente.",
       importing: "Importando arquivo...",
@@ -398,6 +413,10 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
@@ -415,6 +434,7 @@ export default function ProductsPage() {
     id: string;
     name: string;
   } | null>(null);
+  const isSubmittingRef = useRef(false);
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -422,7 +442,10 @@ export default function ProductsPage() {
   const [formData, setFormData] = useState({
     name: "",
     code: "",
-    barcode: "",
+    barcode1: "",
+    barcode2: "",
+    barcode3: "",
+    barcode4: "",
     description: "",
     cost: "",
     margin: "",
@@ -467,8 +490,9 @@ export default function ProductsPage() {
     }
   };
 
-  const loadProducts = async () => {
+  const loadProducts = async (showRefresh = false) => {
     try {
+      if (showRefresh) setIsRefreshing(true);
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/products", {
         headers: { Authorization: `Bearer ${token}` },
@@ -478,7 +502,11 @@ export default function ProductsPage() {
     } catch (error) {
       console.error("Load products error:", error);
     } finally {
-      setLoading(false);
+      if (isInitialLoading) {
+        setLoading(false);
+        setIsInitialLoading(false);
+      }
+      setIsRefreshing(false);
     }
   };
 
@@ -591,7 +619,12 @@ export default function ProductsPage() {
   const filteredProducts = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = products.filter((p) =>
-      [p.name, p.code, p.category, p.barcode]
+      [
+        p.name,
+        p.code,
+        p.category,
+        ...(Array.isArray(p.barcodes) ? p.barcodes : []),
+      ]
         .filter(Boolean)
         .some((v: string) => v.toLowerCase().includes(q)),
     );
@@ -608,9 +641,25 @@ export default function ProductsPage() {
     return list;
   }, [products, query, sortBy, sortDir]);
 
+  const resolveProductErrorKey = (error: unknown) => {
+    if (typeof error !== "string") return null;
+
+    const normalized = error.toLowerCase();
+
+    if (normalized.includes("missing required")) return "missingRequired";
+    if (normalized.includes("product not found")) return "productNotFound";
+    if (normalized.includes("product code already exists"))
+      return "duplicateCode";
+
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving || isSubmittingRef.current) return;
     try {
+      isSubmittingRef.current = true;
+      setIsSaving(true);
       const token = localStorage.getItem("accessToken");
       const payload: any = {
         ...formData,
@@ -620,7 +669,18 @@ export default function ProductsPage() {
         minStock: parseInt(formData.minStock),
         margin: parseFloat(formData.margin),
         id: editingId || undefined,
+        barcodes: [
+          formData.barcode1,
+          formData.barcode2,
+          formData.barcode3,
+          formData.barcode4,
+        ].filter((code) => String(code || "").trim().length > 0),
       };
+
+      delete payload.barcode1;
+      delete payload.barcode2;
+      delete payload.barcode3;
+      delete payload.barcode4;
 
       // Always drop code on POST (creation) - it will be auto-generated
       if (!editingId) {
@@ -638,7 +698,22 @@ export default function ProductsPage() {
 
       const data = await response.json();
       if (!response.ok) {
-        toast.error(`${data.error || copy.toast.saveError}`);
+        // If backend returns an error with a key, use the i18n message
+        if (data?.error && typeof data.error === "object" && data.error.key) {
+          const errorKey =
+            typeof data.error.key === "string" ? data.error.key : null;
+          const message = errorKey
+            ? copy.toast[errorKey as keyof typeof copy.toast] ||
+              copy.toast.saveError
+            : copy.toast.saveError;
+          toast.error(message);
+        } else {
+          const mappedKey = resolveProductErrorKey(data?.error);
+          const fallbackMessage = data?.error || copy.toast.saveError;
+          toast.error(
+            copy.toast[mappedKey as keyof typeof copy.toast] || fallbackMessage,
+          );
+        }
         return;
       }
 
@@ -655,7 +730,10 @@ export default function ProductsPage() {
       setFormData({
         name: "",
         code: "",
-        barcode: "",
+        barcode1: "",
+        barcode2: "",
+        barcode3: "",
+        barcode4: "",
         description: "",
         cost: "",
         margin: "",
@@ -672,6 +750,9 @@ export default function ProductsPage() {
     } catch (error) {
       console.error("Create product error:", error);
       toast.error(copy.toast.saveError);
+    } finally {
+      isSubmittingRef.current = false;
+      setIsSaving(false);
     }
   };
 
@@ -684,6 +765,7 @@ export default function ProductsPage() {
     if (!productToDelete) return;
 
     try {
+      setIsDeleting(true);
       const token = localStorage.getItem("accessToken");
       const response = await fetch(`/api/products?id=${productToDelete.id}`, {
         method: "DELETE",
@@ -701,6 +783,7 @@ export default function ProductsPage() {
       console.error("Error deleting product:", error);
       toast.error(copy.toast.deleteError);
     } finally {
+      setIsDeleting(false);
       setShowDeleteModal(false);
       setProductToDelete(null);
     }
@@ -755,11 +838,14 @@ export default function ProductsPage() {
             </div>
             <div className="flex items-center gap-3">
               <button
-                onClick={loadProducts}
-                className="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg font-semibold flex items-center gap-2 transition shadow-sm dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                onClick={() => loadProducts(true)}
+                disabled={isRefreshing}
+                className="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg font-semibold flex items-center gap-2 transition shadow-sm disabled:opacity-60 disabled:cursor-not-allowed dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                 title={copy.refreshLabel}
               >
-                <RefreshCw className="w-5 h-5" />
+                <RefreshCw
+                  className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`}
+                />
               </button>
               <button
                 onClick={() => setShowImportModal(true)}
@@ -1065,7 +1151,10 @@ export default function ProductsPage() {
                     setFormData({
                       name: "",
                       code: "",
-                      barcode: "",
+                      barcode1: "",
+                      barcode2: "",
+                      barcode3: "",
+                      barcode4: "",
                       description: "",
                       cost: "",
                       margin: "",
@@ -1119,17 +1208,59 @@ export default function ProductsPage() {
                   />
                 </div>
 
-                {/* Barcode and Category */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {/* Barcodes and Category */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div>
                     <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {t("pages.products.barcode", "pos")}
+                      {t("pages.products.barcode", "pos")} 1
                     </label>
                     <input
                       type="text"
-                      value={formData.barcode}
+                      value={formData.barcode1}
                       onChange={(e) =>
-                        setFormData({ ...formData, barcode: e.target.value })
+                        setFormData({ ...formData, barcode1: e.target.value })
+                      }
+                      placeholder={copy.form.barcodePlaceholder}
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                      {t("pages.products.barcode", "pos")} 2
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.barcode2}
+                      onChange={(e) =>
+                        setFormData({ ...formData, barcode2: e.target.value })
+                      }
+                      placeholder={copy.form.barcodePlaceholder}
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                      {t("pages.products.barcode", "pos")} 3
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.barcode3}
+                      onChange={(e) =>
+                        setFormData({ ...formData, barcode3: e.target.value })
+                      }
+                      placeholder={copy.form.barcodePlaceholder}
+                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                      {t("pages.products.barcode", "pos")} 4
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.barcode4}
+                      onChange={(e) =>
+                        setFormData({ ...formData, barcode4: e.target.value })
                       }
                       placeholder={copy.form.barcodePlaceholder}
                       className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
@@ -1281,7 +1412,7 @@ export default function ProductsPage() {
                         {copy.form.codeHint || "(Generado automáticamente)"}
                       </span>
                     </label>
-                    <div className="flex items-center w-full px-4 py-2 bg-slate-100 border rounded-lg border-slate-300 text-slate-600 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-300">
+                    <div className="flex items-center w-full px-4 py-2 border rounded-lg bg-slate-100 border-slate-300 text-slate-600 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-300">
                       <svg
                         className="w-5 h-5 mr-2 text-slate-400"
                         fill="none"
@@ -1300,7 +1431,7 @@ export default function ProductsPage() {
                           ? editingId
                             ? formData.code || "..."
                             : "..."
-                          : "Se asignará automáticamente"}
+                          : copy.form.codeHint || "(Generado automáticamente)"}
                       </span>
                     </div>
                   </div>
@@ -1377,7 +1508,10 @@ export default function ProductsPage() {
                       setFormData({
                         name: "",
                         code: "",
-                        barcode: "",
+                        barcode1: "",
+                        barcode2: "",
+                        barcode3: "",
+                        barcode4: "",
                         description: "",
                         cost: "",
                         margin: "",
@@ -1390,14 +1524,19 @@ export default function ProductsPage() {
                       });
                       setShowForm(false);
                     }}
-                    className="flex-1 px-6 py-3 font-semibold transition bg-white border rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700"
+                    disabled={isSaving}
+                    className="flex-1 px-6 py-3 font-semibold transition bg-white border rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700"
                   >
                     {copy.form.cancel}
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-3 font-semibold text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"
+                    disabled={isSaving}
+                    className="flex items-center justify-center flex-1 gap-2 px-6 py-3 font-semibold text-white transition bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
+                    {isSaving && (
+                      <span className="w-4 h-4 border-2 border-white rounded-full border-t-transparent animate-spin" />
+                    )}
                     {editingId ? copy.form.saveEdit : copy.form.saveNew}
                   </button>
                 </div>
@@ -1497,7 +1636,10 @@ export default function ProductsPage() {
                           setFormData({
                             name: product.name || "",
                             code: product.code || "",
-                            barcode: product.barcode || "",
+                            barcode1: product.barcodes?.[0] || "",
+                            barcode2: product.barcodes?.[1] || "",
+                            barcode3: product.barcodes?.[2] || "",
+                            barcode4: product.barcodes?.[3] || "",
                             description: product.description || "",
                             cost: product.cost?.toString() || "",
                             margin: product.margin?.toString() || "",
@@ -1598,14 +1740,19 @@ export default function ProductsPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowDeleteModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-medium transition-colors"
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {copy.deleteModal.cancel}
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
+                  {isDeleting && (
+                    <span className="w-4 h-4 border-2 border-white rounded-full border-t-transparent animate-spin" />
+                  )}
                   {copy.deleteModal.confirm}
                 </button>
               </div>

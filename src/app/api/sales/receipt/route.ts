@@ -5,6 +5,8 @@ import Invoice from "@/lib/models/Invoice";
 import Business from "@/lib/models/Business";
 import { verifyToken } from "@/lib/utils/jwt";
 
+export const dynamic = "force-dynamic";
+
 // Default ticket messages by language
 const DEFAULT_TICKET_MESSAGES: Record<string, string> = {
   es: "¡GRACIAS POR SU COMPRA!\nVuelva pronto",

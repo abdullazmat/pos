@@ -7,6 +7,7 @@ const CLOSE_TICKET_COPY = {
   es: {
     title: "Ticket de Cierre",
     summary: "Resumen de caja",
+    businessFallback: "Mi Negocio",
     cashier: "CAJERO:",
     session: "SESIÓN:",
     opening: "APERTURA:",
@@ -32,6 +33,7 @@ const CLOSE_TICKET_COPY = {
   en: {
     title: "Close Ticket",
     summary: "Cash Summary",
+    businessFallback: "My Business",
     cashier: "CASHIER:",
     session: "SESSION:",
     opening: "OPENING:",
@@ -57,6 +59,7 @@ const CLOSE_TICKET_COPY = {
   pt: {
     title: "Comprovante de Fechamento",
     summary: "Resumo do Caixa",
+    businessFallback: "Meu Negócio",
     cashier: "CAIXA:",
     session: "SESSÃO:",
     opening: "ABERTURA:",
@@ -112,7 +115,7 @@ export default function CloseTicketModal({
   onClose: () => void;
   data: CloseTicketData | null;
 }) {
-  const { currentLanguage } = useLanguage();
+  const { currentLanguage, t } = useLanguage();
   const copy =
     CLOSE_TICKET_COPY[currentLanguage as keyof typeof CLOSE_TICKET_COPY] ||
     CLOSE_TICKET_COPY.en;
@@ -128,8 +131,9 @@ export default function CloseTicketModal({
     window.print();
   };
 
+  const locale = t("__locale__", "common") || "es-AR";
   const formatAmount = (value: number) =>
-    new Intl.NumberFormat("es-AR", {
+    new Intl.NumberFormat(String(locale), {
       style: "currency",
       currency: "ARS",
       minimumFractionDigits: 2,
@@ -169,7 +173,7 @@ export default function CloseTicketModal({
           <div className="bg-slate-100 rounded-sm border-2 border-gray-900 p-4 font-mono text-sm text-gray-900">
             {/* Business + meta */}
             <div className="text-center font-bold text-base mb-1">
-              {data.businessName || "MI NEGOCIO"}
+              {data.businessName || copy.businessFallback}
             </div>
             <div className="text-center text-gray-700 text-xs mb-4">
               {copy.summary}

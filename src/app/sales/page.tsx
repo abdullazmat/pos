@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import Loading from "@/components/common/Loading";
-import { useSubscription } from "@/lib/hooks/useSubscription";
+import { apiFetch } from "@/lib/utils/apiFetch";
 import { toast } from "react-toastify";
 
 interface Sale {
@@ -22,7 +22,6 @@ interface Sale {
 export default function SalesPage() {
   const router = useRouter();
   const { t } = useGlobalLanguage();
-  const { subscription, loading: subLoading } = useSubscription();
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -39,50 +38,70 @@ export default function SalesPage() {
   useEffect(() => {
     const userStr = localStorage.getItem("user");
     if (!userStr) {
+      setLoading(false);
       router.push("/auth/login");
       return;
     }
-    setUser(JSON.parse(userStr));
+
+    try {
+      const parsedUser = JSON.parse(userStr);
+      if (!parsedUser?.id || !parsedUser?.email) {
+        localStorage.removeItem("user");
+        setLoading(false);
+        router.push("/auth/login");
+        return;
+      }
+      setUser(parsedUser);
+    } catch {
+      localStorage.removeItem("user");
+      setLoading(false);
+      router.push("/auth/login");
+      return;
+    }
+
     fetchSales();
-  }, [filters]);
+  }, [filters, router, t]);
 
   const fetchSales = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("accessToken");
-
       const params = new URLSearchParams({
         startDate: filters.startDate,
         endDate: filters.endDate,
         ...(filters.paymentStatus && { paymentStatus: filters.paymentStatus }),
       });
 
-      const response = await fetch(`/api/sales/manage?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await apiFetch(`/api/sales/manage?${params}`, {
+        method: "GET",
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setSales(data.sales);
-
-        // Fetch analytics
-        const analyticsParams = new URLSearchParams({
-          type: "analytics",
-          startDate: filters.startDate,
-          endDate: filters.endDate,
-        });
-
-        const analyticsRes = await fetch(
-          `/api/sales/manage?${analyticsParams}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => null);
+        throw new Error(
+          errorPayload?.error || String(t("errorLoadingSales", "errors")),
         );
+      }
 
-        if (analyticsRes.ok) {
-          const analyticsData = await analyticsRes.json();
-          setAnalytics(analyticsData.analytics);
-        }
+      const data = await response.json();
+      setSales(data.sales);
+
+      // Fetch analytics
+      const analyticsParams = new URLSearchParams({
+        type: "analytics",
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+      });
+
+      const analyticsRes = await apiFetch(
+        `/api/sales/manage?${analyticsParams}`,
+        { method: "GET" },
+      );
+
+      if (analyticsRes.ok) {
+        const analyticsData = await analyticsRes.json();
+        setAnalytics(analyticsData.analytics);
+      } else {
+        setAnalytics(null);
       }
     } catch (error) {
       console.error("Error fetching sales:", error);

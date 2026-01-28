@@ -7,6 +7,8 @@ import {
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const authResult = await authMiddleware(req);
