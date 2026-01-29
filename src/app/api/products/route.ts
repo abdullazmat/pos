@@ -8,7 +8,10 @@ import {
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 import { checkPlanLimit } from "@/lib/utils/planValidation";
-import { generateDateBasedProductCode } from "@/lib/utils/productCodeGenerator";
+import {
+  generateDateBasedProductCode,
+  generateNextProductInternalId,
+} from "@/lib/utils/productCodeGenerator";
 
 export async function GET(req: NextRequest) {
   try {
@@ -103,7 +106,7 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse(planCheck.message, 403);
     }
 
-    // Auto-generate date-based code
+    // Auto-generate date-based code (SKU)
     let finalCode = code;
     if (!finalCode) {
       finalCode = await generateDateBasedProductCode(businessId);
@@ -133,8 +136,11 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse({ key: "duplicateCode" }, 409);
     }
 
+    const internalId = await generateNextProductInternalId(businessId);
+
     const product = new Product({
       businessId,
+      internalId,
       name,
       code: finalCode,
       cost,

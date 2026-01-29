@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import {
-  normalizeDecimalSeparator,
   parseQuantity,
   formatQuantity,
   validateQuantity,
@@ -46,6 +45,10 @@ export default function Cart({
   const { t } = useGlobalLanguage();
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
   const [isLoading, setIsLoading] = useState(false);
+  const [quantityInputs, setQuantityInputs] = useState<Record<string, string>>(
+    {},
+  );
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [availablePaymentMethods, setAvailablePaymentMethods] = useState<
     PaymentMethod[]
   >([
@@ -80,12 +83,27 @@ export default function Cart({
     fetchPaymentMethods();
   }, []);
 
+  useEffect(() => {
+    setQuantityInputs((prev) => {
+      const next: Record<string, string> = {};
+      items.forEach((item) => {
+        if (editingProductId === item.productId && prev[item.productId]) {
+          next[item.productId] = prev[item.productId];
+          return;
+        }
+        const formatted = formatQuantity(item.quantity, 4);
+        next[item.productId] = formatted;
+      });
+      return next;
+    });
+  }, [items, editingProductId]);
+
   const subtotal = items.reduce(
     (sum, item) => sum + item.quantity * item.unitPrice,
     0,
   );
   const totalDiscount = items.reduce((sum, item) => sum + item.discount, 0);
-  const total = subtotal - totalDiscount;
+  const total = Math.max(0, subtotal - totalDiscount);
 
   const handleCheckout = useCallback(async () => {
     setIsLoading(true);
@@ -134,7 +152,10 @@ export default function Cart({
         </h2>
         {items.length > 0 && (
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              localStorage.removeItem("pos.cartItems");
+              window.location.reload();
+            }}
             className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-2"
             title={t("ui.clearCart", "pos") as string}
           >
@@ -206,39 +227,133 @@ export default function Cart({
                       item.isSoldByWeight || false,
                       "en",
                     )}
-                    value={formatQuantity(item.quantity, 4)}
+                    value={
+                      quantityInputs[item.productId] ??
+                      formatQuantity(item.quantity, 4)
+                    }
+                    onFocus={() => setEditingProductId(item.productId)}
                     onChange={(e) => {
-                      const normalized = normalizeDecimalSeparator(
-                        e.target.value,
-                      );
+                      const rawValue = e.target.value;
+                      const isWeight = item.isSoldByWeight || false;
+
+                      if (!isWeight) {
+                        const sanitized = rawValue.replace(/[^\d]/g, "");
+                        setQuantityInputs((prev) => ({
+                          ...prev,
+                          [item.productId]: sanitized,
+                        }));
+
+                        if (sanitized === "") {
+                          onUpdateQuantity(item.productId, 0);
+                          return;
+                        }
+
+                        const parsedInt = parseInt(sanitized, 10);
+                        if (!Number.isNaN(parsedInt)) {
+                          onUpdateQuantity(item.productId, parsedInt);
+                        }
+                        return;
+                      }
+
+                      setQuantityInputs((prev) => ({
+                        ...prev,
+                        [item.productId]: rawValue,
+                      }));
+
+                      const trimmed = rawValue.trim();
+                      if (trimmed.endsWith(".") || trimmed.endsWith(",")) {
+                        return;
+                      }
+
+                      if (trimmed === "") {
+                        onUpdateQuantity(item.productId, 0);
+                        return;
+                      }
+
                       const parsed = parseQuantity(e.target.value);
 
                       if (parsed !== null) {
-                        // Validate the quantity
-                        const validation = validateQuantity(
-                          parsed,
-                          item.isSoldByWeight || false,
-                        );
+                        const validation = validateQuantity(parsed, true);
                         if (validation.isValid) {
                           onUpdateQuantity(item.productId, parsed);
                         }
-                        // If invalid, silently reject (don't update)
                       }
                     }}
                     onBlur={(e) => {
                       // On blur, ensure a valid value or reset to previous
-                      if (
-                        e.target.value === "" ||
-                        parseQuantity(e.target.value) === null
-                      ) {
-                        onUpdateQuantity(item.productId, item.quantity);
+                      const isWeight = item.isSoldByWeight || false;
+                      if (!isWeight) {
+                        const sanitized = e.target.value.replace(/[^\d]/g, "");
+                        if (sanitized === "") {
+                          onUpdateQuantity(item.productId, 0);
+                          setQuantityInputs((prev) => ({
+                            ...prev,
+                            [item.productId]: "0",
+                          }));
+                          setEditingProductId(null);
+                          return;
+                        }
+
+                        const parsedInt = parseInt(sanitized, 10);
+                        if (Number.isNaN(parsedInt)) {
+                          setQuantityInputs((prev) => ({
+                            ...prev,
+                            [item.productId]: formatQuantity(item.quantity, 4),
+                          }));
+                          setEditingProductId(null);
+                          return;
+                        }
+
+                        onUpdateQuantity(item.productId, parsedInt);
+                        setQuantityInputs((prev) => ({
+                          ...prev,
+                          [item.productId]: parsedInt.toString(),
+                        }));
+                        setEditingProductId(null);
+                        return;
                       }
+
+                      if (e.target.value.trim() === "") {
+                        onUpdateQuantity(item.productId, 0);
+                        setQuantityInputs((prev) => ({
+                          ...prev,
+                          [item.productId]: "0",
+                        }));
+                        setEditingProductId(null);
+                        return;
+                      }
+                      const parsed = parseQuantity(e.target.value);
+                      if (parsed === null) {
+                        setQuantityInputs((prev) => ({
+                          ...prev,
+                          [item.productId]: formatQuantity(item.quantity, 4),
+                        }));
+                        setEditingProductId(null);
+                        return;
+                      }
+
+                      const validation = validateQuantity(parsed, true);
+                      if (!validation.isValid) {
+                        setQuantityInputs((prev) => ({
+                          ...prev,
+                          [item.productId]: formatQuantity(item.quantity, 4),
+                        }));
+                        setEditingProductId(null);
+                        return;
+                      }
+
+                      onUpdateQuantity(item.productId, parsed);
+                      setQuantityInputs((prev) => ({
+                        ...prev,
+                        [item.productId]: formatQuantity(parsed, 4),
+                      }));
+                      setEditingProductId(null);
                     }}
                     className="w-full px-2 py-1 border border-gray-300 dark:border-slate-600 rounded text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   />
                   {item.isSoldByWeight && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Use comma or period (e.g., 1,560 or 1.560)
+                      {t("ui.weightQuantityHint", "pos")}
                     </p>
                   )}
                 </div>
@@ -266,9 +381,10 @@ export default function Cart({
                   </label>
                   <div className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 rounded text-sm font-semibold text-gray-900 dark:text-white border border-blue-200 dark:border-blue-800">
                     $
-                    {(item.quantity * item.unitPrice - item.discount).toFixed(
-                      2,
-                    )}
+                    {Math.max(
+                      0,
+                      item.quantity * item.unitPrice - item.discount,
+                    ).toFixed(2)}
                   </div>
                 </div>
               </div>

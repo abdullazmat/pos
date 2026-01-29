@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { useBusinessDateTime } from "@/lib/hooks/useBusinessDateTime";
 import Header from "@/components/layout/Header";
 import Loading from "@/components/common/Loading";
 import { apiFetch } from "@/lib/utils/apiFetch";
@@ -22,6 +23,7 @@ interface Sale {
 export default function SalesPage() {
   const router = useRouter();
   const { t } = useGlobalLanguage();
+  const { formatDateTime } = useBusinessDateTime();
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -119,15 +121,6 @@ export default function SalesPage() {
       currency: "ARS",
     }).format(value);
   };
-
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("es-AR", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
 
   const getPaymentMethodLabel = (method: string) => {
     const emojis: any = {
@@ -304,7 +297,7 @@ export default function SalesPage() {
                         className="hover:bg-gray-50 transition"
                       >
                         <td className="px-6 py-4 text-sm text-gray-900">
-                          {formatDate(sale.createdAt)}
+                          {formatDateTime(sale.createdAt)}
                         </td>
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">
                           {sale.invoice?.invoiceNumber || "S/N"}

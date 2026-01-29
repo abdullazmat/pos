@@ -10,6 +10,9 @@ import {
   generateErrorResponse,
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
+import { broadcastStockUpdate } from "@/lib/server/stockStream";
+import { generateNextProductInternalId } from "@/lib/utils/productCodeGenerator";
+import { parseNumberInput } from "@/lib/utils/decimalFormatter";
 
 export async function GET(req: NextRequest) {
   try {
@@ -164,8 +167,24 @@ export async function POST(req: NextRequest) {
 
     let subtotal = 0;
     const saleItems = [];
+    const updatedProductIds = new Set<string>();
 
     for (const item of items) {
+      const rawQuantity = (item as any).quantity;
+      const normalizedQuantity =
+        typeof rawQuantity === "number"
+          ? rawQuantity
+          : typeof rawQuantity === "string"
+            ? parseNumberInput(rawQuantity)
+            : null;
+
+      if (normalizedQuantity === null || Number.isNaN(normalizedQuantity)) {
+        return generateErrorResponse("Invalid quantity", 400);
+      }
+      if (normalizedQuantity <= 0) {
+        return generateErrorResponse("Quantity must be greater than 0", 400);
+      }
+
       const product = await Product.findOne({
         _id: item.productId,
         businessId,
@@ -177,35 +196,40 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      if (product.stock < item.quantity) {
+      if (product.stock < normalizedQuantity) {
         return generateErrorResponse(
           `Insufficient stock for ${product.name}`,
           400,
         );
       }
 
-      const itemTotal = item.unitPrice * item.quantity - (item.discount || 0);
+      const itemTotal =
+        item.unitPrice * normalizedQuantity - (item.discount || 0);
       subtotal += itemTotal;
 
       saleItems.push({
         productId: item.productId,
         productName: product.name,
-        quantity: item.quantity,
+        quantity: normalizedQuantity,
         unitPrice: item.unitPrice,
         discount: item.discount || 0,
         total: itemTotal,
       });
 
       // Reduce stock
-      product.stock -= item.quantity;
+      if (!product.internalId) {
+        product.internalId = await generateNextProductInternalId(businessId);
+      }
+      product.stock -= normalizedQuantity;
       await product.save();
+      updatedProductIds.add(String(product._id));
 
       // Record stock history
       await StockHistory.create({
         businessId,
         productId: item.productId,
         type: "sale",
-        quantity: -item.quantity,
+        quantity: -normalizedQuantity,
         reference: null,
         referenceModel: "Sale",
       });
@@ -246,6 +270,10 @@ export async function POST(req: NextRequest) {
     });
 
     await sale.save();
+
+    if (updatedProductIds.size > 0) {
+      broadcastStockUpdate(businessId, Array.from(updatedProductIds));
+    }
 
     // Record cash movement when a register is open
     if (openRegister) {

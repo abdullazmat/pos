@@ -20,6 +20,7 @@ interface CartItem {
   unitPrice: number;
   discount: number;
   total: number;
+  isSoldByWeight?: boolean;
 }
 
 export default function POSPage() {
@@ -33,6 +34,56 @@ export default function POSPage() {
   const [subscription, setSubscription] = useState<any>(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState("");
+  const [isCartHydrated, setIsCartHydrated] = useState(false);
+
+  const handleCheckoutError = (errorPayload: any) => {
+    const message =
+      typeof errorPayload?.error === "string"
+        ? errorPayload.error
+        : typeof errorPayload?.message === "string"
+          ? errorPayload.message
+          : "";
+
+    const match =
+      /Insufficient stock for (.+)\. Available: ([\d.]+), Requested: ([\d.]+)/i.exec(
+        message,
+      );
+    if (match) {
+      const [, name, available, requested] = match;
+      const localized = (t("ui.insufficientStock", "pos") as string)
+        .replace("{name}", name)
+        .replace("{available}", available)
+        .replace("{requested}", requested);
+      toast.error(localized);
+      return true;
+    }
+
+    return false;
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem("pos.cartItems");
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved) as CartItem[];
+      if (Array.isArray(parsed)) {
+        setCartItems(parsed);
+      }
+    } catch (error) {
+      console.warn("Failed to restore cart from storage", error);
+    } finally {
+      setIsCartHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isCartHydrated) return;
+    try {
+      localStorage.setItem("pos.cartItems", JSON.stringify(cartItems));
+    } catch (error) {
+      console.warn("Failed to persist cart to storage", error);
+    }
+  }, [cartItems, isCartHydrated]);
 
   useEffect(() => {
     setMounted(true);
@@ -131,7 +182,10 @@ export default function POSPage() {
             ? {
                 ...item,
                 quantity: item.quantity + 1,
-                total: (item.quantity + 1) * item.unitPrice - item.discount,
+                total: Math.max(
+                  0,
+                  (item.quantity + 1) * item.unitPrice - item.discount,
+                ),
               }
             : item,
         );
@@ -144,7 +198,7 @@ export default function POSPage() {
           quantity: 1,
           unitPrice: price,
           discount: 0,
-          total: price,
+          total: Math.max(0, price),
         },
       ];
     });
@@ -155,17 +209,13 @@ export default function POSPage() {
   };
 
   const handleUpdateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      handleRemoveFromCart(productId);
-      return;
-    }
     setCartItems((prev) =>
       prev.map((item) =>
         item.productId === productId
           ? {
               ...item,
               quantity,
-              total: quantity * item.unitPrice - item.discount,
+              total: Math.max(0, quantity * item.unitPrice - item.discount),
             }
           : item,
       ),
@@ -179,7 +229,7 @@ export default function POSPage() {
           ? {
               ...item,
               discount,
-              total: item.quantity * item.unitPrice - discount,
+              total: Math.max(0, item.quantity * item.unitPrice - discount),
             }
           : item,
       ),
@@ -225,7 +275,12 @@ export default function POSPage() {
 
         if (!response.ok) {
           const error = await response.json();
-          toast.error(`${error.error || error.details || "Error en el pago"}`);
+          const handled = handleCheckoutError(error);
+          if (!handled) {
+            toast.error(
+              `${error.error || error.details || "Error en el pago"}`,
+            );
+          }
           return;
         }
 
@@ -271,7 +326,10 @@ export default function POSPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        toast.error(`${error.error || "Error al completar la venta"}`);
+        const handled = handleCheckoutError(error);
+        if (!handled) {
+          toast.error(`${error.error || "Error al completar la venta"}`);
+        }
         return;
       }
 

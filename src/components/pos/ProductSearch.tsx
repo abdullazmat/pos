@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { toast } from "react-toastify";
 
 interface ProductSearchProps {
   onAddToCart: (
@@ -83,11 +84,17 @@ export default function ProductSearch({
 
         if (target) {
           console.log("Adding product to cart:", target);
-          const normalizedPrice = target.isSoldByWeight
-            ? target.price >= 1000
-              ? target.price / 1000
-              : target.price
-            : target.price;
+          if (typeof target.stock === "number" && target.stock <= 0) {
+            toast.error(
+              t("ui.outOfStock", "pos") !== "ui.outOfStock"
+                ? t("ui.outOfStock", "pos")
+                : "Product out of stock",
+            );
+            setBarcodeQuery("");
+            setResults([]);
+            return;
+          }
+          const normalizedPrice = target.price;
           onAddToCart(
             target._id,
             target.name,
@@ -251,11 +258,15 @@ export default function ProductSearch({
                 key={product._id}
                 className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 bg-white dark:bg-slate-800 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/50 hover:border-blue-300 dark:hover:border-blue-600 transition cursor-pointer"
                 onClick={() => {
-                  const normalizedPrice = product.isSoldByWeight
-                    ? product.price >= 1000
-                      ? product.price / 1000 // normalize to price per kg if stored per gram
-                      : product.price
-                    : product.price;
+                  if (typeof product.stock === "number" && product.stock <= 0) {
+                    toast.error(
+                      t("ui.outOfStock", "pos") !== "ui.outOfStock"
+                        ? t("ui.outOfStock", "pos")
+                        : "Product out of stock",
+                    );
+                    return;
+                  }
+                  const normalizedPrice = product.price;
                   onAddToCart(
                     product._id,
                     product.name,
@@ -276,17 +287,24 @@ export default function ProductSearch({
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-green-600 dark:text-green-400">
                     {product.isSoldByWeight
-                      ? `${(product.price >= 1000 ? product.price / 1000 : product.price).toFixed(3)} / kg`
+                      ? `${product.price.toFixed(3)} / kg`
                       : `$${product.price.toFixed(2)}`}
                   </span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const normalizedPrice = product.isSoldByWeight
-                        ? product.price >= 1000
-                          ? product.price / 1000
-                          : product.price
-                        : product.price;
+                      if (
+                        typeof product.stock === "number" &&
+                        product.stock <= 0
+                      ) {
+                        toast.error(
+                          t("ui.outOfStock", "pos") !== "ui.outOfStock"
+                            ? t("ui.outOfStock", "pos")
+                            : "Product out of stock",
+                        );
+                        return;
+                      }
+                      const normalizedPrice = product.price;
                       onAddToCart(
                         product._id,
                         product.name,

@@ -21,6 +21,7 @@ interface Product {
   minStock?: number;
   price: number;
   cost: number;
+  isSoldByWeight?: boolean;
 }
 
 const STOCK_COPY = {
@@ -157,6 +158,19 @@ export default function StockPage() {
   const { currentLanguage } = useGlobalLanguage();
   const copy = (STOCK_COPY[currentLanguage] ||
     STOCK_COPY.en) as typeof STOCK_COPY.en;
+  const stockLocale =
+    currentLanguage === "pt"
+      ? "pt-BR"
+      : currentLanguage === "en"
+        ? "en-US"
+        : "es-AR";
+  const formatStockValue = (value: number, isWeight: boolean) => {
+    if (!isWeight) return value.toString();
+    return new Intl.NumberFormat(stockLocale, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat(CURRENCY_LOCALE[currentLanguage], {
       style: "currency",
@@ -444,7 +458,12 @@ export default function StockPage() {
                     product.minStock &&
                     product.stock <= product.minStock;
                   const margin =
-                    ((product.price - product.cost) / product.cost) * 100;
+                    product.cost > 0
+                      ? ((product.price - product.cost) / product.cost) * 100
+                      : 0;
+                  const marginClass =
+                    margin < 0 ? "text-red-500" : "text-emerald-400";
+                  const marginPrefix = margin > 0 ? "+" : "";
 
                   return (
                     <tr
@@ -472,13 +491,21 @@ export default function StockPage() {
                                 : "text-slate-900 dark:text-slate-100"
                           }`}
                         >
-                          {product.stock}
+                          {formatStockValue(
+                            product.stock,
+                            !!product.isSoldByWeight,
+                          )}
+                          {product.isSoldByWeight ? " kg" : ""}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
                         {typeof product.minStock === "number"
-                          ? product.minStock
+                          ? formatStockValue(
+                              product.minStock,
+                              !!product.isSoldByWeight,
+                            )
                           : "-"}
+                        {product.isSoldByWeight ? " kg" : ""}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {isOutOfStock ? (
@@ -502,8 +529,9 @@ export default function StockPage() {
                         {formatCurrency(product.price)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-emerald-400 font-medium">
-                          +{margin.toFixed(1)}%
+                        <span className={`${marginClass} font-medium`}>
+                          {marginPrefix}
+                          {margin.toFixed(1)}%
                         </span>
                       </td>
                     </tr>

@@ -7,6 +7,7 @@ import { useSubscription } from "@/lib/hooks/useSubscription";
 import Header from "@/components/layout/Header";
 import { UserCog, Edit, Trash2, X } from "lucide-react";
 import { toast } from "react-toastify";
+import { useBusinessDateTime } from "@/lib/hooks/useBusinessDateTime";
 
 interface User {
   id: string;
@@ -281,6 +282,7 @@ const ADMIN_COPY = {
 export default function AdminPage() {
   const router = useRouter();
   const { currentLanguage } = useGlobalLanguage();
+  const { formatDate } = useBusinessDateTime();
   const copy = ADMIN_COPY[currentLanguage] || ADMIN_COPY["es"];
   const { subscription } = useSubscription();
 
@@ -773,13 +775,7 @@ export default function AdminPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                        {new Date(systemUser.createdAt).toLocaleDateString(
-                          currentLanguage === "es"
-                            ? "es-AR"
-                            : currentLanguage === "pt"
-                              ? "pt-BR"
-                              : "en-US",
-                        )}
+                        {formatDate(systemUser.createdAt)}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">

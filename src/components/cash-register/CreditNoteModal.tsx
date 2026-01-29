@@ -68,7 +68,11 @@ const CREDIT_NOTE_COPY = {
 interface CreditNoteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (amount: number, reason: string, notes: string) => Promise<void>;
+  onConfirm: (
+    amount: number,
+    reason: string,
+    notes: string,
+  ) => Promise<boolean>;
   currentBalance: number;
 }
 
@@ -111,11 +115,13 @@ export default function CreditNoteModal({
 
     setLoading(true);
     try {
-      await onConfirm(amountNum, reason, notes);
-      setAmount("");
-      setReason("");
-      setNotes("");
-      onClose();
+      const ok = await onConfirm(amountNum, reason, notes);
+      if (ok) {
+        setAmount("");
+        setReason("");
+        setNotes("");
+        onClose();
+      }
     } catch (error) {
       console.error("Credit note error:", error);
     } finally {

@@ -582,6 +582,9 @@ const translationsEs = {
       total: "Total",
       subtotal: "Subtotal",
       totalDiscount: "Descuento",
+      tax21: "IVA 21%",
+      weightQuantityHint:
+        "Use punto para decimales y coma para miles (ej.: 1.560 o 1,560)",
       paymentMethod: "Método de Pago",
       paymentOptions: {
         cash: "Efectivo",
@@ -596,6 +599,8 @@ const translationsEs = {
       checkoutSuccess: "¡Venta completada exitosamente!",
       checkoutError: "Error al completar la venta",
       checkoutProcessError: "Error al procesar la venta. Intenta nuevamente.",
+      insufficientStock:
+        "Stock insuficiente para {name}. Disponible: {available}, solicitado: {requested}",
       print: "Imprimir",
       close: "Cerrar",
       roles: {
@@ -628,6 +633,7 @@ const translationsEs = {
       enterProductCode: "Por favor ingrese un código de producto",
       invalidQuantity: "Cantidad inválida",
       productNotFound: "Producto no encontrado",
+      outOfStock: "Producto sin stock",
       addedToCart: "agregado al carrito",
       errorAddingProduct: "Error al agregar producto",
       changeCustomerType: "Cambiar tipo de cliente",
@@ -1181,6 +1187,9 @@ const translationsEn = {
       total: "Total",
       subtotal: "Subtotal",
       totalDiscount: "Discount",
+      tax21: "VAT 21%",
+      weightQuantityHint:
+        "Use period for decimals and comma for thousands (e.g., 1.560 or 1,560)",
       paymentMethod: "Payment Method",
       paymentOptions: {
         cash: "Cash",
@@ -1195,6 +1204,8 @@ const translationsEn = {
       checkoutSuccess: "Sale completed successfully!",
       checkoutError: "Error completing the sale",
       checkoutProcessError: "Error processing the sale. Please try again.",
+      insufficientStock:
+        "Insufficient stock for {name}. Available: {available}, requested: {requested}",
       roles: {
         admin: "Administrator",
         supervisor: "Supervisor",
@@ -1223,6 +1234,7 @@ const translationsEn = {
       enterProductCode: "Please enter a product code",
       invalidQuantity: "Invalid quantity",
       productNotFound: "Product not found",
+      outOfStock: "Product out of stock",
       addedToCart: "added to cart",
       errorAddingProduct: "Error adding product",
       changeCustomerType: "Change customer type",
@@ -1777,6 +1789,9 @@ const translationsPt = {
       total: "Total",
       subtotal: "Subtotal",
       totalDiscount: "Desconto",
+      tax21: "IVA 21%",
+      weightQuantityHint:
+        "Use ponto para decimais e vírgula para milhares (ex.: 1.560 ou 1,560)",
       paymentMethod: "Forma de Pagamento",
       paymentOptions: {
         cash: "Dinheiro",
@@ -1791,6 +1806,8 @@ const translationsPt = {
       checkoutSuccess: "Venda concluída com sucesso!",
       checkoutError: "Erro ao finalizar a venda",
       checkoutProcessError: "Erro ao processar a venda. Tente novamente.",
+      insufficientStock:
+        "Estoque insuficiente para {name}. Disponível: {available}, solicitado: {requested}",
       roles: {
         admin: "Administrador",
         supervisor: "Supervisor",
@@ -1821,6 +1838,7 @@ const translationsPt = {
       enterProductCode: "Por favor, digite um código de produto",
       invalidQuantity: "Quantidade inválida",
       productNotFound: "Produto não encontrado",
+      outOfStock: "Produto sem estoque",
       addedToCart: "adicionado ao carrinho",
       errorAddingProduct: "Erro ao adicionar produto",
       changeCustomerType: "Mudar tipo de cliente",

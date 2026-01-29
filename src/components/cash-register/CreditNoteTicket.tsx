@@ -9,6 +9,8 @@ const CREDIT_NOTE_TICKET_COPY = {
     reasonLabel: "Motivo:",
     amountLabel: "Monto de devolución:",
     notesLabel: "Notas:",
+    cashierLabel: "Cajero:",
+    adminLabel: "Administrador:",
     footer: "Devolución registrada.",
   },
   en: {
@@ -16,6 +18,8 @@ const CREDIT_NOTE_TICKET_COPY = {
     reasonLabel: "Reason:",
     amountLabel: "Refund amount:",
     notesLabel: "Notes:",
+    cashierLabel: "Cashier:",
+    adminLabel: "Administrator:",
     footer: "Refund recorded.",
   },
   pt: {
@@ -23,6 +27,8 @@ const CREDIT_NOTE_TICKET_COPY = {
     reasonLabel: "Motivo:",
     amountLabel: "Valor da devolução:",
     notesLabel: "Notas:",
+    cashierLabel: "Caixa:",
+    adminLabel: "Administrador:",
     footer: "Devolução registrada.",
   },
 };
@@ -32,6 +38,8 @@ interface CreditNoteTicketProps {
   reason: string;
   notes?: string;
   createdAt?: string;
+  cashierName?: string;
+  adminName?: string;
 }
 
 const CreditNoteTicket: React.FC<CreditNoteTicketProps> = ({
@@ -39,6 +47,8 @@ const CreditNoteTicket: React.FC<CreditNoteTicketProps> = ({
   reason,
   notes,
   createdAt,
+  cashierName,
+  adminName,
 }) => {
   const { currentLanguage, t } = useGlobalLanguage();
   const copy =
@@ -82,6 +92,22 @@ const CreditNoteTicket: React.FC<CreditNoteTicketProps> = ({
           </span>
           <span className="font-semibold text-right">{formattedAmount}</span>
         </div>
+        {cashierName && (
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-slate-600 dark:text-slate-400">
+              {copy.cashierLabel}
+            </span>
+            <span className="font-semibold text-right">{cashierName}</span>
+          </div>
+        )}
+        {adminName && (
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-slate-600 dark:text-slate-400">
+              {copy.adminLabel}
+            </span>
+            <span className="font-semibold text-right">{adminName}</span>
+          </div>
+        )}
         {notes && notes.trim().length > 0 && (
           <div className="pt-3 border-t border-dashed border-slate-200 dark:border-slate-700">
             <p className="mb-1 text-xs tracking-wide uppercase text-slate-500 dark:text-slate-400">

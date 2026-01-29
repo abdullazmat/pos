@@ -3,8 +3,10 @@ import dbConnect from "@/lib/db/connect";
 import Product from "@/lib/models/Product";
 import mongoose from "mongoose";
 import { verifyAccessToken } from "@/lib/utils/jwt";
+import { addStockClient, removeStockClient } from "@/lib/server/stockStream";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -25,13 +27,17 @@ export async function GET(req: NextRequest) {
     return new Response("DB connection failed", { status: 500 });
   }
 
-  const stream = new ReadableStream<Uint8Array>({
+  const stream = new ReadableStream<string>({
     async start(controller) {
-      const encoder = new TextEncoder();
+      const client = { businessId: user.businessId, controller };
+      addStockClient(client);
+
+      controller.enqueue(`event: connected\n`);
+      controller.enqueue(`data: ok\n\n`);
 
       // Heartbeat to keep the connection alive
       const heartbeat = setInterval(() => {
-        controller.enqueue(encoder.encode(`:\n\n`));
+        controller.enqueue(`:\n\n`);
       }, 15000);
 
       const businessObjectId = new mongoose.Types.ObjectId(user.businessId);
@@ -41,18 +47,13 @@ export async function GET(req: NextRequest) {
       try {
         changeStream = Product.watch(
           [{ $match: { "fullDocument.businessId": businessObjectId } }],
-          { fullDocument: "updateLookup" }
+          { fullDocument: "updateLookup" },
         );
       } catch (err) {
-        // Change streams may not be supported by the deployment
         controller.enqueue(
-          encoder.encode(
-            `event: error\ndata: {"message":"Change streams unsupported"}\n\n`
-          )
+          `event: error\ndata: {"message":"Change streams unsupported"}\n\n`,
         );
-        clearInterval(heartbeat);
-        controller.close();
-        return;
+        // Keep stream open for in-memory broadcasts
       }
 
       const onChange = (change: any) => {
@@ -73,29 +74,30 @@ export async function GET(req: NextRequest) {
             documentKey: change.documentKey,
           };
           controller.enqueue(
-            encoder.encode(
-              `event: product\ndata: ${JSON.stringify(payload)}\n\n`
-            )
+            `event: product\ndata: ${JSON.stringify(payload)}\n\n`,
           );
-        } catch (e) {
+        } catch {
           // ignore malformed payloads
         }
       };
 
-      changeStream.on("change", onChange);
+      changeStream?.on("change", onChange);
 
-      // If the client disconnects, stop the stream
       const abortHandler = () => {
         try {
           changeStream?.removeListener("change", onChange);
           changeStream?.close();
         } catch {}
         clearInterval(heartbeat);
+        removeStockClient(client);
         controller.close();
       };
 
       // @ts-ignore - NextRequest has signal in Node runtime
       req.signal?.addEventListener("abort", abortHandler);
+    },
+    cancel() {
+      // no-op, cleanup handled by abort
     },
   });
 

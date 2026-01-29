@@ -10,6 +10,9 @@ import Payment from "@/lib/models/Payment";
 import MercadoPagoService from "@/lib/services/payment/MercadoPagoService";
 import { verifyToken } from "@/lib/utils/jwt";
 import User from "@/lib/models/User";
+import { broadcastStockUpdate } from "@/lib/server/stockStream";
+import { generateNextProductInternalId } from "@/lib/utils/productCodeGenerator";
+import { parseNumberInput } from "@/lib/utils/decimalFormatter";
 
 interface SaleItemRequest {
   productId: string;
@@ -119,6 +122,27 @@ export async function POST(req: NextRequest) {
 
     // First pass: validate all items and calculate totals
     for (const item of items) {
+      const rawQuantity = (item as any).quantity;
+      const normalizedQuantity =
+        typeof rawQuantity === "number"
+          ? rawQuantity
+          : typeof rawQuantity === "string"
+            ? parseNumberInput(rawQuantity)
+            : null;
+
+      if (normalizedQuantity === null || Number.isNaN(normalizedQuantity)) {
+        return NextResponse.json(
+          { error: "Invalid quantity" },
+          { status: 400 },
+        );
+      }
+      if (normalizedQuantity <= 0) {
+        return NextResponse.json(
+          { error: "Quantity must be greater than 0" },
+          { status: 400 },
+        );
+      }
+
       const product = await Product.findOne({
         _id: item.productId,
         businessId: decoded.businessId,
@@ -131,23 +155,23 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      if (product.stock < item.quantity) {
+      if (product.stock < normalizedQuantity) {
         return NextResponse.json(
           {
-            error: `Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
+            error: `Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${normalizedQuantity}`,
           },
           { status: 400 },
         );
       }
 
       const itemDiscount = item.discount || 0;
-      const itemTotal = item.quantity * item.unitPrice - itemDiscount;
+      const itemTotal = normalizedQuantity * item.unitPrice - itemDiscount;
       subtotal += itemTotal;
 
       saleItems.push({
         productId: item.productId,
         productName: product.name,
-        quantity: item.quantity,
+        quantity: normalizedQuantity,
         unitPrice: item.unitPrice,
         discount: itemDiscount,
         total: itemTotal,
@@ -156,7 +180,7 @@ export async function POST(req: NextRequest) {
       invoiceItems.push({
         productId: item.productId,
         description: product.name,
-        quantity: item.quantity,
+        quantity: normalizedQuantity,
         unitPrice: item.unitPrice,
         discount: itemDiscount,
       });
@@ -164,7 +188,7 @@ export async function POST(req: NextRequest) {
       // Store for later stock updates
       stockUpdates.push({
         product,
-        quantity: item.quantity,
+        quantity: normalizedQuantity,
       });
     }
 
@@ -306,9 +330,16 @@ export async function POST(req: NextRequest) {
 
     // Now deduct stock and record history (after sale is persisted)
     try {
+      const updatedProductIds = new Set<string>();
       for (const { product, quantity } of stockUpdates) {
+        if (!product.internalId) {
+          product.internalId = await generateNextProductInternalId(
+            decoded.businessId,
+          );
+        }
         product.stock -= quantity;
         await product.save();
+        updatedProductIds.add(String(product._id));
 
         // Record stock history
         await StockHistory.create({
@@ -318,6 +349,10 @@ export async function POST(req: NextRequest) {
           quantity: -quantity,
           reference: sale._id,
         });
+      }
+
+      if (updatedProductIds.size > 0) {
+        broadcastStockUpdate(decoded.businessId, Array.from(updatedProductIds));
       }
     } catch (stockError) {
       console.error("Stock update error:", stockError);

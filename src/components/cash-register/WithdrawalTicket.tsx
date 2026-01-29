@@ -8,6 +8,8 @@ const WITHDRAWAL_TICKET_COPY = {
     title: "Retiro de Fondos",
     reasonLabel: "Motivo:",
     amountLabel: "Monto Retirado:",
+    cashierLabel: "Cajero:",
+    supervisorLabel: "Supervisor:",
     summary: "Retiro de fondos",
     footer: "Dinero retirado.",
   },
@@ -15,6 +17,8 @@ const WITHDRAWAL_TICKET_COPY = {
     title: "Funds Withdrawal",
     reasonLabel: "Reason:",
     amountLabel: "Amount Withdrawn:",
+    cashierLabel: "Cashier:",
+    supervisorLabel: "Supervisor:",
     summary: "Funds withdrawal",
     footer: "Funds withdrawn.",
   },
@@ -22,6 +26,8 @@ const WITHDRAWAL_TICKET_COPY = {
     title: "Retirada de Fundos",
     reasonLabel: "Motivo:",
     amountLabel: "Valor Retirado:",
+    cashierLabel: "Caixa:",
+    supervisorLabel: "Supervisor:",
     summary: "Retirada de fundos",
     footer: "Dinheiro retirado.",
   },
@@ -30,11 +36,15 @@ const WITHDRAWAL_TICKET_COPY = {
 interface WithdrawalTicketProps {
   amount: number;
   reason: string;
+  cashierName?: string;
+  supervisorName?: string;
 }
 
 const WithdrawalTicket: React.FC<WithdrawalTicketProps> = ({
   amount,
   reason,
+  cashierName,
+  supervisorName,
 }) => {
   const { currentLanguage, t } = useGlobalLanguage();
   const copy =
@@ -73,6 +83,22 @@ const WithdrawalTicket: React.FC<WithdrawalTicketProps> = ({
           </span>
           <span className="font-semibold text-right">{formattedAmount}</span>
         </div>
+        {cashierName && (
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-slate-600 dark:text-slate-400">
+              {copy.cashierLabel}
+            </span>
+            <span className="font-semibold text-right">{cashierName}</span>
+          </div>
+        )}
+        {supervisorName && (
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-slate-600 dark:text-slate-400">
+              {copy.supervisorLabel}
+            </span>
+            <span className="font-semibold text-right">{supervisorName}</span>
+          </div>
+        )}
       </div>
 
       <div className="mt-6 rounded-lg border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4 text-center">

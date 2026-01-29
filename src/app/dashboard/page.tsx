@@ -7,6 +7,7 @@ import Header from "@/components/layout/Header";
 import { useSubscription } from "@/lib/hooks/useSubscription";
 import { Zap, Calendar, Check } from "lucide-react";
 import { useLanguage } from "@/lib/context/LanguageContext";
+import { useBusinessDateTime } from "@/lib/hooks/useBusinessDateTime";
 
 interface User {
   id: string;
@@ -21,6 +22,7 @@ export default function Dashboard() {
   const router = useRouter();
   const { subscription } = useSubscription();
   const { t } = useLanguage();
+  const { formatDate } = useBusinessDateTime();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -69,7 +71,7 @@ export default function Dashboard() {
   const nextRenewalLabel = nextRenewalDate
     ? Number.isNaN(nextRenewalDate.getTime())
       ? "N/A"
-      : nextRenewalDate.toLocaleDateString()
+      : formatDate(nextRenewalDate)
     : "N/A";
 
   return (

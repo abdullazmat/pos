@@ -44,7 +44,9 @@ export async function GET(req: NextRequest) {
 
     // Format session history with proper data
     const sessions = closedSessions.map((session) => ({
-      openedAt: session.openedAt?.toLocaleString("es-AR") || "-",
+      openedAt: session.openedAt?.toISOString() || null,
+      openedAtISO: session.openedAt?.toISOString() || null,
+      closedAtISO: session.closedAt?.toISOString() || null,
       initial: session.openingBalance || 0,
       sales: session.salesTotal || 0,
       withdrawals: session.withdrawalsTotal || 0,
@@ -66,7 +68,9 @@ export async function GET(req: NextRequest) {
     // Add current open session to history if exists
     if (openSession) {
       const currentSessionData = {
-        openedAt: openSession.openedAt?.toLocaleString("es-AR") || "-",
+        openedAt: openSession.openedAt?.toISOString() || null,
+        openedAtISO: openSession.openedAt?.toISOString() || null,
+        closedAtISO: null,
         initial: openSession.openingBalance || 0,
         sales: movements
           .filter((m) => m.type === "venta")
@@ -109,8 +113,10 @@ export async function GET(req: NextRequest) {
       type: m.type,
       description: m.description,
       amount: m.amount,
-      createdAt: m.createdAt?.toLocaleString("es-AR") || "-",
+      createdAt: m.createdAt?.toISOString() || null,
+      createdAtISO: m.createdAt?.toISOString() || null,
       operator: m.operator || null,
+      approvedBy: (m as any).approvedBy || null,
     }));
 
     return generateSuccessResponse({
@@ -287,7 +293,8 @@ export async function POST(req: NextRequest) {
         type: m.type,
         description: m.description,
         amount: m.amount,
-        createdAt: m.createdAt?.toLocaleString("es-AR") || "-",
+        createdAt: m.createdAt?.toISOString() || null,
+        createdAtISO: m.createdAt?.toISOString() || null,
         operator: m.operator || null,
       }));
       formattedMovements.push({
@@ -295,7 +302,8 @@ export async function POST(req: NextRequest) {
         type: movement.type,
         description: movement.description,
         amount: movement.amount,
-        createdAt: movement.createdAt?.toLocaleString("es-AR") || "-",
+        createdAt: movement.createdAt?.toISOString() || null,
+        createdAtISO: movement.createdAt?.toISOString() || null,
         operator: movement.operator || null,
       });
 
@@ -308,8 +316,10 @@ export async function POST(req: NextRequest) {
           cashierName:
             cashier?.fullName || cashier?.username || cashier?.email || "",
           sessionId: cashRegister._id.toString(),
-          openedAt: cashRegister.openedAt?.toLocaleString("es-AR") || "",
-          closedAt: cashRegister.closedAt?.toLocaleString("es-AR") || "",
+          openedAt: cashRegister.openedAt?.toISOString() || null,
+          openedAtISO: cashRegister.openedAt?.toISOString() || null,
+          closedAt: cashRegister.closedAt?.toISOString() || null,
+          closedAtISO: cashRegister.closedAt?.toISOString() || null,
           openingBalance: cashRegister.openingBalance || 0,
           salesTotal,
           withdrawalsTotal,

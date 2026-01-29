@@ -38,6 +38,7 @@ interface BusinessConfig {
   website: string;
   cuitRucDni: string;
   ticketMessage: string;
+  country?: string;
   paymentMethods?: Array<{
     id: string;
     name: string;
@@ -84,6 +85,7 @@ const CONFIG_COPY = {
       website: "Sitio Web",
       cuitRucDni: "CUIT/RUC/DNI",
       ticketMessage: "Mensaje en Ticket",
+      country: "País",
     },
     paymentMethods: {
       title: "Métodos de Pago Disponibles",
@@ -146,6 +148,7 @@ const CONFIG_COPY = {
       website: "Website",
       cuitRucDni: "CUIT/RUC/DNI",
       ticketMessage: "Ticket Message",
+      country: "Country",
     },
     paymentMethods: {
       title: "Available Payment Methods",
@@ -208,6 +211,7 @@ const CONFIG_COPY = {
       website: "Site",
       cuitRucDni: "CUIT/RUC/DNI",
       ticketMessage: "Mensagem do Recibo",
+      country: "País",
     },
     paymentMethods: {
       title: "Métodos de Pagamento Disponíveis",
@@ -241,6 +245,54 @@ const CONFIG_COPY = {
   },
 };
 
+const COUNTRY_OPTIONS = {
+  es: [
+    { value: "argentina", label: "Argentina" },
+    { value: "chile", label: "Chile" },
+    { value: "peru", label: "Perú" },
+    { value: "uruguay", label: "Uruguay" },
+    { value: "paraguay", label: "Paraguay" },
+    { value: "bolivia", label: "Bolivia" },
+    { value: "colombia", label: "Colombia" },
+    { value: "mexico", label: "México" },
+    { value: "spain", label: "España" },
+    { value: "brazil", label: "Brasil" },
+    { value: "portugal", label: "Portugal" },
+    { value: "usa", label: "Estados Unidos" },
+    { value: "pakistan", label: "Pakistán" },
+  ],
+  en: [
+    { value: "argentina", label: "Argentina" },
+    { value: "chile", label: "Chile" },
+    { value: "peru", label: "Peru" },
+    { value: "uruguay", label: "Uruguay" },
+    { value: "paraguay", label: "Paraguay" },
+    { value: "bolivia", label: "Bolivia" },
+    { value: "colombia", label: "Colombia" },
+    { value: "mexico", label: "Mexico" },
+    { value: "spain", label: "Spain" },
+    { value: "brazil", label: "Brazil" },
+    { value: "portugal", label: "Portugal" },
+    { value: "usa", label: "United States" },
+    { value: "pakistan", label: "Pakistan" },
+  ],
+  pt: [
+    { value: "argentina", label: "Argentina" },
+    { value: "chile", label: "Chile" },
+    { value: "peru", label: "Peru" },
+    { value: "uruguay", label: "Uruguai" },
+    { value: "paraguay", label: "Paraguai" },
+    { value: "bolivia", label: "Bolívia" },
+    { value: "colombia", label: "Colômbia" },
+    { value: "mexico", label: "México" },
+    { value: "spain", label: "Espanha" },
+    { value: "brazil", label: "Brasil" },
+    { value: "portugal", label: "Portugal" },
+    { value: "usa", label: "Estados Unidos" },
+    { value: "pakistan", label: "Paquistão" },
+  ],
+} as const;
+
 export default function BusinessConfigPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -267,6 +319,7 @@ export default function BusinessConfigPage() {
     website: "www.minegocio.com",
     cuitRucDni: "00-00000000-0",
     ticketMessage: "",
+    country: "argentina",
     paymentMethods: [
       { id: "cash", name: "Efectivo", enabled: true },
       { id: "bankTransfer", name: "Transferencia Bancaria", enabled: true },
@@ -376,6 +429,21 @@ export default function BusinessConfigPage() {
           configData.ticketMessage = copy.ticket.defaultMessage;
         }
 
+        if (!configData.country) {
+          configData.country = "argentina";
+        }
+
+        try {
+          localStorage.setItem("businessCountry", configData.country);
+          window.dispatchEvent(
+            new CustomEvent("business-country-changed", {
+              detail: { country: configData.country },
+            }),
+          );
+        } catch (error) {
+          console.warn("Failed to sync country from config", error);
+        }
+
         setFormData(configData);
       }
     } catch (error) {
@@ -406,6 +474,18 @@ export default function BusinessConfigPage() {
       if (response.ok) {
         const data = await response.json();
         setFormData(data.data);
+        if (data?.data?.country) {
+          try {
+            localStorage.setItem("businessCountry", data.data.country);
+            window.dispatchEvent(
+              new CustomEvent("business-country-changed", {
+                detail: { country: data.data.country },
+              }),
+            );
+          } catch (error) {
+            console.warn("Failed to broadcast saved country", error);
+          }
+        }
         setConfigSaved(true);
         toast.success(copy.messages.saved);
         setTimeout(() => setConfigSaved(false), 3000);
@@ -430,6 +510,20 @@ export default function BusinessConfigPage() {
           : method,
       ),
     }));
+  };
+
+  const handleCountryChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, country: value }));
+    try {
+      localStorage.setItem("businessCountry", value);
+      window.dispatchEvent(
+        new CustomEvent("business-country-changed", {
+          detail: { country: value },
+        }),
+      );
+    } catch (error) {
+      console.warn("Failed to broadcast country change", error);
+    }
   };
 
   const normalizePlanId = (planId?: string | null) => {
@@ -822,6 +916,28 @@ export default function BusinessConfigPage() {
                     placeholder="Ej. Av. San Martin 1234, CABA"
                     className="w-full px-4 py-2 transition-colors bg-white border rounded-lg border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 focus:border-purple-500 focus:outline-none"
                   />
+                </div>
+
+                {/* Country */}
+                <div>
+                  <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-900 dark:text-white">
+                    🌍 {copy.businessForm.country}
+                  </label>
+                  <select
+                    value={formData.country || "argentina"}
+                    onChange={(e) => handleCountryChange(e.target.value)}
+                    className="w-full px-4 py-2 transition-colors bg-white border rounded-lg border-slate-300 text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:border-purple-500 focus:outline-none"
+                  >
+                    {(
+                      COUNTRY_OPTIONS[
+                        currentLanguage as keyof typeof COUNTRY_OPTIONS
+                      ] || COUNTRY_OPTIONS.es
+                    ).map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Phone and Email */}

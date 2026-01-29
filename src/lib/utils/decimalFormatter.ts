@@ -18,6 +18,49 @@ export function normalizeDecimalSeparator(value: string): string {
 }
 
 /**
+ * Parses a numeric input that may contain thousands separators or decimal separators
+ * Supports mixed formats like "1,234.56" or "1.234,56" and simple inputs like "12,500".
+ *
+ * Rules:
+ * - If both "," and "." exist, the last separator is treated as decimal.
+ * - If only "," exists and the last group has 3 digits, treat commas as thousands separators.
+ * - Otherwise, treat "," as decimal separator.
+ *
+ * @param value Input string
+ * @returns Parsed number or null if invalid
+ */
+export function parseNumberInput(value: string): number | null {
+  if (!value || value.trim() === "") return null;
+
+  const trimmed = value.trim().replace(/\s/g, "");
+  const lastComma = trimmed.lastIndexOf(",");
+  const lastDot = trimmed.lastIndexOf(".");
+
+  let normalized = trimmed;
+
+  if (lastComma !== -1 && lastDot !== -1) {
+    const decimalSeparator = lastComma > lastDot ? "," : ".";
+    const thousandsSeparator = decimalSeparator === "," ? "." : ",";
+    normalized = trimmed.split(thousandsSeparator).join("");
+    if (decimalSeparator === ",") {
+      normalized = normalized.replace(",", ".");
+    }
+  } else if (lastComma !== -1) {
+    const parts = trimmed.split(",");
+    const lastPart = parts[parts.length - 1] || "";
+    if (parts.length > 1 && lastPart.length === 3) {
+      normalized = trimmed.replace(/,/g, "");
+    } else {
+      normalized = trimmed.replace(",", ".");
+    }
+  }
+
+  const parsed = Number(normalized);
+  if (Number.isNaN(parsed)) return null;
+  return parsed;
+}
+
+/**
  * Parses quantity input handling both commas and periods
  * Validates against maximum 3 decimal places
  * @param value Input value from user
@@ -26,10 +69,10 @@ export function normalizeDecimalSeparator(value: string): string {
 export function parseQuantity(value: string): number | null {
   if (!value || value.trim() === "") return null;
 
-  const normalized = normalizeDecimalSeparator(value);
-  const parsed = parseFloat(normalized);
+  const parsed = parseNumberInput(value);
+  const normalized = parsed !== null ? String(parsed) : "";
 
-  if (isNaN(parsed)) return null;
+  if (parsed === null) return null;
   if (parsed < 0) return null;
 
   // Check for maximum 4 decimal places
@@ -86,13 +129,12 @@ export function validateQuantity(
   }
 
   if (isSoldByWeight) {
-    // For weight products: allow decimals up to 4 places, minimum 3
+    // For weight products: allow decimals up to 4 places
     const decimalPlaces = (quantity.toString().split(".")[1] || "").length;
-    if (decimalPlaces < 3 || decimalPlaces > 4) {
+    if (decimalPlaces > 4) {
       return {
         isValid: false,
-        error:
-          "Quantity must have 3 or 4 decimal places for weight products (e.g., 1.560 or 1.5600)",
+        error: "Quantity must have up to 4 decimal places for weight products",
       };
     }
     // Minimum weight: 0.001 kg (1 gram)
@@ -176,15 +218,15 @@ export function getInputPlaceholder(
   const placeholders = {
     en: {
       unit: "e.g., 5 units",
-      weight: "e.g., 1.560 kg (or 1,560)",
+      weight: "e.g., 1.560 kg or 1,560 kg",
     },
     es: {
       unit: "ej: 5 unidades",
-      weight: "ej: 1.560 kg (o 1,560)",
+      weight: "ej: 1.560 kg o 1,560 kg",
     },
     pt: {
       unit: "ex: 5 unidades",
-      weight: "ex: 1.560 kg (ou 1,560)",
+      weight: "ex: 1.560 kg ou 1,560 kg",
     },
   };
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { useBusinessDateTime } from "@/lib/hooks/useBusinessDateTime";
 import { apiFetch } from "@/lib/utils/apiFetch";
 import ProductSearch from "@/components/pos/ProductSearch";
 import KeyboardPOSInput from "@/components/pos/KeyboardPOSInput";
@@ -27,6 +28,7 @@ export default function POSPage() {
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const router = useRouter();
   const { t, currentLanguage } = useGlobalLanguage();
+  const { formatDate, formatTime } = useBusinessDateTime();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +37,31 @@ export default function POSPage() {
   const [lastSale, setLastSale] = useState<any>(null);
   const [businessConfig, setBusinessConfig] = useState<any>(null);
   const clientSelectRef = useRef<HTMLSelectElement>(null);
+  const [isCartHydrated, setIsCartHydrated] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("pos.cartItems");
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved) as CartItem[];
+      if (Array.isArray(parsed)) {
+        setCartItems(parsed);
+      }
+    } catch (error) {
+      console.warn("Failed to restore cart from storage", error);
+    } finally {
+      setIsCartHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isCartHydrated) return;
+    try {
+      localStorage.setItem("pos.cartItems", JSON.stringify(cartItems));
+    } catch (error) {
+      console.warn("Failed to persist cart to storage", error);
+    }
+  }, [cartItems, isCartHydrated]);
 
   const getReceiptLabel = (key: string, defaultText: string) => {
     const label = t(key, "pos");
@@ -54,6 +81,31 @@ export default function POSPage() {
       mercadopago: t("ui.paymentOptions.mercadopago", "pos") || "Mercado Pago",
     };
     return methodMap[method] || method;
+  };
+
+  const handleCheckoutError = (errorPayload: any) => {
+    const message =
+      typeof errorPayload?.error === "string"
+        ? errorPayload.error
+        : typeof errorPayload?.message === "string"
+          ? errorPayload.message
+          : "";
+
+    const match =
+      /Insufficient stock for (.+)\. Available: ([\d.]+), Requested: ([\d.]+)/i.exec(
+        message,
+      );
+    if (match) {
+      const [, name, available, requested] = match;
+      const localized = (t("ui.insufficientStock", "pos") as string)
+        .replace("{name}", name)
+        .replace("{available}", available)
+        .replace("{requested}", requested);
+      toast.error(localized);
+      return true;
+    }
+
+    return false;
   };
 
   useEffect(() => {
@@ -183,11 +235,7 @@ export default function POSPage() {
     setCartItems((prev) => {
       console.log("Previous cart items", prev);
       const existing = prev.find((item) => item.productId === productId);
-      const normalizedPrice = isSoldByWeight
-        ? price >= 1000
-          ? price / 1000
-          : price
-        : price;
+      const normalizedPrice = price;
       console.log("normalizedPrice", normalizedPrice);
 
       if (existing) {
@@ -197,9 +245,11 @@ export default function POSPage() {
             ? {
                 ...item,
                 quantity: item.quantity + actualQuantity,
-                total:
+                total: Math.max(
+                  0,
                   (item.quantity + actualQuantity) * normalizedPrice -
-                  item.discount,
+                    item.discount,
+                ),
               }
             : item,
         );
@@ -214,7 +264,7 @@ export default function POSPage() {
           quantity: actualQuantity,
           unitPrice: normalizedPrice,
           discount: 0,
-          total: actualQuantity * normalizedPrice,
+          total: Math.max(0, actualQuantity * normalizedPrice),
           isSoldByWeight: isSoldByWeight || false,
         },
       ];
@@ -226,17 +276,13 @@ export default function POSPage() {
   };
 
   const handleUpdateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      handleRemoveFromCart(productId);
-      return;
-    }
     setCartItems((prev) =>
       prev.map((item) =>
         item.productId === productId
           ? {
               ...item,
               quantity,
-              total: quantity * item.unitPrice - item.discount,
+              total: Math.max(0, quantity * item.unitPrice - item.discount),
             }
           : item,
       ),
@@ -250,7 +296,7 @@ export default function POSPage() {
           ? {
               ...item,
               discount,
-              total: item.quantity * item.unitPrice - discount,
+              total: Math.max(0, item.quantity * item.unitPrice - discount),
             }
           : item,
       ),
@@ -322,9 +368,11 @@ export default function POSPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        // Show translated error message instead of API error
         console.error("Checkout API error:", error.error);
-        toast.error(t("ui.checkoutError", "pos"));
+        const handled = handleCheckoutError(error);
+        if (!handled) {
+          toast.error(t("ui.checkoutError", "pos"));
+        }
         return;
       }
 
@@ -461,50 +509,50 @@ export default function POSPage() {
 
             {/* Receipt Modal */}
             {showReceiptModal && lastSale && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-                <div className="w-full max-w-md overflow-y-auto bg-white rounded-lg shadow-lg max-h-96">
-                  <div className="p-6">
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+                <div className="w-full max-w-md overflow-y-auto bg-white dark:bg-slate-900 rounded-lg shadow-lg max-h-96 border border-slate-200 dark:border-slate-700">
+                  <div className="p-6 text-slate-900 dark:text-slate-100">
                     {/* Business Header */}
-                    <div className="pb-4 mb-4 text-center border-b">
-                      <h2 className="text-xl font-bold text-gray-900">
+                    <div className="pb-4 mb-4 text-center border-b border-slate-200 dark:border-slate-700">
+                      <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                         {businessConfig?.businessName || "Recibo de Venta"}
                       </h2>
                       {businessConfig?.address && (
-                        <p className="mt-1 text-xs text-gray-600">
+                        <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                           {businessConfig.address}
                         </p>
                       )}
                       {businessConfig?.phone && (
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs text-slate-600 dark:text-slate-400">
                           Tel: {businessConfig.phone}
                         </p>
                       )}
                       {businessConfig?.email && (
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs text-slate-600 dark:text-slate-400">
                           {businessConfig.email}
                         </p>
                       )}
                     </div>
 
                     {/* Receipt Content */}
-                    <div className="py-4 mb-4 space-y-2 text-sm border-t border-b">
+                    <div className="py-4 mb-4 space-y-2 text-sm border-t border-b border-slate-200 dark:border-slate-700">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">
+                        <span className="text-slate-600 dark:text-slate-400">
                           {getReceiptLabel("receipt.date", "Date:")}
                         </span>
                         <span className="font-semibold">
                           {lastSale?.createdAt
-                            ? new Date(lastSale.createdAt).toLocaleDateString()
+                            ? formatDate(lastSale.createdAt)
                             : "-"}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">
+                        <span className="text-slate-600 dark:text-slate-400">
                           {getReceiptLabel("receipt.time", "Time:")}
                         </span>
                         <span className="font-semibold">
                           {lastSale?.createdAt
-                            ? new Date(lastSale.createdAt).toLocaleTimeString()
+                            ? formatTime(lastSale.createdAt)
                             : "-"}
                         </span>
                       </div>
@@ -512,16 +560,16 @@ export default function POSPage() {
 
                     {/* Items */}
                     <div className="mb-4 text-sm">
-                      <h3 className="mb-2 font-semibold text-gray-900">
+                      <h3 className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
                         {getReceiptLabel("receipt.items", "Items")}
                       </h3>
-                      <div className="space-y-1 text-gray-700">
+                      <div className="space-y-1 text-slate-700 dark:text-slate-300">
                         {lastSale?.items && lastSale.items.length > 0 ? (
                           lastSale.items.map((item: any, idx: number) => (
                             <div key={idx} className="flex justify-between">
                               <div>
                                 <div>{item.productName}</div>
-                                <div className="text-xs text-gray-500">
+                                <div className="text-xs text-slate-500 dark:text-slate-400">
                                   {item.quantity} x ${item.unitPrice.toFixed(2)}
                                 </div>
                               </div>
@@ -535,7 +583,7 @@ export default function POSPage() {
                             </div>
                           ))
                         ) : (
-                          <div className="italic text-gray-400">
+                          <div className="italic text-slate-400 dark:text-slate-500">
                             {getReceiptLabel("receipt.noItems", "No items")}
                           </div>
                         )}
@@ -543,22 +591,22 @@ export default function POSPage() {
                     </div>
 
                     {/* Totals */}
-                    <div className="pt-3 mb-4 space-y-1 text-sm border-t">
+                    <div className="pt-3 mb-4 space-y-1 text-sm border-t border-slate-200 dark:border-slate-700">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">
+                        <span className="text-slate-600 dark:text-slate-400">
                           {getReceiptLabel("receipt.subtotal", "Subtotal:")}
                         </span>
                         <span>${lastSale?.subtotal?.toFixed(2) || "0.00"}</span>
                       </div>
                       {(lastSale?.discount || 0) > 0 && (
-                        <div className="flex justify-between text-red-600">
+                        <div className="flex justify-between text-red-600 dark:text-red-400">
                           <span>
                             {getReceiptLabel("receipt.discount", "Discount:")}
                           </span>
                           <span>-${(lastSale?.discount || 0).toFixed(2)}</span>
                         </div>
                       )}
-                      <div className="flex justify-between font-bold text-gray-900">
+                      <div className="flex justify-between font-bold text-slate-900 dark:text-slate-100">
                         <span>
                           {getReceiptLabel("receipt.total", "Total:")}
                         </span>
@@ -567,8 +615,8 @@ export default function POSPage() {
                     </div>
 
                     {/* Payment Method */}
-                    <div className="p-2 mb-6 text-sm text-gray-700 rounded bg-gray-50">
-                      <span className="text-gray-600">
+                    <div className="p-2 mb-6 text-sm text-slate-700 dark:text-slate-300 rounded bg-slate-50 dark:bg-slate-800">
+                      <span className="text-slate-600 dark:text-slate-400">
                         {getReceiptLabel(
                           "receipt.paymentMethod",
                           "Payment Method:",
@@ -602,7 +650,7 @@ export default function POSPage() {
                       </button>
                       <button
                         onClick={() => setShowReceiptModal(false)}
-                        className="flex-1 py-2 font-semibold text-gray-800 transition bg-gray-300 rounded-lg hover:bg-gray-400"
+                        className="flex-1 py-2 font-semibold text-slate-800 dark:text-slate-100 transition bg-slate-300 dark:bg-slate-700 rounded-lg hover:bg-slate-400 dark:hover:bg-slate-600"
                       >
                         {getReceiptLabel("ui.close", "Close")}
                       </button>

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import { toast } from "react-toastify";
+import { parseNumberInput } from "@/lib/utils/decimalFormatter";
 
 interface KeyboardPOSInputProps {
   onAddToCart: (
@@ -107,12 +108,11 @@ export default function KeyboardPOSInput({
     // Check for multiplier pattern: "quantity * code" or "quantity*code"
     const multiplierMatch = trimmed.match(/^([0-9.,]+)\s*\*\s*(.+)$/);
     if (multiplierMatch) {
-      const qtyString = multiplierMatch[1].replace(",", ".");
-      const qty = parseFloat(qtyString);
+      const qty = parseNumberInput(multiplierMatch[1]);
       const code = multiplierMatch[2].trim();
 
       // Validate quantity
-      if (isNaN(qty)) {
+      if (qty === null || Number.isNaN(qty)) {
         toast.error(`Invalid quantity: ${multiplierMatch[1]}`);
         return null;
       }
@@ -197,7 +197,10 @@ export default function KeyboardPOSInput({
       // Try exact match first (barcode or code)
       const normalize = (s: string | undefined) =>
         (s || "").replace(/[-\s]/g, "").toLowerCase();
+      const normalizeName = (s: string | undefined) =>
+        (s || "").trim().toLowerCase();
       const normalizedQuery = normalize(code);
+      const normalizedNameQuery = normalizeName(code);
 
       const exactMatch = products.find(
         (p: any) =>
@@ -208,8 +211,16 @@ export default function KeyboardPOSInput({
             )),
       );
 
+      const exactNameMatch = products.find(
+        (p: any) => normalizeName(p.name) === normalizedNameQuery,
+      );
+
       // Return exact match or first result if only one found
-      return exactMatch || (products.length === 1 ? products[0] : null);
+      return (
+        exactMatch ||
+        exactNameMatch ||
+        (products.length === 1 ? products[0] : null)
+      );
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
@@ -499,6 +510,17 @@ export default function KeyboardPOSInput({
         return;
       }
 
+      if (typeof product.stock === "number" && product.stock <= 0) {
+        toast.error(
+          t("ui.outOfStock", "pos") !== "ui.outOfStock"
+            ? t("ui.outOfStock", "pos")
+            : "Product out of stock",
+        );
+        setProductCode("");
+        productInputRef.current?.focus();
+        return;
+      }
+
       // Check if price is a valid number
       if (
         typeof product.price !== "number" ||
@@ -511,11 +533,7 @@ export default function KeyboardPOSInput({
       }
 
       // Normalize price for weight-based products
-      const normalizedPrice = product.isSoldByWeight
-        ? product.price >= 1000
-          ? product.price / 1000
-          : product.price
-        : product.price;
+      const normalizedPrice = product.price;
 
       // Add to cart with specified quantity
       onAddToCart(

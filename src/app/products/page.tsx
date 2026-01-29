@@ -24,6 +24,7 @@ import {
   getRemainingCount,
   isLimitReached,
 } from "@/lib/utils/planFeatures";
+import { parseNumberInput } from "@/lib/utils/decimalFormatter";
 
 const PRODUCT_COPY = {
   es: {
@@ -96,7 +97,7 @@ const PRODUCT_COPY = {
       weightLabel:
         "Se vende por peso (kg) - Ej: verduras, fiambres, alimento de perros",
       weightHelpEnabled:
-        "✓ Decimales habilitados (máx. 3 lugares). Ejemplos: 1.254 kg, 0.750 kg. Usa coma o punto como separador.",
+        "✓ Decimales habilitados (máx. 4 lugares). Ejemplos: 1.254 kg, 0.750 kg. También puedes usar separadores de miles.",
       weightHelpDisabled:
         "Habilitar para productos vendidos por peso/volumen. Admite cantidades decimales (máx. 3 decimales).",
       cancel: "Cancelar",
@@ -221,7 +222,7 @@ const PRODUCT_COPY = {
       activeLabel: "Active product",
       weightLabel: "Sold by weight (kg) - e.g., produce, deli, pet food",
       weightHelpEnabled:
-        "✓ Decimals enabled (max 3 places). Examples: 1.254 kg, 0.750 kg. Use comma or period as separator.",
+        "✓ Decimals enabled (max 4 places). Examples: 1.254 kg, 0.750 kg. Thousands separators are also allowed.",
       weightHelpDisabled:
         "Enable for products sold by weight/volume. Supports decimal quantities (max 3 decimal places).",
       cancel: "Cancel",
@@ -346,7 +347,7 @@ const PRODUCT_COPY = {
       activeLabel: "Produto ativo",
       weightLabel: "Vendido por peso (kg) - Ex.: verduras, frios, ração",
       weightHelpEnabled:
-        "✓ Decimais habilitados (máx. 3 casas). Exemplos: 1.254 kg, 0.750 kg. Use vírgula ou ponto como separador.",
+        "✓ Decimais habilitados (máx. 4 casas). Exemplos: 1.254 kg, 0.750 kg. Separadores de milhar também são aceitos.",
       weightHelpDisabled:
         "Habilitar para produtos vendidos por peso/volume. Suporta quantidades decimais (máx. 3 casas decimais).",
       cancel: "Cancelar",
@@ -409,6 +410,19 @@ export default function ProductsPage() {
   const { t, currentLanguage } = useGlobalLanguage();
   const copy = (PRODUCT_COPY[currentLanguage] ||
     PRODUCT_COPY.en) as typeof PRODUCT_COPY.en;
+  const stockLocale =
+    currentLanguage === "pt"
+      ? "pt-BR"
+      : currentLanguage === "en"
+        ? "en-US"
+        : "es-AR";
+  const formatStockValue = (value: number, isWeight: boolean) => {
+    if (!isWeight) return value.toString();
+    return new Intl.NumberFormat(stockLocale, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
   const [mounted, setMounted] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -473,6 +487,34 @@ export default function ProductsPage() {
     loadCategories();
     loadSubscription();
   }, [router, mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    const token = localStorage.getItem("accessToken");
+    let es: EventSource | null = null;
+
+    if (token) {
+      es = new EventSource(
+        `/api/stock/stream?token=${encodeURIComponent(token)}`,
+      );
+      es.addEventListener("product", () => {
+        loadProducts(true);
+      });
+    }
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        loadProducts(true);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      if (es) es.close();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [mounted]);
 
   const loadSubscription = async () => {
     try {
@@ -663,11 +705,11 @@ export default function ProductsPage() {
       const token = localStorage.getItem("accessToken");
       const payload: any = {
         ...formData,
-        cost: parseFloat(formData.cost),
-        price: parseFloat(formData.price),
+        cost: parseNumberInput(formData.cost) ?? 0,
+        price: parseNumberInput(formData.price) ?? 0,
         stock: parseInt(formData.stock),
         minStock: parseInt(formData.minStock),
-        margin: parseFloat(formData.margin),
+        margin: parseNumberInput(formData.margin) ?? 0,
         id: editingId || undefined,
         barcodes: [
           formData.barcode1,
@@ -1307,12 +1349,12 @@ export default function ProductsPage() {
                       type="number"
                       value={formData.cost}
                       onChange={(e) => {
-                        const cost = parseFloat(e.target.value) || 0;
-                        const price = parseFloat(formData.price) || 0;
+                        const cost = parseNumberInput(e.target.value) ?? 0;
+                        const price = parseNumberInput(formData.price) ?? 0;
                         const margin =
                           price > 0
                             ? ((price - cost) / price) * 100
-                            : parseFloat(formData.margin) || 0;
+                            : (parseNumberInput(formData.margin) ?? 0);
                         setFormData({
                           ...formData,
                           cost: e.target.value,
@@ -1334,8 +1376,8 @@ export default function ProductsPage() {
                       type="number"
                       value={formData.margin}
                       onChange={(e) => {
-                        const margin = parseFloat(e.target.value) || 0;
-                        const cost = parseFloat(formData.cost) || 0;
+                        const margin = parseNumberInput(e.target.value) ?? 0;
+                        const cost = parseNumberInput(formData.cost) ?? 0;
                         const price =
                           margin > 0 ? cost / (1 - margin / 100) : 0;
                         setFormData({
@@ -1363,8 +1405,8 @@ export default function ProductsPage() {
                       type="number"
                       value={formData.price}
                       onChange={(e) => {
-                        const price = parseFloat(e.target.value) || 0;
-                        const cost = parseFloat(formData.cost) || 0;
+                        const price = parseNumberInput(e.target.value) ?? 0;
+                        const cost = parseNumberInput(formData.cost) ?? 0;
                         const margin =
                           price > 0 ? ((price - cost) / price) * 100 : 0;
                         setFormData({
@@ -1597,11 +1639,18 @@ export default function ProductsPage() {
                             : "text-slate-900 dark:text-slate-100"
                         }
                       >
-                        {product.stock}
+                        {formatStockValue(
+                          product.stock,
+                          !!product.isSoldByWeight,
+                        )}
                         {product.isSoldByWeight ? " kg" : ""}
                       </span>
                       <span className="text-xs text-slate-600 dark:text-slate-500">
-                        Min: {product.minStock ?? 0}
+                        Min:{" "}
+                        {formatStockValue(
+                          product.minStock ?? 0,
+                          !!product.isSoldByWeight,
+                        )}
                         {product.isSoldByWeight ? " kg" : ""}
                       </span>
                     </div>

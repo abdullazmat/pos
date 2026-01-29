@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { InvoiceChannel } from "@/lib/models/Invoice";
 import { toast } from "react-toastify";
 import { useLanguage } from "@/lib/context/LanguageContext";
-import { formatQuantity } from "@/lib/utils/decimalFormatter";
+import {
+  formatQuantity,
+  parseQuantity,
+  validateQuantity,
+} from "@/lib/utils/decimalFormatter";
 
 interface CartItem {
   productId: string;
@@ -58,14 +62,34 @@ export default function Cart({
   const [ivaType, setIvaType] = useState("RESPONSABLE_INSCRIPTO");
   const [isLoading, setIsLoading] = useState(false);
   const [showCustomerForm, setShowCustomerForm] = useState(false);
+  const [quantityInputs, setQuantityInputs] = useState<Record<string, string>>(
+    {},
+  );
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.quantity * item.unitPrice,
     0,
   );
   const totalDiscount = items.reduce((sum, item) => sum + item.discount, 0);
-  const tax = Math.round((subtotal - totalDiscount) * 0.21 * 100) / 100;
-  const total = subtotal - totalDiscount + tax;
+  const taxableBase = Math.max(0, subtotal - totalDiscount);
+  const tax = Math.round(taxableBase * 0.21 * 100) / 100;
+  const total = taxableBase + tax;
+
+  useEffect(() => {
+    setQuantityInputs((prev) => {
+      const next: Record<string, string> = {};
+      items.forEach((item) => {
+        if (editingProductId === item.productId && prev[item.productId]) {
+          next[item.productId] = prev[item.productId];
+          return;
+        }
+        const formatted = formatQuantity(item.quantity, 4);
+        next[item.productId] = formatted;
+      });
+      return next;
+    });
+  }, [items, editingProductId]);
 
   const handleCheckout = useCallback(async () => {
     if (!customerName.trim()) {
@@ -135,7 +159,10 @@ export default function Cart({
         </h2>
         {items.length > 0 && (
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              localStorage.removeItem("pos.cartItems");
+              window.location.reload();
+            }}
             className="text-red-600 hover:text-red-700 p-2"
             title="Limpiar Carrito"
           >
@@ -202,36 +229,137 @@ export default function Cart({
                     inputMode={item.isSoldByWeight ? "decimal" : "numeric"}
                     placeholder={
                       item.isSoldByWeight
-                        ? "e.g., 1.560 kg (or 1,560)"
+                        ? "e.g., 1.560 kg or 1,560 kg"
                         : "e.g., 5 units"
                     }
-                    value={formatQuantity(item.quantity, 4)}
+                    value={
+                      quantityInputs[item.productId] ??
+                      formatQuantity(item.quantity, 4)
+                    }
+                    onFocus={() => setEditingProductId(item.productId)}
                     onChange={(e) => {
-                      const normalized = e.target.value.replace(",", ".");
-                      const parsed = parseFloat(normalized);
-                      if (item.isSoldByWeight) {
-                        // Allow up to 4 decimals, no rounding
-                        if (
-                          /^\d+(\.|,)?\d{0,4}$/.test(
-                            e.target.value.replace(",", "."),
-                          )
-                        ) {
-                          onUpdateQuantity(item.productId, parsed || 0);
+                      const rawValue = e.target.value;
+                      const isWeight = item.isSoldByWeight || false;
+
+                      if (!isWeight) {
+                        const sanitized = rawValue.replace(/[^\d]/g, "");
+                        setQuantityInputs((prev) => ({
+                          ...prev,
+                          [item.productId]: sanitized,
+                        }));
+
+                        if (sanitized === "") {
+                          onUpdateQuantity(item.productId, 0);
+                          return;
                         }
-                      } else {
-                        if (
-                          /^\d+$/.test(e.target.value) ||
-                          e.target.value === ""
-                        ) {
-                          onUpdateQuantity(
-                            item.productId,
-                            parseInt(e.target.value) || 0,
-                          );
+
+                        const parsedInt = parseInt(sanitized, 10);
+                        if (!Number.isNaN(parsedInt)) {
+                          onUpdateQuantity(item.productId, parsedInt);
+                        }
+                        return;
+                      }
+
+                      setQuantityInputs((prev) => ({
+                        ...prev,
+                        [item.productId]: rawValue,
+                      }));
+
+                      const trimmed = rawValue.trim();
+                      if (trimmed.endsWith(".") || trimmed.endsWith(",")) {
+                        return;
+                      }
+
+                      if (trimmed === "") {
+                        onUpdateQuantity(item.productId, 0);
+                        return;
+                      }
+
+                      const parsed = parseQuantity(e.target.value);
+
+                      if (parsed !== null) {
+                        const validation = validateQuantity(parsed, true);
+                        if (validation.isValid) {
+                          onUpdateQuantity(item.productId, parsed);
                         }
                       }
                     }}
+                    onBlur={(e) => {
+                      const isWeight = item.isSoldByWeight || false;
+                      if (!isWeight) {
+                        const sanitized = e.target.value.replace(/[^\d]/g, "");
+                        if (sanitized === "") {
+                          onUpdateQuantity(item.productId, 0);
+                          setQuantityInputs((prev) => ({
+                            ...prev,
+                            [item.productId]: "0",
+                          }));
+                          setEditingProductId(null);
+                          return;
+                        }
+
+                        const parsedInt = parseInt(sanitized, 10);
+                        if (Number.isNaN(parsedInt)) {
+                          setQuantityInputs((prev) => ({
+                            ...prev,
+                            [item.productId]: formatQuantity(item.quantity, 4),
+                          }));
+                          setEditingProductId(null);
+                          return;
+                        }
+
+                        onUpdateQuantity(item.productId, parsedInt);
+                        setQuantityInputs((prev) => ({
+                          ...prev,
+                          [item.productId]: parsedInt.toString(),
+                        }));
+                        setEditingProductId(null);
+                        return;
+                      }
+
+                      if (e.target.value.trim() === "") {
+                        onUpdateQuantity(item.productId, 0);
+                        setQuantityInputs((prev) => ({
+                          ...prev,
+                          [item.productId]: "0",
+                        }));
+                        setEditingProductId(null);
+                        return;
+                      }
+                      const parsed = parseQuantity(e.target.value);
+                      if (parsed === null) {
+                        setQuantityInputs((prev) => ({
+                          ...prev,
+                          [item.productId]: formatQuantity(item.quantity, 4),
+                        }));
+                        setEditingProductId(null);
+                        return;
+                      }
+
+                      const validation = validateQuantity(parsed, true);
+                      if (!validation.isValid) {
+                        setQuantityInputs((prev) => ({
+                          ...prev,
+                          [item.productId]: formatQuantity(item.quantity, 4),
+                        }));
+                        setEditingProductId(null);
+                        return;
+                      }
+
+                      onUpdateQuantity(item.productId, parsed);
+                      setQuantityInputs((prev) => ({
+                        ...prev,
+                        [item.productId]: formatQuantity(parsed, 4),
+                      }));
+                      setEditingProductId(null);
+                    }}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
                   />
+                  {item.isSoldByWeight && (
+                    <p className="text-[11px] text-gray-500 mt-1">
+                      {t("ui.weightQuantityHint", "pos")}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs text-gray-600 mb-1">
@@ -256,7 +384,7 @@ export default function Cart({
                     Total
                   </label>
                   <div className="px-2 py-1 bg-blue-50 rounded text-xs font-semibold text-right">
-                    {formatCurrency(item.total)}
+                    {formatCurrency(Math.max(0, item.total))}
                   </div>
                 </div>
               </div>
@@ -270,21 +398,21 @@ export default function Cart({
           {/* Totals Section */}
           <div className="border-t pt-3 mb-4 space-y-1 text-sm">
             <div className="flex justify-between text-gray-700">
-              <span>Subtotal:</span>
+              <span>{t("ui.subtotal", "pos")}:</span>
               <span>{formatCurrency(subtotal)}</span>
             </div>
             {totalDiscount > 0 && (
               <div className="flex justify-between text-red-600">
-                <span>Descuento:</span>
+                <span>{t("ui.totalDiscount", "pos")}:</span>
                 <span>-{formatCurrency(totalDiscount)}</span>
               </div>
             )}
             <div className="flex justify-between text-gray-700">
-              <span>IVA 21%:</span>
+              <span>{t("ui.tax21", "pos")}:</span>
               <span>{formatCurrency(tax)}</span>
             </div>
             <div className="flex justify-between text-xl font-bold text-gray-900 bg-blue-50 p-3 rounded-lg border-2 border-blue-200 mt-2">
-              <span>Total:</span>
+              <span>{t("ui.total", "pos")}:</span>
               <span className="text-blue-600">{formatCurrency(total)}</span>
             </div>
           </div>

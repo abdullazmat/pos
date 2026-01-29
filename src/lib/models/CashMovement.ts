@@ -7,6 +7,12 @@ export interface ICashMovementOperator {
   session_id: string;
 }
 
+export interface ICashMovementApprover {
+  user_id: Schema.Types.ObjectId;
+  visible_name: string;
+  role: "supervisor" | "admin";
+}
+
 export interface ICashMovement extends Document {
   businessId: Schema.Types.ObjectId;
   cashRegisterId: Schema.Types.ObjectId;
@@ -15,6 +21,7 @@ export interface ICashMovement extends Document {
   amount: number;
   createdBy: Schema.Types.ObjectId;
   operator: ICashMovementOperator;
+  approvedBy?: ICashMovementApprover;
   notes?: string;
   createdAt: Date;
 }
@@ -69,6 +76,19 @@ const cashMovementSchema = new Schema<ICashMovement>(
       session_id: {
         type: String,
         required: true,
+      },
+    },
+    approvedBy: {
+      user_id: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+      visible_name: {
+        type: String,
+      },
+      role: {
+        type: String,
+        enum: ["supervisor", "admin"],
       },
     },
   },

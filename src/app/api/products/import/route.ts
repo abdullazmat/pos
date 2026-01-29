@@ -8,7 +8,10 @@ import {
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 import { checkPlanLimit } from "@/lib/utils/planValidation";
-import { generateDateBasedProductCode } from "@/lib/utils/productCodeGenerator";
+import {
+  generateDateBasedProductCode,
+  generateNextProductInternalId,
+} from "@/lib/utils/productCodeGenerator";
 
 type ParsedRow = {
   [key: string]: string | undefined;
@@ -164,8 +167,11 @@ export async function POST(req: NextRequest) {
 
       const margin = price > 0 ? ((price - cost) / price) * 100 : 0;
 
+      const internalId = await generateNextProductInternalId(businessId);
+
       const product = new Product({
         businessId,
+        internalId,
         name,
         code: finalCode,
         cost,

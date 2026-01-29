@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import { toast } from "react-toastify";
+import { useBusinessDateTime } from "@/lib/hooks/useBusinessDateTime";
 
 export default function PurchasesPage() {
+  const { formatDate } = useBusinessDateTime();
   const router = useRouter();
   const { t } = useGlobalLanguage();
   const [purchases, setPurchases] = useState<any[]>([]);
@@ -220,9 +222,7 @@ export default function PurchasesPage() {
                 <tbody>
                   {purchases.map((purchase, idx) => (
                     <tr key={idx} className="border-b hover:bg-gray-50">
-                      <td className="p-3">
-                        {new Date(purchase.createdAt).toLocaleDateString()}
-                      </td>
+                      <td className="p-3">{formatDate(purchase.createdAt)}</td>
                       <td className="p-3">Product</td>
                       <td className="text-right p-3">{purchase.quantity}</td>
                       <td className="text-right p-3">

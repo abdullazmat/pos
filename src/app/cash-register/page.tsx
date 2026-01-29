@@ -9,11 +9,13 @@ import OpenTicketModal from "@/components/cash-register/OpenTicketModal";
 import Toast from "@/components/common/Toast";
 import Loading from "@/components/common/Loading";
 import { isTokenExpiredSoon } from "@/lib/utils/token";
+import { useBusinessDateTime } from "@/lib/hooks/useBusinessDateTime";
 
 import WithdrawalModal from "@/components/cash-register/WithdrawalModal";
 import WithdrawalTicket from "@/components/cash-register/WithdrawalTicket";
 import CreditNoteModal from "@/components/cash-register/CreditNoteModal";
 import CreditNoteTicket from "@/components/cash-register/CreditNoteTicket";
+import AuthorizationModal from "@/components/cash-register/AuthorizationModal";
 import CloseBoxModal from "@/components/cash-register/CloseBoxModal";
 import CloseTicketModal, {
   CloseTicketData,
@@ -37,6 +39,15 @@ const CASH_COPY = {
     creditSuccess: (amount: string) =>
       `¡Nota de crédito de ${amount} registrada!`,
     creditError: "No se pudo registrar la nota de crédito",
+    errors: {
+      invalidAmount: "Ingresa un monto válido.",
+      approvalPasswordRequired: "Se requiere contraseña de autorización.",
+      invalidApprovalPassword: "Contraseña incorrecta.",
+      noOpenSession: "No hay una caja abierta.",
+      invalidAction: "Acción inválida.",
+      unauthorized: "No autorizado.",
+      generic: "Ocurrió un error. Intenta nuevamente.",
+    },
     noOpenTitle: "No hay caja abierta",
     noOpenSubtitle:
       'Debes abrir una caja desde la sección "Control de Caja" para comenzar a vender',
@@ -61,6 +72,7 @@ const CASH_COPY = {
       amount: "Monto",
       operator: "Operador",
       noOperator: "Sin operador",
+      noReason: "Sin motivo especificado",
       empty: "No hay movimientos registrados en esta sesión",
       types: {
         apertura: "Apertura",
@@ -103,6 +115,15 @@ const CASH_COPY = {
     withdrawError: "Unable to record withdrawal",
     creditSuccess: (amount: string) => `Credit note of ${amount} recorded!`,
     creditError: "Unable to record credit note",
+    errors: {
+      invalidAmount: "Enter a valid amount.",
+      approvalPasswordRequired: "Authorization password is required.",
+      invalidApprovalPassword: "Incorrect password.",
+      noOpenSession: "No cash register is open.",
+      invalidAction: "Invalid action.",
+      unauthorized: "Unauthorized.",
+      generic: "Something went wrong. Please try again.",
+    },
     noOpenTitle: "No register open",
     noOpenSubtitle:
       'Open a register from the "Cash Register" section to start selling',
@@ -127,6 +148,7 @@ const CASH_COPY = {
       amount: "Amount",
       operator: "Operator",
       noOperator: "No operator info",
+      noReason: "No reason specified",
       empty: "No movements recorded in this session",
       types: {
         apertura: "Opening",
@@ -170,6 +192,15 @@ const CASH_COPY = {
     creditSuccess: (amount: string) =>
       `Nota de crédito de ${amount} registrada!`,
     creditError: "Não foi possível registrar a nota de crédito",
+    errors: {
+      invalidAmount: "Digite um valor válido.",
+      approvalPasswordRequired: "A senha de autorização é necessária.",
+      invalidApprovalPassword: "Senha incorreta.",
+      noOpenSession: "Não há caixa aberta.",
+      invalidAction: "Ação inválida.",
+      unauthorized: "Não autorizado.",
+      generic: "Ocorreu um erro. Tente novamente.",
+    },
     noOpenTitle: "Nenhuma caixa aberta",
     noOpenSubtitle:
       'Abra uma caixa em "Controle de Caixa" para começar a vender',
@@ -194,6 +225,7 @@ const CASH_COPY = {
       amount: "Valor",
       operator: "Operador",
       noOperator: "Sem operador",
+      noReason: "Sem motivo especificado",
       empty: "Nenhum movimento registrado nesta sessão",
       types: {
         apertura: "Abertura",
@@ -251,6 +283,8 @@ export default function CashRegisterPage() {
   const [withdrawalTicketData, setWithdrawalTicketData] = useState<{
     amount: number;
     reason: string;
+    cashierName?: string;
+    supervisorName?: string;
   } | null>(null);
   const [showCreditNoteTicket, setShowCreditNoteTicket] = useState(false);
   const [creditNoteTicketData, setCreditNoteTicketData] = useState<{
@@ -258,31 +292,94 @@ export default function CashRegisterPage() {
     reason: string;
     notes?: string;
     createdAt?: string;
+    cashierName?: string;
+    adminName?: string;
   } | null>(null);
   const router = useRouter();
   const { currentLanguage } = useGlobalLanguage();
   const copy = (CASH_COPY[currentLanguage] ||
     CASH_COPY.en) as typeof CASH_COPY.en;
+  const { formatDateTime } = useBusinessDateTime();
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat(CURRENCY_LOCALE[currentLanguage], {
       style: "currency",
       currency: "ARS",
     }).format(value);
 
+  const resolveMovementError = (errorKey: unknown): string => {
+    if (typeof errorKey === "string") {
+      const key = errorKey as keyof typeof copy.errors;
+      if (copy.errors?.[key]) return copy.errors[key];
+    }
+    return copy.errors?.generic || copy.withdrawError;
+  };
+
   // Translate movement descriptions stored as "movementType:reason" format
   const translateMovementDescription = (raw: string): string => {
     if (!raw) return "";
-    // If description is in the format "type:reason", split and present both parts
+
+    const normalize = (value: string) => value.trim().toLowerCase();
+    const typeMap: Record<string, keyof typeof copy.movements.types> = {
+      apertura: "apertura",
+      opening: "apertura",
+      sale: "venta",
+      venta: "venta",
+      withdrawal: "retiro",
+      retiro: "retiro",
+      closing: "cierre",
+      cierre: "cierre",
+      creditnote: "nota_credito",
+      credit_note: "nota_credito",
+      nota_credito: "nota_credito",
+    };
+
+    const resolveTypeLabel = (typePart: string) => {
+      const key = typeMap[normalize(typePart)] as
+        | keyof typeof copy.movements.types
+        | undefined;
+      return key ? copy.movements.types[key] : typePart;
+    };
+
+    const resolveReasonLabel = (reasonPart: string) => {
+      const normalized = normalize(reasonPart);
+      if (normalized === "noreason" || normalized === "no reason") {
+        return copy.movements.noReason;
+      }
+
+      const languages = ["es", "en", "pt"] as const;
+      for (const lang of languages) {
+        const idx = WITHDRAWAL_REASONS[lang].findIndex(
+          (r) => normalize(r) === normalized,
+        );
+        if (idx >= 0) {
+          return WITHDRAWAL_REASONS[currentLanguage][idx];
+        }
+      }
+
+      return reasonPart;
+    };
+
     if (raw.includes(":")) {
       const [typePart, ...rest] = raw.split(":");
       const reasonPart = rest.join(":").trim();
-      const typeLabel = typePart
-        ? typePart.charAt(0).toUpperCase() + typePart.slice(1)
-        : "";
-      if (typeLabel && reasonPart) return `${typeLabel} - ${reasonPart}`;
-      return reasonPart || typeLabel || raw;
+      const typeLabel = resolveTypeLabel(typePart);
+      const reasonLabel = reasonPart ? resolveReasonLabel(reasonPart) : "";
+      if (typeLabel && reasonLabel) return `${typeLabel} - ${reasonLabel}`;
+      return reasonLabel || typeLabel || raw;
     }
-    return raw;
+
+    if (raw.includes(" - ")) {
+      const [typePart, ...rest] = raw.split(" - ");
+      const reasonPart = rest.join(" - ").trim();
+      const typeLabel = resolveTypeLabel(typePart);
+      const reasonLabel = reasonPart ? resolveReasonLabel(reasonPart) : "";
+      if (typeLabel && reasonLabel) return `${typeLabel} - ${reasonLabel}`;
+      return reasonLabel || typeLabel || raw;
+    }
+
+    const normalizedRaw = normalize(raw);
+    const typeLabel = resolveTypeLabel(normalizedRaw);
+    return typeLabel || raw;
   };
   const [isOpen, setIsOpen] = useState<boolean | null>(null);
   const [opening, setOpening] = useState("");
@@ -313,6 +410,18 @@ export default function CashRegisterPage() {
   } = sessionData;
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
   const [showCreditNoteModal, setShowCreditNoteModal] = useState(false);
+  const [withdrawalModalKey, setWithdrawalModalKey] = useState(0);
+  const [creditNoteModalKey, setCreditNoteModalKey] = useState(0);
+  const [showAuthorizationModal, setShowAuthorizationModal] = useState(false);
+  const [authorizationRole, setAuthorizationRole] = useState<
+    "supervisor" | "admin"
+  >("supervisor");
+  const [pendingAuthorization, setPendingAuthorization] = useState<{
+    action: "withdrawal" | "credit_note";
+    amount: number;
+    reason: string;
+    notes: string;
+  } | null>(null);
   const [showCloseBoxModal, setShowCloseBoxModal] = useState(false);
   const [showCloseTicket, setShowCloseTicket] = useState(false);
   const [closeTicketData, setCloseTicketData] =
@@ -657,7 +766,8 @@ export default function CashRegisterPage() {
     amount: number,
     reason: string,
     notes: string,
-  ) => {
+    approvalPassword?: string,
+  ): Promise<boolean> => {
     try {
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/cash-register/movements", {
@@ -671,18 +781,20 @@ export default function CashRegisterPage() {
           amount,
           reason,
           notes,
+          approvalPassword,
         }),
       });
 
       if (!response.ok) {
         const error = await response.json();
         setToastType("error");
-        setToastMsg(`Error: ${error.error}`);
+        setToastMsg(resolveMovementError(error?.error));
         setToastOpen(true);
-        return;
+        return false;
       }
 
-      const data = await response.json();
+      const payload = await response.json();
+      const data = payload?.data ?? payload;
       setMovements(data?.movements || []);
       setSessionData({
         initialAmount: data?.initialAmount || 0,
@@ -696,13 +808,20 @@ export default function CashRegisterPage() {
       setToastOpen(true);
 
       // Show withdrawal ticket
-      setWithdrawalTicketData({ amount, reason });
+      setWithdrawalTicketData({
+        amount,
+        reason,
+        cashierName: user?.fullName || "",
+        supervisorName: data?.movement?.approvedBy?.visible_name || "",
+      });
       setShowWithdrawalTicket(true);
+      return true;
     } catch (error) {
       console.error("Withdrawal error:", error);
       setToastType("error");
       setToastMsg(copy.withdrawError);
       setToastOpen(true);
+      return false;
     }
   };
 
@@ -710,7 +829,8 @@ export default function CashRegisterPage() {
     amount: number,
     reason: string,
     notes: string,
-  ) => {
+    approvalPassword?: string,
+  ): Promise<boolean> => {
     try {
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/cash-register/movements", {
@@ -724,18 +844,20 @@ export default function CashRegisterPage() {
           amount,
           reason,
           notes,
+          approvalPassword,
         }),
       });
 
       if (!response.ok) {
         const error = await response.json();
         setToastType("error");
-        setToastMsg(`Error: ${error.error}`);
+        setToastMsg(resolveMovementError(error?.error));
         setToastOpen(true);
-        return;
+        return false;
       }
 
-      const data = await response.json();
+      const payload = await response.json();
+      const data = payload?.data ?? payload;
       setMovements(data?.movements || []);
       setCreditNotesTotal(data?.creditNotesTotal || 0);
       setSessionData({
@@ -753,15 +875,86 @@ export default function CashRegisterPage() {
         amount,
         reason,
         notes,
-        createdAt: new Date().toLocaleString(),
+        createdAt: formatDateTime(new Date()),
+        cashierName: user?.fullName || "",
+        adminName:
+          data?.movement?.approvedBy?.visible_name ||
+          (user?.role === "admin" ? user?.fullName || "" : ""),
       });
       setShowCreditNoteTicket(true);
+      return true;
     } catch (error) {
       console.error("Credit note error:", error);
       setToastType("error");
       setToastMsg(copy.creditError);
       setToastOpen(true);
+      return false;
     }
+  };
+
+  const requestWithdrawal = async (
+    amount: number,
+    reason: string,
+    notes: string,
+  ): Promise<boolean> => {
+    if (user?.role === "cashier") {
+      setPendingAuthorization({
+        action: "withdrawal",
+        amount,
+        reason,
+        notes,
+      });
+      setAuthorizationRole("supervisor");
+      setShowAuthorizationModal(true);
+      return false;
+    }
+
+    return handleWithdrawal(amount, reason, notes);
+  };
+
+  const requestCreditNote = async (
+    amount: number,
+    reason: string,
+    notes: string,
+  ): Promise<boolean> => {
+    if (user?.role === "cashier" || user?.role === "supervisor") {
+      setPendingAuthorization({
+        action: "credit_note",
+        amount,
+        reason,
+        notes,
+      });
+      setAuthorizationRole("admin");
+      setShowAuthorizationModal(true);
+      return false;
+    }
+
+    return handleCreditNote(amount, reason, notes);
+  };
+
+  const handleAuthorizationConfirm = async (
+    password: string,
+  ): Promise<boolean> => {
+    if (!pendingAuthorization) return false;
+
+    const { action, amount, reason, notes } = pendingAuthorization;
+    const approved =
+      action === "withdrawal"
+        ? await handleWithdrawal(amount, reason, notes, password)
+        : await handleCreditNote(amount, reason, notes, password);
+
+    if (approved) {
+      if (action === "withdrawal") {
+        setShowWithdrawalModal(false);
+        setWithdrawalModalKey((prev) => prev + 1);
+      } else {
+        setShowCreditNoteModal(false);
+        setCreditNoteModalKey((prev) => prev + 1);
+      }
+      setPendingAuthorization(null);
+    }
+
+    return approved;
   };
 
   const handleCloseBox = async (countedAmount: number) => {
@@ -803,7 +996,9 @@ export default function CashRegisterPage() {
           type: m.type || "",
           description: m.description || "",
           amount: typeof m.amount === "number" ? m.amount : 0,
-          createdAt: m.createdAt || new Date().toLocaleString(),
+          createdAt:
+            m.createdAtISO || m.createdAt || formatDateTime(new Date()),
+          createdAtISO: m.createdAtISO || undefined,
           operator: m.operator || null,
         }));
       } else if (Array.isArray(movements) && movements.length > 0) {
@@ -812,7 +1007,9 @@ export default function CashRegisterPage() {
           type: m.type || "",
           description: m.description || "",
           amount: typeof m.amount === "number" ? m.amount : 0,
-          createdAt: m.createdAt || new Date().toLocaleString(),
+          createdAt:
+            m.createdAtISO || m.createdAt || formatDateTime(new Date()),
+          createdAtISO: m.createdAtISO || undefined,
           operator: m.operator || null,
         }));
       }
@@ -824,8 +1021,8 @@ export default function CashRegisterPage() {
           summary?.cashierName || user?.fullName || user?.username || "",
         sessionId:
           summary?.sessionId || data?.cashRegister?._id || copy.sessionFallback,
-        openedAt: summary?.openedAt || "",
-        closedAt: summary?.closedAt || new Date().toLocaleString(),
+        openedAt: formatDateTime(summary?.openedAtISO || summary?.openedAt),
+        closedAt: formatDateTime(summary?.closedAtISO || summary?.closedAt),
         openingBalance:
           typeof summary?.openingBalance === "number"
             ? summary.openingBalance
@@ -1171,7 +1368,9 @@ export default function CashRegisterPage() {
                                 className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
                               >
                                 <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-700 dark:text-slate-300">
-                                  {movement.createdAt}
+                                  {formatDateTime(
+                                    movement.createdAtISO || movement.createdAt,
+                                  )}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <span
@@ -1258,7 +1457,7 @@ export default function CashRegisterPage() {
                           className="transition hover:bg-slate-50 dark:hover:bg-slate-800/50"
                         >
                           <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                            {s.openedAt}
+                            {formatDateTime(s.openedAtISO || s.openedAt)}
                           </td>
                           <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
                             {formatCurrency(s.initial ?? 0)}
@@ -1353,9 +1552,10 @@ export default function CashRegisterPage() {
       />
 
       <WithdrawalModal
+        key={withdrawalModalKey}
         isOpen={showWithdrawalModal}
         onClose={() => setShowWithdrawalModal(false)}
-        onConfirm={handleWithdrawal}
+        onConfirm={requestWithdrawal}
         currentBalance={sessionData.expected}
       />
 
@@ -1372,6 +1572,8 @@ export default function CashRegisterPage() {
             <WithdrawalTicket
               amount={withdrawalTicketData.amount}
               reason={withdrawalTicketData.reason}
+              cashierName={withdrawalTicketData.cashierName}
+              supervisorName={withdrawalTicketData.supervisorName}
             />
             <div className="flex items-center justify-center gap-3 p-4 border-t border-slate-200 dark:border-slate-700">
               <button
@@ -1406,6 +1608,8 @@ export default function CashRegisterPage() {
               reason={creditNoteTicketData.reason}
               notes={creditNoteTicketData.notes}
               createdAt={creditNoteTicketData.createdAt}
+              cashierName={creditNoteTicketData.cashierName}
+              adminName={creditNoteTicketData.adminName}
             />
             <div className="flex items-center justify-center gap-3 p-4 border-t border-slate-200 dark:border-slate-700">
               <button
@@ -1426,10 +1630,21 @@ export default function CashRegisterPage() {
       )}
 
       <CreditNoteModal
+        key={creditNoteModalKey}
         isOpen={showCreditNoteModal}
         onClose={() => setShowCreditNoteModal(false)}
-        onConfirm={handleCreditNote}
+        onConfirm={requestCreditNote}
         currentBalance={sessionData.expected}
+      />
+
+      <AuthorizationModal
+        isOpen={showAuthorizationModal}
+        requiredRole={authorizationRole}
+        onClose={() => {
+          setShowAuthorizationModal(false);
+          setPendingAuthorization(null);
+        }}
+        onConfirm={handleAuthorizationConfirm}
       />
 
       <CloseBoxModal

@@ -1,7 +1,9 @@
 import { Schema, model, Document, models } from "mongoose";
+import ProductSequence from "./ProductSequence";
 
 export interface IProduct extends Document {
   name: string;
+  internalId: number;
   code: string;
   barcodes?: string[];
   description?: string;
@@ -23,6 +25,11 @@ const productSchema = new Schema<IProduct>(
     name: {
       type: String,
       required: true,
+    },
+    internalId: {
+      type: Number,
+      required: true,
+      min: 1,
     },
     code: {
       type: String,
@@ -75,7 +82,27 @@ const productSchema = new Schema<IProduct>(
   },
 );
 
+productSchema.pre("validate", async function (next) {
+  if (this.internalId || !this.businessId) {
+    return next();
+  }
+
+  try {
+    const sequence = await ProductSequence.findOneAndUpdate(
+      { businessId: this.businessId },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true, setDefaultsOnInsert: true },
+    );
+
+    this.internalId = sequence.seq;
+    return next();
+  } catch (error) {
+    return next(error as Error);
+  }
+});
+
 productSchema.index({ businessId: 1, code: 1 }, { unique: true });
+productSchema.index({ businessId: 1, internalId: 1 }, { unique: true });
 productSchema.index({ businessId: 1, barcodes: 1 });
 
 export default models.Product || model<IProduct>("Product", productSchema);

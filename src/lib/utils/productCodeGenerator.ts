@@ -1,4 +1,21 @@
 import Product from "@/lib/models/Product";
+import ProductSequence from "@/lib/models/ProductSequence";
+
+/**
+ * Generates the next internal product ID (numeric, incremental, variable length)
+ * This is intended for internal system use only.
+ */
+export async function generateNextProductInternalId(
+  businessId: string,
+): Promise<number> {
+  const sequence = await ProductSequence.findOneAndUpdate(
+    { businessId },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true, setDefaultsOnInsert: true },
+  );
+
+  return sequence.seq;
+}
 
 /**
  * Generates a unique product code
@@ -74,8 +91,8 @@ export async function generateDateBasedProductCode(
 }
 
 /**
- * Generates a simple 4-digit sequential product code
- * Format: XXXX (e.g., 0001, 0002, etc.)
+ * Generates a simple numeric sequential product code
+ * Format: N (e.g., 1, 2, 3, 10000, etc.)
  */
 export async function generateSimple4DigitCode(
   businessId: string,
@@ -88,9 +105,9 @@ export async function generateSimple4DigitCode(
       { sort: { createdAt: -1 }, lean: true },
     )) as any;
 
-    // If no products exist, start from 0001
+    // If no products exist, start from 1
     if (!highestProduct || !highestProduct?.code) {
-      return "0001";
+      return "1";
     }
 
     // Try to parse the existing code as a number
@@ -99,12 +116,7 @@ export async function generateSimple4DigitCode(
     if (!isNaN(lastCodeNum)) {
       // It's a numeric code, increment it
       const nextCode = lastCodeNum + 1;
-      // Keep it to 4 digits max (0001-9999)
-      if (nextCode > 9999) {
-        // If we exceed 4 digits, reset to 0001 (circular)
-        return "0001";
-      }
-      return String(nextCode).padStart(4, "0");
+      return String(nextCode);
     }
 
     // If the code is not numeric, just start from the next available number
@@ -121,14 +133,11 @@ export async function generateSimple4DigitCode(
       .sort((a, b) => b - a);
 
     const nextNum = numericCodes.length > 0 ? numericCodes[0] + 1 : 1;
-    if (nextNum > 9999) {
-      return "0001";
-    }
-    return String(nextNum).padStart(4, "0");
+    return String(nextNum);
   } catch (error) {
-    console.error("Error generating 4-digit code:", error);
-    // Fallback: generate a random 4-digit code
-    const random = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+    console.error("Error generating numeric code:", error);
+    // Fallback: generate a random numeric code (variable length)
+    const random = String(Math.floor(Math.random() * 1000000) + 1);
     return random;
   }
 }
