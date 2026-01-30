@@ -11,6 +11,8 @@ import { toast } from "react-toastify";
 
 interface Sale {
   _id: string;
+  discount?: number;
+  subtotal?: number;
   totalWithTax: number;
   paymentMethod: string;
   paymentStatus: string;
@@ -280,6 +282,9 @@ export default function SalesPage() {
                         Monto
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">
+                        Descuento
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">
                         Método
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">
@@ -307,6 +312,9 @@ export default function SalesPage() {
                         </td>
                         <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                           {formatCurrency(sale.totalWithTax)}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          {formatCurrency(sale.discount || 0)}
                         </td>
                         <td className="px-6 py-4 text-sm">
                           {getPaymentMethodLabel(sale.paymentMethod)}

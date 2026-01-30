@@ -25,6 +25,7 @@ interface SystemUser {
   role: "admin" | "supervisor" | "cashier";
   isActive: boolean;
   createdAt: string;
+  discountLimit?: number | null;
 }
 
 const ADMIN_COPY = {
@@ -61,6 +62,7 @@ const ADMIN_COPY = {
       fullName: "Nombre Completo",
       username: "Usuario",
       email: "Email",
+      discountLimit: "Límite de Descuento (%)",
       password: "Contraseña",
       passwordOptional: "Contraseña (dejar en blanco para no cambiar)",
       phone: "Teléfono",
@@ -72,6 +74,7 @@ const ADMIN_COPY = {
         usernameEdit: "juanperez",
         email: "juan@ejemplo.com (debe ser único)",
         emailEdit: "juan@ejemplo.com",
+        discountLimit: "0 - 100",
         password: "Mínimo 6 caracteres",
         phone: "+54 9 11 1234-5678",
       },
@@ -97,6 +100,7 @@ const ADMIN_COPY = {
       updateError: "Error al actualizar usuario",
       deleteSuccess: "Usuario eliminado exitosamente",
       deleteError: "Error al eliminar usuario",
+      mustHaveAdmin: "Debe existir al menos un administrador.",
       userLimitReached:
         "El límite de usuarios en el plan gratuito es 2/2. Actualiza tu plan para agregar más usuarios.",
       cannotDelete: "No puedes eliminar tu propio usuario.",
@@ -144,6 +148,7 @@ const ADMIN_COPY = {
       fullName: "Full Name",
       username: "Username",
       email: "Email",
+      discountLimit: "Discount Limit (%)",
       password: "Password",
       passwordOptional: "Password (leave blank to keep current)",
       phone: "Phone",
@@ -155,6 +160,7 @@ const ADMIN_COPY = {
         usernameEdit: "johndoe",
         email: "john@example.com (must be unique)",
         emailEdit: "john@example.com",
+        discountLimit: "0 - 100",
         password: "Minimum 6 characters",
         phone: "+1 (555) 123-4567",
       },
@@ -180,6 +186,7 @@ const ADMIN_COPY = {
       updateError: "Error updating user",
       deleteSuccess: "User deleted successfully",
       deleteError: "Error deleting user",
+      mustHaveAdmin: "At least one administrator is required.",
       userLimitReached:
         "The free plan user limit is 2/2. Upgrade your plan to add more users.",
       cannotDelete: "You cannot delete your own user.",
@@ -203,6 +210,7 @@ const ADMIN_COPY = {
       name: "Nome",
       username: "Usuário",
       role: "Função",
+      mustHaveAdmin: "Deve existir pelo menos um administrador.",
       discountLimit: "Limite de Desconto %",
       status: "Status",
       createdDate: "Data de Criação",
@@ -227,6 +235,7 @@ const ADMIN_COPY = {
       fullName: "Nome Completo",
       username: "Usuário",
       email: "E-mail",
+      discountLimit: "Limite de Desconto (%)",
       password: "Senha",
       passwordOptional: "Senha (deixar em branco para manter atual)",
       phone: "Telefone",
@@ -238,6 +247,7 @@ const ADMIN_COPY = {
         usernameEdit: "joaosilva",
         email: "joao@exemplo.com (deve ser único)",
         emailEdit: "joao@exemplo.com",
+        discountLimit: "0 - 100",
         password: "Mínimo 6 caracteres",
         phone: "+55 11 98765-4321",
       },
@@ -304,6 +314,7 @@ export default function AdminPage() {
     email: "",
     password: "",
     phone: "",
+    discountLimit: "",
     role: "cashier" as "admin" | "supervisor" | "cashier",
   });
   const [editFormData, setEditFormData] = useState({
@@ -312,6 +323,7 @@ export default function AdminPage() {
     email: "",
     password: "",
     phone: "",
+    discountLimit: "",
     role: "cashier" as "admin" | "supervisor" | "cashier",
   });
 
@@ -331,6 +343,12 @@ export default function AdminPage() {
     const normalized = error.toLowerCase();
 
     if (normalized.includes("cannot delete yourself")) return "cannotDelete";
+    if (normalized.includes("at least one administrator"))
+      return "mustHaveAdmin";
+    if (normalized.includes("al menos un administrador"))
+      return "mustHaveAdmin";
+    if (normalized.includes("pelo menos um administrador"))
+      return "mustHaveAdmin";
     if (normalized.includes("email") && normalized.includes("en uso"))
       return "emailInUse";
     if (
@@ -420,7 +438,13 @@ export default function AdminPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          discountLimit:
+            formData.discountLimit === ""
+              ? null
+              : Number(formData.discountLimit),
+        }),
       });
 
       const data = await response.json().catch(() => null);
@@ -434,6 +458,7 @@ export default function AdminPage() {
           email: "",
           password: "",
           phone: "",
+          discountLimit: "",
           role: "cashier",
         });
         fetchUsers();
@@ -468,6 +493,11 @@ export default function AdminPage() {
       email: systemUser.email,
       password: "",
       phone: systemUser.phone || "",
+      discountLimit:
+        systemUser.discountLimit === null ||
+        systemUser.discountLimit === undefined
+          ? ""
+          : String(systemUser.discountLimit),
       role: systemUser.role,
     });
     setShowEditModal(true);
@@ -496,6 +526,10 @@ export default function AdminPage() {
         body: JSON.stringify({
           userId: userToEdit._id,
           ...editFormData,
+          discountLimit:
+            editFormData.discountLimit === ""
+              ? null
+              : Number(editFormData.discountLimit),
         }),
       });
 
@@ -511,6 +545,7 @@ export default function AdminPage() {
           email: "",
           password: "",
           phone: "",
+          discountLimit: "",
           role: "cashier",
         });
         fetchUsers();
@@ -734,7 +769,7 @@ export default function AdminPage() {
                   users.map((systemUser) => (
                     <tr
                       key={systemUser._id}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-850"
+                      className="hover:bg-slate-50 dark:hover:bg-slate-800"
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -767,7 +802,9 @@ export default function AdminPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                        {copy.notDefined}
+                        {typeof systemUser.discountLimit === "number"
+                          ? `${systemUser.discountLimit}%`
+                          : copy.notDefined}
                       </td>
                       <td className="px-6 py-4">
                         <span className="inline-block px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 border border-green-300 rounded-full dark:text-green-200 dark:bg-green-900/40 dark:border-green-700/50">
@@ -920,6 +957,27 @@ export default function AdminPage() {
                     }
                     className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     placeholder={copy.modal.placeholders.phone}
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {copy.modal.discountLimit}
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={formData.discountLimit}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        discountLimit: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    placeholder={copy.modal.placeholders.discountLimit}
                   />
                 </div>
 
@@ -1090,6 +1148,27 @@ export default function AdminPage() {
                     }
                     className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     placeholder={copy.modal.placeholders.phone}
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-1 text-sm font-medium text-slate-900 dark:text-slate-300">
+                    {copy.modal.discountLimit}
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={editFormData.discountLimit}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        discountLimit: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                    placeholder={copy.modal.placeholders.discountLimit}
                   />
                 </div>
 

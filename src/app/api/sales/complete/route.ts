@@ -98,6 +98,43 @@ export async function POST(req: NextRequest) {
 
     await dbConnect();
 
+    const saleUser = await User.findOne({
+      _id: decoded.userId,
+      businessId: decoded.businessId,
+      isActive: true,
+    }).select("discountLimit");
+
+    if (!saleUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const userDiscountLimit =
+      typeof saleUser.discountLimit === "number"
+        ? saleUser.discountLimit
+        : null;
+
+    const rawSaleDiscount = discount as unknown;
+    const normalizedSaleDiscount =
+      typeof rawSaleDiscount === "number"
+        ? rawSaleDiscount
+        : typeof rawSaleDiscount === "string"
+          ? parseNumberInput(rawSaleDiscount)
+          : 0;
+
+    if (
+      normalizedSaleDiscount === null ||
+      Number.isNaN(normalizedSaleDiscount)
+    ) {
+      return NextResponse.json({ error: "Invalid discount" }, { status: 400 });
+    }
+
+    if (normalizedSaleDiscount < 0) {
+      return NextResponse.json(
+        { error: "Discount must be 0 or higher" },
+        { status: 400 },
+      );
+    }
+
     // Verify cash register is open (if provided)
     if (cashRegisterId) {
       const register = await CashRegister.findOne({
@@ -115,7 +152,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Process items and verify stock
-    let subtotal = 0;
+    let grossSubtotal = 0;
+    let lineDiscountTotal = 0;
     const saleItems = [];
     const invoiceItems = [];
     const stockUpdates: Array<{ product: any; quantity: number }> = [];
@@ -164,9 +202,50 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const itemDiscount = item.discount || 0;
+      const rawDiscount = (item as any).discount;
+      const normalizedDiscount =
+        typeof rawDiscount === "number"
+          ? rawDiscount
+          : typeof rawDiscount === "string"
+            ? parseNumberInput(rawDiscount)
+            : 0;
+
+      if (normalizedDiscount === null || Number.isNaN(normalizedDiscount)) {
+        return NextResponse.json(
+          { error: "Invalid discount" },
+          { status: 400 },
+        );
+      }
+
+      if (normalizedDiscount < 0) {
+        return NextResponse.json(
+          { error: "Discount must be 0 or higher" },
+          { status: 400 },
+        );
+      }
+
+      const lineSubtotal = normalizedQuantity * item.unitPrice;
+      if (normalizedDiscount > lineSubtotal) {
+        return NextResponse.json(
+          { error: "Discount cannot exceed line subtotal" },
+          { status: 400 },
+        );
+      }
+
+      if (userDiscountLimit !== null) {
+        const maxAllowed = (userDiscountLimit / 100) * lineSubtotal;
+        if (normalizedDiscount > maxAllowed) {
+          return NextResponse.json(
+            { error: "Discount exceeds user limit" },
+            { status: 400 },
+          );
+        }
+      }
+
+      const itemDiscount = normalizedDiscount;
       const itemTotal = normalizedQuantity * item.unitPrice - itemDiscount;
-      subtotal += itemTotal;
+      grossSubtotal += lineSubtotal;
+      lineDiscountTotal += itemDiscount;
 
       saleItems.push({
         productId: item.productId,
@@ -192,7 +271,31 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const totalAmount = subtotal - discount;
+    const maxAdditionalDiscount = Math.max(
+      0,
+      grossSubtotal - lineDiscountTotal,
+    );
+    if (normalizedSaleDiscount > maxAdditionalDiscount) {
+      return NextResponse.json(
+        { error: "Discount cannot exceed subtotal" },
+        { status: 400 },
+      );
+    }
+
+    const totalDiscount = lineDiscountTotal + normalizedSaleDiscount;
+
+    if (userDiscountLimit !== null) {
+      const maxAllowedTotal = (userDiscountLimit / 100) * grossSubtotal;
+      if (totalDiscount > maxAllowedTotal) {
+        return NextResponse.json(
+          { error: "Discount exceeds user limit" },
+          { status: 400 },
+        );
+      }
+    }
+
+    const subtotal = grossSubtotal;
+    const totalAmount = subtotal - totalDiscount;
 
     // Calculate tax (21% IVA for Argentina - can be made configurable)
     const taxAmount = Math.round(totalAmount * 0.21 * 100) / 100;
@@ -232,7 +335,7 @@ export async function POST(req: NextRequest) {
         items: invoiceItems,
         subtotal,
         taxAmount,
-        discountAmount: discount,
+        discountAmount: totalDiscount,
         totalAmount: totalWithTax,
         paymentMethod,
         paymentStatus: "PENDING",
@@ -247,7 +350,7 @@ export async function POST(req: NextRequest) {
       userId: decoded.userId,
       items: saleItems,
       subtotal,
-      discount,
+      discount: totalDiscount,
       total: totalAmount,
       tax: taxAmount,
       totalWithTax,
@@ -440,7 +543,7 @@ export async function POST(req: NextRequest) {
           totalWithTax,
           tax: taxAmount,
           subtotal,
-          discount,
+          discount: totalDiscount,
           paymentMethod,
           paymentStatus: sale.paymentStatus,
           cashRegisterId: resolvedCashRegisterId,

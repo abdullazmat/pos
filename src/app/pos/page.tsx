@@ -91,6 +91,31 @@ export default function POSPage() {
           ? errorPayload.message
           : "";
 
+    if (/discount exceeds user limit/i.test(message)) {
+      toast.error(t("ui.discountExceedsUserLimit", "pos") as string);
+      return true;
+    }
+
+    if (/discount cannot exceed line subtotal/i.test(message)) {
+      toast.error(t("ui.discountExceedsSubtotal", "pos") as string);
+      return true;
+    }
+
+    if (/discount cannot exceed subtotal/i.test(message)) {
+      toast.error(t("ui.discountExceedsSubtotal", "pos") as string);
+      return true;
+    }
+
+    if (/discount must be 0 or higher/i.test(message)) {
+      toast.error(t("ui.discountNegative", "pos") as string);
+      return true;
+    }
+
+    if (/invalid discount/i.test(message)) {
+      toast.error(t("ui.discountInvalid", "pos") as string);
+      return true;
+    }
+
     const match =
       /Insufficient stock for (.+)\. Available: ([\d.]+), Requested: ([\d.]+)/i.exec(
         message,
@@ -295,8 +320,44 @@ export default function POSPage() {
         item.productId === productId
           ? {
               ...item,
-              discount,
-              total: Math.max(0, item.quantity * item.unitPrice - discount),
+              discount: (() => {
+                const rawDiscount = Math.max(0, discount || 0);
+                const lineSubtotal = item.quantity * item.unitPrice;
+                const absoluteMax = Math.max(0, lineSubtotal);
+                const userLimit =
+                  typeof user?.discountLimit === "number"
+                    ? user.discountLimit
+                    : null;
+                const limitMax =
+                  userLimit === null
+                    ? absoluteMax
+                    : Math.max(0, (userLimit / 100) * lineSubtotal);
+                const capped = Math.min(rawDiscount, absoluteMax, limitMax);
+                if (rawDiscount > capped) {
+                  toast.warning(
+                    t("ui.discountLimitExceeded", "pos") !==
+                      "ui.discountLimitExceeded"
+                      ? (t("ui.discountLimitExceeded", "pos") as string)
+                      : "Discount exceeds your limit",
+                  );
+                }
+                return capped;
+              })(),
+              total: (() => {
+                const rawDiscount = Math.max(0, discount || 0);
+                const lineSubtotal = item.quantity * item.unitPrice;
+                const absoluteMax = Math.max(0, lineSubtotal);
+                const userLimit =
+                  typeof user?.discountLimit === "number"
+                    ? user.discountLimit
+                    : null;
+                const limitMax =
+                  userLimit === null
+                    ? absoluteMax
+                    : Math.max(0, (userLimit / 100) * lineSubtotal);
+                const capped = Math.min(rawDiscount, absoluteMax, limitMax);
+                return Math.max(0, lineSubtotal - capped);
+              })(),
             }
           : item,
       ),
@@ -598,14 +659,12 @@ export default function POSPage() {
                         </span>
                         <span>${lastSale?.subtotal?.toFixed(2) || "0.00"}</span>
                       </div>
-                      {(lastSale?.discount || 0) > 0 && (
-                        <div className="flex justify-between text-red-600 dark:text-red-400">
-                          <span>
-                            {getReceiptLabel("receipt.discount", "Discount:")}
-                          </span>
-                          <span>-${(lastSale?.discount || 0).toFixed(2)}</span>
-                        </div>
-                      )}
+                      <div className="flex justify-between text-red-600 dark:text-red-400">
+                        <span>
+                          {getReceiptLabel("receipt.discount", "Discount:")}
+                        </span>
+                        <span>-${(lastSale?.discount || 0).toFixed(2)}</span>
+                      </div>
                       <div className="flex justify-between font-bold text-slate-900 dark:text-slate-100">
                         <span>
                           {getReceiptLabel("receipt.total", "Total:")}

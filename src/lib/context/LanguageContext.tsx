@@ -583,6 +583,12 @@ const translationsEs = {
       subtotal: "Subtotal",
       totalDiscount: "Descuento",
       tax21: "IVA 21%",
+      discountLimitExceeded: "El descuento supera tu límite",
+      discountInvalid: "Descuento inválido",
+      discountNegative: "El descuento debe ser 0 o mayor",
+      discountExceedsSubtotal:
+        "El descuento no puede superar el subtotal de la línea",
+      discountExceedsUserLimit: "El descuento supera tu límite",
       weightQuantityHint:
         "Use punto para decimales y coma para miles (ej.: 1.560 o 1,560)",
       paymentMethod: "Método de Pago",
@@ -1188,6 +1194,11 @@ const translationsEn = {
       subtotal: "Subtotal",
       totalDiscount: "Discount",
       tax21: "VAT 21%",
+      discountLimitExceeded: "Discount exceeds your limit",
+      discountInvalid: "Invalid discount",
+      discountNegative: "Discount must be 0 or higher",
+      discountExceedsSubtotal: "Discount cannot exceed line subtotal",
+      discountExceedsUserLimit: "Discount exceeds your limit",
       weightQuantityHint:
         "Use period for decimals and comma for thousands (e.g., 1.560 or 1,560)",
       paymentMethod: "Payment Method",
@@ -1790,6 +1801,12 @@ const translationsPt = {
       subtotal: "Subtotal",
       totalDiscount: "Desconto",
       tax21: "IVA 21%",
+      discountLimitExceeded: "O desconto excede seu limite",
+      discountInvalid: "Desconto inválido",
+      discountNegative: "O desconto deve ser 0 ou maior",
+      discountExceedsSubtotal:
+        "O desconto não pode exceder o subtotal da linha",
+      discountExceedsUserLimit: "O desconto excede seu limite",
       weightQuantityHint:
         "Use ponto para decimais e vírgula para milhares (ex.: 1.560 ou 1,560)",
       paymentMethod: "Forma de Pagamento",

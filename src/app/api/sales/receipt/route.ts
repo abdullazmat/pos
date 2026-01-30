@@ -324,6 +324,11 @@ function generateHTMLReceipt(data: any): string {
                     <div class="item-desc">
                         ${item.description}
                         ${item.quantity > 1 ? ` x${item.quantity}` : ""}
+                        ${
+                          item.discount > 0
+                            ? `<div style="font-size: 10px; color: #888;">Desc: -${formatCurrency(item.discount)}</div>`
+                            : ""
+                        }
                     </div>
                     <div class="item-qty">${item.quantity}</div>
                     <div class="item-price">${formatCurrency(item.total)}</div>
@@ -338,14 +343,10 @@ function generateHTMLReceipt(data: any): string {
                 <span>Subtotal:</span>
                 <span>${formatCurrency(data.subtotal)}</span>
             </div>
-            ${
-              data.discount > 0
-                ? `<div class="total-row">
-                <span>Descuento:</span>
-                <span>-${formatCurrency(data.discount)}</span>
-            </div>`
-                : ""
-            }
+            <div class="total-row">
+              <span>Descuento:</span>
+              <span>-${formatCurrency(data.discount)}</span>
+            </div>
             ${
               data.tax > 0
                 ? `<div class="total-row">

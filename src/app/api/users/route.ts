@@ -10,6 +10,13 @@ import {
 import bcrypt from "bcryptjs";
 import { PLAN_FEATURES } from "@/lib/utils/planFeatures";
 
+const parseDiscountLimit = (value: unknown) => {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return "invalid" as const;
+  return parsed;
+};
+
 // GET - Fetch all users for the business
 export async function GET(req: NextRequest) {
   try {
@@ -55,7 +62,27 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { email, password, fullName, username, phone, role: userRole } = body;
+    const {
+      email,
+      password,
+      fullName,
+      username,
+      phone,
+      role: userRole,
+      discountLimit,
+    } = body;
+
+    const parsedDiscountLimit = parseDiscountLimit(discountLimit);
+    if (
+      parsedDiscountLimit === "invalid" ||
+      (parsedDiscountLimit !== null &&
+        (parsedDiscountLimit < 0 || parsedDiscountLimit > 100))
+    ) {
+      return generateErrorResponse(
+        "Discount limit must be a number between 0 and 100",
+        400,
+      );
+    }
 
     // Validation
     if (!email || !password || !fullName || !username) {
@@ -120,6 +147,7 @@ export async function POST(req: NextRequest) {
       deletedUser.fullName = fullName;
       deletedUser.phone = phone;
       deletedUser.role = userRole || "cashier";
+      deletedUser.discountLimit = parsedDiscountLimit ?? undefined;
       deletedUser.password = hashedPassword;
       deletedUser.isActive = true;
       await deletedUser.save();
@@ -131,6 +159,7 @@ export async function POST(req: NextRequest) {
         username: deletedUser.username,
         phone: deletedUser.phone,
         role: deletedUser.role,
+        discountLimit: deletedUser.discountLimit,
         isActive: deletedUser.isActive,
         createdAt: deletedUser.createdAt,
       };
@@ -149,6 +178,7 @@ export async function POST(req: NextRequest) {
       username: username.toLowerCase(),
       phone,
       role: userRole || "cashier",
+      discountLimit: parsedDiscountLimit ?? undefined,
       businessId,
       isActive: true,
     });
@@ -161,6 +191,7 @@ export async function POST(req: NextRequest) {
       username: newUser.username,
       phone: newUser.phone,
       role: newUser.role,
+      discountLimit: newUser.discountLimit,
       isActive: newUser.isActive,
       createdAt: newUser.createdAt,
     };
@@ -210,6 +241,21 @@ export async function DELETE(req: NextRequest) {
       return generateErrorResponse("User not found", 404);
     }
 
+    if (userToDelete.role === "admin") {
+      const adminCount = await User.countDocuments({
+        businessId,
+        role: "admin",
+        isActive: true,
+      });
+
+      if (adminCount <= 1) {
+        return generateErrorResponse(
+          "At least one administrator is required",
+          400,
+        );
+      }
+    }
+
     // Soft delete by setting isActive to false
     userToDelete.isActive = false;
     await userToDelete.save();
@@ -245,7 +291,25 @@ export async function PATCH(req: NextRequest) {
       phone,
       role: userRole,
       password,
+      discountLimit,
     } = body;
+
+    const discountLimitProvided = Object.prototype.hasOwnProperty.call(
+      body,
+      "discountLimit",
+    );
+    const parsedDiscountLimit = parseDiscountLimit(discountLimit);
+    if (
+      discountLimitProvided &&
+      (parsedDiscountLimit === "invalid" ||
+        (parsedDiscountLimit !== null &&
+          (parsedDiscountLimit < 0 || parsedDiscountLimit > 100)))
+    ) {
+      return generateErrorResponse(
+        "Discount limit must be a number between 0 and 100",
+        400,
+      );
+    }
 
     if (!userId) {
       return generateErrorResponse("User ID is required", 400);
@@ -261,6 +325,21 @@ export async function PATCH(req: NextRequest) {
 
     if (!userToUpdate) {
       return generateErrorResponse("User not found", 404);
+    }
+
+    if (userRole && userRole !== "admin" && userToUpdate.role === "admin") {
+      const adminCount = await User.countDocuments({
+        businessId,
+        role: "admin",
+        isActive: true,
+      });
+
+      if (adminCount <= 1) {
+        return generateErrorResponse(
+          "At least one administrator is required",
+          400,
+        );
+      }
     }
 
     const nextEmail = email ? email.toLowerCase() : null;
@@ -306,6 +385,9 @@ export async function PATCH(req: NextRequest) {
     if (username) userToUpdate.username = nextUsername!;
     if (phone !== undefined) userToUpdate.phone = phone;
     if (userRole) userToUpdate.role = userRole;
+    if (discountLimitProvided) {
+      userToUpdate.discountLimit = parsedDiscountLimit ?? undefined;
+    }
     if (password && password.length >= 6) {
       userToUpdate.password = await bcrypt.hash(password, 10);
     }
@@ -319,6 +401,7 @@ export async function PATCH(req: NextRequest) {
       username: userToUpdate.username,
       phone: userToUpdate.phone,
       role: userToUpdate.role,
+      discountLimit: userToUpdate.discountLimit,
       isActive: userToUpdate.isActive,
       createdAt: userToUpdate.createdAt,
     };

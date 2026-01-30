@@ -5,6 +5,7 @@ import Product from "@/lib/models/Product";
 import StockHistory from "@/lib/models/StockHistory";
 import CashRegister from "@/lib/models/CashRegister";
 import CashMovement from "@/lib/models/CashMovement";
+import User from "@/lib/models/User";
 import { authMiddleware } from "@/lib/middleware/auth";
 import {
   generateErrorResponse,
@@ -165,7 +166,42 @@ export async function POST(req: NextRequest) {
 
     await dbConnect();
 
-    let subtotal = 0;
+    const saleUser = await User.findOne({
+      _id: userId,
+      businessId,
+      isActive: true,
+    }).select("discountLimit");
+
+    if (!saleUser) {
+      return generateErrorResponse("User not found", 404);
+    }
+
+    const userDiscountLimit =
+      typeof saleUser.discountLimit === "number"
+        ? saleUser.discountLimit
+        : null;
+
+    const rawSaleDiscount = discount as unknown;
+    const normalizedSaleDiscount =
+      typeof rawSaleDiscount === "number"
+        ? rawSaleDiscount
+        : typeof rawSaleDiscount === "string"
+          ? parseNumberInput(rawSaleDiscount)
+          : 0;
+
+    if (
+      normalizedSaleDiscount === null ||
+      Number.isNaN(normalizedSaleDiscount)
+    ) {
+      return generateErrorResponse("Invalid discount", 400);
+    }
+
+    if (normalizedSaleDiscount < 0) {
+      return generateErrorResponse("Discount must be 0 or higher", 400);
+    }
+
+    let grossSubtotal = 0;
+    let lineDiscountTotal = 0;
     const saleItems = [];
     const updatedProductIds = new Set<string>();
 
@@ -203,16 +239,47 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const itemTotal =
-        item.unitPrice * normalizedQuantity - (item.discount || 0);
-      subtotal += itemTotal;
+      const rawDiscount = (item as any).discount;
+      const normalizedDiscount =
+        typeof rawDiscount === "number"
+          ? rawDiscount
+          : typeof rawDiscount === "string"
+            ? parseNumberInput(rawDiscount)
+            : 0;
+
+      if (normalizedDiscount === null || Number.isNaN(normalizedDiscount)) {
+        return generateErrorResponse("Invalid discount", 400);
+      }
+
+      if (normalizedDiscount < 0) {
+        return generateErrorResponse("Discount must be 0 or higher", 400);
+      }
+
+      const lineSubtotal = item.unitPrice * normalizedQuantity;
+      if (normalizedDiscount > lineSubtotal) {
+        return generateErrorResponse(
+          "Discount cannot exceed line subtotal",
+          400,
+        );
+      }
+
+      if (userDiscountLimit !== null) {
+        const maxAllowed = (userDiscountLimit / 100) * lineSubtotal;
+        if (normalizedDiscount > maxAllowed) {
+          return generateErrorResponse("Discount exceeds user limit", 400);
+        }
+      }
+
+      const itemTotal = lineSubtotal - normalizedDiscount;
+      grossSubtotal += lineSubtotal;
+      lineDiscountTotal += normalizedDiscount;
 
       saleItems.push({
         productId: item.productId,
         productName: product.name,
         quantity: normalizedQuantity,
         unitPrice: item.unitPrice,
-        discount: item.discount || 0,
+        discount: normalizedDiscount,
         total: itemTotal,
       });
 
@@ -235,7 +302,25 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const total = subtotal - discount;
+    const maxAdditionalDiscount = Math.max(
+      0,
+      grossSubtotal - lineDiscountTotal,
+    );
+    if (normalizedSaleDiscount > maxAdditionalDiscount) {
+      return generateErrorResponse("Discount cannot exceed subtotal", 400);
+    }
+
+    const totalDiscount = lineDiscountTotal + normalizedSaleDiscount;
+
+    if (userDiscountLimit !== null) {
+      const maxAllowedTotal = (userDiscountLimit / 100) * grossSubtotal;
+      if (totalDiscount > maxAllowedTotal) {
+        return generateErrorResponse("Discount exceeds user limit", 400);
+      }
+    }
+
+    const subtotal = grossSubtotal;
+    const total = subtotal - totalDiscount;
 
     // Attach to open cash register (session) if available or provided
     let resolvedCashRegisterId = cashRegisterId;
@@ -262,7 +347,7 @@ export async function POST(req: NextRequest) {
       userId,
       items: saleItems,
       subtotal,
-      discount,
+      discount: totalDiscount,
       total,
       paymentMethod,
       paymentStatus: paymentMethod === "mercadopago" ? "pending" : "completed",
