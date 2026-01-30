@@ -413,14 +413,12 @@ export default function CashRegisterPage() {
   const [withdrawalModalKey, setWithdrawalModalKey] = useState(0);
   const [creditNoteModalKey, setCreditNoteModalKey] = useState(0);
   const [showAuthorizationModal, setShowAuthorizationModal] = useState(false);
-  const [authorizationRole, setAuthorizationRole] = useState<
-    "supervisor" | "admin"
-  >("supervisor");
   const [pendingAuthorization, setPendingAuthorization] = useState<{
-    action: "withdrawal" | "credit_note";
-    amount: number;
-    reason: string;
-    notes: string;
+    action: "withdrawal" | "credit_note" | "close";
+    amount?: number;
+    reason?: string;
+    notes?: string;
+    countedAmount?: number;
   } | null>(null);
   const [showCloseBoxModal, setShowCloseBoxModal] = useState(false);
   const [showCloseTicket, setShowCloseTicket] = useState(false);
@@ -897,19 +895,9 @@ export default function CashRegisterPage() {
     reason: string,
     notes: string,
   ): Promise<boolean> => {
-    if (user?.role === "cashier") {
-      setPendingAuthorization({
-        action: "withdrawal",
-        amount,
-        reason,
-        notes,
-      });
-      setAuthorizationRole("supervisor");
-      setShowAuthorizationModal(true);
-      return false;
-    }
-
-    return handleWithdrawal(amount, reason, notes);
+    setPendingAuthorization({ action: "withdrawal", amount, reason, notes });
+    setShowAuthorizationModal(true);
+    return false;
   };
 
   const requestCreditNote = async (
@@ -917,47 +905,82 @@ export default function CashRegisterPage() {
     reason: string,
     notes: string,
   ): Promise<boolean> => {
-    if (user?.role === "cashier" || user?.role === "supervisor") {
-      setPendingAuthorization({
-        action: "credit_note",
-        amount,
-        reason,
-        notes,
-      });
-      setAuthorizationRole("admin");
-      setShowAuthorizationModal(true);
-      return false;
-    }
+    setPendingAuthorization({ action: "credit_note", amount, reason, notes });
+    setShowAuthorizationModal(true);
+    return false;
+  };
 
-    return handleCreditNote(amount, reason, notes);
+  const requestCloseBox = async (countedAmount: number) => {
+    setPendingAuthorization({ action: "close", countedAmount });
+    setShowAuthorizationModal(true);
   };
 
   const handleAuthorizationConfirm = async (
     password: string,
   ): Promise<boolean> => {
     if (!pendingAuthorization) return false;
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch("/api/cash-register/authorization", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          approvalPassword: password,
+        }),
+      });
 
-    const { action, amount, reason, notes } = pendingAuthorization;
-    const approved =
-      action === "withdrawal"
-        ? await handleWithdrawal(amount, reason, notes, password)
-        : await handleCreditNote(amount, reason, notes, password);
-
-    if (approved) {
-      if (action === "withdrawal") {
-        setShowWithdrawalModal(false);
-        setWithdrawalModalKey((prev) => prev + 1);
-      } else {
-        setShowCreditNoteModal(false);
-        setCreditNoteModalKey((prev) => prev + 1);
+      if (!response.ok) {
+        const error = await response.json();
+        setToastType("error");
+        setToastMsg(resolveMovementError(error?.error));
+        setToastOpen(true);
+        return false;
       }
-      setPendingAuthorization(null);
-    }
 
-    return approved;
+      if (pendingAuthorization.action === "withdrawal") {
+        const ok = await handleWithdrawal(
+          pendingAuthorization.amount || 0,
+          pendingAuthorization.reason || "",
+          pendingAuthorization.notes || "",
+          password,
+        );
+        if (ok) {
+          setShowWithdrawalModal(false);
+          setWithdrawalModalKey((prev) => prev + 1);
+        }
+      } else if (pendingAuthorization.action === "credit_note") {
+        const ok = await handleCreditNote(
+          pendingAuthorization.amount || 0,
+          pendingAuthorization.reason || "",
+          pendingAuthorization.notes || "",
+          password,
+        );
+        if (ok) {
+          setShowCreditNoteModal(false);
+          setCreditNoteModalKey((prev) => prev + 1);
+        }
+      } else {
+        await handleCloseBox(pendingAuthorization.countedAmount || 0, password);
+      }
+
+      setPendingAuthorization(null);
+      return true;
+    } catch (error) {
+      console.error("Authorization error:", error);
+      setToastType("error");
+      setToastMsg(copy.errors.generic);
+      setToastOpen(true);
+      return false;
+    }
   };
 
-  const handleCloseBox = async (countedAmount: number) => {
+  const handleCloseBox = async (
+    countedAmount: number,
+    approvalPassword: string,
+  ) => {
     try {
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/cash-register", {
@@ -969,13 +992,14 @@ export default function CashRegisterPage() {
         body: JSON.stringify({
           action: "close",
           countedAmount,
+          approvalPassword,
         }),
       });
 
       if (!response.ok) {
         const error = await response.json();
         setToastType("error");
-        setToastMsg(`Error: ${error.error || "Error al cerrar la caja"}`);
+        setToastMsg(resolveMovementError(error?.error));
         setToastOpen(true);
         return;
       }
@@ -1554,7 +1578,10 @@ export default function CashRegisterPage() {
       <WithdrawalModal
         key={withdrawalModalKey}
         isOpen={showWithdrawalModal}
-        onClose={() => setShowWithdrawalModal(false)}
+        onClose={() => {
+          setShowWithdrawalModal(false);
+          setPendingAuthorization(null);
+        }}
         onConfirm={requestWithdrawal}
         currentBalance={sessionData.expected}
       />
@@ -1632,14 +1659,17 @@ export default function CashRegisterPage() {
       <CreditNoteModal
         key={creditNoteModalKey}
         isOpen={showCreditNoteModal}
-        onClose={() => setShowCreditNoteModal(false)}
+        onClose={() => {
+          setShowCreditNoteModal(false);
+          setPendingAuthorization(null);
+        }}
         onConfirm={requestCreditNote}
         currentBalance={sessionData.expected}
       />
 
       <AuthorizationModal
         isOpen={showAuthorizationModal}
-        requiredRole={authorizationRole}
+        requiredRole="admin"
         onClose={() => {
           setShowAuthorizationModal(false);
           setPendingAuthorization(null);
@@ -1649,8 +1679,11 @@ export default function CashRegisterPage() {
 
       <CloseBoxModal
         isOpen={showCloseBoxModal}
-        onClose={() => setShowCloseBoxModal(false)}
-        onConfirm={handleCloseBox}
+        onClose={() => {
+          setShowCloseBoxModal(false);
+          setPendingAuthorization(null);
+        }}
+        onConfirm={requestCloseBox}
         expectedAmount={sessionData.expected}
         salesTotal={sessionData.salesTotal}
         withdrawalsTotal={sessionData.withdrawalsTotal}

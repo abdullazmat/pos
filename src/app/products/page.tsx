@@ -87,8 +87,8 @@ const PRODUCT_COPY = {
       stockUnitHint: "(en unidades)",
       stockPlaceholder: "Ej: 100",
       codeLabel: "Código",
-      codePlaceholder: "Código automático (ej: 697-20260125-40100)",
-      codeHint: "Se asigna automáticamente (ej: 697-20260125-40100)",
+      codePlaceholder: "Código automático (ej: 0009)",
+      codeHint: "Se asigna automáticamente (ej: 0009)",
       minStockLabel: "Stock Mínimo",
       minStockHint: "(en unidades)",
       minStockPlaceholder: "5",
@@ -139,6 +139,9 @@ const PRODUCT_COPY = {
       duplicateNameOrBarcode:
         "Ya existe un producto con el mismo nombre o código de barras.",
       duplicateCode: "Ya existe un producto con el mismo código.",
+      limitReached: "Has alcanzado el límite de productos de tu plan.",
+      duplicateCodeOrBarcode:
+        "Ya existe un producto con el mismo código o código de barras.",
       missingRequired: "Faltan campos obligatorios.",
       productNotFound: "Producto no encontrado.",
       selectFile: "Selecciona un archivo CSV o Excel",
@@ -213,8 +216,8 @@ const PRODUCT_COPY = {
       stockUnitHint: "(units)",
       stockPlaceholder: "e.g., 100",
       codeLabel: "Code",
-      codePlaceholder: "Automatic code (e.g: 697-20260125-40100)",
-      codeHint: "Automatically assigned (e.g: 697-20260125-40100)",
+      codePlaceholder: "Automatic code (e.g: 0009)",
+      codeHint: "Automatically assigned (e.g: 0009)",
       minStockLabel: "Min Stock",
       minStockHint: "(units)",
       minStockPlaceholder: "5",
@@ -264,6 +267,9 @@ const PRODUCT_COPY = {
       duplicateNameOrBarcode:
         "A product with the same name or barcode already exists.",
       duplicateCode: "A product with the same code already exists.",
+      limitReached: "You have reached the product limit for your plan.",
+      duplicateCodeOrBarcode:
+        "A product with the same code or barcode already exists.",
       missingRequired: "Missing required fields.",
       productNotFound: "Product not found.",
       selectFile: "Select a CSV or Excel file",
@@ -338,8 +344,8 @@ const PRODUCT_COPY = {
       stockUnitHint: "(em unidades)",
       stockPlaceholder: "Ex.: 100",
       codeLabel: "Código",
-      codePlaceholder: "Código automático (ex: 697-20260125-40100)",
-      codeHint: "Atribuído automaticamente (ex: 697-20260125-40100)",
+      codePlaceholder: "Código automático (ex: 0009)",
+      codeHint: "Atribuído automaticamente (ex: 0009)",
       minStockLabel: "Estoque Mínimo",
       minStockHint: "(em unidades)",
       minStockPlaceholder: "5",
@@ -389,6 +395,9 @@ const PRODUCT_COPY = {
       duplicateNameOrBarcode:
         "Já existe um produto com o mesmo nome ou código de barras.",
       duplicateCode: "Já existe um produto com o mesmo código.",
+      limitReached: "Você atingiu o limite de produtos do seu plano.",
+      duplicateCodeOrBarcode:
+        "Já existe um produto com o mesmo código ou código de barras.",
       missingRequired: "Campos obrigatórios ausentes.",
       productNotFound: "Produto não encontrado.",
       selectFile: "Selecione um arquivo CSV ou Excel",
@@ -443,6 +452,7 @@ export default function ProductsPage() {
   const [subscription, setSubscription] = useState<any>(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [showLimitPrompt, setShowLimitPrompt] = useState(false);
+  const [limitWarningShown, setLimitWarningShown] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState<{
     id: string;
@@ -565,6 +575,11 @@ export default function ProductsPage() {
     }
   };
   const handleImportExcel = async (fileParam?: File | null) => {
+    if (!canCreateProduct) {
+      toast.error(copy.toast.limitReached);
+      setShowLimitPrompt(true);
+      return;
+    }
     const fileToUpload = fileParam || importFile;
     if (!fileToUpload) {
       toast.error(copy.toast.selectFile);
@@ -595,7 +610,12 @@ export default function ProductsPage() {
         return;
       }
       if (!response.ok) {
-        toast.error(data.error || copy.toast.importError);
+        const mappedKey = resolveProductErrorKey(data?.error);
+        toast.error(
+          copy.toast[mappedKey as keyof typeof copy.toast] ||
+            data?.error ||
+            copy.toast.importError,
+        );
         return;
       }
       toast.success(data.message || copy.toast.importSuccess);
@@ -657,6 +677,20 @@ export default function ProductsPage() {
     "maxProducts",
     products.length,
   );
+  const maxProducts = planConfig?.maxProducts ?? 100;
+  const isOverLimit =
+    maxProducts !== -1 &&
+    maxProducts !== 99999 &&
+    products.length > maxProducts;
+
+  useEffect(() => {
+    if (!mounted) return;
+    if (isOverLimit && !limitWarningShown) {
+      toast.error(copy.toast.limitReached);
+      setShowLimitPrompt(true);
+      setLimitWarningShown(true);
+    }
+  }, [mounted, isOverLimit, limitWarningShown, copy.toast.limitReached]);
 
   const filteredProducts = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -692,8 +726,21 @@ export default function ProductsPage() {
     if (normalized.includes("product not found")) return "productNotFound";
     if (normalized.includes("product code already exists"))
       return "duplicateCode";
+    if (normalized.includes("code or barcode")) return "duplicateCodeOrBarcode";
+    if (normalized.includes("límite") || normalized.includes("limit"))
+      return "limitReached";
 
     return null;
+  };
+
+  const normalizeCode = (value: string | undefined | null) =>
+    (value || "").toString().trim().toLowerCase().replace(/[-\s]/g, "");
+
+  const hasDuplicateCodes = (codes: Array<string | undefined | null>) => {
+    const normalized = codes
+      .map((code) => normalizeCode(code))
+      .filter((code) => code.length > 0);
+    return normalized.length !== new Set(normalized).size;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -702,6 +749,12 @@ export default function ProductsPage() {
     try {
       isSubmittingRef.current = true;
       setIsSaving(true);
+
+      if (!editingId && !canCreateProduct) {
+        toast.error(copy.toast.limitReached);
+        setShowLimitPrompt(true);
+        return;
+      }
       const token = localStorage.getItem("accessToken");
       const payload: any = {
         ...formData,
@@ -727,6 +780,19 @@ export default function ProductsPage() {
       // Always drop code on POST (creation) - it will be auto-generated
       if (!editingId) {
         delete payload.code;
+      }
+
+      const codeInputs = [
+        editingId ? (payload.code ?? formData.code) : formData.code,
+        formData.barcode1,
+        formData.barcode2,
+        formData.barcode3,
+        formData.barcode4,
+      ];
+
+      if (hasDuplicateCodes(codeInputs)) {
+        toast.error(copy.toast.duplicateCodeOrBarcode);
+        return;
       }
 
       const response = await fetch("/api/products", {

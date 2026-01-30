@@ -2,35 +2,39 @@
 
 import { useState } from "react";
 import { X, ShieldCheck } from "lucide-react";
+import { toast } from "react-toastify";
 import { useLanguage } from "@/lib/context/LanguageContext";
 
 const AUTH_COPY = {
   es: {
     supervisorTitle: "Autorización de Supervisor",
-    adminTitle: "Autorización de Administrador",
+    adminTitle: "Confirmar contraseña",
     subtitle: "Ingresa la contraseña para continuar",
     passwordLabel: "Contraseña",
-    passwordPlaceholder: "Contraseña del supervisor/administrador",
+    passwordPlaceholder: "Contraseña de tu cuenta",
+    passwordRequired: "Se requiere contraseña de autorización.",
     cancel: "Cancelar",
     confirm: "Autorizar",
     processing: "Validando...",
   },
   en: {
     supervisorTitle: "Supervisor Authorization",
-    adminTitle: "Administrator Authorization",
+    adminTitle: "Confirm password",
     subtitle: "Enter the password to continue",
     passwordLabel: "Password",
-    passwordPlaceholder: "Supervisor/admin password",
+    passwordPlaceholder: "Your account password",
+    passwordRequired: "Authorization password is required.",
     cancel: "Cancel",
     confirm: "Authorize",
     processing: "Validating...",
   },
   pt: {
     supervisorTitle: "Autorização do Supervisor",
-    adminTitle: "Autorização do Administrador",
+    adminTitle: "Confirmar senha",
     subtitle: "Digite a senha para continuar",
     passwordLabel: "Senha",
-    passwordPlaceholder: "Senha do supervisor/admin",
+    passwordPlaceholder: "Senha da sua conta",
+    passwordRequired: "A senha de autorização é necessária.",
     cancel: "Cancelar",
     confirm: "Autorizar",
     processing: "Validando...",
@@ -62,7 +66,10 @@ export default function AuthorizationModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password.trim()) return;
+    if (!password.trim()) {
+      toast.error(copy.passwordRequired);
+      return;
+    }
     setLoading(true);
     try {
       const ok = await onConfirm(password.trim());

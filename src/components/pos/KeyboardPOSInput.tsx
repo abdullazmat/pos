@@ -26,6 +26,7 @@ export default function KeyboardPOSInput({
   const [isProcessing, setIsProcessing] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const quantityInputRef = useRef<HTMLInputElement>(null);
@@ -96,6 +97,63 @@ export default function KeyboardPOSInput({
       document.removeEventListener("keydown", handleGlobalKeyDown);
     };
   }, [onCustomerAction]);
+
+  const fetchSuggestions = useCallback(async (query: string) => {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        setSearchResults([]);
+        setShowResults(false);
+        return;
+      }
+
+      const encodedQuery = encodeURIComponent(trimmed);
+      const response = await fetch(`/api/products?search=${encodedQuery}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      const products = data.data?.products || [];
+
+      const normalizedQuery = trimmed.toLowerCase();
+      const startsWithMatches = products.filter((p: any) =>
+        (p.name || "").toLowerCase().startsWith(normalizedQuery),
+      );
+
+      const fallbackMatches = products.filter(
+        (p: any) =>
+          !(p.name || "").toLowerCase().startsWith(normalizedQuery) &&
+          (p.name || "").toLowerCase().includes(normalizedQuery),
+      );
+
+      const combined = [...startsWithMatches, ...fallbackMatches].slice(0, 8);
+      setSearchResults(combined);
+      setShowResults(combined.length > 0);
+    } catch (error) {
+      console.error("Suggestions search error:", error);
+      setSearchResults([]);
+      setShowResults(false);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handle = window.setTimeout(() => {
+      fetchSuggestions(productCode);
+    }, 300);
+
+    return () => {
+      window.clearTimeout(handle);
+    };
+  }, [productCode, fetchSuggestions]);
 
   // Parse quantity with multiplier support
   const parseQuantityInput = (
@@ -361,6 +419,7 @@ export default function KeyboardPOSInput({
   // Handle product code input
   const handleProductCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProductCode(e.target.value);
+    setShowResults(true);
   };
 
   // Handle product field key press
@@ -553,6 +612,8 @@ export default function KeyboardPOSInput({
       // Reset and focus back to quantity field
       setQuantity("1");
       setProductCode("");
+      setSearchResults([]);
+      setShowResults(false);
       quantityInputRef.current?.focus();
     } catch (error) {
       const errorMessage =
@@ -566,6 +627,8 @@ export default function KeyboardPOSInput({
 
       // Reset product code on error
       setProductCode("");
+      setSearchResults([]);
+      setShowResults(false);
       productInputRef.current?.focus();
     } finally {
       setIsProcessing(false);
@@ -663,6 +726,39 @@ export default function KeyboardPOSInput({
             </div>
           )}
         </div>
+        {isSearching && (
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            {t("ui.searching", "pos")}
+          </p>
+        )}
+        {showResults && searchResults.length > 0 && (
+          <div className="mt-2 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
+            {searchResults.map((product) => (
+              <button
+                key={product._id}
+                type="button"
+                onClick={async () => {
+                  const qtyValue = quantity.trim() || "1";
+                  const parsedQty = parseFloat(qtyValue.replace(",", "."));
+                  const effectiveQty =
+                    pendingMultiplierQtyRef.current !== null
+                      ? pendingMultiplierQtyRef.current
+                      : parsedQty;
+                  pendingMultiplierQtyRef.current = null;
+                  await processProductAddition(product.code, effectiveQty);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              >
+                <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  {product.name}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">
+                  {t("ui.codeLabel", "pos")} {product.code}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           {t("ui.pressEnterToAdd", "pos") !== "ui.pressEnterToAdd"
             ? t("ui.pressEnterToAdd", "pos")

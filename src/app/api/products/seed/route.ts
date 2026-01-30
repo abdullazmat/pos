@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const samples = [
       {
         name: "Manzanas Fuji",
-        code: "SKU-001",
+        code: "0001",
         barcode: "770000000001",
         cost: 300,
         price: 500,
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       },
       {
         name: "Bananas",
-        code: "SKU-002",
+        code: "0002",
         barcode: "770000000002",
         cost: 200,
         price: 380,
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       },
       {
         name: "Leche Entera 1L",
-        code: "SKU-003",
+        code: "0003",
         barcode: "770000000003",
         cost: 600,
         price: 850,
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       },
       {
         name: "Harina 000 1Kg",
-        code: "SKU-004",
+        code: "0004",
         barcode: "770000000004",
         cost: 450,
         price: 700,
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
       },
       {
         name: "Azúcar 1Kg",
-        code: "SKU-005",
+        code: "0005",
         barcode: "770000000005",
         cost: 500,
         price: 780,
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       },
       {
         name: "Aceite Girasol 900ml",
-        code: "SKU-006",
+        code: "0006",
         barcode: "770000000006",
         cost: 1200,
         price: 1600,
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
       },
       {
         name: "Arroz Largo 1Kg",
-        code: "SKU-007",
+        code: "0007",
         barcode: "770000000007",
         cost: 700,
         price: 980,
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
       },
       {
         name: "Fideos Spaghetti 500g",
-        code: "SKU-008",
+        code: "0008",
         barcode: "770000000008",
         cost: 350,
         price: 600,
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
       },
       {
         name: "Gaseosa Cola 2.25L",
-        code: "SKU-009",
+        code: "0009",
         barcode: "770000000009",
         cost: 1500,
         price: 2100,
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       },
       {
         name: "Cerveza Rubia 473ml",
-        code: "SKU-010",
+        code: "0010",
         barcode: "770000000010",
         cost: 900,
         price: 1300,
@@ -151,8 +151,8 @@ export async function POST(req: NextRequest) {
               category: s.category,
             },
           },
-          { upsert: true }
-        )
+          { upsert: true },
+        ),
       );
     }
 

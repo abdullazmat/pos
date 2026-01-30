@@ -30,12 +30,12 @@ export const PLAN_FEATURES: Record<
   }
 > = {
   BASIC: {
-    name: "Básico",
-    maxProducts: 500,
-    maxCategories: 50,
+    name: "Free",
+    maxProducts: 100,
+    maxCategories: 10,
     maxClients: 0,
-    maxSuppliers: 10,
-    maxUsers: 2,
+    maxSuppliers: 5,
+    maxUsers: 1,
     features: {
       advancedReports: false,
       stockManagement: true,

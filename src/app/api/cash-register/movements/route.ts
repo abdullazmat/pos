@@ -13,7 +13,7 @@ import {
 type ApproverInfo = {
   user_id: string;
   visible_name: string;
-  role: "supervisor" | "admin";
+  role: "cashier" | "supervisor" | "admin";
 };
 
 export async function POST(req: NextRequest) {
@@ -32,63 +32,46 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { action, amount, reason, notes, approvalPassword } = body;
 
-    const verifyApprover = async (
-      allowedRoles: Array<"supervisor" | "admin">,
-    ): Promise<ApproverInfo | null> => {
+    const verifyCurrentUser = async (): Promise<ApproverInfo | null> => {
       if (!approvalPassword || typeof approvalPassword !== "string") {
         return null;
       }
 
-      const approverCandidates = await User.find({
+      const currentUser = await User.findOne({
+        _id: userId,
         businessId,
-        role: { $in: allowedRoles },
         isActive: true,
       }).select("fullName password role");
 
-      for (const candidate of approverCandidates) {
-        const isValid = await comparePassword(
-          approvalPassword,
-          candidate.password,
-        );
-        if (isValid) {
-          return {
-            user_id: candidate._id.toString(),
-            visible_name: candidate.fullName || "",
-            role: candidate.role,
-          };
-        }
-      }
+      if (!currentUser) return null;
 
-      return null;
+      const isValid = await comparePassword(
+        approvalPassword,
+        currentUser.password,
+      );
+
+      if (!isValid) return null;
+
+      return {
+        user_id: currentUser._id.toString(),
+        visible_name: currentUser.fullName || "",
+        role: currentUser.role,
+      };
     };
 
     const hasApprovalPassword =
       typeof approvalPassword === "string" &&
       approvalPassword.trim().length > 0;
 
-    // Permissions enforcement with approvals
+    // Password confirmation required for all roles
     let approvedBy: ApproverInfo | null = null;
-    if (action === "withdrawal") {
-      if (role === "cashier") {
-        if (!hasApprovalPassword) {
-          return generateErrorResponse("approvalPasswordRequired", 403);
-        }
-        approvedBy = await verifyApprover(["supervisor", "admin"]);
-        if (!approvedBy) {
-          return generateErrorResponse("invalidApprovalPassword", 403);
-        }
+    if (action === "withdrawal" || action === "credit_note") {
+      if (!hasApprovalPassword) {
+        return generateErrorResponse("approvalPasswordRequired", 403);
       }
-    }
-
-    if (action === "credit_note") {
-      if (role !== "admin") {
-        if (!hasApprovalPassword) {
-          return generateErrorResponse("approvalPasswordRequired", 403);
-        }
-        approvedBy = await verifyApprover(["admin"]);
-        if (!approvedBy) {
-          return generateErrorResponse("invalidApprovalPassword", 403);
-        }
+      approvedBy = await verifyCurrentUser();
+      if (!approvedBy) {
+        return generateErrorResponse("invalidApprovalPassword", 403);
       }
     }
 

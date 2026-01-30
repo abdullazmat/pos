@@ -8,10 +8,22 @@ import {
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 import { checkPlanLimit } from "@/lib/utils/planValidation";
-import {
-  generateDateBasedProductCode,
-  generateNextProductInternalId,
-} from "@/lib/utils/productCodeGenerator";
+import { generateNextProductInternalId } from "@/lib/utils/productCodeGenerator";
+
+const normalizeCode = (value: string | undefined | null) =>
+  (value || "").toString().trim().toLowerCase().replace(/[-\s]/g, "");
+
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const buildLooseRegex = (normalized: string) =>
+  new RegExp(
+    `^${normalized
+      .split("")
+      .map((char) => escapeRegex(char))
+      .join("[-\\s]*")}$`,
+    "i",
+  );
 
 type ParsedRow = {
   [key: string]: string | undefined;
@@ -96,6 +108,7 @@ export async function POST(req: NextRequest) {
     } = { created: 0, skipped: 0, errors: [] };
 
     const seenCodes = new Set<string>();
+    const seenNormalized = new Set<string>();
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -125,7 +138,11 @@ export async function POST(req: NextRequest) {
 
       let finalCode = (row.codigo || row.code || "").trim();
 
-      if (finalCode && seenCodes.has(finalCode)) {
+      const normalizedCode = normalizeCode(finalCode);
+      if (
+        finalCode &&
+        (seenCodes.has(finalCode) || seenNormalized.has(normalizedCode))
+      ) {
         results.skipped += 1;
         results.errors.push({
           row: i + 2,
@@ -135,25 +152,25 @@ export async function POST(req: NextRequest) {
       }
 
       if (finalCode) {
-        const conflict = await Product.findOne({ businessId, code: finalCode });
+        const regex = buildLooseRegex(normalizedCode);
+        const conflict = await Product.findOne({
+          businessId,
+          $or: [{ code: { $regex: regex } }, { barcodes: { $regex: regex } }],
+        });
         if (conflict) {
           results.skipped += 1;
-          results.errors.push({ row: i + 2, reason: "El código ya existe" });
+          results.errors.push({
+            row: i + 2,
+            reason: "El código ya existe en otro producto",
+          });
           continue;
         }
       }
 
+      const internalId = await generateNextProductInternalId(businessId);
+
       if (!finalCode) {
-        // Auto-generate date-based code and ensure uniqueness
-        let attempts = 0;
-        do {
-          finalCode = await generateDateBasedProductCode(businessId);
-          attempts++;
-        } while (
-          attempts < 10 &&
-          (seenCodes.has(finalCode) ||
-            (await Product.findOne({ businessId, code: finalCode })))
-        );
+        finalCode = String(internalId).padStart(4, "0");
       }
 
       if (!finalCode) {
@@ -166,8 +183,6 @@ export async function POST(req: NextRequest) {
       }
 
       const margin = price > 0 ? ((price - cost) / price) * 100 : 0;
-
-      const internalId = await generateNextProductInternalId(businessId);
 
       const product = new Product({
         businessId,
@@ -188,6 +203,7 @@ export async function POST(req: NextRequest) {
 
       await product.save();
       seenCodes.add(finalCode);
+      seenNormalized.add(normalizeCode(finalCode));
       results.created += 1;
     }
 

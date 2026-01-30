@@ -8,10 +8,49 @@ import {
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
 import { checkPlanLimit } from "@/lib/utils/planValidation";
-import {
-  generateDateBasedProductCode,
-  generateNextProductInternalId,
-} from "@/lib/utils/productCodeGenerator";
+import { generateNextProductInternalId } from "@/lib/utils/productCodeGenerator";
+
+const normalizeCode = (value: string | undefined | null) =>
+  (value || "").toString().trim().toLowerCase().replace(/[-\s]/g, "");
+
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const buildLooseRegex = (normalized: string) =>
+  new RegExp(
+    `^${normalized
+      .split("")
+      .map((char) => escapeRegex(char))
+      .join("[-\\s]*")}$`,
+    "i",
+  );
+
+const buildBarcodeConflictQuery = (
+  businessId: string,
+  rawValues: string[],
+  normalizedValues: string[],
+  excludeId?: string,
+) => {
+  const orConditions: Array<Record<string, unknown>> = [];
+
+  if (rawValues.length > 0) {
+    orConditions.push({ code: { $in: rawValues } });
+    orConditions.push({ barcodes: { $in: rawValues } });
+  }
+
+  normalizedValues.forEach((normalized) => {
+    const regex = buildLooseRegex(normalized);
+    orConditions.push({ code: { $regex: regex } });
+    orConditions.push({ barcodes: { $regex: regex } });
+  });
+
+  const query: Record<string, unknown> = { businessId, $or: orConditions };
+  if (excludeId) {
+    query._id = { $ne: excludeId };
+  }
+
+  return query;
+};
 
 export async function GET(req: NextRequest) {
   try {
@@ -80,21 +119,16 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse("Price and cost must be 0 or greater", 400);
     }
 
-    // Check for duplicate name or barcode
-    const duplicate = await Product.findOne({
+    await dbConnect();
+
+    // Check for duplicate name
+    const duplicateName = await Product.findOne({
       businessId,
-      $or: [
-        { name: { $regex: `^${name}$`, $options: "i" } },
-        ...(Array.isArray(barcodes) && barcodes.length > 0
-          ? [{ barcodes: { $in: barcodes.filter(Boolean) } }]
-          : []),
-      ],
+      name: { $regex: `^${name}$`, $options: "i" },
     });
-    if (duplicate) {
+    if (duplicateName) {
       return generateErrorResponse({ key: "duplicateNameOrBarcode" }, 409);
     }
-
-    await dbConnect();
 
     const productCount = await Product.countDocuments({ businessId });
     const planCheck = await checkPlanLimit(
@@ -106,19 +140,12 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse(planCheck.message, 403);
     }
 
-    // Auto-generate date-based code (SKU)
+    const internalId = await generateNextProductInternalId(businessId);
+
+    // Auto-generate 4-digit sequential code (e.g., 0009)
     let finalCode = code;
     if (!finalCode) {
-      finalCode = await generateDateBasedProductCode(businessId);
-      // Ensure the generated code is unique
-      let attempts = 0;
-      while (
-        (await Product.findOne({ businessId, code: finalCode })) &&
-        attempts < 10
-      ) {
-        finalCode = await generateDateBasedProductCode(businessId);
-        attempts++;
-      }
+      finalCode = String(internalId).padStart(4, "0");
     }
 
     const calculatedMargin =
@@ -128,15 +155,30 @@ export async function POST(req: NextRequest) {
           ? ((price - cost) / price) * 100
           : 0;
 
-    const existingProduct = await Product.findOne({
-      businessId,
-      code: finalCode,
-    });
-    if (existingProduct) {
-      return generateErrorResponse({ key: "duplicateCode" }, 409);
+    const cleanedBarcodes = Array.isArray(barcodes)
+      ? barcodes
+          .map((value) => String(value || "").trim())
+          .filter((value) => value.length > 0)
+      : [];
+
+    const rawCodes = [finalCode, ...cleanedBarcodes].filter(Boolean);
+    const normalizedCodes = rawCodes
+      .map((value) => normalizeCode(value))
+      .filter(Boolean);
+
+    if (normalizedCodes.length !== new Set(normalizedCodes).size) {
+      return generateErrorResponse({ key: "duplicateCodeOrBarcode" }, 409);
     }
 
-    const internalId = await generateNextProductInternalId(businessId);
+    const conflictQuery = buildBarcodeConflictQuery(
+      businessId,
+      rawCodes,
+      normalizedCodes,
+    );
+    const existingConflict = await Product.findOne(conflictQuery);
+    if (existingConflict) {
+      return generateErrorResponse({ key: "duplicateCodeOrBarcode" }, 409);
+    }
 
     const product = new Product({
       businessId,
@@ -147,7 +189,7 @@ export async function POST(req: NextRequest) {
       price,
       margin: calculatedMargin,
       stock: stock || 0,
-      barcodes: Array.isArray(barcodes) ? barcodes.filter(Boolean) : [],
+      barcodes: cleanedBarcodes,
       category,
       description,
       minStock: minStock || 0,
@@ -200,16 +242,37 @@ export async function PUT(req: NextRequest) {
       return generateErrorResponse("Product not found", 404);
     }
 
-    // Ensure code uniqueness within business
-    if (code && code !== product.code) {
-      const conflict = await Product.findOne({ businessId, code });
-      if (conflict) {
-        return generateErrorResponse("Product code already exists", 409);
-      }
+    const nextCode = code ?? product.code;
+    const nextBarcodes = Array.isArray(barcodes)
+      ? barcodes
+          .map((value) => String(value || "").trim())
+          .filter((value) => value.length > 0)
+      : Array.isArray(product.barcodes)
+        ? product.barcodes
+        : [];
+
+    const rawCodes = [nextCode, ...nextBarcodes].filter(Boolean);
+    const normalizedCodes = rawCodes
+      .map((value) => normalizeCode(value))
+      .filter(Boolean);
+
+    if (normalizedCodes.length !== new Set(normalizedCodes).size) {
+      return generateErrorResponse({ key: "duplicateCodeOrBarcode" }, 409);
+    }
+
+    const conflictQuery = buildBarcodeConflictQuery(
+      businessId,
+      rawCodes,
+      normalizedCodes,
+      id,
+    );
+    const existingConflict = await Product.findOne(conflictQuery);
+    if (existingConflict) {
+      return generateErrorResponse({ key: "duplicateCodeOrBarcode" }, 409);
     }
 
     product.name = name ?? product.name;
-    product.code = code ?? product.code;
+    product.code = nextCode ?? product.code;
     if (typeof cost === "number") {
       if (cost < 0) {
         return generateErrorResponse("Cost must be 0 or greater", 400);
@@ -225,7 +288,7 @@ export async function PUT(req: NextRequest) {
     if (typeof stock === "number") product.stock = stock;
     if (category !== undefined) product.category = category;
     if (Array.isArray(barcodes)) {
-      product.barcodes = barcodes.filter(Boolean);
+      product.barcodes = nextBarcodes;
     }
     if (description !== undefined) product.description = description;
     if (typeof minStock === "number") product.minStock = minStock;

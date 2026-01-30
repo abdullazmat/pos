@@ -5,6 +5,7 @@ import CashMovement from "@/lib/models/CashMovement";
 import Business from "@/lib/models/Business";
 import User from "@/lib/models/User";
 import { authMiddleware } from "@/lib/middleware/auth";
+import { comparePassword } from "@/lib/utils/password";
 import {
   generateErrorResponse,
   generateSuccessResponse,
@@ -149,7 +150,7 @@ export async function POST(req: NextRequest) {
     const userDoc = await User.findById(userId).select("fullName");
     const fullName = userDoc?.fullName || "";
     const body = await req.json();
-    const { action, amount, reason, countedAmount } = body;
+    const { action, amount, reason, countedAmount, approvalPassword } = body;
 
     // Permissions enforcement
     if (role === "cashier" && action !== "open" && action !== "close") {
@@ -221,6 +222,43 @@ export async function POST(req: NextRequest) {
       );
     } else {
       // Close
+      const hasApprovalPassword =
+        typeof approvalPassword === "string" &&
+        approvalPassword.trim().length > 0;
+      if (!hasApprovalPassword) {
+        return generateErrorResponse("approvalPasswordRequired", 403);
+      }
+
+      const currentUser = await User.findOne({
+        _id: userId,
+        businessId,
+        isActive: true,
+      }).select("fullName password role");
+
+      let approvedBy: {
+        user_id: string;
+        visible_name: string;
+        role: "cashier" | "supervisor" | "admin";
+      } | null = null;
+
+      if (currentUser) {
+        const isValid = await comparePassword(
+          approvalPassword,
+          currentUser.password,
+        );
+        if (isValid) {
+          approvedBy = {
+            user_id: currentUser._id.toString(),
+            visible_name: currentUser.fullName || "",
+            role: currentUser.role,
+          };
+        }
+      }
+
+      if (!approvedBy) {
+        return generateErrorResponse("invalidApprovalPassword", 403);
+      }
+
       const cashRegister = await CashRegister.findOne({
         businessId,
         status: "open",
@@ -283,6 +321,11 @@ export async function POST(req: NextRequest) {
           visible_name: fullName,
           role: role || "cashier",
           session_id: cashRegister._id.toString(),
+        },
+        approvedBy: {
+          user_id: approvedBy.user_id,
+          visible_name: approvedBy.visible_name,
+          role: approvedBy.role,
         },
       });
 

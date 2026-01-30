@@ -10,7 +10,7 @@ export interface ICashMovementOperator {
 export interface ICashMovementApprover {
   user_id: Schema.Types.ObjectId;
   visible_name: string;
-  role: "supervisor" | "admin";
+  role: "cashier" | "supervisor" | "admin";
 }
 
 export interface ICashMovement extends Document {
@@ -88,7 +88,7 @@ const cashMovementSchema = new Schema<ICashMovement>(
       },
       role: {
         type: String,
-        enum: ["supervisor", "admin"],
+        enum: ["cashier", "supervisor", "admin"],
       },
     },
   },
