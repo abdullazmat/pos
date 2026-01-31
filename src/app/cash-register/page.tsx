@@ -821,9 +821,10 @@ export default function CashRegisterPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
+        const error = await response.json().catch(() => ({ error: "generic" }));
+        const errorKey = error?.error || error?.message || "generic";
         setToastType("error");
-        setToastMsg(resolveMovementError(error?.error));
+        setToastMsg(resolveMovementError(errorKey));
         setToastOpen(true);
         return false;
       }
@@ -1013,6 +1014,7 @@ export default function CashRegisterPage() {
   const requestCloseBox = async (countedAmount: number) => {
     setPendingAuthorization({ action: "close", countedAmount });
     setShowAuthorizationModal(true);
+    setShowCloseBoxModal(false);
   };
 
   const handleAuthorizationConfirm = async (
@@ -1029,13 +1031,15 @@ export default function CashRegisterPage() {
         },
         body: JSON.stringify({
           approvalPassword: password,
+          action: pendingAuthorization.action,
         }),
       });
 
       if (!response.ok) {
-        const error = await response.json();
+        const error = await response.json().catch(() => ({ error: "generic" }));
+        const errorKey = error?.error || error?.message || "generic";
         setToastType("error");
-        setToastMsg(resolveMovementError(error?.error));
+        setToastMsg(resolveMovementError(errorKey));
         setToastOpen(true);
         return false;
       }
@@ -1051,6 +1055,7 @@ export default function CashRegisterPage() {
           setShowWithdrawalModal(false);
           setWithdrawalModalKey((prev) => prev + 1);
         }
+        if (!ok) return false;
       } else if (pendingAuthorization.action === "credit_note") {
         const ok = await handleCreditNote(
           pendingAuthorization.amount || 0,
@@ -1062,10 +1067,15 @@ export default function CashRegisterPage() {
           setShowCreditNoteModal(false);
           setCreditNoteModalKey((prev) => prev + 1);
         }
+        if (!ok) return false;
       } else if (pendingAuthorization.action === "deposit") {
         await handleCashIn(pendingAuthorization.amount || 0, password);
       } else {
-        await handleCloseBox(pendingAuthorization.countedAmount || 0, password);
+        const ok = await handleCloseBox(
+          pendingAuthorization.countedAmount || 0,
+          password,
+        );
+        if (!ok) return false;
       }
 
       setPendingAuthorization(null);
@@ -1082,7 +1092,7 @@ export default function CashRegisterPage() {
   const handleCloseBox = async (
     countedAmount: number,
     approvalPassword: string,
-  ) => {
+  ): Promise<boolean> => {
     try {
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/cash-register", {
@@ -1099,11 +1109,12 @@ export default function CashRegisterPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
+        const error = await response.json().catch(() => ({ error: "generic" }));
+        const errorKey = error?.error || error?.message || "generic";
         setToastType("error");
-        setToastMsg(resolveMovementError(error?.error));
+        setToastMsg(resolveMovementError(errorKey));
         setToastOpen(true);
-        return;
+        return false;
       }
 
       const payload = await response.json();
@@ -1191,12 +1202,14 @@ export default function CashRegisterPage() {
       setToastType("success");
       setToastMsg(copy.closeSuccess);
       setToastOpen(true);
+      return true;
     } catch (error) {
       console.error("Close box error:", error);
       setToastType("error");
       setToastMsg(copy.closeError);
 
       setToastOpen(true);
+      return false;
     }
   };
 
@@ -1816,7 +1829,6 @@ export default function CashRegisterPage() {
         isOpen={showCloseBoxModal}
         onClose={() => {
           setShowCloseBoxModal(false);
-          setPendingAuthorization(null);
         }}
         onConfirm={requestCloseBox}
         expectedAmount={sessionData.expected}

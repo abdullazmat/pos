@@ -264,36 +264,40 @@ export async function POST(req: NextRequest) {
         role: "cashier" | "supervisor" | "admin";
       } | null = null;
 
-      const candidates = [] as Array<{
-        _id: any;
-        fullName?: string;
-        password: string;
-        role: "cashier" | "supervisor" | "admin";
-      }>;
+      if (currentUser) {
+        const isValid = await comparePassword(
+          approvalPassword,
+          currentUser.password,
+        );
+        if (isValid) {
+          approvedBy = {
+            user_id: currentUser._id.toString(),
+            visible_name: currentUser.fullName || "",
+            role: currentUser.role,
+          };
+        }
+      }
 
-      if (currentUser && currentUser.role === "admin") {
-        candidates.push(currentUser as any);
-      } else {
+      if (!approvedBy) {
         const admins = await User.find({
           businessId,
           role: "admin",
           isActive: true,
         }).select("fullName password role");
-        candidates.push(...(admins as any));
-      }
 
-      for (const candidate of candidates) {
-        const isValid = await comparePassword(
-          approvalPassword,
-          candidate.password,
-        );
-        if (isValid) {
-          approvedBy = {
-            user_id: candidate._id.toString(),
-            visible_name: candidate.fullName || "",
-            role: candidate.role,
-          };
-          break;
+        for (const candidate of admins as any[]) {
+          const isValid = await comparePassword(
+            approvalPassword,
+            candidate.password,
+          );
+          if (isValid) {
+            approvedBy = {
+              user_id: candidate._id.toString(),
+              visible_name: candidate.fullName || "",
+              role: candidate.role,
+            };
+            break;
+          }
         }
       }
 

@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const { businessId, userId } = authResult.user!;
     const body = await req.json();
-    const { approvalPassword } = body;
+    const { approvalPassword, action } = body;
 
     const hasApprovalPassword =
       typeof approvalPassword === "string" &&
@@ -42,7 +42,9 @@ export async function POST(req: NextRequest) {
       role: "cashier" | "supervisor" | "admin";
     }>;
 
-    if (requester && requester.role === "admin") {
+    if (action === "close" && requester) {
+      candidates.push(requester as any);
+    } else if (requester && requester.role === "admin") {
       candidates.push(requester as any);
     } else {
       const admins = await User.find({

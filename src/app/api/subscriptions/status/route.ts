@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import Subscription from "@/lib/models/Subscription";
+import { getPlanConfig } from "@/lib/services/subscriptions/PlanConfig";
 import { verifyToken } from "@/lib/utils/jwt";
 
 /**
@@ -48,6 +49,37 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const now = new Date();
+    const isExpired = subscription.currentPeriodEnd < now;
+
+    if (isExpired) {
+      const basicPlan = getPlanConfig("BASIC");
+      if (basicPlan) {
+        subscription.planId = "BASIC";
+        subscription.status = "active";
+        subscription.provider = undefined;
+        subscription.currentPeriodStart = now;
+        subscription.currentPeriodEnd = new Date(
+          Date.now() + 365 * 24 * 60 * 60 * 1000,
+        );
+        subscription.features = {
+          maxProducts: basicPlan.features.maxProducts,
+          maxUsers: basicPlan.features.maxUsers,
+          maxCategories: basicPlan.features.maxCategories,
+          maxClients: basicPlan.features.maxClients,
+          maxSuppliers: basicPlan.features.maxSuppliers,
+          arcaIntegration: basicPlan.features.arcaIntegration,
+          advancedReporting: basicPlan.features.advancedReporting,
+          customBranding: basicPlan.features.customBranding,
+          invoiceChannels: basicPlan.features.invoiceChannels,
+        };
+      } else {
+        subscription.status = "expired";
+      }
+
+      await subscription.save();
+    }
+
     return NextResponse.json({
       planId: subscription.planId,
       status: subscription.status,
@@ -89,7 +121,7 @@ export async function PUT(request: NextRequest) {
       {
         planId,
         status: status || "active",
-        provider: provider || "stripe",
+        provider: provider || "mercado_pago",
         features: features || {},
         currentPeriodStart: new Date(),
         currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days

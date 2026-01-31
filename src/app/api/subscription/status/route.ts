@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import Subscription from "@/lib/models/Subscription";
+import { getPlanConfig } from "@/lib/services/subscriptions/PlanConfig";
 import { verifyToken } from "@/lib/utils/jwt";
 
 export const dynamic = "force-dynamic";
@@ -30,12 +31,35 @@ export async function GET(request: Request) {
       });
     }
 
-    // Check if subscription has expired
+    // Check if subscription has expired and downgrade to BASIC
     const now = new Date();
     const isExpired = subscription.currentPeriodEnd < now;
 
-    if (isExpired && subscription.status === "active") {
-      subscription.status = "expired";
+    if (isExpired) {
+      const basicPlan = getPlanConfig("BASIC");
+      if (basicPlan) {
+        subscription.planId = "BASIC";
+        subscription.status = "active";
+        subscription.provider = undefined;
+        subscription.currentPeriodStart = now;
+        subscription.currentPeriodEnd = new Date(
+          Date.now() + 365 * 24 * 60 * 60 * 1000,
+        );
+        subscription.features = {
+          maxProducts: basicPlan.features.maxProducts,
+          maxUsers: basicPlan.features.maxUsers,
+          maxCategories: basicPlan.features.maxCategories,
+          maxClients: basicPlan.features.maxClients,
+          maxSuppliers: basicPlan.features.maxSuppliers,
+          arcaIntegration: basicPlan.features.arcaIntegration,
+          advancedReporting: basicPlan.features.advancedReporting,
+          customBranding: basicPlan.features.customBranding,
+          invoiceChannels: basicPlan.features.invoiceChannels,
+        };
+      } else if (subscription.status === "active") {
+        subscription.status = "expired";
+      }
+
       await subscription.save();
     }
 

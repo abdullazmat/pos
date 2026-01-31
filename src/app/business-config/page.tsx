@@ -15,6 +15,7 @@ interface User {
   id: string;
   email: string;
   fullName: string;
+  businessName?: string;
   role: string;
 }
 
@@ -623,16 +624,24 @@ export default function BusinessConfigPage() {
   const handleSubscriptionConfirm = async (billingData: any) => {
     setSubscribing(true);
     try {
+      const resolvedPlanId = resolveSubscriptionPlanId(selectedPlanForModal);
+      if (!resolvedPlanId) {
+        toast.error(copy.messages.subscriptionError);
+        return;
+      }
+
       const token = localStorage.getItem("accessToken");
-      const response = await fetch("/api/stripe/create-checkout", {
+      const response = await fetch("/api/payments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          planId: resolvedPlanId,
           email: billingData?.email || user?.email,
-          fullName: user?.fullName || billingData?.businessName,
+          businessName:
+            billingData?.businessName || user?.businessName || user?.fullName,
         }),
       });
 
@@ -643,9 +652,9 @@ export default function BusinessConfigPage() {
         return;
       }
 
-      const checkoutUrl = data.data?.url;
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
+      const preferenceLink = data.payment?.preferenceLink;
+      if (preferenceLink) {
+        window.location.href = preferenceLink;
         return;
       }
 

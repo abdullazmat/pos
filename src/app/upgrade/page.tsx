@@ -6,14 +6,7 @@ import Header from "@/components/layout/Header";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import { toast } from "react-toastify";
 import { AlertCircle } from "lucide-react";
-import {
-  Check,
-  CreditCard,
-  Zap,
-  TrendingUp,
-  Shield,
-  Users,
-} from "lucide-react";
+import { Check, CreditCard, TrendingUp, Shield, Users } from "lucide-react";
 
 const UPGRADE_COPY = {
   es: {
@@ -46,7 +39,7 @@ const UPGRADE_COPY = {
         recommended: "RECOMENDADO",
         price: "AR$24.990",
         billing: "/mes",
-        paymentMethods: "Paga en ARS con Mercado Pago o en USD con Stripe",
+        paymentMethods: "Paga en ARS con Mercado Pago",
         features: [
           "Productos ilimitados",
           "Gestión avanzada de inventario",
@@ -57,7 +50,6 @@ const UPGRADE_COPY = {
           "Reportes avanzados",
         ],
         buttons: {
-          stripe: "Pagar con Stripe",
           mercadoPago: "Pagar con Mercado Pago",
           processing: "Procesando...",
           opening: "Abriendo Mercado Pago...",
@@ -79,7 +71,7 @@ const UPGRADE_COPY = {
         desc: "Añade miembros ilimitados con permisos basados en roles.",
       },
     },
-    security: "Pagos seguros con Stripe o Mercado Pago",
+    security: "Pagos seguros con Mercado Pago",
     successMessage:
       "Mercado Pago listo. El plan se activa al confirmar el pago.",
   },
@@ -113,7 +105,7 @@ const UPGRADE_COPY = {
         recommended: "RECOMMENDED",
         price: "AR$24.990",
         billing: "/month",
-        paymentMethods: "Pay in ARS with Mercado Pago or in USD with Stripe",
+        paymentMethods: "Pay in ARS with Mercado Pago",
         features: [
           "Unlimited products",
           "Advanced inventory management",
@@ -124,7 +116,6 @@ const UPGRADE_COPY = {
           "Advanced reports",
         ],
         buttons: {
-          stripe: "Pay with Stripe",
           mercadoPago: "Pay with Mercado Pago",
           processing: "Processing...",
           opening: "Opening Mercado Pago...",
@@ -146,7 +137,7 @@ const UPGRADE_COPY = {
         desc: "Add unlimited team members with role-based permissions.",
       },
     },
-    security: "Secure payments with Stripe or Mercado Pago",
+    security: "Secure payments with Mercado Pago",
     successMessage:
       "Mercado Pago ready. Plan activates when you confirm payment.",
   },
@@ -180,7 +171,7 @@ const UPGRADE_COPY = {
         recommended: "RECOMENDADO",
         price: "AR$24.990",
         billing: "/mês",
-        paymentMethods: "Pague em ARS com Mercado Pago ou em USD com Stripe",
+        paymentMethods: "Pague em ARS com Mercado Pago",
         features: [
           "Produtos ilimitados",
           "Gerenciamento avançado de inventário",
@@ -191,7 +182,6 @@ const UPGRADE_COPY = {
           "Relatórios avançados",
         ],
         buttons: {
-          stripe: "Pagar com Stripe",
           mercadoPago: "Pagar com Mercado Pago",
           processing: "Processando...",
           opening: "Abrindo Mercado Pago...",
@@ -213,7 +203,7 @@ const UPGRADE_COPY = {
         desc: "Adicione membros ilimitados com permissões baseadas em funções.",
       },
     },
-    security: "Pagamentos seguros com Stripe ou Mercado Pago",
+    security: "Pagamentos seguros com Mercado Pago",
     successMessage:
       "Mercado Pago pronto. O plano é ativado quando você confirma o pagamento.",
   },
@@ -226,7 +216,6 @@ export default function UpgradePage() {
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [upgrading, setUpgrading] = useState(false);
   const [mpUpgrading, setMpUpgrading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -242,46 +231,6 @@ export default function UpgradePage() {
     setUser(JSON.parse(userStr));
     setLoading(false);
   }, [router]);
-
-  const handleUpgrade = async () => {
-    setUpgrading(true);
-    try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch("/api/stripe/create-checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          email: user?.email,
-          fullName: user?.fullName,
-          plan: "paid",
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to create checkout session");
-      }
-
-      const data = await response.json();
-
-      if (data.data?.url) {
-        window.location.href = data.data.url;
-      } else {
-        throw new Error("No checkout URL returned");
-      }
-    } catch (error) {
-      console.error("Upgrade error:", error);
-      const msg = getPaymentErrorMessage(
-        error instanceof Error ? error.message : String(error),
-        currentLanguage,
-      );
-      toast.error(msg);
-      setUpgrading(false);
-    }
-  };
 
   const handleUpgradeMercadoPago = async () => {
     setMpUpgrading(true);
@@ -329,7 +278,6 @@ export default function UpgradePage() {
     const M = {
       es: {
         createFailed: "No se pudo crear el pago",
-        checkoutFailed: "No se pudo crear la sesión de pago",
         linkMissing: "No se recibió el enlace de pago",
         unauthorized: "No autorizado. Inicia sesión nuevamente.",
         invalidToken: "Token inválido. Inicia sesión nuevamente.",
@@ -339,7 +287,6 @@ export default function UpgradePage() {
       },
       en: {
         createFailed: "Failed to create payment",
-        checkoutFailed: "Failed to create checkout session",
         linkMissing: "Payment link was not received",
         unauthorized: "Unauthorized. Please sign in again.",
         invalidToken: "Invalid token. Please sign in again.",
@@ -349,7 +296,6 @@ export default function UpgradePage() {
       },
       pt: {
         createFailed: "Não foi possível criar o pagamento",
-        checkoutFailed: "Não foi possível criar a sessão de pagamento",
         linkMissing: "O link de pagamento não foi recebido",
         unauthorized: "Não autorizado. Entre novamente.",
         invalidToken: "Token inválido. Entre novamente.",
@@ -362,7 +308,6 @@ export default function UpgradePage() {
     const L = M[lang] || M.en;
     const s = (raw || "").toLowerCase();
     if (s.includes("failed to create payment")) return L.createFailed;
-    if (s.includes("failed to create checkout")) return L.checkoutFailed;
     if (s.includes("no checkout url") || s.includes("enlace de pago"))
       return L.linkMissing;
     if (s.includes("unauthorized")) return L.unauthorized;
@@ -482,24 +427,6 @@ export default function UpgradePage() {
             </ul>
 
             <div className="space-y-3">
-              <button
-                onClick={handleUpgrade}
-                disabled={upgrading}
-                className="w-full py-3 bg-white text-blue-600 rounded-lg font-bold hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {upgrading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                    <span>{copy.plans.pro.buttons.processing}</span>
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-5 h-5" />
-                    <span>{copy.plans.pro.buttons.stripe}</span>
-                  </>
-                )}
-              </button>
-
               <button
                 onClick={handleUpgradeMercadoPago}
                 disabled={mpUpgrading}

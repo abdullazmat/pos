@@ -19,6 +19,22 @@ class MercadoPagoService implements IPaymentProvider {
     }
   }
 
+  private mapStatus(status: string): PaymentStatus["status"] {
+    const statusMap: Record<string, PaymentStatus["status"]> = {
+      approved: "APPROVED",
+      pending: "PENDING",
+      authorized: "PENDING",
+      in_process: "PENDING",
+      in_mediation: "PENDING",
+      rejected: "REJECTED",
+      cancelled: "CANCELLED",
+      refunded: "CANCELLED",
+      charged_back: "REJECTED",
+    };
+
+    return statusMap[status] || "PENDING";
+  }
+
   async createPaymentPreference(options: {
     businessName: string;
     planName: string;
@@ -28,6 +44,12 @@ class MercadoPagoService implements IPaymentProvider {
     metadata: Record<string, any>;
   }): Promise<PaymentPreference> {
     try {
+      const rawBaseUrl =
+        process.env.NEXT_PUBLIC_APP_URL ||
+        process.env.NEXTAUTH_URL ||
+        "http://localhost:3000";
+      const baseUrl = rawBaseUrl.replace(/\/+$/, "");
+
       const payload = {
         items: [
           {
@@ -50,20 +72,12 @@ class MercadoPagoService implements IPaymentProvider {
         },
         metadata: options.metadata,
         back_urls: {
-          success: `${
-            process.env.NEXTAUTH_URL || "http://localhost:3000"
-          }/payment/success`,
-          failure: `${
-            process.env.NEXTAUTH_URL || "http://localhost:3000"
-          }/payment/failure`,
-          pending: `${
-            process.env.NEXTAUTH_URL || "http://localhost:3000"
-          }/payment/pending`,
+          success: `${baseUrl}/subscribe/mercadopago/success`,
+          failure: `${baseUrl}/subscribe/mercadopago/failure`,
+          pending: `${baseUrl}/subscribe/mercadopago/pending`,
         },
         external_reference: options.metadata.businessId,
-        notification_url: `${
-          process.env.NEXTAUTH_URL || "http://localhost:3000"
-        }/api/webhooks/mercado-pago`,
+        notification_url: `${baseUrl}/api/webhooks/mercado-pago`,
         auto_return: "approved",
         statement_descriptor: "POS Facturador",
         expires: false,
@@ -81,7 +95,7 @@ class MercadoPagoService implements IPaymentProvider {
       if (!response.ok) {
         const error = await response.json();
         throw new Error(
-          `Mercado Pago API error: ${error.message || response.statusText}`
+          `Mercado Pago API error: ${error.message || response.statusText}`,
         );
       }
 
@@ -106,12 +120,12 @@ class MercadoPagoService implements IPaymentProvider {
           headers: {
             Authorization: `Bearer ${this.accessToken}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
         throw new Error(
-          `Failed to fetch payment status: ${response.statusText}`
+          `Failed to fetch payment status: ${response.statusText}`,
         );
       }
 
@@ -122,26 +136,42 @@ class MercadoPagoService implements IPaymentProvider {
         throw new Error("Payment not found");
       }
 
-      const statusMap: Record<string, PaymentStatus["status"]> = {
-        approved: "APPROVED",
-        pending: "PENDING",
-        authorized: "PENDING",
-        in_process: "PENDING",
-        in_mediation: "PENDING",
-        rejected: "REJECTED",
-        cancelled: "CANCELLED",
-        refunded: "CANCELLED",
-        charged_back: "REJECTED",
-      };
-
       return {
-        status: statusMap[payment.status] || "PENDING",
+        status: this.mapStatus(payment.status),
         transactionId: payment.id.toString(),
         amount: payment.transaction_amount,
         timestamp: new Date(payment.date_created),
       };
     } catch (error) {
       console.error("Mercado Pago payment status error:", error);
+      throw error;
+    }
+  }
+
+  async getPaymentById(paymentId: string): Promise<PaymentStatus> {
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/payments/${paymentId}`, {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch payment by id: ${response.statusText}`,
+        );
+      }
+
+      const payment = await response.json();
+
+      return {
+        status: this.mapStatus(payment.status),
+        transactionId: payment.id.toString(),
+        amount: payment.transaction_amount,
+        timestamp: new Date(payment.date_created),
+      };
+    } catch (error) {
+      console.error("Mercado Pago payment lookup error:", error);
       throw error;
     }
   }

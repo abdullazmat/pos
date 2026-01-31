@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import Subscription from "@/lib/models/Subscription";
 import { authMiddleware } from "@/lib/middleware/auth";
+import { getPlanConfig } from "@/lib/services/subscriptions/PlanConfig";
 import {
   generateErrorResponse,
   generateSuccessResponse,
@@ -19,7 +20,9 @@ export async function GET(req: NextRequest) {
     const { businessId } = authResult.user!;
     await dbConnect();
 
-    let subscription = await Subscription.findOne({ businessId }).lean();
+    let subscription = await Subscription.findOne({ businessId });
+
+    const basicPlan = getPlanConfig("BASIC");
 
     // If no subscription exists, create a default FREE plan subscription
     if (!subscription) {
@@ -29,20 +32,47 @@ export async function GET(req: NextRequest) {
         status: "active",
         currentPeriodStart: new Date(),
         currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        features: {
-          maxProducts: 100,
-          maxCategories: 10,
-          maxClients: 0,
-          maxSuppliers: 5,
-          maxUsers: 1,
-          arcaIntegration: false,
-          advancedReporting: false,
-          customBranding: false,
-          invoiceChannels: 1,
-        },
+        features: basicPlan
+          ? {
+              maxProducts: basicPlan.features.maxProducts,
+              maxUsers: basicPlan.features.maxUsers,
+              maxCategories: basicPlan.features.maxCategories,
+              maxClients: basicPlan.features.maxClients,
+              maxSuppliers: basicPlan.features.maxSuppliers,
+              arcaIntegration: basicPlan.features.arcaIntegration,
+              advancedReporting: basicPlan.features.advancedReporting,
+              customBranding: basicPlan.features.customBranding,
+              invoiceChannels: basicPlan.features.invoiceChannels,
+            }
+          : undefined,
       });
       await newSub.save();
-      subscription = newSub.toObject();
+      subscription = newSub;
+    }
+
+    const now = new Date();
+    const isExpired = subscription.currentPeriodEnd < now;
+
+    if (isExpired && basicPlan) {
+      subscription.planId = "BASIC";
+      subscription.status = "active";
+      subscription.provider = undefined;
+      subscription.currentPeriodStart = now;
+      subscription.currentPeriodEnd = new Date(
+        Date.now() + 365 * 24 * 60 * 60 * 1000,
+      );
+      subscription.features = {
+        maxProducts: basicPlan.features.maxProducts,
+        maxUsers: basicPlan.features.maxUsers,
+        maxCategories: basicPlan.features.maxCategories,
+        maxClients: basicPlan.features.maxClients,
+        maxSuppliers: basicPlan.features.maxSuppliers,
+        arcaIntegration: basicPlan.features.arcaIntegration,
+        advancedReporting: basicPlan.features.advancedReporting,
+        customBranding: basicPlan.features.customBranding,
+        invoiceChannels: basicPlan.features.invoiceChannels,
+      };
+      await subscription.save();
     }
 
     return generateSuccessResponse({ subscription });
