@@ -16,6 +16,7 @@ const CLOSE_TICKET_COPY = {
     sales: "Ventas:",
     withdrawals: "Retiros:",
     creditNotes: "Notas de crédito:",
+    deposits: "Ingresos:",
     expected: "Esperado:",
     counted: "Contado:",
     noDifference: "Sin diferencias",
@@ -42,6 +43,7 @@ const CLOSE_TICKET_COPY = {
     sales: "Sales:",
     withdrawals: "Withdrawals:",
     creditNotes: "Credit Notes:",
+    deposits: "Cash In:",
     expected: "Expected:",
     counted: "Counted:",
     noDifference: "No difference",
@@ -68,6 +70,7 @@ const CLOSE_TICKET_COPY = {
     sales: "Vendas:",
     withdrawals: "Saques:",
     creditNotes: "Notas de Crédito:",
+    deposits: "Entradas:",
     expected: "Esperado:",
     counted: "Contado:",
     noDifference: "Sem diferença",
@@ -94,6 +97,7 @@ export type CloseTicketData = {
   salesTotal: number;
   withdrawalsTotal: number;
   creditNotesTotal: number;
+  depositsTotal: number;
   expected: number;
   countedAmount: number;
   difference: number;
@@ -218,6 +222,10 @@ export default function CloseTicketModal({
                 <div className="flex justify-between">
                   <span>{copy.creditNotes}</span>
                   <span>-{formatAmount(data.creditNotesTotal)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{copy.deposits}</span>
+                  <span>{formatAmount(data.depositsTotal)}</span>
                 </div>
               </div>
               <div className="space-y-1">

@@ -1,44 +1,59 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useLanguage } from "@/lib/context/LanguageContext";
 
 const OPEN_REGISTER_COPY = {
   es: {
     title: "Apertura de Caja",
     description: "Cuenta el efectivo inicial y registra la apertura",
+    depositTitle: "Ingreso de Dinero",
+    depositDescription: "Registra el dinero ingresado a la caja",
     bills: "Billetes",
     coins: "Monedas",
     total: "TOTAL",
     billsEmoji: "💵",
     coinsEmoji: "🪙",
     counted: "Total Contado",
+    manualEntry: "Monto manual",
+    manualEntryHint: "Si completas el monto manual, se usará ese total.",
     cancel: "Cancelar",
     continue: "Continuar",
+    depositContinue: "Registrar",
   },
   en: {
     title: "Open Register",
     description: "Count the initial cash and register the opening",
+    depositTitle: "Cash In",
+    depositDescription: "Register money added to the register",
     bills: "Bills",
     coins: "Coins",
     total: "TOTAL",
     billsEmoji: "💵",
     coinsEmoji: "🪙",
     counted: "Total Counted",
+    manualEntry: "Manual amount",
+    manualEntryHint: "If you enter a manual amount, it will be used.",
     cancel: "Cancel",
     continue: "Continue",
+    depositContinue: "Register",
   },
   pt: {
     title: "Abertura de Caixa",
     description: "Conte o dinheiro inicial e registre a abertura",
+    depositTitle: "Entrada de Dinheiro",
+    depositDescription: "Registre o dinheiro inserido no caixa",
     bills: "Notas",
     coins: "Moedas",
     total: "TOTAL",
     billsEmoji: "💵",
     coinsEmoji: "🪙",
     counted: "Total Contado",
+    manualEntry: "Valor manual",
+    manualEntryHint: "Se você preencher o valor manual, ele será usado.",
     cancel: "Cancelar",
     continue: "Continuar",
+    depositContinue: "Registrar",
   },
 };
 
@@ -80,18 +95,22 @@ export default function OpenRegisterModal({
   open,
   onClose,
   onConfirm,
+  mode = "open",
 }: {
   open: boolean;
   onClose: () => void;
   onConfirm: (amount: number) => void;
+  mode?: "open" | "deposit";
 }) {
   const { currentLanguage } = useLanguage();
   const copy =
     OPEN_REGISTER_COPY[currentLanguage as keyof typeof OPEN_REGISTER_COPY] ||
     OPEN_REGISTER_COPY.en;
+  const isDeposit = mode === "deposit";
 
   const [billTotals, setBillTotals] = useState<Record<string, number>>({});
   const [coinTotals, setCoinTotals] = useState<Record<string, number>>({});
+  const [manualTotal, setManualTotal] = useState<string>("");
 
   const bills = [10000, 2000, 1000, 500, 200, 100, 50].map((v) => ({
     label: `$${v.toLocaleString()}`,
@@ -113,6 +132,20 @@ export default function OpenRegisterModal({
     [coinTotals],
   );
   const total = totalBills + totalCoins;
+  const manualValue = manualTotal.trim().length
+    ? Number(manualTotal.replace(",", "."))
+    : null;
+  const manualAmount =
+    manualValue !== null && !Number.isNaN(manualValue) && manualValue >= 0
+      ? manualValue
+      : null;
+  const effectiveTotal = manualAmount !== null ? manualAmount : total;
+
+  useEffect(() => {
+    if (open) {
+      setManualTotal("");
+    }
+  }, [open]);
 
   if (!open) return null;
 
@@ -125,7 +158,7 @@ export default function OpenRegisterModal({
             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-200 dark:bg-gray-700">
               $
             </span>
-            {copy.title}
+            {isDeposit ? copy.depositTitle : copy.title}
           </div>
           <button
             onClick={onClose}
@@ -136,7 +169,7 @@ export default function OpenRegisterModal({
         </div>
 
         <div className="px-6 py-4 text-sm text-slate-600 dark:text-gray-400 border-b border-slate-300 dark:border-gray-800">
-          {copy.description}
+          {isDeposit ? copy.depositDescription : copy.description}
         </div>
 
         <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -215,13 +248,38 @@ export default function OpenRegisterModal({
           </div>
         </div>
 
+        {isDeposit && (
+          <div className="px-6 pb-4">
+            <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
+              {copy.manualEntry}
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-gray-500">
+                $
+              </span>
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                value={manualTotal}
+                onChange={(e) => setManualTotal(e.target.value)}
+                placeholder="0.00"
+                className="w-full pl-8 pr-4 py-2 border border-slate-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-slate-900 dark:text-gray-100 placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <p className="mt-2 text-xs text-slate-500 dark:text-gray-400">
+              {copy.manualEntryHint}
+            </p>
+          </div>
+        )}
+
         <div className="px-6 py-4 border-t border-slate-300 dark:border-gray-800 flex items-center justify-between bg-slate-50 dark:bg-gray-800">
           <div>
             <div className="text-sm text-slate-600 dark:text-gray-400">
               {copy.counted}
             </div>
             <div className="text-3xl font-bold text-slate-900 dark:text-gray-100">
-              ${total.toFixed(2)}
+              ${effectiveTotal.toFixed(2)}
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -232,10 +290,11 @@ export default function OpenRegisterModal({
               {copy.cancel}
             </button>
             <button
-              onClick={() => onConfirm(total)}
+              onClick={() => onConfirm(effectiveTotal)}
               className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
             >
-              {copy.continue} (${total.toFixed(2)})
+              {isDeposit ? copy.depositContinue : copy.continue} ($
+              {effectiveTotal.toFixed(2)})
             </button>
           </div>
         </div>

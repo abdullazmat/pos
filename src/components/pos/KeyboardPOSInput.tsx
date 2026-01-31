@@ -27,10 +27,12 @@ export default function KeyboardPOSInput({
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [activeResultIndex, setActiveResultIndex] = useState(-1);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const quantityInputRef = useRef<HTMLInputElement>(null);
   const productInputRef = useRef<HTMLInputElement>(null);
+  const resultsListRef = useRef<HTMLDivElement>(null);
   const pendingMultiplierQtyRef = useRef<number | null>(null);
 
   // Focus on quantity field on mount and after adding product
@@ -154,6 +156,27 @@ export default function KeyboardPOSInput({
       window.clearTimeout(handle);
     };
   }, [productCode, fetchSuggestions]);
+
+  useEffect(() => {
+    if (activeResultIndex < 0 || !resultsListRef.current) return;
+    const activeEl = resultsListRef.current.querySelector(
+      `[data-index="${activeResultIndex}"]`,
+    ) as HTMLElement | null;
+    activeEl?.scrollIntoView({ block: "nearest" });
+  }, [activeResultIndex]);
+
+  useEffect(() => {
+    if (searchResults.length === 0) {
+      if (activeResultIndex !== -1) {
+        setActiveResultIndex(-1);
+      }
+      return;
+    }
+
+    if (activeResultIndex >= searchResults.length) {
+      setActiveResultIndex(searchResults.length - 1);
+    }
+  }, [searchResults, activeResultIndex]);
 
   // Parse quantity with multiplier support
   const parseQuantityInput = (
@@ -420,6 +443,7 @@ export default function KeyboardPOSInput({
   const handleProductCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProductCode(e.target.value);
     setShowResults(true);
+    setActiveResultIndex(-1);
   };
 
   // Handle product field key press
@@ -480,6 +504,21 @@ export default function KeyboardPOSInput({
     if (e.key === "Enter") {
       e.preventDefault();
 
+      if (showResults && searchResults.length > 0 && activeResultIndex >= 0) {
+        const selected = searchResults[activeResultIndex];
+        if (selected) {
+          const qtyValue = quantity.trim() || "1";
+          const parsedQty = parseFloat(qtyValue.replace(",", "."));
+          const effectiveQty =
+            pendingMultiplierQtyRef.current !== null
+              ? pendingMultiplierQtyRef.current
+              : parsedQty;
+          pendingMultiplierQtyRef.current = null;
+          await processProductAddition(selected.code, effectiveQty);
+          return;
+        }
+      }
+
       const multiplierFromProduct = parseQuantityInput(productCode);
       if (multiplierFromProduct) {
         pendingMultiplierQtyRef.current = null;
@@ -517,11 +556,24 @@ export default function KeyboardPOSInput({
 
       pendingMultiplierQtyRef.current = null;
       await processProductAddition(code, effectiveQty);
+    } else if (e.key === "ArrowDown") {
+      if (!showResults || searchResults.length === 0) return;
+      e.preventDefault();
+      setActiveResultIndex((prev) =>
+        prev < searchResults.length - 1 ? prev + 1 : 0,
+      );
+    } else if (e.key === "ArrowUp") {
+      if (!showResults || searchResults.length === 0) return;
+      e.preventDefault();
+      setActiveResultIndex((prev) =>
+        prev > 0 ? prev - 1 : searchResults.length - 1,
+      );
     } else if (e.key === "Escape") {
       e.preventDefault();
       setProductCode("");
       setQuantity("1");
       pendingMultiplierQtyRef.current = null;
+      setActiveResultIndex(-1);
       quantityInputRef.current?.focus();
     }
   };
@@ -732,11 +784,15 @@ export default function KeyboardPOSInput({
           </p>
         )}
         {showResults && searchResults.length > 0 && (
-          <div className="mt-2 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
-            {searchResults.map((product) => (
+          <div
+            ref={resultsListRef}
+            className="mt-2 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900"
+          >
+            {searchResults.map((product, index) => (
               <button
                 key={product._id}
                 type="button"
+                data-index={index}
                 onClick={async () => {
                   const qtyValue = quantity.trim() || "1";
                   const parsedQty = parseFloat(qtyValue.replace(",", "."));
@@ -747,7 +803,14 @@ export default function KeyboardPOSInput({
                   pendingMultiplierQtyRef.current = null;
                   await processProductAddition(product.code, effectiveQty);
                 }}
-                className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                onMouseEnter={() => {
+                  setActiveResultIndex(index);
+                }}
+                className={`w-full text-left px-3 py-2 transition ${
+                  index === activeResultIndex
+                    ? "bg-slate-100 dark:bg-slate-800"
+                    : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                }`}
               >
                 <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">
                   {product.name}

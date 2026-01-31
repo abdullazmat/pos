@@ -11,6 +11,7 @@ const CLOSE_BOX_COPY = {
     sales: "Ventas:",
     withdrawals: "Retiros:",
     refunds: "Devoluciones:",
+    deposits: "Ingresos:",
     expectedAmount: "Monto Esperado:",
     countedAmount: "Monto Contado *",
     difference: "Diferencia:",
@@ -25,6 +26,7 @@ const CLOSE_BOX_COPY = {
     sales: "Sales:",
     withdrawals: "Withdrawals:",
     refunds: "Refunds:",
+    deposits: "Cash In:",
     expectedAmount: "Expected Amount:",
     countedAmount: "Counted Amount *",
     difference: "Difference:",
@@ -39,6 +41,7 @@ const CLOSE_BOX_COPY = {
     sales: "Vendas:",
     withdrawals: "Retiradas:",
     refunds: "Devoluções:",
+    deposits: "Entradas:",
     expectedAmount: "Valor Esperado:",
     countedAmount: "Valor Contado *",
     difference: "Diferença:",
@@ -58,6 +61,7 @@ interface CloseBoxModalProps {
   salesTotal: number;
   withdrawalsTotal: number;
   creditNotesTotal: number;
+  depositsTotal: number;
 }
 
 export default function CloseBoxModal({
@@ -68,6 +72,7 @@ export default function CloseBoxModal({
   salesTotal,
   withdrawalsTotal,
   creditNotesTotal,
+  depositsTotal,
 }: CloseBoxModalProps) {
   const { currentLanguage } = useGlobalLanguage();
   const copy = (CLOSE_BOX_COPY[currentLanguage] ||
@@ -150,6 +155,14 @@ export default function CloseBoxModal({
               </span>
               <span className="font-medium text-slate-900 dark:text-gray-100">
                 -${creditNotesTotal.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600 dark:text-gray-400">
+                {copy.deposits}
+              </span>
+              <span className="font-medium text-slate-900 dark:text-gray-100">
+                +${depositsTotal.toFixed(2)}
               </span>
             </div>
             <div className="border-t border-slate-300 dark:border-slate-700 pt-3 flex justify-between">

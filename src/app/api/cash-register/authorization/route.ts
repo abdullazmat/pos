@@ -29,25 +29,44 @@ export async function POST(req: NextRequest) {
 
     await dbConnect();
 
-    const user = await User.findOne({
+    const requester = await User.findOne({
       _id: userId,
       businessId,
       isActive: true,
     }).select("fullName password role");
 
-    if (!user) {
-      return generateErrorResponse("invalidApprovalPassword", 403);
+    const candidates = [] as Array<{
+      _id: any;
+      fullName?: string;
+      password: string;
+      role: "cashier" | "supervisor" | "admin";
+    }>;
+
+    if (requester && requester.role === "admin") {
+      candidates.push(requester as any);
+    } else {
+      const admins = await User.find({
+        businessId,
+        role: "admin",
+        isActive: true,
+      }).select("fullName password role");
+      candidates.push(...(admins as any));
     }
 
-    const isValid = await comparePassword(approvalPassword, user.password);
-    if (isValid) {
-      return generateSuccessResponse({
-        approvedBy: {
-          user_id: user._id.toString(),
-          visible_name: user.fullName || "",
-          role: user.role,
-        },
-      });
+    for (const candidate of candidates) {
+      const isValid = await comparePassword(
+        approvalPassword,
+        candidate.password,
+      );
+      if (isValid) {
+        return generateSuccessResponse({
+          approvedBy: {
+            user_id: candidate._id.toString(),
+            visible_name: candidate.fullName || "",
+            role: candidate.role,
+          },
+        });
+      }
     }
 
     return generateErrorResponse("invalidApprovalPassword", 403);

@@ -44,27 +44,33 @@ export async function GET(req: NextRequest) {
       .limit(10);
 
     // Format session history with proper data
-    const sessions = closedSessions.map((session) => ({
-      openedAt: session.openedAt?.toISOString() || null,
-      openedAtISO: session.openedAt?.toISOString() || null,
-      closedAtISO: session.closedAt?.toISOString() || null,
-      initial: session.openingBalance || 0,
-      sales: session.salesTotal || 0,
-      withdrawals: session.withdrawalsTotal || 0,
-      expected:
-        (session.openingBalance || 0) +
-        (session.salesTotal || 0) -
-        (session.withdrawalsTotal || 0),
-      real: session.closingBalance != null ? session.closingBalance : null,
-      diff:
-        session.closingBalance != null
-          ? session.closingBalance -
-            ((session.openingBalance || 0) +
-              (session.salesTotal || 0) -
-              (session.withdrawalsTotal || 0))
-          : null,
-      status: "Cerrada",
-    }));
+    const sessions = closedSessions.map((session) => {
+      const opening = session.openingBalance || 0;
+      const sales = session.salesTotal || 0;
+      const withdrawals = session.withdrawalsTotal || 0;
+      const creditNotes = session.creditNotesTotal || 0;
+      const deposits = session.depositsTotal || 0;
+      const expectedValue =
+        opening + sales + deposits - withdrawals - creditNotes;
+
+      return {
+        openedAt: session.openedAt?.toISOString() || null,
+        openedAtISO: session.openedAt?.toISOString() || null,
+        closedAtISO: session.closedAt?.toISOString() || null,
+        initial: opening,
+        sales,
+        withdrawals,
+        deposits,
+        creditNotes,
+        expected: expectedValue,
+        real: session.closingBalance != null ? session.closingBalance : null,
+        diff:
+          session.closingBalance != null
+            ? session.closingBalance - expectedValue
+            : null,
+        status: "Cerrada",
+      };
+    });
 
     // Add current open session to history if exists
     if (openSession) {
@@ -79,6 +85,12 @@ export async function GET(req: NextRequest) {
         withdrawals: movements
           .filter((m) => m.type === "retiro")
           .reduce((sum, m) => sum + m.amount, 0),
+        deposits: movements
+          .filter((m) => m.type === "ingreso")
+          .reduce((sum, m) => sum + m.amount, 0),
+        creditNotes: movements
+          .filter((m) => m.type === "nota_credito")
+          .reduce((sum, m) => sum + m.amount, 0),
         expected:
           (openSession.openingBalance || 0) +
           movements
@@ -86,6 +98,12 @@ export async function GET(req: NextRequest) {
             .reduce((sum, m) => sum + m.amount, 0) -
           movements
             .filter((m) => m.type === "retiro")
+            .reduce((sum, m) => sum + m.amount, 0) -
+          movements
+            .filter((m) => m.type === "nota_credito")
+            .reduce((sum, m) => sum + m.amount, 0) +
+          movements
+            .filter((m) => m.type === "ingreso")
             .reduce((sum, m) => sum + m.amount, 0),
         real: null,
         diff: null,
@@ -105,8 +123,15 @@ export async function GET(req: NextRequest) {
     const creditNotesTotal = movements
       .filter((m) => m.type === "nota_credito")
       .reduce((sum, m) => sum + m.amount, 0);
+    const depositsTotal = movements
+      .filter((m) => m.type === "ingreso")
+      .reduce((sum, m) => sum + m.amount, 0);
     const expected =
-      initialAmount + salesTotal - withdrawalsTotal - creditNotesTotal;
+      initialAmount +
+      salesTotal +
+      depositsTotal -
+      withdrawalsTotal -
+      creditNotesTotal;
 
     // Format movements with proper timestamps
     const formattedMovements = movements.map((m) => ({
@@ -127,6 +152,7 @@ export async function GET(req: NextRequest) {
       salesTotal,
       withdrawalsTotal,
       creditNotesTotal,
+      depositsTotal,
       expected,
       currentBalance: openSession?.currentBalance || 0,
       movements: formattedMovements,
@@ -154,13 +180,10 @@ export async function POST(req: NextRequest) {
 
     // Permissions enforcement
     if (role === "cashier" && action !== "open" && action !== "close") {
-      return generateErrorResponse(
-        "Cashiers can only open/close register",
-        403,
-      );
+      return generateErrorResponse("cashierActionNotAllowed", 403);
     }
     if (!action || !["open", "close"].includes(action)) {
-      return generateErrorResponse("Invalid action", 400);
+      return generateErrorResponse("invalidAction", 400);
     }
 
     await dbConnect();
@@ -241,17 +264,36 @@ export async function POST(req: NextRequest) {
         role: "cashier" | "supervisor" | "admin";
       } | null = null;
 
-      if (currentUser) {
+      const candidates = [] as Array<{
+        _id: any;
+        fullName?: string;
+        password: string;
+        role: "cashier" | "supervisor" | "admin";
+      }>;
+
+      if (currentUser && currentUser.role === "admin") {
+        candidates.push(currentUser as any);
+      } else {
+        const admins = await User.find({
+          businessId,
+          role: "admin",
+          isActive: true,
+        }).select("fullName password role");
+        candidates.push(...(admins as any));
+      }
+
+      for (const candidate of candidates) {
         const isValid = await comparePassword(
           approvalPassword,
-          currentUser.password,
+          candidate.password,
         );
         if (isValid) {
           approvedBy = {
-            user_id: currentUser._id.toString(),
-            visible_name: currentUser.fullName || "",
-            role: currentUser.role,
+            user_id: candidate._id.toString(),
+            visible_name: candidate.fullName || "",
+            role: candidate.role,
           };
+          break;
         }
       }
 
@@ -264,7 +306,7 @@ export async function POST(req: NextRequest) {
         status: "open",
       });
       if (!cashRegister) {
-        return generateErrorResponse("No open cash register found", 404);
+        return generateErrorResponse("noOpenSession", 404);
       }
 
       // Get all movements for this session to calculate totals
@@ -281,9 +323,13 @@ export async function POST(req: NextRequest) {
       const creditNotesTotal = movements
         .filter((m) => m.type === "nota_credito")
         .reduce((sum, m) => sum + m.amount, 0);
+      const depositsTotal = movements
+        .filter((m) => m.type === "ingreso")
+        .reduce((sum, m) => sum + m.amount, 0);
       const expected =
         cashRegister.openingBalance +
-        salesTotal -
+        salesTotal +
+        depositsTotal -
         withdrawalsTotal -
         creditNotesTotal;
 
@@ -297,6 +343,8 @@ export async function POST(req: NextRequest) {
       cashRegister.closingBalance = closingBalance;
       cashRegister.salesTotal = salesTotal;
       cashRegister.withdrawalsTotal = withdrawalsTotal;
+      cashRegister.creditNotesTotal = creditNotesTotal;
+      cashRegister.depositsTotal = depositsTotal;
       // Persist current balance to match closing balance
       cashRegister.currentBalance = closingBalance;
 
@@ -367,6 +415,7 @@ export async function POST(req: NextRequest) {
           salesTotal,
           withdrawalsTotal,
           creditNotesTotal,
+          depositsTotal,
           expected,
           countedAmount: closingBalance,
           difference: closingBalance - expected,

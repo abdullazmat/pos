@@ -63,9 +63,13 @@ export async function POST(req: NextRequest) {
       typeof approvalPassword === "string" &&
       approvalPassword.trim().length > 0;
 
-    // Password confirmation required for all roles
+    // Password confirmation required for sensitive actions
     let approvedBy: ApproverInfo | null = null;
-    if (action === "withdrawal" || action === "credit_note") {
+    if (
+      action === "withdrawal" ||
+      action === "credit_note" ||
+      action === "deposit"
+    ) {
       if (!hasApprovalPassword) {
         return generateErrorResponse("approvalPasswordRequired", 403);
       }
@@ -75,7 +79,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (!action || !["withdrawal", "credit_note"].includes(action)) {
+    if (!action || !["withdrawal", "credit_note", "deposit"].includes(action)) {
       return generateErrorResponse("invalidAction", 400);
     }
 
@@ -96,16 +100,27 @@ export async function POST(req: NextRequest) {
     }
 
     // Create movement
-    const movementType = action === "withdrawal" ? "retiro" : "nota_credito";
+    const movementType =
+      action === "withdrawal"
+        ? "retiro"
+        : action === "credit_note"
+          ? "nota_credito"
+          : "ingreso";
     const movementDescription =
-      action === "withdrawal" ? "withdrawal" : "creditNote";
-    const movementReason = reason || "noReason";
+      action === "withdrawal"
+        ? "withdrawal"
+        : action === "credit_note"
+          ? "creditNote"
+          : "deposit";
+    const movementReason = action === "deposit" ? "" : reason || "noReason";
 
     const movement = new CashMovement({
       cashRegisterId: openSession._id,
       businessId,
       type: movementType,
-      description: `${movementDescription}:${movementReason}`,
+      description: movementReason
+        ? `${movementDescription}:${movementReason}`
+        : movementDescription,
       amount,
       createdBy: userId,
       notes,
@@ -127,11 +142,10 @@ export async function POST(req: NextRequest) {
     await movement.save();
 
     // Update current balance based on movement type
-    if (action === "withdrawal") {
-      // Withdrawals reduce the balance
-      openSession.currentBalance -= amount;
+    if (action === "deposit") {
+      openSession.currentBalance += amount;
     } else {
-      // Credit notes also reduce the balance (returning money)
+      // Withdrawals and credit notes reduce the balance
       openSession.currentBalance -= amount;
     }
 
@@ -150,6 +164,9 @@ export async function POST(req: NextRequest) {
       .reduce((sum, m) => sum + m.amount, 0);
     const creditNotesTotal = movements
       .filter((m) => m.type === "nota_credito")
+      .reduce((sum, m) => sum + m.amount, 0);
+    const depositsTotal = movements
+      .filter((m) => m.type === "ingreso")
       .reduce((sum, m) => sum + m.amount, 0);
 
     const formattedMovements = movements.map((m) => ({
@@ -172,9 +189,11 @@ export async function POST(req: NextRequest) {
         salesTotal,
         withdrawalsTotal,
         creditNotesTotal,
+        depositsTotal,
         expected:
           openSession.openingBalance +
-          salesTotal -
+          salesTotal +
+          depositsTotal -
           withdrawalsTotal -
           creditNotesTotal,
       },

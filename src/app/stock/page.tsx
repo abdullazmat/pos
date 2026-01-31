@@ -258,7 +258,7 @@ export default function StockPage() {
         ? lowStock
         : safeProducts;
 
-  const totalProducts = safeProducts.filter((p) => p.stock > 0).length;
+  const totalProducts = safeProducts.length;
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">

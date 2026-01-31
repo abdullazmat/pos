@@ -12,6 +12,8 @@ export interface ICashRegister extends Document {
   closingBalance?: number;
   salesTotal?: number;
   withdrawalsTotal?: number;
+  creditNotesTotal?: number;
+  depositsTotal?: number;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -59,11 +61,19 @@ const cashRegisterSchema = new Schema<ICashRegister>(
       type: Number,
       default: 0,
     },
+    creditNotesTotal: {
+      type: Number,
+      default: 0,
+    },
+    depositsTotal: {
+      type: Number,
+      default: 0,
+    },
     notes: String,
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 cashRegisterSchema.index({ businessId: 1, status: 1 });

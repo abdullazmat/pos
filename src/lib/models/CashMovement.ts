@@ -16,7 +16,7 @@ export interface ICashMovementApprover {
 export interface ICashMovement extends Document {
   businessId: Schema.Types.ObjectId;
   cashRegisterId: Schema.Types.ObjectId;
-  type: "apertura" | "cierre" | "venta" | "retiro" | "nota_credito";
+  type: "apertura" | "cierre" | "venta" | "retiro" | "nota_credito" | "ingreso";
   description: string;
   amount: number;
   createdBy: Schema.Types.ObjectId;
@@ -40,7 +40,14 @@ const cashMovementSchema = new Schema<ICashMovement>(
     },
     type: {
       type: String,
-      enum: ["apertura", "cierre", "venta", "retiro", "nota_credito"],
+      enum: [
+        "apertura",
+        "cierre",
+        "venta",
+        "retiro",
+        "nota_credito",
+        "ingreso",
+      ],
       required: true,
     },
     description: {
