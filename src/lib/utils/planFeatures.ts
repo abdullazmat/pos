@@ -32,10 +32,10 @@ export const PLAN_FEATURES: Record<
   BASIC: {
     name: "Free",
     maxProducts: 100,
-    maxCategories: 10,
+    maxCategories: 20,
     maxClients: 0,
     maxSuppliers: 5,
-    maxUsers: 1,
+    maxUsers: 2,
     features: {
       advancedReports: false,
       stockManagement: true,
@@ -50,11 +50,11 @@ export const PLAN_FEATURES: Record<
   },
   PROFESSIONAL: {
     name: "Profesional",
-    maxProducts: 5000,
-    maxCategories: 200,
-    maxClients: 100,
-    maxSuppliers: 100,
-    maxUsers: 5,
+    maxProducts: 99999,
+    maxCategories: 99999,
+    maxClients: 99999,
+    maxSuppliers: 99999,
+    maxUsers: 99999,
     features: {
       advancedReports: true,
       stockManagement: true,

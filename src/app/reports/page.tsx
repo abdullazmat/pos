@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import { apiFetch } from "@/lib/utils/apiFetch";
 import Header from "@/components/layout/Header";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 import {
   Calendar,
   Download,
@@ -19,6 +20,7 @@ const REPORTS_COPY = {
   es: {
     title: "Reportes y Estadísticas",
     subtitle: "Analiza el rendimiento completo de tu negocio",
+    loading: "Cargando...",
     exportCSV: "Exportar CSV",
     dateRange: "Período de análisis:",
     tabs: {
@@ -72,6 +74,7 @@ const REPORTS_COPY = {
   en: {
     title: "Reports and Statistics",
     subtitle: "Analyze your business performance",
+    loading: "Loading...",
     exportCSV: "Export CSV",
     dateRange: "Analysis period:",
     tabs: {
@@ -125,6 +128,7 @@ const REPORTS_COPY = {
   pt: {
     title: "Relatórios e Estatísticas",
     subtitle: "Analise o desempenho completo do seu negócio",
+    loading: "Carregando...",
     exportCSV: "Exportar CSV",
     dateRange: "Período de análise:",
     tabs: {
@@ -181,6 +185,7 @@ export default function ReportsPage() {
   const { t } = useGlobalLanguage();
   const { currentLanguage } = useGlobalLanguage();
   const router = useRouter();
+  const { subscription, loading: subLoading } = useSubscription();
   const [activeTab, setActiveTab] = useState("general");
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -191,6 +196,12 @@ export default function ReportsPage() {
   const copy =
     REPORTS_COPY[currentLanguage as keyof typeof REPORTS_COPY] ||
     REPORTS_COPY.es;
+
+  const planId = (subscription?.planId || "BASIC").toUpperCase();
+  const subscriptionReady = !subLoading;
+  const hasAdvancedReports = subscriptionReady
+    ? subscription?.features?.advancedReporting || planId !== "BASIC"
+    : true;
 
   const CURRENCY_LOCALE: Record<string, string> = {
     es: "es-AR",
@@ -204,6 +215,90 @@ export default function ReportsPage() {
       currency: "ARS",
       minimumFractionDigits: 2,
     }).format(value || 0);
+  const formatQuantity = (value: number) =>
+    new Intl.NumberFormat(CURRENCY_LOCALE[currentLanguage] || "es-AR", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 3,
+    }).format(value || 0);
+
+  const buildProductAggregates = (products: any[]) => {
+    const toNumber = (val: any) => {
+      if (typeof val === "number") return val;
+      if (typeof val === "string") {
+        const normalized = val.replace(",", ".");
+        const parsed = Number.parseFloat(normalized);
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+      return 0;
+    };
+
+    const normalizedProducts = products.map((p: any) => {
+      const sold = toNumber(p.sold);
+      const revenue = toNumber(p.revenue);
+      const cost = toNumber(p.cost);
+      const totalCost = cost * sold;
+      const profit = revenue - totalCost;
+      const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+      return {
+        name: p.name,
+        quantity: sold,
+        revenue,
+        cost,
+        totalCost,
+        profit,
+        margin,
+        isSoldByWeight: p.isSoldByWeight || false,
+        category: p.category || "Sin categoría",
+      };
+    });
+
+    const topProducts = normalizedProducts.sort(
+      (a: any, b: any) => b.quantity - a.quantity || b.revenue - a.revenue,
+    );
+
+    const categoryMap: Record<
+      string,
+      {
+        name: string;
+        revenue: number;
+        quantityUnits: number;
+        quantityWeight: number;
+      }
+    > = {};
+    normalizedProducts.forEach((p: any) => {
+      const category = p.category || "Sin categoría";
+      if (!categoryMap[category]) {
+        categoryMap[category] = {
+          name: category,
+          revenue: 0,
+          quantityUnits: 0,
+          quantityWeight: 0,
+        };
+      }
+      categoryMap[category].revenue += p.revenue;
+      if (p.isSoldByWeight) {
+        categoryMap[category].quantityWeight += p.quantity;
+      } else {
+        categoryMap[category].quantityUnits += p.quantity;
+      }
+    });
+    const categories = Object.values(categoryMap).sort(
+      (a, b) => b.revenue - a.revenue,
+    );
+
+    const profitability = normalizedProducts
+      .sort((a: any, b: any) => b.profit - a.profit || b.revenue - a.revenue)
+      .map((p: any) => ({
+        name: p.name,
+        revenue: p.revenue,
+        cost: p.totalCost,
+        profit: p.profit,
+        margin: p.margin,
+        quantity: p.quantity,
+      }));
+
+    return { topProducts, categories, profitability };
+  };
 
   // Format a Date to yyyy-mm-dd
   const fmt = (d: Date) => {
@@ -252,157 +347,53 @@ export default function ReportsPage() {
 
   useEffect(() => {
     if (fromDate && toDate) {
-      fetchReportData();
+      fetchReportData(activeTab);
     }
-  }, [fromDate, toDate]);
+  }, [fromDate, toDate, activeTab]);
 
-  const fetchReportData = async () => {
+  const fetchReportData = async (tab: string) => {
     setLoading(true);
     try {
-      const url = `/api/sales?startDate=${fromDate}&endDate=${toDate}`;
-      console.log(`[REPORTS PAGE] Fetching: ${url}`);
-      const response = await apiFetch(url);
+      const dailyUrl = `/api/reports?type=daily&from=${fromDate}&to=${toDate}`;
+      const productsUrl = `/api/reports?type=products&from=${fromDate}&to=${toDate}`;
 
-      console.log(`[REPORTS PAGE] Response status: ${response.status}`);
+      if (tab === "general") {
+        const [dailyResponse, productsResponse] = await Promise.all([
+          apiFetch(dailyUrl),
+          apiFetch(productsUrl),
+        ]);
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log(
-          `[REPORTS PAGE] API returned:`,
-          JSON.stringify(data, null, 2),
-        );
-
-        // Calculate actual data from database
-        const sales = data.data?.sales || data.sales || [];
-        console.log(
-          `[REPORTS PAGE] Parsed sales array - count: ${sales.length}`,
-        );
-        if (sales.length > 0) {
-          console.log(`[REPORTS PAGE] First sale:`, sales[0]);
+        let dailyPayload: any = null;
+        if (dailyResponse.ok) {
+          dailyPayload = await dailyResponse.json();
         }
 
-        const totalSales = sales.length;
-        const totalRevenue = sales.reduce((sum: number, s: any) => {
-          const gross =
-            typeof s.total === "number"
-              ? s.total
-              : typeof s.totalWithTax === "number"
-                ? s.totalWithTax
-                : typeof s.amount === "number"
-                  ? s.amount
-                  : 0;
-          return sum + gross;
-        }, 0);
-        const parseQuantity = (value: any) => {
-          if (typeof value === "number") return value;
-          if (typeof value === "string") {
-            const normalized = value.replace(",", ".");
-            const parsed = Number.parseFloat(normalized);
-            return Number.isFinite(parsed) ? parsed : 0;
-          }
-          return 0;
-        };
-
+        const sales = dailyPayload?.data?.sales || dailyPayload?.sales || [];
+        const totalSales =
+          dailyPayload?.data?.totalSales ??
+          dailyPayload?.totalSales ??
+          sales.length;
+        const totalRevenue =
+          dailyPayload?.data?.totalRevenue ?? dailyPayload?.totalRevenue ?? 0;
         const totalItems = sales.reduce(
           (sum: number, s: any) =>
             sum +
             (s.items?.reduce(
               (itemSum: number, item: any) =>
-                itemSum + parseQuantity(item.quantity),
+                itemSum + (Number(item.quantity) || 0),
               0,
             ) || 0),
           0,
         );
         const avgTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
 
-        console.log(
-          `[REPORTS PAGE] KPIs - Sales: ${totalSales}, Revenue: ${totalRevenue}, Items: ${totalItems}, Avg: ${avgTicket}`,
-        );
-
-        // Build top products aggregation (best effort from sale items)
-        const productMap: Record<
-          string,
-          {
-            name: string;
-            quantity: number;
-            revenue: number;
-            productId?: string;
-          }
-        > = {};
-
-        sales.forEach((sale: any) => {
-          (sale.items || []).forEach((item: any) => {
-            const name =
-              item.productName || item.name || item.title || "Unnamed product";
-            const qty = parseQuantity(item.quantity);
-            const revenue =
-              typeof item.total === "number"
-                ? item.total
-                : typeof item.totalWithTax === "number"
-                  ? item.totalWithTax
-                  : (Number(item.unitPrice) || 0) * qty;
-
-            if (!productMap[name]) {
-              productMap[name] = {
-                name,
-                quantity: 0,
-                revenue: 0,
-                productId: item.productId?.toString(),
-              };
-            }
-            productMap[name].quantity += qty;
-            productMap[name].revenue += revenue;
-          });
-        });
-
-        const topProducts = Object.values(productMap)
-          .sort((a, b) => b.quantity - a.quantity || b.revenue - a.revenue)
-          .slice(0, 5);
-
-        // Fetch product cost data for top products
-        const topProductsWithCosts = await Promise.all(
-          topProducts.map(async (product) => {
-            try {
-              if (product.productId) {
-                const productRes = await apiFetch(
-                  `/api/products/${product.productId}`,
-                );
-                if (productRes.ok) {
-                  const productData = await productRes.json();
-                  const cost = productData.data?.cost || 0;
-                  const totalCost = cost * product.quantity;
-                  const profit = product.revenue - totalCost;
-                  const margin =
-                    product.revenue > 0 ? (profit / product.revenue) * 100 : 0;
-
-                  return {
-                    ...product,
-                    cost,
-                    totalCost,
-                    profit,
-                    margin,
-                  };
-                }
-              }
-            } catch (err) {
-              console.error(
-                `Failed to fetch product ${product.productId}:`,
-                err,
-              );
-            }
-            return {
-              ...product,
-              cost: 0,
-              totalCost: 0,
-              profit: 0,
-              margin: 0,
-            };
-          }),
-        );
-
-        console.log(
-          `[REPORTS PAGE] Setting report data with: Sales=${totalSales}, Revenue=${totalRevenue}, Items=${totalItems}`,
-        );
+        let productPayload: any = null;
+        if (productsResponse.ok) {
+          productPayload = await productsResponse.json();
+        }
+        const products =
+          productPayload?.data?.products || productPayload?.products || [];
+        const aggregates = buildProductAggregates(products);
 
         setReportData({
           totalSales,
@@ -410,17 +401,16 @@ export default function ReportsPage() {
           totalItems,
           avgTicket,
           recentSales: sales.slice(0, 5),
-          topProducts: topProductsWithCosts,
+          topProducts: aggregates.topProducts,
+          categories: aggregates.categories,
+          profitability: aggregates.profitability,
         });
+        return;
+      }
 
-        console.log(
-          `[REPORTS PAGE] Report data has been set. Check re-render.`,
-        );
-      } else {
-        console.error(
-          `[REPORTS PAGE] API error: ${response.status} ${response.statusText}`,
-        );
-        // If the API responds with an error, still reset report data to avoid stale UI
+      const response = await apiFetch(productsUrl);
+
+      if (!response.ok) {
         setReportData({
           totalSales: 0,
           totalRevenue: 0,
@@ -428,8 +418,26 @@ export default function ReportsPage() {
           avgTicket: 0,
           recentSales: [],
           topProducts: [],
+          categories: [],
+          profitability: [],
         });
+        return;
       }
+
+      const data = await response.json();
+      const products = data.data?.products || data.products || [];
+      const aggregates = buildProductAggregates(products);
+
+      setReportData({
+        totalSales: reportData?.totalSales || 0,
+        totalRevenue: reportData?.totalRevenue || 0,
+        totalItems: reportData?.totalItems || 0,
+        avgTicket: reportData?.avgTicket || 0,
+        recentSales: reportData?.recentSales || [],
+        topProducts: aggregates.topProducts,
+        categories: aggregates.categories,
+        profitability: aggregates.profitability,
+      });
     } catch (error) {
       console.error("Error fetching report data:", error);
       setReportData({
@@ -439,6 +447,8 @@ export default function ReportsPage() {
         avgTicket: 0,
         recentSales: [],
         topProducts: [],
+        categories: [],
+        profitability: [],
       });
     } finally {
       setLoading(false);
@@ -460,13 +470,11 @@ export default function ReportsPage() {
       sale.total || 0,
     ]);
 
-    // Create CSV content
     const csvContent = [
       headers.join(","),
       ...rows.map((row: any[]) => row.join(",")),
     ].join("\n");
 
-    // Create blob and download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
@@ -549,19 +557,20 @@ export default function ReportsPage() {
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const active = activeTab === tab.id;
+              const isLocked = tab.premium && !hasAdvancedReports;
               return (
                 <button
                   key={tab.id}
-                  onClick={() => !tab.premium && setActiveTab(tab.id)}
+                  onClick={() => !isLocked && setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                     active
                       ? "border-blue-500 text-blue-500 bg-blue-50 dark:bg-slate-850 dark:text-blue-400"
                       : "border-transparent text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-850"
-                  } ${tab.premium ? "opacity-60 cursor-not-allowed" : ""}`}
+                  } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                 >
                   <Icon className="w-4 h-4" />
                   {getTabLabel(tab.id)}
-                  {tab.premium && (
+                  {isLocked && (
                     <span className="ml-1 px-2 py-0.5 text-xs bg-purple-900/40 text-purple-200 rounded-full">
                       {copy.tabs.premium}
                     </span>
@@ -641,17 +650,21 @@ export default function ReportsPage() {
               </div>
 
               {/* Access limited */}
-              <div className="rounded-xl border border-red-300 bg-red-50 text-red-800 p-4 flex items-start gap-3 dark:border-red-900/70 dark:bg-red-900/30 dark:text-red-200">
-                <div className="bg-red-200 p-2 rounded-lg dark:bg-red-800/70">
-                  <BarChart3 className="w-5 h-5 text-red-700 dark:text-white" />
+              {subscriptionReady && !hasAdvancedReports && (
+                <div className="rounded-xl border border-red-300 bg-red-50 text-red-800 p-4 flex items-start gap-3 dark:border-red-900/70 dark:bg-red-900/30 dark:text-red-200">
+                  <div className="bg-red-200 p-2 rounded-lg dark:bg-red-800/70">
+                    <BarChart3 className="w-5 h-5 text-red-700 dark:text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">
+                      {copy.limitedAccess.title}
+                    </h3>
+                    <p className="text-sm text-red-700 dark:text-red-200/90">
+                      {copy.limitedAccess.desc}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold">{copy.limitedAccess.title}</h3>
-                  <p className="text-sm text-red-700 dark:text-red-200/90">
-                    {copy.limitedAccess.desc}
-                  </p>
-                </div>
-              </div>
+              )}
 
               {/* Recent sales table */}
               <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
@@ -768,6 +781,196 @@ export default function ReportsPage() {
                         <tr>
                           <td className="py-3 px-4" colSpan={6}>
                             {loading ? "..." : "-"}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "categories" && (
+            <div className="p-6">
+              <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                  {copy.tabs.categories}
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="text-slate-700 border-b border-slate-300 dark:text-slate-400 dark:border-slate-800">
+                        <th className="text-left py-3 px-4">
+                          {copy.tabs.categories}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.kpis.itemsSold.title}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.kpis.totalSales.title}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                      {reportData?.categories?.length ? (
+                        reportData.categories.map((c: any, idx: number) => (
+                          <tr key={`${c.name}-${idx}`}>
+                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                              {c.name}
+                            </td>
+                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                              {c.quantityUnits === 0 &&
+                              c.quantityWeight === 0 ? (
+                                <span className="text-slate-500 dark:text-slate-400">
+                                  0
+                                </span>
+                              ) : (
+                                <div className="flex flex-wrap items-center gap-2 text-sm">
+                                  {c.quantityUnits > 0 && (
+                                    <span className="px-2 py-0.5 rounded-full bg-slate-200/60 dark:bg-slate-800/70 text-slate-700 dark:text-slate-200">
+                                      {formatQuantity(c.quantityUnits)} u
+                                    </span>
+                                  )}
+                                  {c.quantityWeight > 0 && (
+                                    <span className="px-2 py-0.5 rounded-full bg-emerald-200/60 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-200">
+                                      {formatQuantity(c.quantityWeight)} kg
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                              {formatCurrency(c.revenue)}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={3}
+                            className="py-4 px-4 text-center text-slate-600 dark:text-slate-400"
+                          >
+                            {loading ? copy.loading : copy.recentSales.noSales}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "profitability" && (
+            <div className="p-6">
+              <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                  {copy.tabs.profitability}
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="text-slate-700 border-b border-slate-300 dark:text-slate-400 dark:border-slate-800">
+                        <th className="text-left py-3 px-4">
+                          {copy.topProducts.product}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.topProducts.totalRevenue}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.topProducts.approxCost}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.topProducts.approxProfit}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.topProducts.margin}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                      {reportData?.profitability?.length ? (
+                        reportData.profitability.map((p: any, idx: number) => (
+                          <tr key={`${p.name}-${idx}`}>
+                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                              {p.name}
+                            </td>
+                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                              {formatCurrency(p.revenue)}
+                            </td>
+                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                              {formatCurrency(p.cost)}
+                            </td>
+                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                              {formatCurrency(p.profit)}
+                            </td>
+                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                              {p.margin > 0 ? p.margin.toFixed(1) : 0}%
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={5}
+                            className="py-4 px-4 text-center text-slate-600 dark:text-slate-400"
+                          >
+                            {loading ? copy.loading : copy.recentSales.noSales}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "products" && (
+            <div className="p-6">
+              <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                  {copy.tabs.products}
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="text-slate-700 border-b border-slate-300 dark:text-slate-400 dark:border-slate-800">
+                        <th className="text-left py-3 px-4">
+                          {copy.topProducts.product}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.topProducts.quantitySold}
+                        </th>
+                        <th className="text-left py-3 px-4">
+                          {copy.topProducts.totalRevenue}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                      {reportData?.topProducts?.length ? (
+                        reportData.topProducts.map((p: any, idx: number) => (
+                          <tr key={`${p.name}-${idx}`}>
+                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                              {p.name}
+                            </td>
+                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                              {formatQuantity(p.quantity)}
+                              {p.isSoldByWeight ? " kg" : ""}
+                            </td>
+                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                              {formatCurrency(p.revenue)}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={3}
+                            className="py-4 px-4 text-center text-slate-600 dark:text-slate-400"
+                          >
+                            {loading ? copy.loading : copy.recentSales.noSales}
                           </td>
                         </tr>
                       )}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import { verifyToken } from "@/lib/utils/jwt";
 import Subscription from "@/lib/models/Subscription";
+import { getPlanConfig } from "@/lib/services/subscriptions/PlanConfig";
 import Product from "@/lib/models/Product";
 import Client from "@/lib/models/Client";
 
@@ -45,7 +46,8 @@ export async function GET(request: NextRequest) {
       business: decoded.businessId,
     });
 
-    const { features } = subscription;
+    const planConfig = getPlanConfig(subscription.planId);
+    const features = planConfig ? planConfig.features : subscription.features;
 
     return NextResponse.json({
       subscription: {

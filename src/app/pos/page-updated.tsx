@@ -181,7 +181,9 @@ export default function POSPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setSubscription(data.subscription || { planId: "BASIC" });
+        const resolved = data?.data?.subscription ||
+          data?.subscription || { planId: "BASIC" };
+        setSubscription(resolved);
       }
     } catch (error) {
       console.error("Load subscription error:", error);

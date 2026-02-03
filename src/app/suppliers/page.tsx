@@ -38,8 +38,8 @@ const SUPPLIER_COPY = {
     subtitle: "Administra tu red de proveedores",
     bulkUpload: "Carga Masiva",
     newSupplier: "Nuevo Proveedor",
-    planStatus: (count: number, max: string | number) =>
-      `${count}/${max} proveedores · Gratuito`,
+    planStatus: (count: number, max: string | number, planName: string) =>
+      `${count}/${max === 99999 || max === -1 ? "∞" : max} proveedores · ${planName}`,
     limitReached: "Límite alcanzado",
     stats: {
       totalTitle: "Total Proveedores",
@@ -114,8 +114,8 @@ const SUPPLIER_COPY = {
     subtitle: "Manage your supplier network",
     bulkUpload: "Bulk Upload",
     newSupplier: "New Supplier",
-    planStatus: (count: number, max: string | number) =>
-      `${count}/${max} suppliers · Free`,
+    planStatus: (count: number, max: string | number, planName: string) =>
+      `${count}/${max === 99999 || max === -1 ? "∞" : max} suppliers · ${planName}`,
     limitReached: "Limit reached",
     stats: {
       totalTitle: "Total Suppliers",
@@ -189,8 +189,8 @@ const SUPPLIER_COPY = {
     subtitle: "Administre sua rede de fornecedores",
     bulkUpload: "Carga Massiva",
     newSupplier: "Novo Fornecedor",
-    planStatus: (count: number, max: string | number) =>
-      `${count}/${max} fornecedores · Gratuito`,
+    planStatus: (count: number, max: string | number, planName: string) =>
+      `${count}/${max === 99999 || max === -1 ? "∞" : max} fornecedores · ${planName}`,
     limitReached: "Limite atingido",
     stats: {
       totalTitle: "Total de Fornecedores",
@@ -317,7 +317,9 @@ export default function SuppliersPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setSubscription(data.subscription || { planId: "BASIC" });
+        const resolved = data?.data?.subscription ||
+          data?.subscription || { planId: "BASIC" };
+        setSubscription(resolved);
       }
     } catch (error) {
       console.error("Load subscription error:", error);
@@ -637,6 +639,13 @@ export default function SuppliersPage() {
         ? "ENTERPRISE"
         : "BASIC";
   const planConfig = PLAN_FEATURES[currentPlan];
+  const planNameMap: Record<string, Record<string, string>> = {
+    es: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
+    en: { BASIC: "Free", PROFESSIONAL: "Pro", ENTERPRISE: "Enterprise" },
+    pt: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
+  };
+  const planName =
+    planNameMap[currentLanguage]?.[currentPlan] || planNameMap.en[currentPlan];
   const canAddSupplier = !isLimitReached(
     currentPlan,
     "maxSuppliers",
@@ -644,7 +653,9 @@ export default function SuppliersPage() {
   );
   const supplierCount = suppliers.length;
   const maxSuppliers =
-    planConfig.maxSuppliers === -1 ? "∞" : planConfig.maxSuppliers;
+    planConfig.maxSuppliers === -1 || planConfig.maxSuppliers === 99999
+      ? "∞"
+      : planConfig.maxSuppliers;
 
   return (
     <>
@@ -711,7 +722,7 @@ export default function SuppliersPage() {
           <div className="flex items-center gap-2 p-4 mb-6 border rounded-lg bg-emerald-50 border-emerald-300 dark:bg-emerald-900/20 dark:border-emerald-700">
             <Truck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <span className="font-medium text-emerald-700 dark:text-emerald-300">
-              {copy.planStatus(supplierCount, maxSuppliers)}
+              {copy.planStatus(supplierCount, maxSuppliers, planName)}
             </span>
             {planConfig.maxSuppliers > 0 &&
               supplierCount >= planConfig.maxSuppliers && (

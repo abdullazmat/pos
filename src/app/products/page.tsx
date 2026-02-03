@@ -33,7 +33,8 @@ const PRODUCT_COPY = {
     refreshLabel: "Refrescar",
     importButton: "Importar Excel",
     newButton: "Nuevo Producto",
-    planLabel: (count: number) => `${count}/100 productos - Gratuito`,
+    planLabel: (count: number, max: number, planName: string) =>
+      `${count}/${max === -1 || max === 99999 ? "∞" : max} productos - ${planName}`,
     searchPlaceholder: "Buscar por nombre, código de barras o descripción...",
     importModal: {
       title: "Importar Productos desde Excel/CSV",
@@ -143,6 +144,7 @@ const PRODUCT_COPY = {
       duplicateCodeOrBarcode:
         "Ya existe un producto con el mismo código o código de barras.",
       missingRequired: "Faltan campos obligatorios.",
+      categoryRequired: "Selecciona una categoría.",
       productNotFound: "Producto no encontrado.",
       selectFile: "Selecciona un archivo CSV o Excel",
       sessionExpired: "Sesión expirada. Inicia sesión nuevamente.",
@@ -162,7 +164,8 @@ const PRODUCT_COPY = {
     refreshLabel: "Refresh",
     importButton: "Import Excel/CSV",
     newButton: "New Product",
-    planLabel: (count: number) => `${count}/100 products - Free tier`,
+    planLabel: (count: number, max: number, planName: string) =>
+      `${count}/${max === -1 || max === 99999 ? "∞" : max} products - ${planName}`,
     searchPlaceholder: "Search by name, barcode, or description...",
     importModal: {
       title: "Import Products from Excel/CSV",
@@ -271,6 +274,7 @@ const PRODUCT_COPY = {
       duplicateCodeOrBarcode:
         "A product with the same code or barcode already exists.",
       missingRequired: "Missing required fields.",
+      categoryRequired: "Select a category.",
       productNotFound: "Product not found.",
       selectFile: "Select a CSV or Excel file",
       sessionExpired: "Session expired. Please sign in again.",
@@ -290,7 +294,8 @@ const PRODUCT_COPY = {
     refreshLabel: "Atualizar",
     importButton: "Importar Excel/CSV",
     newButton: "Novo Produto",
-    planLabel: (count: number) => `${count}/100 produtos - Gratuito`,
+    planLabel: (count: number, max: number, planName: string) =>
+      `${count}/${max === -1 || max === 99999 ? "∞" : max} produtos - ${planName}`,
     searchPlaceholder: "Busque por nome, código de barras ou descrição...",
     importModal: {
       title: "Importar Produtos de Excel/CSV",
@@ -399,6 +404,7 @@ const PRODUCT_COPY = {
       duplicateCodeOrBarcode:
         "Já existe um produto com o mesmo código ou código de barras.",
       missingRequired: "Campos obrigatórios ausentes.",
+      categoryRequired: "Selecione uma categoria.",
       productNotFound: "Produto não encontrado.",
       selectFile: "Selecione um arquivo CSV ou Excel",
       sessionExpired: "Sessão expirada. Faça login novamente.",
@@ -534,7 +540,9 @@ export default function ProductsPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setSubscription(data.subscription || { planId: "BASIC" });
+        const resolved = data?.data?.subscription ||
+          data?.subscription || { planId: "BASIC" };
+        setSubscription(resolved);
       }
     } catch (error) {
       console.error("Load subscription error:", error);
@@ -672,6 +680,13 @@ export default function ProductsPage() {
         ? "ENTERPRISE"
         : "BASIC";
   const planConfig = PLAN_FEATURES[currentPlan];
+  const planNameMap: Record<string, Record<string, string>> = {
+    es: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
+    en: { BASIC: "Free", PROFESSIONAL: "Pro", ENTERPRISE: "Enterprise" },
+    pt: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
+  };
+  const planName =
+    planNameMap[currentLanguage]?.[currentPlan] || planNameMap.en[currentPlan];
   const canCreateProduct = !isLimitReached(
     currentPlan,
     "maxProducts",
@@ -792,6 +807,11 @@ export default function ProductsPage() {
 
       if (hasDuplicateCodes(codeInputs)) {
         toast.error(copy.toast.duplicateCodeOrBarcode);
+        return;
+      }
+
+      if (!payload.category || !String(payload.category).trim()) {
+        toast.error(copy.toast.categoryRequired || copy.toast.missingRequired);
         return;
       }
 
@@ -1006,7 +1026,11 @@ export default function ProductsPage() {
               />
             </svg>
             <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              {copy.planLabel(products.length)}
+              {copy.planLabel(
+                products.length,
+                planConfig?.maxProducts ?? 0,
+                planName,
+              )}
             </span>
           </div>
         </div>
@@ -1383,6 +1407,7 @@ export default function ProductsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, category: e.target.value })
                       }
+                      required
                       className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                     >
                       <option

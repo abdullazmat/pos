@@ -33,8 +33,8 @@ export default function CategoriesPage() {
   } | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  const planUsageLabel = (current: number, max: number) =>
-    copy.planUsage(current, max);
+  const planUsageLabel = (current: number, max: number, planName: string) =>
+    copy.planUsage(current, max, planName);
 
   const loadSubscription = async () => {
     try {
@@ -44,7 +44,9 @@ export default function CategoriesPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setSubscription(data.subscription || { planId: "BASIC" });
+        const resolved = data?.data?.subscription ||
+          data?.subscription || { planId: "BASIC" };
+        setSubscription(resolved);
       }
     } catch (error) {
       console.error("Load subscription error:", error);
@@ -107,6 +109,13 @@ export default function CategoriesPage() {
         ? "ENTERPRISE"
         : "BASIC";
   const planConfig = PLAN_FEATURES[currentPlan];
+  const planNameMap: Record<string, Record<string, string>> = {
+    es: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
+    en: { BASIC: "Free", PROFESSIONAL: "Pro", ENTERPRISE: "Enterprise" },
+    pt: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
+  };
+  const planName =
+    planNameMap[currentLanguage]?.[currentPlan] || planNameMap.en[currentPlan];
   const canCreateCategory = !isLimitReached(
     currentPlan,
     "maxCategories",
@@ -267,10 +276,8 @@ export default function CategoriesPage() {
                   {planUsageLabel(
                     categories.length,
                     planConfig?.maxCategories ?? 0,
+                    planName,
                   )}
-                </span>
-                <span className="hidden sm:inline text-slate-500 dark:text-slate-500">
-                  {copy.planTag}
                 </span>
               </span>
               {currentPlan === "BASIC" && (
@@ -514,9 +521,8 @@ const CATEGORIES_COPY = {
   es: {
     title: "Gestión de Categorías",
     subtitle: "Organiza tus productos por categorías",
-    planUsage: (current: number, max: number) =>
-      `${current}/${max === -1 ? "∞" : max} categorías`,
-    planTag: "· Gratuito",
+    planUsage: (current: number, max: number, planName: string) =>
+      `${current}/${max === -1 || max === 99999 ? "∞" : max} categorías · ${planName}`,
     upgradeCta: "Upgrade Pro",
     newCategory: "Nueva Categoría",
     emptyTitle: "No hay categorías aún",
@@ -544,9 +550,8 @@ const CATEGORIES_COPY = {
   en: {
     title: "Category Management",
     subtitle: "Organize your products by category",
-    planUsage: (current: number, max: number) =>
-      `${current}/${max === -1 ? "∞" : max} categories`,
-    planTag: "· Free",
+    planUsage: (current: number, max: number, planName: string) =>
+      `${current}/${max === -1 || max === 99999 ? "∞" : max} categories · ${planName}`,
     upgradeCta: "Upgrade Pro",
     newCategory: "New Category",
     emptyTitle: "No categories yet",
@@ -574,9 +579,8 @@ const CATEGORIES_COPY = {
   pt: {
     title: "Gestão de Categorias",
     subtitle: "Organize seus produtos por categorias",
-    planUsage: (current: number, max: number) =>
-      `${current}/${max === -1 ? "∞" : max} categorias`,
-    planTag: "· Gratuito",
+    planUsage: (current: number, max: number, planName: string) =>
+      `${current}/${max === -1 || max === 99999 ? "∞" : max} categorias · ${planName}`,
     upgradeCta: "Upgrade Pro",
     newCategory: "Nova Categoria",
     emptyTitle: "Ainda não há categorias",

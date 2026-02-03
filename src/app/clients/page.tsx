@@ -67,6 +67,14 @@ const CLIENT_COPY = {
       actions: "Acciones",
     },
     deleteConfirm: "¿Estás seguro de eliminar este cliente?",
+    toasts: {
+      loadError: "Error al cargar clientes",
+      subscriptionError: "Error al cargar suscripción",
+      saveError: "Error al guardar cliente",
+      deleteError: "Error al eliminar cliente",
+      saved: "Cliente guardado",
+      deleted: "Cliente eliminado",
+    },
   },
   en: {
     title: "Customer Management",
@@ -106,6 +114,14 @@ const CLIENT_COPY = {
       actions: "Actions",
     },
     deleteConfirm: "Are you sure you want to delete this customer?",
+    toasts: {
+      loadError: "Failed to load customers",
+      subscriptionError: "Failed to load subscription",
+      saveError: "Failed to save customer",
+      deleteError: "Failed to delete customer",
+      saved: "Customer saved",
+      deleted: "Customer deleted",
+    },
   },
   pt: {
     title: "Gestão de Clientes",
@@ -145,6 +161,14 @@ const CLIENT_COPY = {
       actions: "Ações",
     },
     deleteConfirm: "Tem certeza que deseja excluir este cliente?",
+    toasts: {
+      loadError: "Erro ao carregar clientes",
+      subscriptionError: "Erro ao carregar assinatura",
+      saveError: "Erro ao salvar cliente",
+      deleteError: "Erro ao excluir cliente",
+      saved: "Cliente salvo",
+      deleted: "Cliente excluído",
+    },
   },
 } as const;
 
@@ -157,6 +181,7 @@ export default function ClientsPage() {
   const [user, setUser] = useState<any>(null);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -193,22 +218,32 @@ export default function ClientsPage() {
 
   const loadSubscription = async () => {
     try {
+      setSubscriptionLoading(true);
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/subscription", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
         const data = await response.json();
-        setSubscription(data.subscription || { planId: "BASIC" });
+        const resolved = data?.data?.subscription ||
+          data?.subscription || { planId: "BASIC" };
+        setSubscription(resolved);
+      } else {
+        toast.error(copy.toasts.subscriptionError);
+        setSubscription({ planId: "BASIC" });
       }
     } catch (error) {
       console.error("Load subscription error:", error);
       setSubscription({ planId: "BASIC" });
+      toast.error(copy.toasts.subscriptionError);
+    } finally {
+      setSubscriptionLoading(false);
     }
   };
 
   const fetchClients = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/clients", {
         headers: { Authorization: `Bearer ${token}` },
@@ -217,9 +252,12 @@ export default function ClientsPage() {
       if (response.ok) {
         const data = await response.json();
         setClients(data.clients);
+      } else {
+        toast.error(copy.toasts.loadError);
       }
     } catch (error) {
       console.error("Error fetching clients:", error);
+      toast.error(copy.toasts.loadError);
     } finally {
       setLoading(false);
     }
@@ -267,9 +305,13 @@ export default function ClientsPage() {
           email: "",
           address: "",
         });
+        toast.success(copy.toasts.saved);
+      } else {
+        toast.error(copy.toasts.saveError);
       }
     } catch (error) {
       console.error("Error saving client:", error);
+      toast.error(copy.toasts.saveError);
     }
   };
 
@@ -297,9 +339,13 @@ export default function ClientsPage() {
 
       if (response.ok) {
         fetchClients();
+        toast.success(copy.toasts.deleted);
+      } else {
+        toast.error(copy.toasts.deleteError);
       }
     } catch (error) {
       console.error("Error deleting client:", error);
+      toast.error(copy.toasts.deleteError);
     }
   };
 
@@ -314,7 +360,7 @@ export default function ClientsPage() {
     return null;
   }
 
-  if (loading) {
+  if (loading || subscriptionLoading) {
     return (
       <div className="min-h-screen bg-slate-950">
         <Header user={user} showBackButton={true} />

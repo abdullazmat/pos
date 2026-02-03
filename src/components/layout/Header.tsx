@@ -29,6 +29,7 @@ import {
   Globe,
 } from "lucide-react";
 import { useLanguage } from "@/lib/hooks/useLang";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 
 interface HeaderProps {
   user?: {
@@ -50,6 +51,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
   const languageMenuRef = useRef<HTMLDivElement | null>(null);
   const languageButtonRef = useRef<HTMLButtonElement | null>(null);
   const { currentLanguage, setLanguage, t } = useLanguage();
+  const { subscription } = useSubscription();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -134,23 +136,32 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
 
   const isActive = (href: string) => pathname === href;
 
-  const getPlanInfo = () => {
-    try {
-      const businessStr = localStorage.getItem("business");
-      if (businessStr) {
-        const business = JSON.parse(businessStr);
-        return {
-          plan: business.plan || "Free",
-          status: business.subscriptionStatus || "Active",
-        };
-      }
-    } catch {
-      return { plan: "Free", status: "Active" };
-    }
-    return { plan: "Free", status: "Active" };
+  const planId = (subscription?.planId || "BASIC").toUpperCase();
+  const planStatus = subscription?.status || "active";
+  const planLabelMap: Record<string, Record<string, string>> = {
+    es: {
+      BASIC: "Gratuito",
+      PROFESSIONAL: "Pro",
+      ENTERPRISE: "Empresarial",
+    },
+    en: {
+      BASIC: "Free",
+      PROFESSIONAL: "Pro",
+      ENTERPRISE: "Enterprise",
+    },
+    pt: {
+      BASIC: "Gratuito",
+      PROFESSIONAL: "Pro",
+      ENTERPRISE: "Empresarial",
+    },
   };
-
-  const planInfo = getPlanInfo();
+  const planInfo = {
+    plan:
+      planLabelMap[currentLanguage]?.[planId] ||
+      planLabelMap.en[planId] ||
+      "Free",
+    status: planStatus,
+  };
 
   const getRoleLabel = () => {
     const roleKey = String(user?.role || "user").toLowerCase();

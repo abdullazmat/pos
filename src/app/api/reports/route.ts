@@ -113,7 +113,7 @@ export async function GET(req: NextRequest) {
 
       // Get all products
       const products = await Product.find({ businessId })
-        .select("name stock price cost margin category")
+        .select("name stock price cost margin category isSoldByWeight")
         .lean();
 
       // Get sales in date range
@@ -129,12 +129,29 @@ export async function GET(req: NextRequest) {
         productStats[p._id.toString()] = { sold: 0, revenue: 0 };
       });
 
+      const parseNumber = (value: any) => {
+        if (typeof value === "number") return value;
+        if (typeof value === "string") {
+          const normalized = value.replace(",", ".");
+          const parsed = Number.parseFloat(normalized);
+          return Number.isFinite(parsed) ? parsed : 0;
+        }
+        return 0;
+      };
+
       sales.forEach((sale: any) => {
         sale.items?.forEach((item: any) => {
           const pid = item.productId?.toString();
           if (pid && productStats[pid]) {
-            productStats[pid].sold += item.quantity || 0;
-            productStats[pid].revenue += item.total || 0;
+            const qty = parseNumber(item.quantity);
+            const lineTotal =
+              parseNumber(item.total) ||
+              parseNumber(item.totalWithTax) ||
+              parseNumber(item.amount) ||
+              parseNumber(item.unitPrice) * qty ||
+              0;
+            productStats[pid].sold += qty;
+            productStats[pid].revenue += lineTotal;
           }
         });
       });
@@ -146,6 +163,7 @@ export async function GET(req: NextRequest) {
           sold: stats.sold,
           revenue: stats.revenue,
           profitIfSold: (p.price - p.cost) * p.stock,
+          isSoldByWeight: p.isSoldByWeight || false,
           category: p.category || "Uncategorized",
         };
       });

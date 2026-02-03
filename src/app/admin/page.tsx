@@ -331,12 +331,29 @@ export default function AdminPage() {
   const isFreePlan = planId === "BASIC";
   const planUserLimit = subscription?.features?.maxUsers || 2;
   const userLimit = isFreePlan ? 2 : planUserLimit;
+  const planNameMap: Record<string, Record<string, string>> = {
+    es: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
+    en: { BASIC: "Free", PROFESSIONAL: "Pro", ENTERPRISE: "Enterprise" },
+    pt: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
+  };
+  const planName =
+    planNameMap[currentLanguage]?.[planId] || planNameMap.en[planId] || "Free";
   const currentUsers = Math.min(users.length, userLimit);
+  const displayUserLimit = userLimit >= 99999 ? "∞" : userLimit.toString();
   const currentPlan = {
-    name: copy.planName,
+    name: planName,
     userLimit,
     currentUsers,
+    displayUserLimit,
   };
+
+  const userLimitReachedMessage = isFreePlan
+    ? copy.toasts.userLimitReached
+    : currentLanguage === "es"
+      ? `Has alcanzado el límite de usuarios (${userLimit}).`
+      : currentLanguage === "pt"
+        ? `Você atingiu o limite de usuários (${userLimit}).`
+        : `You have reached the user limit (${userLimit}).`;
 
   const resolveUserErrorKey = (error: unknown) => {
     if (typeof error !== "string") return null;
@@ -683,7 +700,7 @@ export default function AdminPage() {
             </p>
             <div className="inline-flex items-center gap-3 px-3 py-2 mt-3 border rounded-lg bg-slate-100 border-slate-300 dark:bg-slate-900 dark:border-slate-800">
               <span className="text-sm font-semibold text-slate-900 dark:text-slate-200">
-                {currentPlan.currentUsers}/{currentPlan.userLimit}{" "}
+                {currentPlan.currentUsers}/{currentPlan.displayUserLimit}{" "}
                 {copy.userCount} · {currentPlan.name}
               </span>
               <div className="w-32 h-1.5 bg-slate-300 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -700,7 +717,7 @@ export default function AdminPage() {
           <button
             onClick={() => {
               if (users.length >= userLimit) {
-                toast.error(copy.toasts.userLimitReached);
+                toast.error(userLimitReachedMessage);
                 return;
               }
               setShowModal(true);

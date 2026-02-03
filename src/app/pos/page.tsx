@@ -26,6 +26,7 @@ interface CartItem {
 
 export default function POSPage() {
   const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [storedClientId, setStoredClientId] = useState<string | null>(null);
   const router = useRouter();
   const { t, currentLanguage } = useGlobalLanguage();
   const { formatDate, formatTime } = useBusinessDateTime();
@@ -53,6 +54,24 @@ export default function POSPage() {
       setIsCartHydrated(true);
     }
   }, []);
+
+  useEffect(() => {
+    const savedClientId = localStorage.getItem("pos.selectedClientId");
+    if (savedClientId) {
+      setStoredClientId(savedClientId);
+    }
+  }, []);
+
+  useEffect(() => {
+    const id = selectedClient?._id ? String(selectedClient._id) : "";
+    if (id) {
+      localStorage.setItem("pos.selectedClientId", id);
+      setStoredClientId(id);
+    } else {
+      localStorage.removeItem("pos.selectedClientId");
+      setStoredClientId(null);
+    }
+  }, [selectedClient]);
 
   useEffect(() => {
     if (!isCartHydrated) return;
@@ -385,6 +404,8 @@ export default function POSPage() {
           if (clientSelectRef.current) {
             clientSelectRef.current.value = "";
           }
+          localStorage.removeItem("pos.selectedClientId");
+          setStoredClientId(null);
           toast.success(
             t("ui.removeCustomer", "pos") !== "ui.removeCustomer"
               ? t("ui.removeCustomer", "pos")
@@ -513,6 +534,7 @@ export default function POSPage() {
                     value={selectedClient}
                     onChange={setSelectedClient}
                     selectRef={clientSelectRef}
+                    selectedClientId={storedClientId}
                   />
                 </div>
                 {/* New Keyboard-First Input */}

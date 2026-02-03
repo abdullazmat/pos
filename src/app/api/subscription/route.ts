@@ -73,6 +73,22 @@ export async function GET(req: NextRequest) {
         invoiceChannels: basicPlan.features.invoiceChannels,
       };
       await subscription.save();
+    } else {
+      const planConfig = getPlanConfig(subscription.planId);
+      if (planConfig) {
+        subscription.features = {
+          maxProducts: planConfig.features.maxProducts,
+          maxUsers: planConfig.features.maxUsers,
+          maxCategories: planConfig.features.maxCategories,
+          maxClients: planConfig.features.maxClients,
+          maxSuppliers: planConfig.features.maxSuppliers,
+          arcaIntegration: planConfig.features.arcaIntegration,
+          advancedReporting: planConfig.features.advancedReporting,
+          customBranding: planConfig.features.customBranding,
+          invoiceChannels: planConfig.features.invoiceChannels,
+        };
+        await subscription.save();
+      }
     }
 
     return generateSuccessResponse({ subscription });

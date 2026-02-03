@@ -15,12 +15,14 @@ interface ClientSelectorProps {
   value: Client | null;
   onChange: (client: Client | null) => void;
   selectRef?: React.RefObject<HTMLSelectElement>;
+  selectedClientId?: string | null;
 }
 
 const ClientSelector: React.FC<ClientSelectorProps> = ({
   value,
   onChange,
   selectRef,
+  selectedClientId,
 }) => {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,6 +67,17 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
     fetchClients();
   }, [t]);
 
+  useEffect(() => {
+    if (!selectedClientId || value || clients.length === 0) return;
+    const normalizedSelectedId = String(selectedClientId);
+    const match = clients.find(
+      (client) => String(client._id) === normalizedSelectedId,
+    );
+    if (match) {
+      onChange(match);
+    }
+  }, [clients, onChange, selectedClientId, value]);
+
   return (
     <div className="mb-4">
       <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -75,10 +88,11 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
       <select
         ref={selectRef}
         className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-slate-900 dark:text-gray-100"
-        value={value?._id || ""}
+        value={value?._id ? String(value._id) : ""}
         onChange={(e) => {
+          const selectedId = String(e.target.value || "");
           const selected =
-            clients.find((c) => c._id === e.target.value) || null;
+            clients.find((c) => String(c._id) === selectedId) || null;
           onChange(selected);
         }}
         disabled={loading}
@@ -91,7 +105,7 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
               : "Seleccionar cliente..."}
         </option>
         {clients.map((client) => (
-          <option key={client._id} value={client._id}>
+          <option key={String(client._id)} value={String(client._id)}>
             {client.name} {client.email ? `(${client.email})` : ""}
           </option>
         ))}

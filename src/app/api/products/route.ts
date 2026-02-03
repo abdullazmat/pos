@@ -114,6 +114,9 @@ export async function POST(req: NextRequest) {
     if (!name || typeof cost !== "number" || typeof price !== "number") {
       return generateErrorResponse("Missing required fields", 400);
     }
+    if (!category || typeof category !== "string" || !category.trim()) {
+      return generateErrorResponse({ key: "categoryRequired" }, 400);
+    }
 
     if (cost < 0 || price < 0) {
       return generateErrorResponse("Price and cost must be 0 or greater", 400);
@@ -286,7 +289,12 @@ export async function PUT(req: NextRequest) {
       product.price = price;
     }
     if (typeof stock === "number") product.stock = stock;
-    if (category !== undefined) product.category = category;
+    if (category !== undefined) {
+      if (!category || !String(category).trim()) {
+        return generateErrorResponse({ key: "categoryRequired" }, 400);
+      }
+      product.category = category;
+    }
     if (Array.isArray(barcodes)) {
       product.barcodes = nextBarcodes;
     }
