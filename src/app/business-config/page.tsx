@@ -648,10 +648,9 @@ export default function BusinessConfigPage() {
       const data = await response.json();
 
       if (response.ok) {
-        const data = await response.json();
         const resolved = data?.data?.subscription ||
           data?.subscription || { planId: "BASIC" };
-        setSubscription(resolved);
+        setCurrentSubscription(resolved);
       }
 
       const preferenceLink = data.payment?.preferenceLink;
