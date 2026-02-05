@@ -20,33 +20,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     useState<ThemeVariant>("balanced");
   const [isClient, setIsClient] = useState(false);
 
-  useEffect(() => {
-    setIsClient(true);
-    const savedTheme = localStorage.getItem("theme") as Theme;
-    const savedVariant = localStorage.getItem("themeVariant") as ThemeVariant;
-    if (
-      savedVariant &&
-      ["minimal", "balanced", "vibrant"].includes(savedVariant)
-    ) {
-      setThemeVariantState(savedVariant);
-      applyVariant(savedVariant);
-    } else {
-      applyVariant("balanced");
-    }
-
-    if (savedTheme && ["light", "dark"].includes(savedTheme)) {
-      setTheme(savedTheme);
-      applyTheme(savedTheme);
-    } else {
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
-      const initialTheme = prefersDark ? "dark" : "light";
-      setTheme(initialTheme);
-      applyTheme(initialTheme);
-    }
-  }, []);
-
   const applyTheme = (newTheme: Theme) => {
     const html = document.documentElement;
     if (newTheme === "dark") {
@@ -63,17 +36,47 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     html.dataset.theme = variant;
   };
 
+  useEffect(() => {
+    setIsClient(true);
+    const savedTheme = localStorage.getItem("theme") as Theme;
+    const savedVariant = localStorage.getItem("themeVariant") as ThemeVariant;
+    if (
+      savedVariant &&
+      ["minimal", "balanced", "vibrant"].includes(savedVariant)
+    ) {
+      setThemeVariantState(savedVariant);
+    }
+
+    if (savedTheme && ["light", "dark"].includes(savedTheme)) {
+      setTheme(savedTheme);
+    } else {
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      const initialTheme = prefersDark ? "dark" : "light";
+      setTheme(initialTheme);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+    applyTheme(theme);
+    localStorage.setItem("theme", theme);
+  }, [theme, isClient]);
+
+  useEffect(() => {
+    if (!isClient) return;
+    applyVariant(themeVariant);
+    localStorage.setItem("themeVariant", themeVariant);
+  }, [themeVariant, isClient]);
+
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    applyTheme(newTheme);
   };
 
   const setThemeVariant = (variant: ThemeVariant) => {
     setThemeVariantState(variant);
-    localStorage.setItem("themeVariant", variant);
-    applyVariant(variant);
   };
 
   return (

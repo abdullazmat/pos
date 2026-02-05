@@ -45,6 +45,12 @@ const translationsEs = {
     portuguese: "Português",
     darkMode: "Modo Oscuro",
     lightMode: "Modo Claro",
+    theme: "Tema",
+    palette: "Paleta",
+    minimal: "Minimal",
+    balanced: "Balanceado",
+    vibrant: "Vibrante",
+    apply: "Aplicar",
     settings: "Configuración",
     save: "Guardar",
     cancel: "Cancelar",
@@ -79,79 +85,128 @@ const translationsEs = {
   },
   landing: {
     hero: {
-      badge: "⭐ Sistema 100% en la nube - Sin instalaciones",
-      titleMain: "Tu Punto de Venta",
-      titleHighlight: "en la Nube",
+      badge: "⭐ POS para kioscos y mostrador",
+      titleMain: "Cobrá rápido",
+      titleHighlight: "sin vueltas",
       description:
-        "Sistema de facturación completo para kioscos, almacenes y minimercados. Rápido, fácil y sin complicaciones.",
+        "VentaPlus es el POS para kioscos y comercios de mostrador: menos pasos para cobrar, pantallas claras para el personal y una operación estable todo el día.",
       startFree: "Empezar Gratis →",
       viewFeatures: "Ver Características",
     },
     stats: {
-      cloud: "En la Nube",
-      initialPlan: "Plan Inicial",
-      available: "Disponible",
+      cloud: "Cobro en pocos pasos",
+      initialPlan: "Pantallas claras",
+      available: "Operación estable",
     },
     features: [
       {
-        title: "Súper Rápido",
+        title: "Cobro rápido en mostrador",
         description:
-          "Interfaz optimizada como supermercado. Vende en segundos con código de barras.",
+          "Flujo corto para escanear, totalizar y cobrar sin demoras.",
       },
       {
-        title: "100% en la Nube",
+        title: "Pantallas claras para el equipo",
         description:
-          "Sin instalaciones. Accede desde cualquier navegador, en cualquier dispositivo.",
+          "Opciones concretas por pantalla para reducir errores y capacitación.",
       },
       {
-        title: "Control de Stock",
+        title: "Caja y turnos confiables",
         description:
-          "Gestiona inventario automáticamente con cada venta. Alertas de stock bajo.",
+          "Aperturas, cierres y movimientos consistentes para cada cajero.",
       },
       {
-        title: "Reportes en Vivo",
-        description:
-          "Ventas, caja, productos más vendidos. Todo actualizado en tiempo real.",
+        title: "Stock actualizado por venta",
+        description: "Descuenta automáticamente y avisa cuando falta.",
       },
       {
-        title: "Multi-Usuario",
-        description:
-          "Gestiona cajeros y administradores. Control de permisos y descuentos.",
+        title: "Reportes operativos claros",
+        description: "Ventas por turno y productos clave sin ruido.",
       },
       {
-        title: "Seguro y Confiable",
-        description:
-          "Tus datos protegidos con Supabase. Backup automático en la nube.",
+        title: "Permisos simples",
+        description: "Roles básicos para operar seguro sin complejidad.",
       },
     ],
     howItWorks: {
       badge: "Cómo funciona",
-      title: "Configura, vende y crece",
-      subtitle: "Todo listo en minutos, sin instalaciones ni hardware extra.",
+      title: "Configura y vendé en mostrador",
+      subtitle: "Catálogo, precios y caja listos en minutos.",
       steps: [
         {
-          title: "Configura tu negocio",
-          description:
-            "Carga productos, precios y usuarios en minutos desde cualquier dispositivo.",
+          title: "Cargá tu catálogo",
+          description: "Importá productos y códigos para empezar a vender.",
         },
         {
-          title: "Vende más rápido",
-          description:
-            "Código de barras, atajos y tickets listos para cobrar sin fricciones.",
+          title: "Cobrá en segundos",
+          description: "Escaneá, confirmá el total y emití el comprobante.",
         },
         {
-          title: "Controla tu operación",
-          description:
-            "Reportes en vivo, stock y caja en un solo lugar, siempre actualizado.",
+          title: "Cerrá caja con claridad",
+          description: "Arqueo y stock sincronizados al final del turno.",
         },
       ],
     },
     cta: {
-      title: "¿Listo para modernizar tu negocio?",
+      title: "Listo para operar en mostrador",
       subtitle:
-        "Únete a cientos de negocios que ya usan VentaPlus para vender más rápido",
+        "Pensado para kioscos, retail chico y atención en caja donde la velocidad importa.",
       startFreeNow: "Empezar Gratis Ahora →",
       noCard: "Sin tarjeta de crédito • Configuración en 2 minutos",
+    },
+    designSystem: {
+      badge: "Sistema de diseño",
+      title: "Paletas y motion de VentaPlus",
+      subtitle:
+        "Compará variaciones de color y micro-animaciones para una interfaz confiable y moderna.",
+      paletteTitle: "Variaciones de color",
+      paletteSubtitle:
+        "Seleccioná la paleta que mejor exprese el tono de tu negocio.",
+      motionTitle: "Micro-animaciones",
+      motionDescription:
+        "Interacciones sutiles para reforzar calidad sin distraer el flujo de venta.",
+      cta: "Aplicar paleta",
+      activeLabel: "Activa",
+      tokens: {
+        primary: "Primario",
+        accent: "Acento",
+        surface: "Superficie",
+        text: "Texto",
+      },
+      variants: [
+        {
+          key: "minimal",
+          label: "Minimalista",
+          description:
+            "Serena y discreta para ambientes de alta concentración.",
+          traits: ["Bajo contraste", "Superficies limpias", "Foco en datos"],
+        },
+        {
+          key: "balanced",
+          label: "Balanceada",
+          description: "Equilibrio entre modernidad y claridad operacional.",
+          traits: ["Contraste medio", "Botones legibles", "Jerarquía clara"],
+        },
+        {
+          key: "vibrant",
+          label: "Vibrante",
+          description: "Mayor energía para equipos dinámicos y retail rápido.",
+          traits: ["Acentos vivos", "Feedback visible", "Marca protagonista"],
+        },
+      ],
+      motionSamples: {
+        primaryAction: "Acción principal",
+        liveSync: "Sincronización",
+        notification: "Notificación",
+        notificationText: "Nueva venta aprobada",
+        auto: "Auto",
+        menu: "Menú",
+        hover: "Hover",
+        sales: "Ventas",
+        reports: "Reportes",
+        products: "Productos",
+        cash: "Caja",
+        note: "VentaPlus usa tech-blue como ancla de confianza y neutros suaves para mantener el foco.",
+      },
     },
   },
   dashboard: {
@@ -297,7 +352,7 @@ const translationsEs = {
   },
   pricing: {
     title: "Planes simples y transparentes",
-    subtitle: "Empieza gratis y crece cuando lo necesites",
+    subtitle: "Pensado para kioscos, almacenes y minimercados",
     free: "Plan Gratuito",
     freePrice: "$0",
     freeSubtitle: "para siempre",
@@ -382,6 +437,10 @@ const translationsEs = {
     back: "Volver",
   },
   pos: {
+    header: {
+      tagline: "Punto de Venta en la Nube",
+      cashRegisterOpen: "Caja Abierta",
+    },
     nav: {
       posSale: "Punto de Venta",
       cashRegister: "Control de Caja",
@@ -703,6 +762,12 @@ const translationsEn = {
     portuguese: "Português",
     darkMode: "Dark Mode",
     lightMode: "Light Mode",
+    theme: "Theme",
+    palette: "Palette",
+    minimal: "Minimal",
+    balanced: "Balanced",
+    vibrant: "Vibrant",
+    apply: "Apply",
     settings: "Settings",
     save: "Save",
     cancel: "Cancel",
@@ -737,78 +802,125 @@ const translationsEn = {
   },
   landing: {
     hero: {
-      badge: "⭐ 100% Cloud System - No installations",
-      titleMain: "Your Point of Sale",
-      titleHighlight: "in the Cloud",
+      badge: "⭐ POS for kiosks and counter sales",
+      titleMain: "Fast checkout",
+      titleHighlight: "for daily sales",
       description:
-        "Complete billing system for kiosks, stores and mini-markets. Fast, easy and hassle-free.",
+        "VentaPlus is the POS for kiosks, small retail, and counter service: fewer steps to charge, clear screens for staff, and stable operation during daily rushes.",
       startFree: "Start Free →",
       viewFeatures: "View Features",
     },
     stats: {
-      cloud: "In the Cloud",
-      initialPlan: "Initial Plan",
-      available: "Available",
+      cloud: "Short checkout flow",
+      initialPlan: "Clear screens for staff",
+      available: "Stable daily operation",
     },
     features: [
       {
-        title: "Super Fast",
-        description:
-          "Optimized interface like supermarkets. Sell in seconds with barcodes.",
+        title: "Fast counter checkout",
+        description: "Short flow to scan, total, and take payment.",
       },
       {
-        title: "100% in the Cloud",
-        description: "No installations. Access from any browser on any device.",
+        title: "Clear screens for staff",
+        description:
+          "Focused options per step to reduce mistakes and training time.",
       },
       {
-        title: "Stock Control",
-        description:
-          "Manage inventory automatically with each sale. Low stock alerts.",
+        title: "Reliable cash shifts",
+        description: "Open, close, and track cash with consistent results.",
       },
       {
-        title: "Live Reports",
-        description:
-          "Sales, cash register, top products. All updated in real time.",
+        title: "Stock updated per sale",
+        description: "Auto-adjusts inventory and flags low stock.",
       },
       {
-        title: "Multi-User",
-        description:
-          "Manage cashiers and admins. Control permissions and discounts.",
+        title: "Operational reports",
+        description: "Sales by shift and top items without noise.",
       },
       {
-        title: "Secure and Reliable",
-        description:
-          "Your data protected with Supabase. Automatic cloud backups.",
+        title: "Simple permissions",
+        description: "Basic roles and discounts without complexity.",
       },
     ],
     howItWorks: {
       badge: "How it works",
-      title: "Set up, sell, and grow",
-      subtitle: "Ready in minutes with no installs or extra hardware.",
+      title: "Set up and sell at the counter",
+      subtitle: "Catalog, prices, and cash ready in minutes.",
       steps: [
         {
-          title: "Set up your business",
-          description:
-            "Add products, pricing, and users in minutes from any device.",
+          title: "Load your catalog",
+          description: "Import products and barcodes to start selling.",
         },
         {
-          title: "Sell faster",
-          description:
-            "Barcode scanning, shortcuts, and receipts built for speed.",
+          title: "Charge in seconds",
+          description: "Scan, confirm total, and issue the receipt.",
         },
         {
-          title: "Stay in control",
+          title: "Close out with clarity",
           description:
-            "Live reports, stock, and cash in one always‑updated place.",
+            "Cash count and stock stay aligned at the end of each shift.",
         },
       ],
     },
     cta: {
-      title: "Ready to modernize your business?",
+      title: "Ready for counter operations",
       subtitle:
-        "Join hundreds of businesses already using VentaPlus to sell faster",
+        "Built for kiosks, small retail, and counter service where speed matters.",
       startFreeNow: "Start Free Now →",
       noCard: "No credit card • Setup in 2 minutes",
+    },
+    designSystem: {
+      badge: "Design system",
+      title: "VentaPlus palettes and motion",
+      subtitle:
+        "Compare color variations and micro-animations for a reliable, modern interface.",
+      paletteTitle: "Color variations",
+      paletteSubtitle: "Pick the palette that best matches your brand tone.",
+      motionTitle: "Micro-animations",
+      motionDescription:
+        "Subtle interactions reinforce quality without distracting the sales flow.",
+      cta: "Apply palette",
+      activeLabel: "Active",
+      tokens: {
+        primary: "Primary",
+        accent: "Accent",
+        surface: "Surface",
+        text: "Text",
+      },
+      variants: [
+        {
+          key: "minimal",
+          label: "Minimal",
+          description: "Calm and understated for high-focus environments.",
+          traits: ["Low contrast", "Clean surfaces", "Data-first"],
+        },
+        {
+          key: "balanced",
+          label: "Balanced",
+          description: "Modern clarity with operational readability.",
+          traits: ["Medium contrast", "Readable buttons", "Clear hierarchy"],
+        },
+        {
+          key: "vibrant",
+          label: "Vibrant",
+          description: "Higher energy for fast-paced retail teams.",
+          traits: ["Bold accents", "Visible feedback", "Brand-forward"],
+        },
+      ],
+      motionSamples: {
+        primaryAction: "Primary action",
+        liveSync: "Live sync",
+        notification: "Notification",
+        notificationText: "New sale approved",
+        auto: "Auto",
+        menu: "Menu",
+        hover: "Hover",
+        sales: "Sales",
+        reports: "Reports",
+        products: "Products",
+        cash: "Cash",
+        note: "VentaPlus uses tech-blue for trust and soft neutrals to keep focus on the workflow.",
+      },
     },
   },
   dashboard: {
@@ -953,7 +1065,7 @@ const translationsEn = {
   },
   pricing: {
     title: "Simple and transparent plans",
-    subtitle: "Start free and grow when you need to",
+    subtitle: "Built for kiosks, convenience stores, and minimarkets",
     free: "Free Plan",
     freePrice: "$0",
     freeSubtitle: "forever",
@@ -1037,6 +1149,10 @@ const translationsEn = {
     back: "Back",
   },
   pos: {
+    header: {
+      tagline: "Cloud Point of Sale",
+      cashRegisterOpen: "Register Open",
+    },
     nav: {
       posSale: "Point of Sale",
       cashRegister: "Cash Register",
@@ -1353,6 +1469,12 @@ const translationsPt = {
     portuguese: "Português",
     darkMode: "Modo Escuro",
     lightMode: "Modo Claro",
+    theme: "Tema",
+    palette: "Paleta",
+    minimal: "Minimal",
+    balanced: "Equilibrado",
+    vibrant: "Vibrante",
+    apply: "Aplicar",
     settings: "Configurações",
     save: "Salvar",
     cancel: "Cancelar",
@@ -1387,79 +1509,125 @@ const translationsPt = {
   },
   landing: {
     hero: {
-      badge: "⭐ Sistema 100% na nuvem - Sem instalações",
-      titleMain: "Seu Ponto de Venda",
-      titleHighlight: "na Nuvem",
+      badge: "⭐ POS para quiosques e balcão",
+      titleMain: "Cobrança rápida",
+      titleHighlight: "no balcão",
       description:
-        "Sistema de faturamento completo para quiosques, lojas e minimercados. Rápido, fácil e sem complicações.",
+        "VentaPlus é o POS para quiosques, varejo pequeno e atendimento no balcão: menos etapas para cobrar, telas claras para a equipe e operação estável o dia todo.",
       startFree: "Começar Gratuitamente →",
       viewFeatures: "Ver Recursos",
     },
     stats: {
-      cloud: "Na Nuvem",
-      initialPlan: "Plano Inicial",
-      available: "Disponível",
+      cloud: "Fluxo curto de venda",
+      initialPlan: "Telas claras para equipe",
+      available: "Operação estável",
     },
     features: [
       {
-        title: "Super Rápido",
-        description:
-          "Interface otimizada como supermercado. Venda em segundos com código de barras.",
+        title: "Cobrança rápida no balcão",
+        description: "Fluxo curto para escanear, totalizar e receber.",
       },
       {
-        title: "100% na Nuvem",
+        title: "Telas claras para a equipe",
         description:
-          "Sem instalações. Acesse de qualquer navegador, em qualquer dispositivo.",
+          "Opções objetivas por etapa para reduzir erros e treinamento.",
       },
       {
-        title: "Controle de Estoque",
-        description:
-          "Gerencie inventário automaticamente a cada venda. Alertas de baixo estoque.",
+        title: "Caixa e turnos confiáveis",
+        description: "Abertura, fechamento e movimentos consistentes.",
       },
       {
-        title: "Relatórios ao Vivo",
-        description:
-          "Vendas, caixa, produtos mais vendidos. Tudo atualizado em tempo real.",
+        title: "Estoque atualizado por venda",
+        description: "Ajuste automático e aviso de baixo estoque.",
       },
       {
-        title: "Multiusuário",
-        description:
-          "Gerencie caixas e administradores. Controle de permissões e descontos.",
+        title: "Relatórios operacionais claros",
+        description: "Vendas por turno e itens principais sem ruído.",
       },
       {
-        title: "Seguro e Confiável",
-        description:
-          "Seus dados protegidos com Supabase. Backup automático na nuvem.",
+        title: "Permissões simples",
+        description: "Papéis básicos para operar com segurança.",
       },
     ],
     howItWorks: {
       badge: "Como funciona",
-      title: "Configure, venda e cresça",
-      subtitle: "Tudo pronto em minutos, sem instalações ou hardware extra.",
+      title: "Configure e venda no balcão",
+      subtitle: "Catálogo, preços e caixa prontos em minutos.",
       steps: [
         {
-          title: "Configure seu negócio",
-          description:
-            "Adicione produtos, preços e usuários em minutos de qualquer dispositivo.",
+          title: "Carregue seu catálogo",
+          description: "Importe produtos e códigos de barras para começar.",
         },
         {
-          title: "Venda mais rápido",
-          description:
-            "Código de barras, atalhos e recibos prontos para cobrar sem fricção.",
+          title: "Cobre em segundos",
+          description: "Escaneie, confirme o total e emita o comprovante.",
         },
         {
-          title: "Controle sua operação",
-          description:
-            "Relatórios ao vivo, estoque e caixa em um só lugar, sempre atualizado.",
+          title: "Feche o caixa com clareza",
+          description: "Conferência e estoque alinhados ao final do turno.",
         },
       ],
     },
     cta: {
-      title: "Pronto para modernizar seu negócio?",
+      title: "Pronto para operar no balcão",
       subtitle:
-        "Junte-se a centenas de negócios que já usam VentaPlus para vender mais rápido",
+        "Feito para quiosques, varejo pequeno e atendimento em caixa onde velocidade importa.",
       startFreeNow: "Começar Gratuitamente Agora →",
       noCard: "Sem cartão de crédito • Configuração em 2 minutos",
+    },
+    designSystem: {
+      badge: "Sistema de design",
+      title: "Paletas e motion do VentaPlus",
+      subtitle:
+        "Compare variações de cor e micro-animações para uma interface confiável e moderna.",
+      paletteTitle: "Variações de cor",
+      paletteSubtitle:
+        "Escolha a paleta que melhor expressa o tom da sua marca.",
+      motionTitle: "Micro-animações",
+      motionDescription:
+        "Interações sutis reforçam qualidade sem distrair o fluxo de vendas.",
+      cta: "Aplicar paleta",
+      activeLabel: "Ativa",
+      tokens: {
+        primary: "Primário",
+        accent: "Acento",
+        surface: "Superfície",
+        text: "Texto",
+      },
+      variants: [
+        {
+          key: "minimal",
+          label: "Minimal",
+          description: "Serena e discreta para ambientes de alta concentração.",
+          traits: ["Baixo contraste", "Superfícies limpas", "Foco em dados"],
+        },
+        {
+          key: "balanced",
+          label: "Equilibrada",
+          description: "Clareza moderna com legibilidade operacional.",
+          traits: ["Contraste médio", "Botões legíveis", "Hierarquia clara"],
+        },
+        {
+          key: "vibrant",
+          label: "Vibrante",
+          description: "Mais energia para equipes de varejo rápidas.",
+          traits: ["Acentos vivos", "Feedback visível", "Marca em destaque"],
+        },
+      ],
+      motionSamples: {
+        primaryAction: "Ação principal",
+        liveSync: "Sincronização",
+        notification: "Notificação",
+        notificationText: "Nova venda aprovada",
+        auto: "Auto",
+        menu: "Menu",
+        hover: "Hover",
+        sales: "Vendas",
+        reports: "Relatórios",
+        products: "Produtos",
+        cash: "Caixa",
+        note: "VentaPlus usa tech-blue como âncora de confiança e neutros suaves para manter o foco.",
+      },
     },
   },
   dashboard: {
@@ -1604,7 +1772,7 @@ const translationsPt = {
   },
   pricing: {
     title: "Planos simples e transparentes",
-    subtitle: "Comece grátis e cresça quando precisar",
+    subtitle: "Feito para quiosques, mercearias e minimercados",
     free: "Plano Gratuito",
     freePrice: "$0",
     freeSubtitle: "para sempre",
@@ -1688,6 +1856,10 @@ const translationsPt = {
     back: "Voltar",
   },
   pos: {
+    header: {
+      tagline: "Ponto de Venda na Nuvem",
+      cashRegisterOpen: "Caixa Aberta",
+    },
     nav: {
       posSale: "Ponto de Venda",
       cashRegister: "Caixa",

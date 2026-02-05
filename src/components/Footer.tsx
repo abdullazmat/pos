@@ -68,7 +68,7 @@ export default function Footer() {
             <ul className="space-y-3 text-[hsl(var(--vp-muted))] text-sm">
               <li>
                 <a
-                  href="mailto:soporte@poscloud.app?subject=Necesito%20ayuda"
+                  href="mailto:soporte@ventaplus.pro?subject=Necesito%20ayuda"
                   className="hover:text-[hsl(var(--vp-text))] transition"
                 >
                   {String(t("help", "common"))}
@@ -76,7 +76,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:hola@poscloud.app"
+                  href="mailto:hola@ventaplus.pro"
                   className="hover:text-[hsl(var(--vp-text))] transition"
                 >
                   {String(t("contact", "common"))}

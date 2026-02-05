@@ -284,7 +284,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                   </span>
                 </div>
                 <p className="text-xs text-[hsl(var(--vp-muted))] mt-0.5">
-                  Punto de Venta en la Nube
+                  {String(t("header.tagline", "pos"))}
                 </p>
               </div>
             </Link>
@@ -293,7 +293,8 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
               {cashRegister?.isOpen && (
                 <div className="items-center hidden gap-2 px-4 py-2 border rounded-lg md:flex border-emerald-200/60 bg-emerald-50/70 text-emerald-700 dark:border-emerald-800/50 dark:bg-emerald-900/20 dark:text-emerald-300">
                   <span className="text-sm font-medium">
-                    Caja Abierta - ${cashRegister.expected.toFixed(2)}
+                    {String(t("header.cashRegisterOpen", "pos"))} - $
+                    {cashRegister.expected.toFixed(2)}
                   </span>
                 </div>
               )}

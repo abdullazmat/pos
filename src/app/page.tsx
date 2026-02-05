@@ -8,14 +8,17 @@ import Stats from "@/components/stats";
 import PosPreview from "@/components/PosPreview";
 import MotionMockups from "@/components/MotionMockups";
 import FeaturesSection from "@/components/FeaturesSection";
+import PaletteShowcaseSection from "@/components/PaletteShowcaseSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import PricingSection from "@/components/PricingSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
+import { useLanguage } from "@/lib/context/LanguageContext";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { currentLanguage } = useLanguage();
 
   useEffect(() => {
     const checkAuth = () => {
@@ -55,7 +58,7 @@ export default function Home() {
     elements.forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
-  }, [loading]);
+  }, [loading, currentLanguage]);
 
   if (loading) {
     return (
@@ -102,6 +105,7 @@ export default function Home() {
       </main>
 
       <FeaturesSection />
+      <PaletteShowcaseSection />
       <HowItWorksSection />
       <PricingSection />
       <MotionMockups />

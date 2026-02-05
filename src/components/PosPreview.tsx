@@ -95,6 +95,7 @@ export default function PosPreview() {
               <span className="text-right">{copy.qty}</span>
               <span className="text-right">{copy.price}</span>
             </div>
+            <div className="vp-flow-step mb-3" />
             <div className="space-y-3 text-sm">
               <div className="grid grid-cols-[1fr_auto_auto] gap-3">
                 <span className="text-[hsl(var(--vp-text))]">
@@ -142,7 +143,7 @@ export default function PosPreview() {
               <span>{copy.total}</span>
               <span className="text-[hsl(var(--vp-primary))]">$8.35</span>
             </div>
-            <button className="vp-button vp-button-primary w-full mt-5 text-sm">
+            <button className="vp-button vp-button-primary w-full mt-5 text-sm vp-micro">
               {copy.checkout}
             </button>
           </div>

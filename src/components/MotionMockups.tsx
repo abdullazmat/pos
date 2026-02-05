@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useLanguage } from "@/lib/context/LanguageContext";
 
 const COPY = {
@@ -35,6 +36,14 @@ const COPY = {
       card: "Tarjeta",
       qr: "QR",
       cardBrand: "VISA",
+      cashRegister: "Caja",
+      cashStatus: "Estado de caja",
+      opening: "Apertura",
+      withdrawals: "Retiros",
+      balance: "Saldo",
+      openRegister: "Abrir caja",
+      lastMovement: "Último movimiento",
+      cashMovement: "Retiro autorizado",
       kpis: "KPIs",
       gross: "Ventas",
       net: "Neto",
@@ -74,6 +83,14 @@ const COPY = {
       card: "Card",
       qr: "QR",
       cardBrand: "VISA",
+      cashRegister: "Cash register",
+      cashStatus: "Register status",
+      opening: "Opening",
+      withdrawals: "Withdrawals",
+      balance: "Balance",
+      openRegister: "Open register",
+      lastMovement: "Last movement",
+      cashMovement: "Authorized withdrawal",
       kpis: "KPIs",
       gross: "Sales",
       net: "Net",
@@ -113,6 +130,14 @@ const COPY = {
       card: "Cartão",
       qr: "QR",
       cardBrand: "VISA",
+      cashRegister: "Caixa",
+      cashStatus: "Status do caixa",
+      opening: "Abertura",
+      withdrawals: "Retiradas",
+      balance: "Saldo",
+      openRegister: "Abrir caixa",
+      lastMovement: "Último movimento",
+      cashMovement: "Retirada autorizada",
       kpis: "KPIs",
       gross: "Vendas",
       net: "Líquido",
@@ -134,8 +159,11 @@ export default function MotionMockups() {
           <p className="vp-section-subtitle text-base">{copy.subtitle}</p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          <div className="vp-card vp-card-hover p-6 relative overflow-hidden text-[hsl(var(--vp-text))] min-h-[340px]">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div
+            className="vp-card vp-card-hover p-6 relative overflow-hidden text-[hsl(var(--vp-text))] min-h-[340px] vp-reveal"
+            style={{ "--vp-reveal-delay": "0ms" } as CSSProperties}
+          >
             <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--vp-primary))]/10 to-transparent" />
             <div className="relative flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-[hsl(var(--vp-text))]">
@@ -183,9 +211,18 @@ export default function MotionMockups() {
                 </div>
               </div>
             </div>
+            <div className="mt-4 space-y-2">
+              <div className="vp-flow-step" />
+              <div className="h-1.5 rounded-full bg-[hsl(var(--vp-border))]/70 overflow-hidden">
+                <div className="h-full bg-[hsl(var(--vp-primary))] vp-flow-progress" />
+              </div>
+            </div>
           </div>
 
-          <div className="vp-card vp-card-hover p-6 relative overflow-hidden text-[hsl(var(--vp-text))] min-h-[340px]">
+          <div
+            className="vp-card vp-card-hover p-6 relative overflow-hidden text-[hsl(var(--vp-text))] min-h-[340px] vp-reveal"
+            style={{ "--vp-reveal-delay": "120ms" } as CSSProperties}
+          >
             <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--vp-primary))]/10 to-transparent" />
             <div className="relative flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-[hsl(var(--vp-text))]">
@@ -231,7 +268,7 @@ export default function MotionMockups() {
                     </div>
                   </div>
                 </div>
-                <button className="vp-button vp-button-primary w-full mt-3 text-xs">
+                <button className="vp-button vp-button-primary w-full mt-3 text-xs vp-micro">
                   {copy.labels.save}
                 </button>
               </div>
@@ -252,9 +289,66 @@ export default function MotionMockups() {
                 </div>
               </div>
             </div>
+            <div className="mt-4">
+              <div className="vp-flow-step" />
+            </div>
           </div>
 
-          <div className="vp-card vp-card-hover p-6 relative overflow-hidden text-[hsl(var(--vp-text))] min-h-[340px]">
+          <div
+            className="vp-card vp-card-hover p-6 relative overflow-hidden text-[hsl(var(--vp-text))] min-h-[340px] vp-reveal"
+            style={{ "--vp-reveal-delay": "240ms" } as CSSProperties}
+          >
+            <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--vp-primary))]/10 to-transparent" />
+            <div className="relative flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-[hsl(var(--vp-text))]">
+                {copy.labels.cashRegister}
+              </h3>
+              <span className="text-xs text-[hsl(var(--vp-muted))]">
+                {copy.labels.cashStatus}
+              </span>
+            </div>
+            <div className="vp-card vp-card-soft border border-[hsl(var(--vp-border))] p-3 space-y-3 shadow-[0_12px_26px_rgba(15,23,42,0.3)]">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-[hsl(var(--vp-muted))]">
+                  {copy.labels.opening}
+                </span>
+                <span className="font-semibold text-[hsl(var(--vp-text))]">
+                  $120.00
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-[hsl(var(--vp-muted))]">
+                  {copy.labels.withdrawals}
+                </span>
+                <span className="font-semibold text-[hsl(var(--vp-text))]">
+                  $32.00
+                </span>
+              </div>
+              <div className="h-px bg-[hsl(var(--vp-border))]" />
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-[hsl(var(--vp-muted))]">
+                  {copy.labels.balance}
+                </span>
+                <span className="font-semibold text-[hsl(var(--vp-primary))]">
+                  $88.00
+                </span>
+              </div>
+              <button className="vp-button vp-button-primary w-full mt-2 text-xs vp-micro">
+                {copy.labels.openRegister}
+              </button>
+            </div>
+            <div className="mt-4 flex items-center justify-between text-xs text-[hsl(var(--vp-muted))]">
+              <span>{copy.labels.lastMovement}</span>
+              <span className="vp-pill vp-pulse">
+                {copy.labels.cashMovement}
+              </span>
+            </div>
+          </div>
+
+          <div
+            className="vp-card vp-card-hover p-6 relative overflow-hidden text-[hsl(var(--vp-text))] min-h-[340px] vp-reveal"
+            style={{ "--vp-reveal-delay": "360ms" } as CSSProperties}
+          >
             <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--vp-primary))]/10 to-transparent" />
             <div className="relative flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-[hsl(var(--vp-text))]">
@@ -297,20 +391,23 @@ export default function MotionMockups() {
                     </span>
                     <span className="vp-pill">{copy.labels.cardBrand}</span>
                   </div>
-                  <button className="vp-button vp-button-primary w-full mt-3 text-xs">
+                  <button className="vp-button vp-button-primary w-full mt-3 text-xs vp-micro">
                     {copy.labels.confirm}
                   </button>
                 </div>
               </div>
               <div className="mt-3 flex justify-end">
-                <div className="vp-card px-3 py-2 text-[0.7rem] text-emerald-400 border border-emerald-500/30">
+                <div className="vp-card px-3 py-2 text-[0.7rem] text-emerald-400 border border-emerald-500/30 vp-pulse">
                   {copy.labels.success}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="vp-card vp-card-hover p-6 relative overflow-hidden text-[hsl(var(--vp-text))] min-h-[340px]">
+          <div
+            className="vp-card vp-card-hover p-6 relative overflow-hidden text-[hsl(var(--vp-text))] min-h-[340px] vp-reveal"
+            style={{ "--vp-reveal-delay": "480ms" } as CSSProperties}
+          >
             <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--vp-primary))]/10 to-transparent" />
             <div className="relative flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-[hsl(var(--vp-text))]">
@@ -351,6 +448,7 @@ export default function MotionMockups() {
                 <p className="text-[0.7rem] text-[hsl(var(--vp-muted))] mb-2">
                   {copy.labels.chart}
                 </p>
+                <div className="vp-flow-step mb-2" />
                 <svg viewBox="0 0 120 40" className="w-full h-10" fill="none">
                   <path
                     d="M2 30 L22 24 L40 26 L58 18 L76 20 L96 12 L118 16"

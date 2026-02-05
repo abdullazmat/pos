@@ -5,7 +5,7 @@ export default function Hero() {
   const { t } = useLanguage();
   return (
     <section className="max-w-2xl vp-reveal">
-      <p className="text-[hsl(var(--vp-primary))] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] mb-4">
+      <p className="text-[hsl(var(--vp-primary))] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] mb-4 vp-micro">
         {String(t("hero.badge", "landing"))}
       </p>
 
@@ -21,10 +21,13 @@ export default function Hero() {
       </p>
 
       <div className="flex flex-wrap gap-4 mt-8 sm:mt-10">
-        <Link href="/auth/register" className="vp-button vp-button-primary">
+        <Link
+          href="/auth/register"
+          className="vp-button vp-button-primary vp-micro"
+        >
           {String(t("hero.startFree", "landing"))}
         </Link>
-        <Link href="#features" className="vp-button">
+        <Link href="#features" className="vp-button vp-micro">
           {String(t("hero.viewFeatures", "landing"))}
         </Link>
       </div>
