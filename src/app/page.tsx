@@ -8,8 +8,8 @@ import Stats from "@/components/stats";
 import PosPreview from "@/components/PosPreview";
 import MotionMockups from "@/components/MotionMockups";
 import FeaturesSection from "@/components/FeaturesSection";
-import PaletteShowcaseSection from "@/components/PaletteShowcaseSection";
-import HowItWorksSection from "@/components/HowItWorksSection";
+import SystemInActionSection from "@/components/SystemInActionSection";
+import CheckoutWorkflowSection from "@/components/CheckoutWorkflowSection";
 import PricingSection from "@/components/PricingSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
@@ -104,9 +104,9 @@ export default function Home() {
         </div>
       </main>
 
+      <SystemInActionSection />
       <FeaturesSection />
-      <PaletteShowcaseSection />
-      <HowItWorksSection />
+      <CheckoutWorkflowSection />
       <PricingSection />
       <MotionMockups />
       <CTASection />

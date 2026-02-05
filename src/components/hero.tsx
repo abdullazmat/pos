@@ -1,22 +1,30 @@
 import Link from "next/link";
 import { useLanguage } from "@/lib/context/LanguageContext";
 
+const STATUS_COPY = {
+  es: ["Sistema activo", "Sincronización OK", "Impresora lista"],
+  en: ["System active", "Sync OK", "Printer ready"],
+  pt: ["Sistema ativo", "Sincronização OK", "Impressora pronta"],
+} as const;
+
 export default function Hero() {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const status =
+    STATUS_COPY[currentLanguage as keyof typeof STATUS_COPY] || STATUS_COPY.es;
   return (
     <section className="max-w-2xl vp-reveal">
       <p className="text-[hsl(var(--vp-primary))] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] mb-4 vp-micro">
         {String(t("hero.badge", "landing"))}
       </p>
 
-      <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold leading-[1.05] tracking-tight text-[hsl(var(--vp-text))]">
+      <h1 className="vp-hero-title">
         {String(t("hero.titleMain", "landing"))} <br />
         <span className="text-[hsl(var(--vp-primary))]">
           {String(t("hero.titleHighlight", "landing"))}
         </span>
       </h1>
 
-      <p className="text-[hsl(var(--vp-muted))] mt-6 text-lg md:text-xl leading-relaxed max-w-xl">
+      <p className="vp-hero-subtitle max-w-xl">
         {String(t("hero.description", "landing"))}
       </p>
 
@@ -30,6 +38,15 @@ export default function Hero() {
         <Link href="#features" className="vp-button vp-micro">
           {String(t("hero.viewFeatures", "landing"))}
         </Link>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 mt-6">
+        {status.map((label) => (
+          <span key={label} className="vp-status-pill">
+            <span className="vp-status-dot" />
+            {label}
+          </span>
+        ))}
       </div>
     </section>
   );

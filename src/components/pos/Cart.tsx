@@ -454,7 +454,7 @@ export default function Cart({
             <button
               onClick={handleCheckout}
               disabled={isLoading}
-              className="vp-button vp-button-primary w-full py-3 text-base disabled:opacity-60 disabled:cursor-not-allowed"
+              className="vp-button vp-button-primary vp-tap w-full text-base disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>

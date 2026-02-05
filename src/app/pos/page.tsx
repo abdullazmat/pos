@@ -656,6 +656,23 @@ export default function POSPage() {
       <Header user={user} showBackButton={true} />
 
       <main className="vp-page-inner">
+        <div className="vp-card vp-card-soft p-4 mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="vp-status-pill">
+              <span className="vp-status-dot" />
+              {getPosLabel("ui.statusOnline", "Online")}
+            </span>
+            <span className="vp-status-pill">
+              {getPosLabel("ui.statusSync", "Sync 0s")}
+            </span>
+            <span className="vp-status-pill">
+              {getPosLabel("ui.statusPrinter", "Printer OK")}
+            </span>
+          </div>
+          <div className="text-sm text-[hsl(var(--vp-muted))]">
+            {formatDate(new Date())} · {formatTime(new Date())}
+          </div>
+        </div>
         <h1 className="vp-section-title mb-10">{title}</h1>
         {registerOpen === false && (
           <div className="vp-card vp-card-hover p-12 flex flex-col items-center justify-center">

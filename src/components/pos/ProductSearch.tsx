@@ -291,7 +291,7 @@ export default function ProductSearch({
                         product.isSoldByWeight,
                       );
                     }}
-                    className="vp-button vp-button-primary"
+                    className="vp-button vp-button-primary vp-tap"
                   >
                     {t("ui.addButton", "pos")}
                   </button>
