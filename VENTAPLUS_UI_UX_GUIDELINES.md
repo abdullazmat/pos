@@ -11,6 +11,7 @@ VentaPlus is a modern SaaS POS system built for kiosks, neighborhood stores, and
 **For** kiosks, convenience stores, and minimarkets that need fast counter sales, **VentaPlus** is the cloud POS that accelerates checkout and keeps cash + stock under control without complex hardware or installations.
 
 ### Value Proposition (Actionable)
+
 - **Speed at the counter:** barcode-first flow and shortcuts reduce queue time.
 - **Clear cash control:** shift openings/closings and cash movements are tracked per cashier.
 - **Always‑ready inventory:** stock updates with every sale, with low-stock visibility.
@@ -23,12 +24,14 @@ VentaPlus is a modern SaaS POS system built for kiosks, neighborhood stores, and
 **Core message:** “Sell faster at the counter. Control stock and cash from the browser.”
 
 ### Messaging Pillars
+
 1. **Counter speed** — instant scans, quick totals, frictionless checkout.
 2. **Cash clarity** — openings, withdrawals, and closings in one view.
 3. **Inventory confidence** — barcodes, variants, and real-time alerts.
 4. **Simple cloud setup** — live in minutes, no local installs.
 
 ### Target Audience
+
 - Kiosks and convenience stores
 - Neighborhood grocery and minimarkets
 - Fast‑moving retail teams who need reliable daily operations
@@ -52,20 +55,24 @@ VentaPlus is a modern SaaS POS system built for kiosks, neighborhood stores, and
 ## Brand System (Essential Kit)
 
 ### Logo Usage
+
 - Primary wordmark: **VentaPlus**.
 - Icon: “V+” for compact spaces (nav, app icon, favicon).
 - Clear space: at least 1× the icon height around the mark.
 
 ### Voice & Tone
+
 - **Practical and direct** (retail operators value clarity).
 - **Confident, not corporate** (modern SaaS but approachable).
 - **Operational first** (focus on time savings, cash control, stock accuracy).
 
 ### Typography
+
 - Primary font: Inter (UI clarity and legibility).
 - Use strong numeric emphasis for totals and KPIs.
 
 ### UI Components
+
 - Buttons: primary tech-blue for core actions.
 - Cards: soft neutral surfaces with subtle depth.
 - Labels: short, action‑first copy (e.g., “Open register”, “Close shift”).
