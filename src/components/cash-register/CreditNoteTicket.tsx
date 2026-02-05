@@ -65,9 +65,9 @@ const CreditNoteTicket: React.FC<CreditNoteTicketProps> = ({
   return (
     <div
       id="credit-note-ticket"
-      className="w-full max-w-md px-8 py-6 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+      className="w-full max-w-md px-8 py-8 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 receipt-container"
     >
-      <div className="mb-6 space-y-1 text-center">
+      <div className="mb-7 space-y-2 text-center">
         <h2 className="text-lg font-bold tracking-wide">{copy.title}</h2>
         {createdAt && (
           <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -79,7 +79,7 @@ const CreditNoteTicket: React.FC<CreditNoteTicketProps> = ({
         </p>
       </div>
 
-      <div className="space-y-3 text-sm">
+      <div className="space-y-4 text-sm leading-6">
         <div className="flex items-center justify-between gap-4">
           <span className="text-slate-600 dark:text-slate-400">
             {copy.reasonLabel}
@@ -109,7 +109,7 @@ const CreditNoteTicket: React.FC<CreditNoteTicketProps> = ({
           </div>
         )}
         {notes && notes.trim().length > 0 && (
-          <div className="pt-3 border-t border-dashed border-slate-200 dark:border-slate-700">
+          <div className="pt-4 border-t border-dashed border-slate-200 dark:border-slate-700">
             <p className="mb-1 text-xs tracking-wide uppercase text-slate-500 dark:text-slate-400">
               {copy.notesLabel}
             </p>

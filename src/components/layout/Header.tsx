@@ -42,6 +42,7 @@ interface HeaderProps {
 }
 
 export default function Header({ user, showBackButton = false }: HeaderProps) {
+  const [isScrolled, setIsScrolled] = useState(false);
   const [showUserCard, setShowUserCard] = useState(false);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [cashRegister, setCashRegister] = useState<{
@@ -217,6 +218,17 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
   }, []);
 
   useEffect(() => {
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 8);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
     const fetchCashRegister = async () => {
       try {
         const token = localStorage.getItem("accessToken");
@@ -242,30 +254,36 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-40 bg-white shadow-md dark:bg-slate-950 dark:shadow-lg dark:shadow-black/50">
-      <div className="bg-white border-b border-gray-200 dark:bg-slate-950 dark:border-slate-800">
-        <div className="px-4 py-3 mx-auto max-w-7xl">
+    <nav
+      className={`sticky top-0 z-40 border-b border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-surface))]/80 backdrop-blur-xl vp-navbar ${
+        isScrolled ? "is-scrolled" : ""
+      }`}
+    >
+      <div className="border-b border-[hsl(var(--vp-border))] bg-transparent">
+        <div className="px-6 py-4 mx-auto max-w-7xl">
           <div className="flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="p-2 bg-blue-600 rounded-lg dark:bg-blue-500">
-                <Store className="w-6 h-6 text-white" />
+            <Link href="/dashboard" className="flex items-center gap-3 group">
+              <div className="flex items-center justify-center w-10 h-10 transition shadow-sm rounded-lg border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-soft))] group-hover:scale-105">
+                <span className="text-[hsl(var(--vp-primary))] font-semibold text-lg">
+                  V+
+                </span>
               </div>
-              <div>
+              <div className="flex flex-col leading-tight">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-bold text-gray-900 dark:text-white">
-                    Sistema POS
+                  <h1 className="text-lg font-semibold text-[hsl(var(--vp-text))]">
+                    VentaPlus
                   </h1>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    className={`vp-pill ${
                       planInfo.plan === "Pro"
-                        ? "bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300"
-                        : "bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300"
+                        ? "bg-[hsl(var(--vp-primary)/0.12)] text-[hsl(var(--vp-primary))]"
+                        : "bg-[hsl(var(--vp-muted)/0.18)] text-[hsl(var(--vp-muted))]"
                     }`}
                   >
-                    {planInfo.plan === "Pro" ? "Pro" : "Gratuito"}
+                    {planInfo.plan}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-[hsl(var(--vp-muted))] mt-0.5">
                   Punto de Venta en la Nube
                 </p>
               </div>
@@ -273,8 +291,8 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
 
             <div className="flex items-center gap-4">
               {cashRegister?.isOpen && (
-                <div className="items-center hidden gap-2 px-4 py-2 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800 md:flex">
-                  <span className="text-sm font-medium text-green-800 dark:text-green-300">
+                <div className="items-center hidden gap-2 px-4 py-2 border rounded-lg md:flex border-emerald-200/60 bg-emerald-50/70 text-emerald-700 dark:border-emerald-800/50 dark:bg-emerald-900/20 dark:text-emerald-300">
+                  <span className="text-sm font-medium">
                     Caja Abierta - ${cashRegister.expected.toFixed(2)}
                   </span>
                 </div>
@@ -285,16 +303,14 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                 <button
                   ref={languageButtonRef}
                   onClick={() => setShowLanguageMenu((prev) => !prev)}
-                  className="flex items-center gap-2 p-2 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-full border border-[hsl(var(--vp-border-soft))] text-[hsl(var(--vp-muted))] hover:text-[hsl(var(--vp-text))] hover:bg-[hsl(var(--vp-bg-hover))]"
                   title={t("language", "common")}
                 >
-                  <Globe className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  <span className="text-sm font-medium text-gray-700 uppercase dark:text-gray-300">
-                    {currentLanguage}
-                  </span>
+                  <Globe className="w-4 h-4" />
+                  <span className="uppercase">{currentLanguage}</span>
                 </button>
                 <div
-                  className={`absolute right-0 top-full mt-2 w-48 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg dark:shadow-2xl dark:shadow-black/50 transition-all duration-200 ease-out z-50 ${
+                  className={`absolute right-0 top-full mt-2 w-48 rounded-xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-surface))] shadow-lg transition-all duration-200 ease-out z-50 ${
                     showLanguageMenu
                       ? "opacity-100 translate-y-0 pointer-events-auto"
                       : "opacity-0 translate-y-2 pointer-events-none"
@@ -310,8 +326,8 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                         }}
                         className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                           currentLanguage === lang
-                            ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
-                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+                            ? "bg-[hsl(var(--vp-primary)/0.12)] text-[hsl(var(--vp-primary))]"
+                            : "text-[hsl(var(--vp-text))] hover:bg-[hsl(var(--vp-bg-hover))]"
                         }`}
                       >
                         {lang === "es" && "🇪🇸 Español"}
@@ -329,20 +345,20 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                   onClick={() =>
                     setTheme(resolvedTheme === "dark" ? "light" : "dark")
                   }
-                  className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+                  className="vp-button vp-button-ghost"
                   title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
                 >
                   {resolvedTheme === "dark" ? (
-                    <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                    <Sun className="w-5 h-5 text-[hsl(var(--vp-muted))]" />
                   ) : (
-                    <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                    <Moon className="w-5 h-5 text-[hsl(var(--vp-muted))]" />
                   )}
                 </button>
               )}
 
               {user && (
                 <div
-                  className="relative flex items-center gap-2 p-2 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800"
+                  className="relative flex items-center gap-2 p-2 transition-colors rounded-lg hover:bg-[hsl(var(--vp-bg-hover))]"
                   onMouseEnter={() => setShowUserCard(true)}
                   onMouseLeave={() => {
                     setShowUserCard(false);
@@ -353,20 +369,20 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                   }}
                   tabIndex={0}
                 >
-                  <div className="p-2 bg-blue-100 rounded-full dark:bg-blue-900/30">
-                    <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <div className="p-2 rounded-full bg-[hsl(var(--vp-primary)/0.12)] text-[hsl(var(--vp-primary))]">
+                    <User className="w-5 h-5" />
                   </div>
                   <div className="hidden text-left md:block">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                    <p className="text-sm font-semibold text-[hsl(var(--vp-text))]">
                       {user.fullName || "Usuario"}
                     </p>
-                    <p className="text-xs text-gray-600 capitalize dark:text-gray-400">
+                    <p className="text-xs capitalize text-[hsl(var(--vp-muted))]">
                       {roleLabel}
                     </p>
                   </div>
 
                   <div
-                    className={`absolute right-0 top-full mt-2 w-72 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl dark:shadow-2xl dark:shadow-black/50 transition-all duration-200 ease-out ${
+                    className={`absolute right-0 top-full mt-2 w-72 rounded-xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-surface))] shadow-xl transition-all duration-200 ease-out ${
                       showUserCard
                         ? "opacity-100 translate-y-0 pointer-events-auto"
                         : "opacity-0 translate-y-2 pointer-events-none"
@@ -376,42 +392,42 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                   >
                     <div className="p-4 space-y-3">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 text-blue-600 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">
+                        <div className="p-2 rounded-full bg-[hsl(var(--vp-primary)/0.12)] text-[hsl(var(--vp-primary))]">
                           <User className="w-4 h-4" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                          <p className="text-sm font-semibold text-[hsl(var(--vp-text))]">
                             {user.fullName || "Usuario"}
                           </p>
-                          <p className="text-xs text-gray-600 capitalize dark:text-gray-400">
+                          <p className="text-xs capitalize text-[hsl(var(--vp-muted))]">
                             {roleLabel}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <div className="p-2 text-purple-600 bg-purple-100 rounded-full dark:bg-purple-900/30 dark:text-purple-400">
+                        <div className="p-2 rounded-full bg-[hsl(var(--vp-primary)/0.12)] text-[hsl(var(--vp-primary))]">
                           <Shield className="w-4 h-4" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <p className="text-xs text-[hsl(var(--vp-muted))]">
                             {t("status", "common")}
                           </p>
-                          <p className="text-sm font-medium text-gray-900 capitalize dark:text-white">
+                          <p className="text-sm font-medium capitalize text-[hsl(var(--vp-text))]">
                             {roleLabel}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <div className="p-2 text-orange-600 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">
+                        <div className="p-2 rounded-full bg-[hsl(var(--vp-primary)/0.12)] text-[hsl(var(--vp-primary))]">
                           <CreditCard className="w-4 h-4" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <p className="text-xs text-[hsl(var(--vp-muted))]">
                             {t("pricing", "common")}
                           </p>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          <p className="text-sm font-medium text-[hsl(var(--vp-text))]">
                             {planInfo.plan}
                           </p>
                         </div>
@@ -421,8 +437,8 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                         <div
                           className={`p-2 rounded-full ${
                             planInfo.status?.toLowerCase() === "active"
-                              ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                              : "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+                              ? "bg-emerald-100/70 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+                              : "bg-rose-100/70 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400"
                           }`}
                         >
                           {planInfo.status?.toLowerCase() === "active" ? (
@@ -432,10 +448,10 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                           )}
                         </div>
                         <div className="flex-1">
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <p className="text-xs text-[hsl(var(--vp-muted))]">
                             {t("status", "common")}
                           </p>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          <p className="text-sm font-medium text-[hsl(var(--vp-text))]">
                             {planInfo.status}
                           </p>
                         </div>
@@ -444,7 +460,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                       <div className="flex justify-end pt-1">
                         <Link
                           href="/profile"
-                          className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                          className="text-xs font-semibold text-[hsl(var(--vp-primary))] hover:text-[hsl(var(--vp-primary-strong))]"
                           onClick={() => setShowUserCard(false)}
                         >
                           {t("settings", "common")}
@@ -457,7 +473,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
 
               <button
                 onClick={handleLogout}
-                className="p-2 text-red-600 transition-colors rounded-lg dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                className="p-2 transition-colors rounded-full text-[hsl(var(--vp-muted))] hover:text-red-600 hover:bg-red-50/70 dark:hover:bg-red-900/20"
                 title={t("logout", "common")}
               >
                 <LogOut className="w-5 h-5" />
@@ -467,8 +483,8 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
         </div>
       </div>
 
-      <div className="overflow-x-auto bg-white border-b border-gray-200 dark:bg-slate-950 dark:border-slate-800">
-        <div className="px-4 mx-auto max-w-7xl">
+      <div className="overflow-x-auto border-b border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-surface))]">
+        <div className="px-6 mx-auto max-w-7xl">
           <div className="flex gap-1">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -477,10 +493,10 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
+                  className={`flex items-center gap-2 whitespace-nowrap transition-colors ${
                     active
-                      ? "border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                      : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-900"
+                      ? "vp-tab vp-tab-active bg-[hsl(var(--vp-primary)/0.08)]"
+                      : "vp-tab hover:text-[hsl(var(--vp-text))] hover:bg-[hsl(var(--vp-bg-hover))]"
                   }`}
                 >
                   <Icon className="w-4 h-4" />

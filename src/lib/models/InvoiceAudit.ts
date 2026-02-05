@@ -11,6 +11,7 @@ export interface IInvoiceAudit extends Document {
     | "DELETE"
     | "CAE_REQUEST"
     | "CAE_RECEIVED"
+    | "PRINT"
     | "EXPORT"
     | "VOID";
   actionDescription: string;
@@ -68,6 +69,7 @@ const InvoiceAuditSchema = new Schema<IInvoiceAudit>(
         "DELETE",
         "CAE_REQUEST",
         "CAE_RECEIVED",
+        "PRINT",
         "EXPORT",
         "VOID",
       ],

@@ -508,52 +508,45 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100">
+    <div className="vp-page">
       <Header user={user} showBackButton />
 
-      <main className="max-w-7xl mx-auto px-4 py-10">
+      <main className="vp-page-inner">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-              {copy.title}
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 text-sm">
-              {copy.subtitle}
-            </p>
+            <h1 className="vp-section-title">{copy.title}</h1>
+            <p className="vp-section-subtitle text-sm">{copy.subtitle}</p>
           </div>
-          <button
-            onClick={exportToCSV}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/20"
-          >
+          <button onClick={exportToCSV} className="vp-button vp-button-primary">
             <Download className="w-5 h-5" />
             {copy.exportCSV}
           </button>
         </div>
 
         {/* Date Range */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 flex items-center gap-3 mb-6">
-          <Calendar className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-          <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">
+        <div className="vp-card px-4 py-3 flex items-center gap-3 mb-6">
+          <Calendar className="w-5 h-5 text-[hsl(var(--vp-muted))]" />
+          <span className="text-sm text-[hsl(var(--vp-text))] font-medium">
             {copy.dateRange}
           </span>
           <input
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="text-sm"
           />
-          <span className="text-slate-400 dark:text-slate-500">-</span>
+          <span className="text-[hsl(var(--vp-muted))]">-</span>
           <input
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="text-sm"
           />
         </div>
 
         {/* Tabs */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden mb-6">
-          <div className="flex overflow-x-auto border-b border-slate-200 dark:border-slate-800">
+        <div className="vp-card overflow-hidden mb-6">
+          <div className="flex overflow-x-auto border-b border-[hsl(var(--vp-border))]">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const active = activeTab === tab.id;
@@ -562,18 +555,14 @@ export default function ReportsPage() {
                 <button
                   key={tab.id}
                   onClick={() => !isLocked && setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
-                    active
-                      ? "border-blue-500 text-blue-500 bg-blue-50 dark:bg-slate-850 dark:text-blue-400"
-                      : "border-transparent text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-850"
+                  className={`flex items-center gap-2 whitespace-nowrap ${
+                    active ? "vp-tab vp-tab-active" : "vp-tab"
                   } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                 >
                   <Icon className="w-4 h-4" />
                   {getTabLabel(tab.id)}
                   {isLocked && (
-                    <span className="ml-1 px-2 py-0.5 text-xs bg-purple-900/40 text-purple-200 rounded-full">
-                      {copy.tabs.premium}
-                    </span>
+                    <span className="ml-1 vp-pill">{copy.tabs.premium}</span>
                   )}
                 </button>
               );
@@ -584,66 +573,66 @@ export default function ReportsPage() {
             <div className="p-6 space-y-6">
               {/* KPI cards */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
-                  <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 text-sm mb-2">
+                <div className="vp-card p-5">
+                  <div className="flex items-center justify-between text-[hsl(var(--vp-muted))] text-sm mb-2">
                     {copy.kpis.totalSales.title}
-                    <TrendingUp className="w-5 h-5 text-green-400" />
+                    <TrendingUp className="w-5 h-5 text-[hsl(var(--vp-primary))]" />
                   </div>
-                  <div className="text-3xl font-bold text-slate-900 dark:text-white">
+                  <div className="text-3xl font-semibold text-[hsl(var(--vp-text))]">
                     {loading
                       ? "..."
                       : reportData?.totalRevenue
                         ? formatCurrency(reportData.totalRevenue)
                         : "$0"}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                  <p className="text-xs text-[hsl(var(--vp-muted))] mt-1">
                     {copy.kpis.totalSales.desc}
                   </p>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
-                  <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 text-sm mb-2">
+                <div className="vp-card p-5">
+                  <div className="flex items-center justify-between text-[hsl(var(--vp-muted))] text-sm mb-2">
                     {copy.kpis.numSales.title}
-                    <ShoppingCart className="w-5 h-5 text-blue-400" />
+                    <ShoppingCart className="w-5 h-5 text-[hsl(var(--vp-primary))]" />
                   </div>
-                  <div className="text-3xl font-bold text-slate-900 dark:text-white">
+                  <div className="text-3xl font-semibold text-[hsl(var(--vp-text))]">
                     {loading ? "..." : reportData?.totalSales || 0}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                  <p className="text-xs text-[hsl(var(--vp-muted))] mt-1">
                     {copy.kpis.numSales.desc}
                   </p>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
-                  <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 text-sm mb-2">
+                <div className="vp-card p-5">
+                  <div className="flex items-center justify-between text-[hsl(var(--vp-muted))] text-sm mb-2">
                     {copy.kpis.itemsSold.title}
-                    <Package className="w-5 h-5 text-purple-400" />
+                    <Package className="w-5 h-5 text-[hsl(var(--vp-primary))]" />
                   </div>
-                  <div className="text-3xl font-bold text-slate-900 dark:text-white">
+                  <div className="text-3xl font-semibold text-[hsl(var(--vp-text))]">
                     {loading
                       ? "..."
                       : reportData?.totalItems
                         ? Math.floor(Number(reportData.totalItems))
                         : 0}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                  <p className="text-xs text-[hsl(var(--vp-muted))] mt-1">
                     {copy.kpis.itemsSold.desc}
                   </p>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
-                  <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 text-sm mb-2">
+                <div className="vp-card p-5">
+                  <div className="flex items-center justify-between text-[hsl(var(--vp-muted))] text-sm mb-2">
                     {copy.kpis.avgTicket.title}
-                    <DollarSign className="w-5 h-5 text-amber-400" />
+                    <DollarSign className="w-5 h-5 text-[hsl(var(--vp-primary))]" />
                   </div>
-                  <div className="text-3xl font-bold text-slate-900 dark:text-white">
+                  <div className="text-3xl font-semibold text-[hsl(var(--vp-text))]">
                     {loading
                       ? "..."
                       : reportData?.avgTicket
                         ? formatCurrency(reportData.avgTicket)
                         : "$0.00"}
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                  <p className="text-xs text-[hsl(var(--vp-muted))] mt-1">
                     {copy.kpis.avgTicket.desc}
                   </p>
                 </div>
@@ -667,54 +656,37 @@ export default function ReportsPage() {
               )}
 
               {/* Recent sales table */}
-              <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+              <div className="vp-card p-5">
+                <h3 className="text-lg font-semibold text-[hsl(var(--vp-text))] mb-4">
                   {copy.recentSales.title}
                 </h3>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
+                  <table className="vp-table text-sm">
                     <thead>
-                      <tr className="text-slate-700 border-b border-slate-300 dark:text-slate-400 dark:border-slate-800">
-                        <th className="text-left py-3 px-4">
-                          {copy.recentSales.date}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.recentSales.time}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.recentSales.items}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.recentSales.total}
-                        </th>
+                      <tr>
+                        <th>{copy.recentSales.date}</th>
+                        <th>{copy.recentSales.time}</th>
+                        <th>{copy.recentSales.items}</th>
+                        <th>{copy.recentSales.total}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    <tbody>
                       {reportData?.recentSales?.length ? (
                         reportData.recentSales.map((sale: any, idx: number) => (
-                          <tr
-                            key={sale._id || idx}
-                            className="text-slate-900 dark:text-slate-200"
-                          >
-                            <td className="py-3 px-4">
-                              {sale.createdAt?.slice(0, 10) || "-"}
-                            </td>
-                            <td className="py-3 px-4 text-slate-700 dark:text-slate-400">
+                          <tr key={sale._id || idx}>
+                            <td>{sale.createdAt?.slice(0, 10) || "-"}</td>
+                            <td className="text-[hsl(var(--vp-muted))]">
                               {sale.createdAt?.slice(11, 19) || "-"}
                             </td>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
-                              {sale.items?.length || 0}
-                            </td>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
-                              {formatCurrency(sale.total || 0)}
-                            </td>
+                            <td>{sale.items?.length || 0}</td>
+                            <td>{formatCurrency(sale.total || 0)}</td>
                           </tr>
                         ))
                       ) : (
                         <tr>
                           <td
                             colSpan={4}
-                            className="py-4 px-4 text-center text-slate-600 dark:text-slate-400"
+                            className="text-center text-[hsl(var(--vp-muted))]"
                           >
                             {loading ? "Cargando..." : copy.recentSales.noSales}
                           </td>
@@ -726,60 +698,45 @@ export default function ReportsPage() {
               </div>
 
               {/* Top products placeholder */}
-              <div className="bg-white border border-slate-200 rounded-xl p-5 dark:bg-slate-900/80 dark:border-slate-800">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4 dark:text-white">
+              <div className="vp-card p-5">
+                <h3 className="text-lg font-semibold text-[hsl(var(--vp-text))] mb-4">
                   {copy.topProducts.title}
                 </h3>
-                <p className="text-sm text-slate-600 mb-4 dark:text-slate-400">
+                <p className="text-sm text-[hsl(var(--vp-muted))] mb-4">
                   {copy.topProducts.subtitle}
                 </p>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
+                  <table className="vp-table text-sm">
                     <thead>
-                      <tr className="text-slate-700 border-b border-slate-300 dark:text-slate-400 dark:border-slate-800">
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.product}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.quantitySold}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.totalRevenue}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.approxCost}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.approxProfit}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.margin}
-                        </th>
+                      <tr>
+                        <th>{copy.topProducts.product}</th>
+                        <th>{copy.topProducts.quantitySold}</th>
+                        <th>{copy.topProducts.totalRevenue}</th>
+                        <th>{copy.topProducts.approxCost}</th>
+                        <th>{copy.topProducts.approxProfit}</th>
+                        <th>{copy.topProducts.margin}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 text-slate-900 dark:divide-slate-800 dark:text-slate-200">
+                    <tbody>
                       {reportData?.topProducts?.length ? (
                         reportData.topProducts.map((p: any, idx: number) => (
                           <tr key={`${p.name}-${idx}`}>
-                            <td className="py-3 px-4">{p.name}</td>
-                            <td className="py-3 px-4">{p.quantity}</td>
-                            <td className="py-3 px-4">
-                              {formatCurrency(p.revenue)}
-                            </td>
-                            <td className="py-3 px-4">
-                              {formatCurrency(p.totalCost || 0)}
-                            </td>
-                            <td className="py-3 px-4">
-                              {formatCurrency(p.profit || 0)}
-                            </td>
-                            <td className="py-3 px-4">
+                            <td>{p.name}</td>
+                            <td>{p.quantity}</td>
+                            <td>{formatCurrency(p.revenue)}</td>
+                            <td>{formatCurrency(p.totalCost || 0)}</td>
+                            <td>{formatCurrency(p.profit || 0)}</td>
+                            <td>
                               {(p.margin || 0) > 0 ? p.margin.toFixed(1) : 0}%
                             </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td className="py-3 px-4" colSpan={6}>
+                          <td
+                            colSpan={6}
+                            className="text-[hsl(var(--vp-muted))]"
+                          >
                             {loading ? "..." : "-"}
                           </td>
                         </tr>
@@ -793,63 +750,53 @@ export default function ReportsPage() {
 
           {activeTab === "categories" && (
             <div className="p-6">
-              <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+              <div className="vp-card p-5">
+                <h3 className="text-lg font-semibold text-[hsl(var(--vp-text))] mb-4">
                   {copy.tabs.categories}
                 </h3>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
+                  <table className="vp-table text-sm">
                     <thead>
-                      <tr className="text-slate-700 border-b border-slate-300 dark:text-slate-400 dark:border-slate-800">
-                        <th className="text-left py-3 px-4">
-                          {copy.tabs.categories}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.kpis.itemsSold.title}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.kpis.totalSales.title}
-                        </th>
+                      <tr>
+                        <th>{copy.tabs.categories}</th>
+                        <th>{copy.kpis.itemsSold.title}</th>
+                        <th>{copy.kpis.totalSales.title}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    <tbody>
                       {reportData?.categories?.length ? (
                         reportData.categories.map((c: any, idx: number) => (
                           <tr key={`${c.name}-${idx}`}>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
-                              {c.name}
-                            </td>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                            <td>{c.name}</td>
+                            <td>
                               {c.quantityUnits === 0 &&
                               c.quantityWeight === 0 ? (
-                                <span className="text-slate-500 dark:text-slate-400">
+                                <span className="text-[hsl(var(--vp-muted))]">
                                   0
                                 </span>
                               ) : (
                                 <div className="flex flex-wrap items-center gap-2 text-sm">
                                   {c.quantityUnits > 0 && (
-                                    <span className="px-2 py-0.5 rounded-full bg-slate-200/60 dark:bg-slate-800/70 text-slate-700 dark:text-slate-200">
+                                    <span className="px-2 py-0.5 rounded-full bg-[hsl(var(--vp-bg-soft))] text-[hsl(var(--vp-text))]">
                                       {formatQuantity(c.quantityUnits)} u
                                     </span>
                                   )}
                                   {c.quantityWeight > 0 && (
-                                    <span className="px-2 py-0.5 rounded-full bg-emerald-200/60 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-200">
+                                    <span className="px-2 py-0.5 rounded-full bg-[hsl(var(--vp-primary))]/15 text-[hsl(var(--vp-primary))]">
                                       {formatQuantity(c.quantityWeight)} kg
                                     </span>
                                   )}
                                 </div>
                               )}
                             </td>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
-                              {formatCurrency(c.revenue)}
-                            </td>
+                            <td>{formatCurrency(c.revenue)}</td>
                           </tr>
                         ))
                       ) : (
                         <tr>
                           <td
                             colSpan={3}
-                            className="py-4 px-4 text-center text-slate-600 dark:text-slate-400"
+                            className="text-center text-[hsl(var(--vp-muted))]"
                           >
                             {loading ? copy.loading : copy.recentSales.noSales}
                           </td>
@@ -864,57 +811,37 @@ export default function ReportsPage() {
 
           {activeTab === "profitability" && (
             <div className="p-6">
-              <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+              <div className="vp-card p-5">
+                <h3 className="text-lg font-semibold text-[hsl(var(--vp-text))] mb-4">
                   {copy.tabs.profitability}
                 </h3>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
+                  <table className="vp-table text-sm">
                     <thead>
-                      <tr className="text-slate-700 border-b border-slate-300 dark:text-slate-400 dark:border-slate-800">
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.product}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.totalRevenue}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.approxCost}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.approxProfit}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.margin}
-                        </th>
+                      <tr>
+                        <th>{copy.topProducts.product}</th>
+                        <th>{copy.topProducts.totalRevenue}</th>
+                        <th>{copy.topProducts.approxCost}</th>
+                        <th>{copy.topProducts.approxProfit}</th>
+                        <th>{copy.topProducts.margin}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    <tbody>
                       {reportData?.profitability?.length ? (
                         reportData.profitability.map((p: any, idx: number) => (
                           <tr key={`${p.name}-${idx}`}>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
-                              {p.name}
-                            </td>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
-                              {formatCurrency(p.revenue)}
-                            </td>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
-                              {formatCurrency(p.cost)}
-                            </td>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
-                              {formatCurrency(p.profit)}
-                            </td>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
-                              {p.margin > 0 ? p.margin.toFixed(1) : 0}%
-                            </td>
+                            <td>{p.name}</td>
+                            <td>{formatCurrency(p.revenue)}</td>
+                            <td>{formatCurrency(p.cost)}</td>
+                            <td>{formatCurrency(p.profit)}</td>
+                            <td>{p.margin > 0 ? p.margin.toFixed(1) : 0}%</td>
                           </tr>
                         ))
                       ) : (
                         <tr>
                           <td
                             colSpan={5}
-                            className="py-4 px-4 text-center text-slate-600 dark:text-slate-400"
+                            className="text-center text-[hsl(var(--vp-muted))]"
                           >
                             {loading ? copy.loading : copy.recentSales.noSales}
                           </td>
@@ -929,39 +856,29 @@ export default function ReportsPage() {
 
           {activeTab === "products" && (
             <div className="p-6">
-              <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+              <div className="vp-card p-5">
+                <h3 className="text-lg font-semibold text-[hsl(var(--vp-text))] mb-4">
                   {copy.tabs.products}
                 </h3>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
+                  <table className="vp-table text-sm">
                     <thead>
-                      <tr className="text-slate-700 border-b border-slate-300 dark:text-slate-400 dark:border-slate-800">
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.product}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.quantitySold}
-                        </th>
-                        <th className="text-left py-3 px-4">
-                          {copy.topProducts.totalRevenue}
-                        </th>
+                      <tr>
+                        <th>{copy.topProducts.product}</th>
+                        <th>{copy.topProducts.quantitySold}</th>
+                        <th>{copy.topProducts.totalRevenue}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    <tbody>
                       {reportData?.topProducts?.length ? (
                         reportData.topProducts.map((p: any, idx: number) => (
                           <tr key={`${p.name}-${idx}`}>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
-                              {p.name}
-                            </td>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
+                            <td>{p.name}</td>
+                            <td>
                               {formatQuantity(p.quantity)}
                               {p.isSoldByWeight ? " kg" : ""}
                             </td>
-                            <td className="py-3 px-4 text-slate-900 dark:text-slate-200">
-                              {formatCurrency(p.revenue)}
-                            </td>
+                            <td>{formatCurrency(p.revenue)}</td>
                           </tr>
                         ))
                       ) : (

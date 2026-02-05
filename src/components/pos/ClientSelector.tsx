@@ -80,14 +80,14 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
 
   return (
     <div className="mb-4">
-      <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">
+      <label className="vp-label">
         {t("labels.customer", "pos") !== "labels.customer"
           ? t("labels.customer", "pos")
           : "Cliente"}
       </label>
       <select
         ref={selectRef}
-        className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-slate-900 dark:text-gray-100"
+        className="vp-input"
         value={value?._id ? String(value._id) : ""}
         onChange={(e) => {
           const selectedId = String(e.target.value || "");
@@ -123,7 +123,7 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
         )}
       </select>
       {!loading && clients.length === 0 && !isClientsEnabled && (
-        <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+        <p className="mt-2 text-xs text-amber-500">
           {t("messages.clientsUpgradeRequired", "pos") !==
           "messages.clientsUpgradeRequired"
             ? t("messages.clientsUpgradeRequired", "pos")

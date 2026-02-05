@@ -688,18 +688,15 @@ export default function KeyboardPOSInput({
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="bg-white dark:bg-slate-900 rounded-lg shadow-md dark:shadow-lg dark:shadow-black/50 p-6 space-y-4"
-    >
+    <div ref={containerRef} className="vp-card vp-card-hover p-7 space-y-6">
       {/* Title */}
-      <div className="border-b border-gray-200 dark:border-slate-700 pb-3">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="border-b border-[hsl(var(--vp-border))] pb-4">
+        <h2 className="text-xl font-semibold text-[hsl(var(--vp-text))]">
           {t("ui.keyboardPOS", "pos") !== "ui.keyboardPOS"
             ? t("ui.keyboardPOS", "pos")
             : "Keyboard POS"}
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-sm text-[hsl(var(--vp-muted))] mt-1">
           {t("ui.quantityFirst", "pos") !== "ui.quantityFirst"
             ? t("ui.quantityFirst", "pos")
             : "Enter quantity first, then product code"}
@@ -708,11 +705,11 @@ export default function KeyboardPOSInput({
 
       {/* Quantity Input - PRIMARY FOCUS */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="vp-label">
           {t("ui.quantity", "pos") !== "ui.quantity"
             ? t("ui.quantity", "pos")
             : "Quantity"}
-          <span className="text-gray-500 dark:text-gray-400 ml-2 text-xs">
+          <span className="text-[hsl(var(--vp-muted))] ml-2 text-xs">
             (Default: 1)
           </span>
         </label>
@@ -725,13 +722,13 @@ export default function KeyboardPOSInput({
             onKeyDown={handleQuantityKeyDown}
             placeholder="1"
             autoComplete="off"
-            className="w-full px-4 py-3 text-lg border-2 border-blue-500 dark:border-blue-400 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+            className="vp-input text-lg border-[hsl(var(--vp-primary))] focus:border-[hsl(var(--vp-primary))]"
           />
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500">
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[hsl(var(--vp-muted))]">
             <span className="text-sm">⏎</span>
           </div>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-xs text-[hsl(var(--vp-muted))] mt-1">
           {t("ui.quantityHint", "pos") !== "ui.quantityHint"
             ? t("ui.quantityHint", "pos")
             : "Enter quantity or use multiplier: 50*code"}
@@ -740,14 +737,14 @@ export default function KeyboardPOSInput({
 
       {/* Product Code / Barcode Input */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="vp-label">
           {t("ui.productCodeBarcode", "pos") !== "ui.productCodeBarcode"
             ? t("ui.productCodeBarcode", "pos")
             : "Product Code / Barcode"}
         </label>
         <div className="relative">
           <svg
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500"
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[hsl(var(--vp-muted))]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -770,7 +767,7 @@ export default function KeyboardPOSInput({
             }
             autoComplete="off"
             disabled={isProcessing}
-            className="w-full pl-10 pr-4 py-3 text-lg border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+            className="vp-input text-lg pl-10 disabled:opacity-50 disabled:cursor-not-allowed"
           />
           {isProcessing && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -779,14 +776,14 @@ export default function KeyboardPOSInput({
           )}
         </div>
         {isSearching && (
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-xs text-[hsl(var(--vp-muted))]">
             {t("ui.searching", "pos")}
           </p>
         )}
         {showResults && searchResults.length > 0 && (
           <div
             ref={resultsListRef}
-            className="mt-2 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900"
+            className="mt-2 max-h-60 overflow-y-auto rounded-lg border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-card))] shadow-lg vp-dropdown"
           >
             {searchResults.map((product, index) => (
               <button
@@ -808,21 +805,21 @@ export default function KeyboardPOSInput({
                 }}
                 className={`w-full text-left px-3 py-2 transition ${
                   index === activeResultIndex
-                    ? "bg-slate-100 dark:bg-slate-800"
-                    : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                    ? "bg-[hsl(var(--vp-bg-hover))]"
+                    : "hover:bg-[hsl(var(--vp-bg-hover))]"
                 }`}
               >
-                <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                <div className="text-sm font-semibold text-[hsl(var(--vp-text))]">
                   {product.name}
                 </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">
+                <div className="text-xs text-[hsl(var(--vp-muted))]">
                   {t("ui.codeLabel", "pos")} {product.code}
                 </div>
               </button>
             ))}
           </div>
         )}
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-xs text-[hsl(var(--vp-muted))] mt-1">
           {t("ui.pressEnterToAdd", "pos") !== "ui.pressEnterToAdd"
             ? t("ui.pressEnterToAdd", "pos")
             : "Press Enter to add • Esc to cancel"}
@@ -830,8 +827,8 @@ export default function KeyboardPOSInput({
       </div>
 
       {/* Keyboard Shortcuts Reference */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+      <div className="vp-panel-sm bg-[hsl(var(--vp-bg-card-soft))]">
+        <h3 className="text-sm font-semibold text-[hsl(var(--vp-text))] mb-3 flex items-center gap-2">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" />
           </svg>
@@ -842,32 +839,26 @@ export default function KeyboardPOSInput({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
           {/* Workflow */}
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded font-mono">
-                Enter
-              </kbd>
-              <span className="text-gray-700 dark:text-gray-300">
+              <kbd className="vp-kbd">Enter</kbd>
+              <span className="text-[hsl(var(--vp-muted))]">
                 {t("ui.confirmAdd", "pos") !== "ui.confirmAdd"
                   ? t("ui.confirmAdd", "pos")
                   : "Confirm / Add"}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded font-mono">
-                Esc
-              </kbd>
-              <span className="text-gray-700 dark:text-gray-300">
+              <kbd className="vp-kbd">Esc</kbd>
+              <span className="text-[hsl(var(--vp-muted))]">
                 {t("ui.cancel", "pos") !== "ui.cancel"
                   ? t("ui.cancel", "pos")
                   : "Cancel / Clear"}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded font-mono">
-                *
-              </kbd>
-              <span className="text-gray-700 dark:text-gray-300">
+              <kbd className="vp-kbd">*</kbd>
+              <span className="text-[hsl(var(--vp-muted))]">
                 {t("ui.multiplier", "pos") !== "ui.multiplier"
                   ? t("ui.multiplier", "pos")
                   : "Multiplier (50*code)"}
@@ -876,42 +867,34 @@ export default function KeyboardPOSInput({
           </div>
 
           {/* Customer Shortcuts */}
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded font-mono">
-                Shift+C
-              </kbd>
-              <span className="text-gray-700 dark:text-gray-300">
+              <kbd className="vp-kbd">Shift+C</kbd>
+              <span className="text-[hsl(var(--vp-muted))]">
                 {t("ui.changeCustomer", "pos") !== "ui.changeCustomer"
                   ? t("ui.changeCustomer", "pos")
                   : "Change customer"}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded font-mono">
-                Shift+F
-              </kbd>
-              <span className="text-gray-700 dark:text-gray-300">
+              <kbd className="vp-kbd">Shift+F</kbd>
+              <span className="text-[hsl(var(--vp-muted))]">
                 {t("ui.findCustomer", "pos") !== "ui.findCustomer"
                   ? t("ui.findCustomer", "pos")
                   : "Find customer"}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded font-mono">
-                Shift+N
-              </kbd>
-              <span className="text-gray-700 dark:text-gray-300">
+              <kbd className="vp-kbd">Shift+N</kbd>
+              <span className="text-[hsl(var(--vp-muted))]">
                 {t("ui.newCustomer", "pos") !== "ui.newCustomer"
                   ? t("ui.newCustomer", "pos")
                   : "New customer"}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded font-mono">
-                Shift+X
-              </kbd>
-              <span className="text-gray-700 dark:text-gray-300">
+              <kbd className="vp-kbd">Shift+X</kbd>
+              <span className="text-[hsl(var(--vp-muted))]">
                 {t("ui.removeCustomer", "pos") !== "ui.removeCustomer"
                   ? t("ui.removeCustomer", "pos")
                   : "Remove customer"}
@@ -922,15 +905,15 @@ export default function KeyboardPOSInput({
       </div>
 
       {/* Quick Examples */}
-      <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
-        <h4 className="text-xs font-semibold text-green-800 dark:text-green-300 mb-2">
-          📝{" "}
+      <div className="vp-panel-sm bg-[hsl(var(--vp-bg-card-soft))]">
+        <h4 className="text-xs font-semibold text-[hsl(var(--vp-text))] mb-2">
+          <span className="mr-1">📝</span>
           {t("ui.examples", "pos") !== "ui.examples"
             ? t("ui.examples", "pos")
             : "Examples"}
           :
         </h4>
-        <ul className="text-xs text-green-700 dark:text-green-300 space-y-1">
+        <ul className="text-xs text-[hsl(var(--vp-muted))] space-y-1">
           <li>
             •{" "}
             {t("ui.example1", "pos") !== "ui.example1"

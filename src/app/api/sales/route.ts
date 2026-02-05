@@ -154,6 +154,7 @@ export async function POST(req: NextRequest) {
       "bankTransfer",
       "qr",
       "mercadopago",
+      "account",
     ];
 
     if (!allowedMethods.includes(paymentMethod)) {

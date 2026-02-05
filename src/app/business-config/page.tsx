@@ -39,6 +39,7 @@ interface BusinessConfig {
   website: string;
   cuitRucDni: string;
   ticketMessage: string;
+  ticketLogo?: string;
   country?: string;
   paymentMethods?: Array<{
     id: string;
@@ -52,6 +53,9 @@ interface Subscription {
   status: string;
   currentPeriodStart: string;
   currentPeriodEnd: string;
+  features?: {
+    customBranding?: boolean;
+  };
 }
 
 const CONFIG_COPY = {
@@ -77,6 +81,14 @@ const CONFIG_COPY = {
       title: "Función Premium",
       description: "Personaliza tu ticket con el logo de tu negocio",
       availability: "Disponible en Plan Profesional y superior",
+    },
+    logo: {
+      badgeAvailable: "Pro",
+      badgeLocked: "Premium",
+      uploadLabel: "Subir logo",
+      replaceLabel: "Reemplazar logo",
+      removeLabel: "Quitar logo",
+      helper: "PNG, JPG, WEBP o SVG (máx. 2 MB)",
     },
     businessForm: {
       businessName: "Nombre del Negocio",
@@ -116,6 +128,8 @@ const CONFIG_COPY = {
       subscriptionError: "Error al actualizar suscripción",
       loading: "Cargando...",
       previewInfo: "Vista previa se actualiza en tiempo real",
+      logoTypeError: "Formato de logo no válido",
+      logoSizeError: "El logo supera el tamaño máximo (2 MB)",
     },
   },
   en: {
@@ -140,6 +154,14 @@ const CONFIG_COPY = {
       title: "Premium Feature",
       description: "Customize your ticket with your business logo",
       availability: "Available in Professional Plan and above",
+    },
+    logo: {
+      badgeAvailable: "Pro",
+      badgeLocked: "Premium",
+      uploadLabel: "Upload logo",
+      replaceLabel: "Replace logo",
+      removeLabel: "Remove logo",
+      helper: "PNG, JPG, WEBP, or SVG (max 2 MB)",
     },
     businessForm: {
       businessName: "Business Name",
@@ -179,6 +201,8 @@ const CONFIG_COPY = {
       subscriptionError: "Error updating subscription",
       loading: "Loading...",
       previewInfo: "Preview updates in real time",
+      logoTypeError: "Invalid logo format",
+      logoSizeError: "Logo exceeds maximum size (2 MB)",
     },
   },
   pt: {
@@ -203,6 +227,14 @@ const CONFIG_COPY = {
       title: "Função Premium",
       description: "Personalize seu recibo com o logotipo do seu negócio",
       availability: "Disponível no Plano Profissional e superior",
+    },
+    logo: {
+      badgeAvailable: "Pro",
+      badgeLocked: "Premium",
+      uploadLabel: "Enviar logotipo",
+      replaceLabel: "Substituir logotipo",
+      removeLabel: "Remover logotipo",
+      helper: "PNG, JPG, WEBP ou SVG (máx. 2 MB)",
     },
     businessForm: {
       businessName: "Nome do Negócio",
@@ -242,6 +274,8 @@ const CONFIG_COPY = {
       subscriptionError: "Erro ao atualizar inscrição",
       loading: "Carregando...",
       previewInfo: "Visualização é atualizada em tempo real",
+      logoTypeError: "Formato de logotipo inválido",
+      logoSizeError: "O logotipo excede o tamanho máximo (2 MB)",
     },
   },
 };
@@ -320,6 +354,7 @@ export default function BusinessConfigPage() {
     website: "www.minegocio.com",
     cuitRucDni: "00-00000000-0",
     ticketMessage: "",
+    ticketLogo: "",
     country: "argentina",
     paymentMethods: [
       { id: "cash", name: "Efectivo", enabled: true },
@@ -331,6 +366,14 @@ export default function BusinessConfigPage() {
   });
   const [savingConfig, setSavingConfig] = useState(false);
   const [configSaved, setConfigSaved] = useState(false);
+
+  const MAX_LOGO_SIZE = 2 * 1024 * 1024;
+  const ALLOWED_LOGO_TYPES = [
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/svg+xml",
+  ];
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -434,6 +477,10 @@ export default function BusinessConfigPage() {
           configData.country = "argentina";
         }
 
+        if (!configData.ticketLogo) {
+          configData.ticketLogo = "";
+        }
+
         try {
           localStorage.setItem("businessCountry", configData.country);
           window.dispatchEvent(
@@ -535,6 +582,39 @@ export default function BusinessConfigPage() {
     if (normalized === "PREMIUM") return "ENTERPRISE";
 
     return normalized;
+  };
+
+  const canCustomizeTicket = (() => {
+    const normalizedPlanId = normalizePlanId(currentSubscription?.planId);
+    if (currentSubscription?.features?.customBranding) return true;
+    return (
+      normalizedPlanId === "PROFESSIONAL" || normalizedPlanId === "ENTERPRISE"
+    );
+  })();
+
+  const handleLogoChange = (file?: File | null) => {
+    if (!file) return;
+    if (!ALLOWED_LOGO_TYPES.includes(file.type)) {
+      toast.error(copy.messages.logoTypeError);
+      return;
+    }
+    if (file.size > MAX_LOGO_SIZE) {
+      toast.error(copy.messages.logoSizeError);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData((prev) => ({
+        ...prev,
+        ticketLogo: typeof reader.result === "string" ? reader.result : "",
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveLogo = () => {
+    setFormData((prev) => ({ ...prev, ticketLogo: "" }));
   };
 
   const resolveSubscriptionPlanId = (plan?: Plan | null) => {
@@ -783,24 +863,76 @@ export default function BusinessConfigPage() {
                   🎨 {copy.sections.logo}
                 </h2>
                 <span className="px-2.5 py-1 text-xs font-semibold text-purple-700 bg-purple-100 border border-purple-300 dark:text-purple-300 dark:bg-purple-900/60 dark:border-purple-700/50 rounded-full">
-                  Premium
+                  {canCustomizeTicket
+                    ? copy.logo.badgeAvailable
+                    : copy.logo.badgeLocked}
                 </span>
               </div>
               <div className="p-6">
-                <div className="p-6 text-center border-2 border-purple-300 dark:border-purple-700/40 rounded-xl bg-purple-50 dark:bg-purple-900/20">
-                  <div className="flex items-center justify-center w-16 h-16 mx-auto mb-3 text-purple-700 bg-purple-200 dark:text-purple-300 dark:bg-purple-900/60 rounded-xl">
-                    👑
+                {canCustomizeTicket ? (
+                  <div className="p-4 border-2 border-purple-200 dark:border-purple-700/40 rounded-xl bg-purple-50/60 dark:bg-purple-900/20">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                      <div className="flex items-center justify-center w-20 h-20 overflow-hidden text-purple-700 bg-white border border-purple-200 dark:bg-slate-900 dark:border-purple-700/40 rounded-xl">
+                        {formData.ticketLogo ? (
+                          <img
+                            src={formData.ticketLogo}
+                            alt="Logo"
+                            className="object-contain w-full h-full"
+                          />
+                        ) : (
+                          <span className="text-2xl">🏷️</span>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                          {copy.premiumFunction.description}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                          {copy.logo.helper}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 mt-3">
+                          <label className="px-3 py-1.5 text-xs font-semibold text-white bg-purple-600 rounded-lg cursor-pointer hover:bg-purple-500">
+                            {formData.ticketLogo
+                              ? copy.logo.replaceLabel
+                              : copy.logo.uploadLabel}
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                              className="hidden"
+                              onChange={(e) =>
+                                handleLogoChange(e.target.files?.[0])
+                              }
+                            />
+                          </label>
+                          {formData.ticketLogo ? (
+                            <button
+                              type="button"
+                              onClick={handleRemoveLogo}
+                              className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-200 rounded-lg hover:bg-slate-300 dark:text-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"
+                            >
+                              {copy.logo.removeLabel}
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-purple-700 dark:text-purple-300">
-                    {copy.premiumFunction.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-purple-700 dark:text-purple-200">
-                    {copy.premiumFunction.description}
-                  </p>
-                  <p className="mt-2 text-xs text-purple-600 dark:text-purple-300/70">
-                    {copy.premiumFunction.availability}
-                  </p>
-                </div>
+                ) : (
+                  <div className="p-6 text-center border-2 border-purple-300 dark:border-purple-700/40 rounded-xl bg-purple-50 dark:bg-purple-900/20">
+                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-3 text-purple-700 bg-purple-200 dark:text-purple-300 dark:bg-purple-900/60 rounded-xl">
+                      👑
+                    </div>
+                    <h3 className="font-semibold text-purple-700 dark:text-purple-300">
+                      {copy.premiumFunction.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-purple-700 dark:text-purple-200">
+                      {copy.premiumFunction.description}
+                    </p>
+                    <p className="mt-2 text-xs text-purple-600 dark:text-purple-300/70">
+                      {copy.premiumFunction.availability}
+                    </p>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -1119,6 +1251,13 @@ export default function BusinessConfigPage() {
                 <div className="p-4 overflow-hidden font-mono text-xs text-center bg-white border rounded-lg shadow-2xl w-80 text-slate-800 dark:bg-black dark:text-green-400 border-slate-300 dark:border-green-600/30">
                   {/* Header with line decorations */}
                   <div className="mb-2 text-slate-900 dark:text-green-500">
+                    {formData.ticketLogo ? (
+                      <img
+                        src={formData.ticketLogo}
+                        alt="Logo"
+                        className="object-contain h-10 mx-auto mb-2"
+                      />
+                    ) : null}
                     <p className="mb-1 text-sm font-bold">
                       {formData.businessName.toUpperCase()}
                     </p>

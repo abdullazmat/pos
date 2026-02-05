@@ -139,11 +139,11 @@ export default function Cart({
     }).format(value);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 h-full flex flex-col">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+    <div className="vp-card vp-card-hover p-7 h-full flex flex-col">
+      <div className="flex items-center justify-between mb-7">
+        <h2 className="text-xl font-semibold text-[hsl(var(--vp-text))] flex items-center gap-2">
           <svg
-            className="w-6 h-6 text-blue-600"
+            className="w-6 h-6 text-[hsl(var(--vp-primary))]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -163,7 +163,7 @@ export default function Cart({
               localStorage.removeItem("pos.cartItems");
               window.location.reload();
             }}
-            className="text-red-600 hover:text-red-700 p-2"
+            className="vp-button vp-button-ghost text-red-500 hover:text-red-600"
             title="Limpiar Carrito"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -177,11 +177,11 @@ export default function Cart({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-3 mb-6">
+      <div className="flex-1 overflow-y-auto space-y-5 mb-7">
         {items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full py-16 text-gray-400">
+          <div className="flex flex-col items-center justify-center h-full vp-empty-state">
             <svg
-              className="w-24 h-24 mb-4"
+              className="w-24 h-24 mb-4 vp-empty-icon vp-float"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -193,27 +193,29 @@ export default function Cart({
                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
               />
             </svg>
-            <p className="text-lg font-medium mb-1">Carrito vacío</p>
-            <p className="text-sm">Escanea o busca productos para comenzar</p>
+            <p className="text-lg font-semibold mb-1">Carrito vacío</p>
+            <p className="text-sm text-[hsl(var(--vp-muted))]">
+              Escanea o busca productos para comenzar
+            </p>
           </div>
         ) : (
           items.map((item) => (
             <div
               key={item.productId}
-              className="bg-gray-50 p-3 rounded border border-gray-200 text-sm"
+              className="vp-card vp-card-soft vp-item-enter p-5 text-sm"
             >
               <div className="flex justify-between items-start mb-2">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-800">
+                  <h3 className="font-semibold text-[hsl(var(--vp-text))]">
                     {item.productName}
                   </h3>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-[hsl(var(--vp-muted))]">
                     {formatCurrency(item.unitPrice)} x {item.quantity}
                   </p>
                 </div>
                 <button
                   onClick={() => onRemove(item.productId)}
-                  className="text-red-600 hover:text-red-800 text-xs font-medium ml-2"
+                  className="text-red-500 hover:text-red-600 text-xs font-medium ml-2"
                 >
                   ✕
                 </button>
@@ -221,7 +223,7 @@ export default function Cart({
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">
+                  <label className="vp-label text-xs">
                     Cant.{item.isSoldByWeight ? " (kg)" : ""}
                   </label>
                   <input
@@ -353,18 +355,16 @@ export default function Cart({
                       }));
                       setEditingProductId(null);
                     }}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                    className="vp-input text-xs py-1.5"
                   />
                   {item.isSoldByWeight && (
-                    <p className="text-[11px] text-gray-500 mt-1">
+                    <p className="text-[11px] text-[hsl(var(--vp-muted))] mt-1">
                       {t("ui.weightQuantityHint", "pos")}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">
-                    Desc.
-                  </label>
+                  <label className="vp-label text-xs">Desc.</label>
                   <input
                     type="number"
                     min="0"
@@ -376,14 +376,12 @@ export default function Cart({
                         parseFloat(e.target.value),
                       )
                     }
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                    className="vp-input text-xs py-1.5"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">
-                    Total
-                  </label>
-                  <div className="px-2 py-1 bg-blue-50 rounded text-xs font-semibold text-right">
+                  <label className="vp-label text-xs">Total</label>
+                  <div className="px-2 py-1 rounded text-xs font-semibold text-right bg-[hsl(var(--vp-bg-card-soft))] border border-[hsl(var(--vp-border))]">
                     {formatCurrency(Math.max(0, item.total))}
                   </div>
                 </div>
@@ -396,31 +394,33 @@ export default function Cart({
       {items.length > 0 && (
         <>
           {/* Totals Section */}
-          <div className="border-t pt-3 mb-4 space-y-1 text-sm">
-            <div className="flex justify-between text-gray-700">
+          <div className="border-t border-[hsl(var(--vp-border))] pt-4 mb-5 space-y-2 text-sm">
+            <div className="flex justify-between text-[hsl(var(--vp-muted))]">
               <span>{t("ui.subtotal", "pos")}:</span>
               <span>{formatCurrency(subtotal)}</span>
             </div>
             {totalDiscount > 0 && (
-              <div className="flex justify-between text-red-600">
+              <div className="flex justify-between text-rose-500">
                 <span>{t("ui.totalDiscount", "pos")}:</span>
                 <span>-{formatCurrency(totalDiscount)}</span>
               </div>
             )}
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-[hsl(var(--vp-muted))]">
               <span>{t("ui.tax21", "pos")}:</span>
               <span>{formatCurrency(tax)}</span>
             </div>
-            <div className="flex justify-between text-xl font-bold text-gray-900 bg-blue-50 p-3 rounded-lg border-2 border-blue-200 mt-2">
+            <div className="flex justify-between text-xl font-semibold text-[hsl(var(--vp-text))] bg-[hsl(var(--vp-primary)/0.12)] p-3 rounded-lg border border-[hsl(var(--vp-border))] mt-2">
               <span>{t("ui.total", "pos")}:</span>
-              <span className="text-blue-600">{formatCurrency(total)}</span>
+              <span className="text-[hsl(var(--vp-primary))]">
+                {formatCurrency(total)}
+              </span>
             </div>
           </div>
 
           {/* Customer & Invoice Section */}
           <button
             onClick={() => setShowCustomerForm(!showCustomerForm)}
-            className="w-full mb-3 px-3 py-2 border-2 border-blue-400 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 transition flex items-center justify-between"
+            className="w-full mb-3 vp-panel-sm vp-hover-surface text-sm font-medium text-[hsl(var(--vp-text))] flex items-center justify-between"
           >
             <span>
               {customerName ? `Cliente: ${customerName}` : "Agregar Cliente"}
@@ -443,43 +443,37 @@ export default function Cart({
           </button>
 
           {showCustomerForm && (
-            <div className="bg-blue-50 p-3 rounded-lg mb-3 space-y-2 text-sm">
+            <div className="vp-panel-sm bg-[hsl(var(--vp-bg-card-soft))] mb-3 space-y-3 text-sm">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Cliente *
-                </label>
+                <label className="vp-label text-xs">Cliente *</label>
                 <input
                   type="text"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   placeholder="Nombre del cliente"
-                  className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs"
+                  className="vp-input text-xs"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
+                  <label className="vp-label text-xs">Email</label>
                   <input
                     type="email"
                     value={customerEmail}
                     onChange={(e) => setCustomerEmail(e.target.value)}
                     placeholder="email@ejemplo.com"
-                    className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs"
+                    className="vp-input text-xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Tipo de Factura
-                  </label>
+                  <label className="vp-label text-xs">Tipo de Factura</label>
                   <select
                     value={invoiceChannel}
                     onChange={(e) =>
                       setInvoiceChannel(e.target.value as InvoiceChannel)
                     }
-                    className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs"
+                    className="vp-input text-xs"
                   >
                     <option value={InvoiceChannel.INTERNAL}>Interna</option>
                     {canUseArcaInvoicing && (
@@ -491,7 +485,7 @@ export default function Cart({
                       </option>
                     )}
                   </select>
-                  <p className="text-[11px] text-gray-500 mt-1">
+                  <p className="text-[11px] text-[hsl(var(--vp-muted))] mt-1">
                     Interna: solo visible en el sistema y no se exporta. ARCA:
                     requiere datos fiscales y es reportable.
                   </p>
@@ -501,25 +495,21 @@ export default function Cart({
               {invoiceChannel === InvoiceChannel.ARCA && (
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      CUIT *
-                    </label>
+                    <label className="vp-label text-xs">CUIT *</label>
                     <input
                       type="text"
                       value={customerCuit}
                       onChange={(e) => setCustomerCuit(e.target.value)}
                       placeholder="20-12345678-9"
-                      className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs"
+                      className="vp-input text-xs"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Tipo IVA
-                    </label>
+                    <label className="vp-label text-xs">Tipo IVA</label>
                     <select
                       value={ivaType}
                       onChange={(e) => setIvaType(e.target.value)}
-                      className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs"
+                      className="vp-input text-xs"
                     >
                       <option value="RESPONSABLE_INSCRIPTO">Responsable</option>
                       <option value="MONOTRIBUTISTA">Monotributista</option>
@@ -533,13 +523,11 @@ export default function Cart({
 
           {/* Payment Method */}
           <div className="mb-3">
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">
-              Método de Pago
-            </label>
+            <label className="vp-label text-xs mb-1.5">Método de Pago</label>
             <select
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="vp-input text-sm"
             >
               <option value="cash">💵 Efectivo</option>
               <option value="card">💳 Tarjeta de Débito</option>
@@ -560,7 +548,7 @@ export default function Cart({
           <button
             onClick={handleCheckout}
             disabled={isLoading || !customerName.trim()}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 rounded-lg transition shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+            className="vp-button vp-button-primary w-full py-3 font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {isLoading ? (
               <>

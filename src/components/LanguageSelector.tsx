@@ -15,12 +15,11 @@ export function LanguageSelector() {
   ];
 
   return (
-    <div className="flex items-center gap-4">
-      {/* Language Selector */}
+    <div className="flex items-center gap-3">
       <select
         value={currentLanguage}
         onChange={(e) => setLanguage(e.target.value as any)}
-        className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:border-gray-400 dark:hover:border-gray-600 transition text-sm"
+        className="text-sm"
       >
         {languages.map((lang) => (
           <option key={lang.code} value={lang.code}>
@@ -29,10 +28,9 @@ export function LanguageSelector() {
         ))}
       </select>
 
-      {/* Theme Toggle */}
       <button
         onClick={toggleTheme}
-        className="p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+        className="vp-button vp-button-ghost"
         title={String(t(`${theme}Mode`, "common"))}
         aria-label="Toggle theme"
       >

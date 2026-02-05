@@ -6,7 +6,9 @@ import Header from "@/components/Header";
 import Hero from "@/components/hero";
 import Stats from "@/components/stats";
 import PosPreview from "@/components/PosPreview";
+import MotionMockups from "@/components/MotionMockups";
 import FeaturesSection from "@/components/FeaturesSection";
+import HowItWorksSection from "@/components/HowItWorksSection";
 import PricingSection from "@/components/PricingSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
@@ -32,12 +34,35 @@ export default function Home() {
     checkAuth();
   }, [router]);
 
+  useEffect(() => {
+    if (loading) return;
+
+    const elements = document.querySelectorAll<HTMLElement>(".vp-reveal");
+    if (!elements.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -10% 0px" },
+    );
+
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [loading]);
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0b0c0e] text-white">
-        <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-b-2 border-white rounded-full animate-spin"></div>
-          <p className="text-lg">
+      <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--vp-bg))] text-[hsl(var(--vp-text))]">
+        <div className="text-center vp-fade-in">
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 border-[hsl(var(--vp-primary))] rounded-full animate-spin"></div>
+          <p className="text-lg text-[hsl(var(--vp-muted))]">
             {String(
               require("@/lib/context/LanguageContext")
                 .useLanguage()
@@ -53,26 +78,23 @@ export default function Home() {
     <>
       <Header />
 
-      <main
-        id="top"
-        className="bg-white dark:bg-[#0b0c0e] text-gray-900 dark:text-white"
-      >
-        <div className="px-6 pt-24 pb-40 mx-auto max-w-7xl">
-          <div className="grid lg:grid-cols-2 gap-16 items-center min-h-[85vh]">
-            <div className="space-y-16">
+      <main id="top" className="vp-page">
+        <div className="px-6 pt-32 pb-32 mx-auto max-w-7xl">
+          <div className="grid lg:grid-cols-2 gap-20 items-center min-h-[78vh]">
+            <div className="space-y-12">
               <Hero />
               <Stats />
             </div>
 
             <div className="justify-center hidden lg:flex">
-              <div className="w-full max-w-lg">
+              <div className="w-full max-w-xl vp-mockup-shell vp-float">
                 <PosPreview />
               </div>
             </div>
           </div>
 
-          <div className="flex justify-center mt-20 lg:hidden">
-            <div className="w-full max-w-lg">
+          <div className="flex justify-center mt-16 lg:hidden">
+            <div className="w-full max-w-xl vp-mockup-shell vp-float">
               <PosPreview />
             </div>
           </div>
@@ -80,7 +102,9 @@ export default function Home() {
       </main>
 
       <FeaturesSection />
+      <HowItWorksSection />
       <PricingSection />
+      <MotionMockups />
       <CTASection />
       <Footer />
     </>

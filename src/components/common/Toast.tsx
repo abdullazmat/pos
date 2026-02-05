@@ -34,14 +34,16 @@ export default function Toast({
 
   const color =
     type === "success"
-      ? "bg-green-600"
+      ? "bg-emerald-600"
       : type === "error"
-        ? "bg-red-600"
+        ? "bg-rose-600"
         : "bg-blue-600";
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999]">
-      <div className={`${color} text-white px-4 py-2 rounded-lg shadow-lg`}>
+      <div
+        className={`${color} vp-toast text-white px-4 py-2 rounded-xl shadow-lg border border-white/10`}
+      >
         {message}
       </div>
     </div>

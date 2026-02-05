@@ -13,6 +13,7 @@ interface SaleItem {
 export interface ISale extends Document {
   businessId: Schema.Types.ObjectId;
   userId: Schema.Types.ObjectId;
+  clientId?: Schema.Types.ObjectId;
   items: SaleItem[];
   subtotal: number;
   tax?: number;
@@ -92,6 +93,10 @@ const saleSchema = new Schema<ISale>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    clientId: {
+      type: Schema.Types.ObjectId,
+      ref: "Client",
     },
     items: [saleItemSchema],
     subtotal: Number,

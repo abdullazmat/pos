@@ -927,18 +927,18 @@ export default function ProductsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-slate-950">
+      <div className="vp-page">
         <Header user={user} showBackButton={true} />
-        <main className="p-6 mx-auto max-w-7xl">
+        <main className="vp-page-inner">
           <div className="grid grid-cols-1 gap-6 animate-pulse md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-40 p-6 bg-white rounded-lg shadow">
-                <div className="w-1/2 h-6 mb-4 bg-gray-200 rounded" />
+              <div key={i} className="vp-card h-40 p-6">
+                <div className="w-1/2 h-6 mb-4 vp-skeleton" />
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="h-10 bg-gray-200 rounded" />
-                  <div className="h-10 bg-gray-200 rounded" />
-                  <div className="h-10 bg-gray-200 rounded" />
-                  <div className="h-10 bg-gray-200 rounded" />
+                  <div className="h-10 vp-skeleton" />
+                  <div className="h-10 vp-skeleton" />
+                  <div className="h-10 vp-skeleton" />
+                  <div className="h-10 vp-skeleton" />
                 </div>
               </div>
             ))}
@@ -949,26 +949,22 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
+    <div className="vp-page">
       <Header user={user} showBackButton={true} />
 
-      <main className="px-4 py-8 mx-auto max-w-7xl">
+      <main className="vp-page-inner">
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="mb-2 text-4xl font-bold text-slate-900 dark:text-white">
-                {copy.headerTitle}
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400">
-                {copy.headerSubtitle}
-              </p>
+              <h1 className="vp-section-title mb-2">{copy.headerTitle}</h1>
+              <p className="vp-section-subtitle">{copy.headerSubtitle}</p>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => loadProducts(true)}
                 disabled={isRefreshing}
-                className="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg font-semibold flex items-center gap-2 transition shadow-sm disabled:opacity-60 disabled:cursor-not-allowed dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="vp-button"
                 title={copy.refreshLabel}
               >
                 <RefreshCw
@@ -977,7 +973,7 @@ export default function ProductsPage() {
               </button>
               <button
                 onClick={() => setShowImportModal(true)}
-                className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold flex items-center gap-2 transition shadow-lg"
+                className="vp-button"
               >
                 <svg
                   className="w-5 h-5"
@@ -1003,7 +999,7 @@ export default function ProductsPage() {
                   setShowForm(!showForm);
                 }}
                 disabled={!canCreateProduct}
-                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg"
+                className="vp-button vp-button-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus className="w-5 h-5" />
                 {copy.newButton}
@@ -1013,7 +1009,7 @@ export default function ProductsPage() {
           </div>
 
           {/* Plan Status Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border rounded-lg shadow-sm border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+          <div className="inline-flex items-center gap-2 px-4 py-2 vp-card">
             <svg
               className="w-4 h-4 text-green-500 dark:text-green-400"
               fill="currentColor"

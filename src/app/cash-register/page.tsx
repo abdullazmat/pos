@@ -1216,9 +1216,9 @@ export default function CashRegisterPage() {
   const isLoading = loading || isOpen === null;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
+    <div className="vp-page">
       <Header user={user} showBackButton={true} />
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="vp-page-inner">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loading label={copy.loading} />
@@ -1234,15 +1234,15 @@ export default function CashRegisterPage() {
                 >
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
                 </svg>
-                <p className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">
+                <p className="mb-2 text-2xl font-semibold text-[hsl(var(--vp-text))]">
                   {copy.noOpenTitle}
                 </p>
-                <p className="max-w-md mb-8 text-center text-slate-600 dark:text-slate-400">
+                <p className="max-w-md mb-8 text-center text-[hsl(var(--vp-muted))]">
                   {copy.noOpenSubtitle}
                 </p>
                 <button
                   onClick={() => setShowOpenModal(true)}
-                  className="flex items-center gap-2 px-8 py-3 font-bold text-white transition bg-green-600 rounded-lg shadow-lg hover:bg-green-700 hover:shadow-xl"
+                  className="vp-button vp-button-primary"
                 >
                   <svg
                     className="w-5 h-5"
@@ -1267,7 +1267,7 @@ export default function CashRegisterPage() {
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-4">
                   {/* Monto Inicial */}
-                  <div className="p-6 bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+                  <div className="vp-card p-6">
                     <div className="flex items-center justify-between mb-4">
                       <p className="text-sm text-slate-600 dark:text-slate-400">
                         {copy.stats.initial}
@@ -1296,7 +1296,7 @@ export default function CashRegisterPage() {
                   </div>
 
                   {/* Ventas */}
-                  <div className="p-6 bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+                  <div className="vp-card p-6">
                     <div className="flex items-center justify-between mb-4">
                       <p className="text-sm text-slate-600 dark:text-slate-400">
                         {copy.stats.sales}
@@ -1321,7 +1321,7 @@ export default function CashRegisterPage() {
                   </div>
 
                   {/* Retiros */}
-                  <div className="p-6 bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+                  <div className="vp-card p-6">
                     <div className="flex items-center justify-between mb-4">
                       <p className="text-sm text-slate-600 dark:text-slate-400">
                         {copy.stats.withdrawals}
@@ -1346,7 +1346,7 @@ export default function CashRegisterPage() {
                   </div>
 
                   {/* Esperado en Caja */}
-                  <div className="p-6 bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+                  <div className="vp-card p-6">
                     <div className="flex items-center justify-between mb-4">
                       <p className="text-sm text-slate-600 dark:text-slate-400">
                         {copy.stats.expected}
@@ -1454,7 +1454,7 @@ export default function CashRegisterPage() {
                   </button>
                 </div>
                 {/* Movements Table with Operator Filter */}
-                <div className="p-6 mb-8 bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+                <div className="vp-card p-6 mb-8">
                   <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                       {copy.movements.title}
@@ -1580,7 +1580,7 @@ export default function CashRegisterPage() {
               </>
             )}
             {/* Historial de Sesiones */}
-            <div className="p-6 mt-8 bg-white border rounded-lg shadow-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+            <div className="vp-card p-6 mt-8">
               <h2 className="mb-6 text-lg font-bold text-slate-900 dark:text-white">
                 {copy.sessions.title}
               </h2>
@@ -1730,11 +1730,11 @@ export default function CashRegisterPage() {
       {/* Withdrawal Ticket Print Modal */}
       {showWithdrawalTicket && withdrawalTicketData && (
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 receipt-overlay"
           onClick={() => setShowWithdrawalTicket(false)}
         >
           <div
-            className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-700"
+            className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-700 receipt-modal"
             onClick={(e) => e.stopPropagation()}
           >
             <WithdrawalTicket
@@ -1743,7 +1743,7 @@ export default function CashRegisterPage() {
               cashierName={withdrawalTicketData.cashierName}
               supervisorName={withdrawalTicketData.supervisorName}
             />
-            <div className="flex items-center justify-center gap-3 p-4 border-t border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-center gap-3 p-4 border-t border-slate-200 dark:border-slate-700 no-print">
               <button
                 onClick={() => window.print()}
                 className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition"
@@ -1764,11 +1764,11 @@ export default function CashRegisterPage() {
       {/* Credit Note Ticket Print Modal */}
       {showCreditNoteTicket && creditNoteTicketData && (
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 receipt-overlay"
           onClick={() => setShowCreditNoteTicket(false)}
         >
           <div
-            className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-700"
+            className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-700 receipt-modal"
             onClick={(e) => e.stopPropagation()}
           >
             <CreditNoteTicket
@@ -1779,7 +1779,7 @@ export default function CashRegisterPage() {
               cashierName={creditNoteTicketData.cashierName}
               adminName={creditNoteTicketData.adminName}
             />
-            <div className="flex items-center justify-center gap-3 p-4 border-t border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-center gap-3 p-4 border-t border-slate-200 dark:border-slate-700 no-print">
               <button
                 onClick={() => window.print()}
                 className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition"

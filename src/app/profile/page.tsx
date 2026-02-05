@@ -120,21 +120,21 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
-      <div className="bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-800">
+    <div className="vp-page">
+      <div className="border-b border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-card))]">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center gap-3">
           <button
             onClick={() => router.back()}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+            className="p-2 rounded-lg hover:bg-[hsl(var(--vp-bg-hover))] text-[hsl(var(--vp-muted))]"
             aria-label={String(t("back", "profile"))}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-[hsl(var(--vp-muted))]">
               {String(t("account", "profile"))}
             </p>
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-[hsl(var(--vp-text))]">
               {String(t("title", "profile"))}
             </h1>
           </div>

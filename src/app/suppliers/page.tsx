@@ -615,7 +615,7 @@ export default function SuppliersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950">
+      <div className="vp-page">
         <Header user={user} showBackButton={true} />
         <main className="px-4 py-8 mx-auto max-w-7xl">
           <div className="space-y-4 animate-pulse">
@@ -667,17 +667,17 @@ export default function SuppliersPage() {
           onDismiss={() => setShowLimitPrompt(false)}
         />
       )}
-      <div className="min-h-screen bg-white dark:bg-slate-950">
+      <div className="vp-page">
         <Header user={user} showBackButton />
 
-        <main className="px-4 py-8 mx-auto max-w-7xl">
+        <main className="vp-page-inner">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="flex items-center gap-3 mb-2 text-3xl font-bold text-slate-900 dark:text-white">
+              <h1 className="flex items-center gap-3 mb-2 vp-section-title">
                 <Truck className="w-8 h-8 text-purple-400" />
                 {copy.title}
               </h1>
-              <p className="text-slate-600 dark:text-slate-400">
+              <p className="vp-section-subtitle">
                 {copy.subtitle}
               </p>
             </div>
@@ -686,7 +686,7 @@ export default function SuppliersPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowBulkUpload(true)}
-                className="bg-purple-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2"
+                className="vp-button"
               >
                 <Upload className="w-5 h-5" />
                 {copy.bulkUpload}
@@ -708,7 +708,7 @@ export default function SuppliersPage() {
                   setShowForm(true);
                 }}
                 disabled={!canAddSupplier}
-                className={`bg-purple-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2 ${
+                className={`vp-button vp-button-primary ${
                   !canAddSupplier ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >

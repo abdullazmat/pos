@@ -57,7 +57,7 @@ export const SUBSCRIPTION_PLANS: Record<string, PlanConfig> = {
       maxSuppliers: 99999,
       arcaIntegration: true,
       advancedReporting: true,
-      customBranding: false,
+      customBranding: true,
       invoiceChannels: 2, // ARCA + INTERNAL
     },
   },

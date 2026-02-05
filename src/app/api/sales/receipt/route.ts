@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import Sale from "@/lib/models/Sale";
-import Invoice from "@/lib/models/Invoice";
+import Invoice, { InvoiceStatus } from "@/lib/models/Invoice";
 import Business from "@/lib/models/Business";
+import InvoiceAudit from "@/lib/models/InvoiceAudit";
 import { verifyToken } from "@/lib/utils/jwt";
 
 export const dynamic = "force-dynamic";
@@ -62,6 +63,125 @@ export async function GET(req: NextRequest) {
 
     const invoice = (sale as any).invoice;
 
+    const isFiscalInvoice =
+      invoice?.channel === "ARCA" || invoice?.channel === "WSFE";
+    const cae = invoice?.fiscalData?.cae || invoice?.fiscalData?.caeNro;
+    const caeVto = invoice?.fiscalData?.caeVto;
+    const caeAuthorized =
+      invoice?.status === InvoiceStatus.AUTHORIZED ||
+      invoice?.fiscalData?.caeStatus === "AUTHORIZED" ||
+      invoice?.arcaStatus === "APPROVED";
+    const caePending =
+      invoice?.status === InvoiceStatus.PENDING_CAE ||
+      invoice?.fiscalData?.caeStatus === "PENDING" ||
+      invoice?.arcaStatus === "PENDING" ||
+      invoice?.arcaStatus === "SENT";
+    const caeRejected =
+      invoice?.arcaStatus === "REJECTED" ||
+      invoice?.fiscalData?.caeStatus === "REJECTED";
+    const cancelledByNc =
+      invoice?.status === InvoiceStatus.CANCELLED ||
+      invoice?.status === InvoiceStatus.VOIDED;
+
+    const fiscalLetter = (() => {
+      const comprobanteTipo = invoice?.fiscalData?.comprobanteTipo;
+      if (comprobanteTipo === 1) return "A";
+      if (comprobanteTipo === 6) return "B";
+      if (comprobanteTipo === 11) return "C";
+      return invoice?.customerCuit ? "A" : "B";
+    })();
+
+    const documentTypeLabel = isFiscalInvoice
+      ? `Factura Fiscal ${fiscalLetter}`
+      : "Comprobante de Venta";
+
+    const fiscalDecision = (() => {
+      if (!isFiscalInvoice) {
+        return {
+          action: "PRINT_INTERNAL",
+          documentLabel: "Comprobante de Venta",
+          fiscalStatus: "INTERNAL",
+        };
+      }
+
+      if (cancelledByNc) {
+        return {
+          action: "BLOCK",
+          documentLabel: "Nota de Crédito",
+          fiscalStatus: "CANCELLED_BY_NC",
+          reason: "Sale cancelled by credit note",
+        };
+      }
+
+      if (caeRejected) {
+        return {
+          action: "BLOCK",
+          documentLabel: "Ninguno",
+          fiscalStatus: "REJECTED",
+          reason: "Fiscal data rejected",
+        };
+      }
+
+      if (caeAuthorized && cae) {
+        return {
+          action: "PRINT_FISCAL",
+          documentLabel: documentTypeLabel,
+          fiscalStatus: "APPROVED",
+        };
+      }
+
+      if (caePending) {
+        return {
+          action: "PRINT_PROVISIONAL",
+          documentLabel: "Presupuesto (Provisorio)",
+          fiscalStatus: "PENDING_CAE",
+        };
+      }
+
+      return {
+        action: "BLOCK",
+        documentLabel: "Ninguno",
+        fiscalStatus: "CAE_REQUIRED",
+        reason: "CAE required for fiscal invoice",
+      };
+    })();
+
+    const fiscalPos =
+      invoice?.fiscalData?.pointOfSale ||
+      businessConfig?.fiscalConfig?.pointOfSale;
+    const fiscalSequence = invoice?.fiscalData?.invoiceSequence;
+    const fiscalNumber =
+      fiscalPos && fiscalSequence
+        ? `${String(fiscalPos).padStart(4, "0")}-${String(fiscalSequence).padStart(8, "0")}`
+        : null;
+
+    const fiscalQrAvailable = Boolean(caeAuthorized && cae);
+    const fiscalValidityLabel = isFiscalInvoice
+      ? caeAuthorized && cae
+        ? "Válida ante ARCA"
+        : "No válida"
+      : "No aplica";
+    const fiscalUsageLabel = isFiscalInvoice
+      ? caeAuthorized && cae
+        ? "Documento definitivo"
+        : "Contingencia / respaldo"
+      : "No aplica";
+    const fiscalEditLabel = isFiscalInvoice
+      ? "No editable (solo NC)"
+      : "No editable";
+
+    if (fiscalDecision.action === "BLOCK") {
+      return NextResponse.json(
+        {
+          error: "Printing not allowed for this fiscal status",
+          fiscalStatus: fiscalDecision.fiscalStatus,
+          reason: fiscalDecision.reason,
+          document: fiscalDecision.documentLabel,
+        },
+        { status: 409 },
+      );
+    }
+
     // Determine ticket message to use
     let ticketMessage =
       DEFAULT_TICKET_MESSAGES[lang] || DEFAULT_TICKET_MESSAGES.en;
@@ -87,7 +207,18 @@ export async function GET(req: NextRequest) {
       receiptNumber:
         invoice?.invoiceNumber ||
         `VENTA-${(sale as any)._id.toString().slice(-6)}`,
+      documentNumber: fiscalNumber,
       date: new Date((sale as any).createdAt).toLocaleString("es-AR"),
+      logoUrl: businessConfig?.ticketLogo || "",
+      documentType: fiscalDecision.documentLabel,
+      fiscalStatus: fiscalDecision.fiscalStatus,
+      cae,
+      caeVto,
+      fiscalQrAvailable,
+      fiscalValidityLabel,
+      fiscalUsageLabel,
+      fiscalEditLabel,
+      isProvisional: fiscalDecision.action === "PRINT_PROVISIONAL",
       items: (sale as any).items.map((item: any) => ({
         description: item.productName,
         quantity: item.quantity,
@@ -106,6 +237,28 @@ export async function GET(req: NextRequest) {
       notes: invoice?.notes,
       ticketMessage, // Add the ticket message
     };
+
+    if (format === "html") {
+      try {
+        await InvoiceAudit.create({
+          business: decoded.businessId,
+          invoice: invoice?._id,
+          action: "PRINT",
+          actionDescription: `Receipt printed: ${receiptData.documentType}`,
+          userId: decoded.userId,
+          userEmail: decoded.email,
+          metadata: {
+            saleId,
+            format,
+            documentType: receiptData.documentType,
+            fiscalStatus: receiptData.fiscalStatus,
+            provisional: receiptData.isProvisional,
+          },
+        });
+      } catch (auditError) {
+        console.error("Receipt audit log error:", auditError);
+      }
+    }
 
     if (format === "json") {
       return NextResponse.json({ receipt: receiptData });
@@ -178,6 +331,14 @@ function generateHTMLReceipt(data: any): string {
             border-bottom: 2px dashed #333;
             padding-bottom: 10px;
             margin-bottom: 10px;
+        }
+
+        .logo {
+          max-width: 140px;
+          max-height: 80px;
+          margin: 0 auto 8px;
+          display: block;
+          object-fit: contain;
         }
         
         .receipt-title {
@@ -296,10 +457,26 @@ function generateHTMLReceipt(data: any): string {
 <body>
     <div class="receipt">
         <div class="header">
-            <div class="receipt-title">COMPROBANTE DE VENTA</div>
-            <div class="receipt-number">Nº ${data.receiptNumber}</div>
+          ${data.logoUrl ? `<img class="logo" src="${data.logoUrl}" alt="Logo" />` : ""}
+            <div class="receipt-title">${
+              data.documentType
+                ? data.documentType.toUpperCase()
+                : "COMPROBANTE DE VENTA"
+            }</div>
+            <div class="receipt-number">Nº ${data.documentNumber || data.receiptNumber}</div>
             <div class="receipt-date">${data.date}</div>
         </div>
+
+          <div class="customer-info">
+            <div><span class="customer-label">Tipo de documento:</span> ${data.documentType || "Comprobante"}</div>
+            <div><span class="customer-label">Numeración:</span> ${data.documentNumber || data.receiptNumber}</div>
+            <div><span class="customer-label">CAE:</span> ${data.cae ? "Sí" : "No"}</div>
+            <div><span class="customer-label">Vencimiento CAE:</span> ${data.caeVto || "No"}</div>
+            <div><span class="customer-label">QR Fiscal:</span> ${data.fiscalQrAvailable ? "Sí" : "No"}</div>
+            <div><span class="customer-label">Validez fiscal:</span> ${data.fiscalValidityLabel}</div>
+            <div><span class="customer-label">Uso:</span> ${data.fiscalUsageLabel}</div>
+            <div><span class="customer-label">Edición:</span> ${data.fiscalEditLabel}</div>
+          </div>
         
         ${
           data.customerName
@@ -316,6 +493,21 @@ function generateHTMLReceipt(data: any): string {
             : ""
         }
         
+        ${
+          data.isProvisional
+            ? `<div class="status-pending">COMPROBANTE PROVISORIO - SIN VALIDEZ FISCAL</div>`
+            : ""
+        }
+
+        ${
+          data.cae
+            ? `<div class="customer-info">
+                <div><span class="customer-label">CAE:</span> ${data.cae}</div>
+                ${data.caeVto ? `<div><span class="customer-label">Vto CAE:</span> ${data.caeVto}</div>` : ""}
+              </div>`
+            : ""
+        }
+
         <div class="items">
             ${data.items
               .map(

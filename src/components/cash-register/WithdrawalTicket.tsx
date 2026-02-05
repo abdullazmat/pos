@@ -61,16 +61,16 @@ const WithdrawalTicket: React.FC<WithdrawalTicketProps> = ({
   return (
     <div
       id="withdrawal-ticket"
-      className="w-full max-w-md px-8 py-6 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+      className="w-full max-w-md px-8 py-8 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 receipt-container"
     >
-      <div className="text-center space-y-1 mb-6">
+      <div className="text-center space-y-2 mb-7">
         <h2 className="text-lg font-bold tracking-wide">{copy.title}</h2>
         <p className="text-xs text-slate-500 dark:text-slate-400">
           {copy.footer}
         </p>
       </div>
 
-      <div className="space-y-3 text-sm">
+      <div className="space-y-4 text-sm leading-6">
         <div className="flex items-center justify-between gap-4">
           <span className="text-slate-600 dark:text-slate-400">
             {copy.reasonLabel}
@@ -101,7 +101,7 @@ const WithdrawalTicket: React.FC<WithdrawalTicketProps> = ({
         )}
       </div>
 
-      <div className="mt-6 rounded-lg border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4 text-center">
+      <div className="mt-7 rounded-lg border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-5 text-center">
         <p className="text-sm font-semibold">{copy.summary}</p>
         <p className="text-sm text-slate-600 dark:text-slate-400">{reason}</p>
       </div>

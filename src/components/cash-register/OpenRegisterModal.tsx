@@ -150,10 +150,10 @@ export default function OpenRegisterModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center receipt-overlay">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-full max-w-5xl mx-auto bg-white dark:bg-gray-900 rounded-2xl border border-slate-300 dark:border-gray-700 shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-300 dark:border-gray-800 bg-slate-50 dark:bg-gray-800">
+      <div className="relative w-full max-w-5xl mx-auto bg-white dark:bg-gray-900 rounded-2xl border border-slate-300 dark:border-gray-700 shadow-xl overflow-hidden receipt-modal">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-300 dark:border-gray-800 bg-slate-50 dark:bg-gray-800 no-print">
           <div className="flex items-center gap-2 text-slate-900 dark:text-gray-100 text-xl font-semibold">
             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-200 dark:bg-gray-700">
               $
@@ -168,11 +168,11 @@ export default function OpenRegisterModal({
           </button>
         </div>
 
-        <div className="px-6 py-4 text-sm text-slate-600 dark:text-gray-400 border-b border-slate-300 dark:border-gray-800">
+        <div className="px-6 py-4 text-sm text-slate-600 dark:text-gray-400 border-b border-slate-300 dark:border-gray-800 no-print">
           {isDeposit ? copy.depositDescription : copy.description}
         </div>
 
-        <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-3 gap-4 receipt-container">
           <div className="bg-green-100 dark:bg-green-900/15 border border-green-300 dark:border-green-700 rounded-lg p-4">
             <div className="text-slate-700 dark:text-gray-300 text-sm">
               {copy.bills}
@@ -199,7 +199,7 @@ export default function OpenRegisterModal({
           </div>
         </div>
 
-        <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[52vh] overflow-y-auto">
+        <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[52vh] overflow-y-auto receipt-container">
           <div>
             <div className="flex items-center gap-2 text-slate-700 dark:text-gray-300 mb-3">
               <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-green-200 dark:bg-green-900/40 text-green-700 dark:text-green-300">
@@ -273,7 +273,7 @@ export default function OpenRegisterModal({
           </div>
         )}
 
-        <div className="px-6 py-4 border-t border-slate-300 dark:border-gray-800 flex items-center justify-between bg-slate-50 dark:bg-gray-800">
+        <div className="px-6 py-4 border-t border-slate-300 dark:border-gray-800 flex items-center justify-between bg-slate-50 dark:bg-gray-800 no-print">
           <div>
             <div className="text-sm text-slate-600 dark:text-gray-400">
               {copy.counted}

@@ -45,6 +45,11 @@ const EXPENSE_COPY = {
       loading: "Cargando...",
       confirmDelete: "¿Eliminar este gasto?",
     },
+    paymentMethods: {
+      cash: "Efectivo",
+      card: "Tarjeta",
+      transfer: "Transferencia",
+    },
     toasts: {
       loadError: "Error al cargar gastos",
       saveError: "Error al guardar gasto",
@@ -77,6 +82,11 @@ const EXPENSE_COPY = {
       noData: "No expenses yet",
       loading: "Loading...",
       confirmDelete: "Delete this expense?",
+    },
+    paymentMethods: {
+      cash: "Cash",
+      card: "Card",
+      transfer: "Transfer",
     },
     toasts: {
       loadError: "Failed to load expenses",
@@ -111,6 +121,11 @@ const EXPENSE_COPY = {
       noData: "Sem despesas ainda",
       loading: "Carregando...",
       confirmDelete: "Excluir esta despesa?",
+    },
+    paymentMethods: {
+      cash: "Dinheiro",
+      card: "Cartão",
+      transfer: "Transferência",
     },
     toasts: {
       loadError: "Erro ao carregar despesas",
@@ -316,22 +331,22 @@ export default function ExpensesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100">
+    <div className="vp-page">
       <Header user={user} showBackButton />
 
-      <main className="max-w-5xl mx-auto px-4 py-10">
+      <main className="vp-page-inner max-w-5xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+            <h1 className="vp-section-title">
               {copy.title.replace(" - Premium", "")}
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 text-sm">
+            <p className="vp-section-subtitle text-sm">
               {copy.description}
             </p>
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold flex items-center gap-2"
+            className="vp-button vp-button-primary"
           >
             <Plus className="w-4 h-4" />
             {copy.labels.newExpense}
@@ -339,10 +354,10 @@ export default function ExpensesPage() {
         </div>
 
         {showForm && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 mb-6">
+          <div className="vp-card vp-panel mb-6">
             <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">
+                <label className="vp-label">
                   {copy.labels.description}
                 </label>
                 <input
@@ -350,12 +365,12 @@ export default function ExpensesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
+                  className="vp-input"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="vp-label">
                   {copy.labels.amount}
                 </label>
                 <input
@@ -365,12 +380,12 @@ export default function ExpensesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, amount: e.target.value })
                   }
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
+                  className="vp-input"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="vp-label">
                   {copy.labels.category}
                 </label>
                 <input
@@ -378,11 +393,11 @@ export default function ExpensesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, category: e.target.value })
                   }
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
+                  className="vp-input"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="vp-label">
                   {copy.labels.paymentMethod}
                 </label>
                 <select
@@ -393,15 +408,17 @@ export default function ExpensesPage() {
                       paymentMethod: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
+                  className="vp-input"
                 >
-                  <option value="cash">Cash</option>
-                  <option value="card">Card</option>
-                  <option value="transfer">Transfer</option>
+                  <option value="cash">{copy.paymentMethods.cash}</option>
+                  <option value="card">{copy.paymentMethods.card}</option>
+                  <option value="transfer">
+                    {copy.paymentMethods.transfer}
+                  </option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="vp-label">
                   {copy.labels.date}
                 </label>
                 <input
@@ -410,11 +427,11 @@ export default function ExpensesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, date: e.target.value })
                   }
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
+                  className="vp-input"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">
+                <label className="vp-label">
                   {copy.labels.notes}
                 </label>
                 <textarea
@@ -422,14 +439,14 @@ export default function ExpensesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, notes: e.target.value })
                   }
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
+                  className="vp-input"
                 />
               </div>
               <div className="md:col-span-2 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700"
+                  className="vp-button"
                 >
                   {copy.buttons.cancel}
                 </button>

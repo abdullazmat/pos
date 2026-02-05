@@ -5,7 +5,7 @@ import { verifyToken } from "@/lib/utils/jwt";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const token = request.headers.get("authorization")?.split(" ")[1];
@@ -34,14 +34,14 @@ export async function GET(
     console.error("Get invoice error:", error);
     return NextResponse.json(
       { error: "Failed to fetch invoice" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const token = request.headers.get("authorization")?.split(" ")[1];
@@ -54,14 +54,36 @@ export async function PUT(
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    const body = await request.json();
-
     await dbConnect();
+
+    const existingInvoice = await Invoice.findOne({
+      _id: params.id,
+      business: decoded.businessId,
+    });
+
+    if (!existingInvoice) {
+      return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+    }
+
+    if (
+      existingInvoice.channel === "ARCA" ||
+      existingInvoice.channel === "WSFE"
+    ) {
+      return NextResponse.json(
+        {
+          error: "Fiscal invoices cannot be edited",
+          message: "Corrections must be made via credit note",
+        },
+        { status: 409 },
+      );
+    }
+
+    const body = await request.json();
 
     const invoice = await Invoice.findOneAndUpdate(
       { _id: params.id, business: decoded.businessId },
       body,
-      { new: true }
+      { new: true },
     );
 
     if (!invoice) {
@@ -76,14 +98,14 @@ export async function PUT(
     console.error("Update invoice error:", error);
     return NextResponse.json(
       { error: "Failed to update invoice" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const token = request.headers.get("authorization")?.split(" ")[1];
@@ -97,6 +119,28 @@ export async function DELETE(
     }
 
     await dbConnect();
+
+    const existingInvoice = await Invoice.findOne({
+      _id: params.id,
+      business: decoded.businessId,
+    });
+
+    if (!existingInvoice) {
+      return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+    }
+
+    if (
+      existingInvoice.channel === "ARCA" ||
+      existingInvoice.channel === "WSFE"
+    ) {
+      return NextResponse.json(
+        {
+          error: "Fiscal invoices cannot be deleted",
+          message: "Corrections must be made via credit note",
+        },
+        { status: 409 },
+      );
+    }
 
     const invoice = await Invoice.findOneAndDelete({
       _id: params.id,
@@ -112,7 +156,7 @@ export async function DELETE(
     console.error("Delete invoice error:", error);
     return NextResponse.json(
       { error: "Failed to delete invoice" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

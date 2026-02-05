@@ -261,16 +261,16 @@ export default function StockPage() {
   const totalProducts = safeProducts.length;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
+    <div className="vp-page">
       <Header user={user} showBackButton />
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="vp-page-inner">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            <h1 className="vp-section-title mb-2">
               {copy.title}
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="vp-section-subtitle">
               {copy.subtitle}
             </p>
           </div>

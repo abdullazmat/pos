@@ -53,35 +53,46 @@ export default function FeaturesSection() {
     description: string;
   }>;
   return (
-    <section id="features" className="py-24 bg-white dark:bg-slate-900">
-      <div className="max-w-7xl mx-auto px-6">
+    <section
+      id="features"
+      className="vp-section vp-section-muted vp-reveal relative overflow-hidden"
+    >
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute -top-24 right-[-10%] h-72 w-72 rounded-full bg-[hsl(var(--vp-primary))]/10 blur-3xl" />
+        <div className="absolute bottom-[-20%] left-[-5%] h-80 w-80 rounded-full bg-[hsl(var(--vp-primary))]/5 blur-[120px]" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-soft))] text-xs uppercase tracking-[0.2em] text-[hsl(var(--vp-muted))]">
+            {String(t("features", "common"))}
+          </span>
+          <h2 className="vp-section-title mt-5">
             {String(t("title", "pricing"))}
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-4 text-lg">
+          <p className="vp-section-subtitle text-lg">
             {String(t("subtitle", "pricing"))}
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {features?.map((feature, index) => {
             const Icon = iconMap[index] || LightningBoltIcon;
             return (
-              <div
-                key={index}
-                className="group bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl p-8 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-300"
-              >
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-white dark:text-white">
-                  <Icon />
-                </div>
+              <div key={index} className="group relative">
+                <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-[hsl(var(--vp-primary))]/30 via-transparent to-[hsl(var(--vp-primary))]/10 opacity-0 blur transition duration-300 group-hover:opacity-100" />
+                <div className="relative h-full rounded-2xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg))]/80 p-7 sm:p-8 shadow-[0_20px_50px_-30px_rgba(15,23,42,0.6)] backdrop-blur-sm transition duration-300 group-hover:-translate-y-1">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 border border-[hsl(var(--vp-border))] bg-gradient-to-br from-[hsl(var(--vp-bg-soft))] to-[hsl(var(--vp-bg))] text-[hsl(var(--vp-primary))]">
+                    <Icon />
+                  </div>
 
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-700 dark:text-gray-400 text-sm leading-relaxed">
-                  {feature.description}
-                </p>
+                  <h3 className="text-lg font-semibold text-[hsl(var(--vp-text))] mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-[hsl(var(--vp-muted))] text-base leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
               </div>
             );
           })}

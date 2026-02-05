@@ -255,22 +255,22 @@ export default function CategoriesPage() {
         />
       )}
 
-      <div className="min-h-screen bg-white dark:bg-slate-950">
+      <div className="vp-page">
         <Header user={user} showBackButton />
 
-        <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <main className="vp-page-inner">
           {/* Page Header */}
           <div className="flex items-start justify-between gap-4 mb-6">
             <div>
-              <h1 className="mb-1 text-3xl font-bold text-slate-900 dark:text-white">
+              <h1 className="vp-section-title mb-1">
                 {copy.title}
               </h1>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="vp-section-subtitle text-sm">
                 {copy.subtitle}
               </p>
             </div>
-            <div className="inline-flex items-center gap-3 px-4 py-2 border rounded-lg shadow-sm bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800">
-              <span className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+            <div className="inline-flex items-center gap-3 vp-card vp-panel-sm">
+              <span className="flex items-center gap-2 text-sm font-medium text-[hsl(var(--vp-text))]">
                 <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
                   {planUsageLabel(
@@ -283,7 +283,7 @@ export default function CategoriesPage() {
               {currentPlan === "BASIC" && (
                 <button
                   onClick={() => router.push("/upgrade")}
-                  className="px-2 py-1 text-xs text-blue-600 transition border rounded bg-blue-100 border-blue-200 hover:bg-blue-200/80 dark:text-blue-300 dark:bg-blue-600/20 dark:border-blue-500/40 dark:hover:bg-blue-600/30"
+                    className="vp-button vp-button-ghost text-xs"
                 >
                   {copy.upgradeCta}
                 </button>
@@ -304,7 +304,7 @@ export default function CategoriesPage() {
                 setFormData({ name: "", description: "" });
               }}
               disabled={!canCreateCategory}
-              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              className="vp-button vp-button-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-5 h-5" />
               {copy.newCategory}
@@ -314,12 +314,12 @@ export default function CategoriesPage() {
 
           {/* Categories Grid */}
           {categories.length === 0 ? (
-            <div className="p-12 text-center border shadow-sm bg-white rounded-xl border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+            <div className="vp-card vp-panel text-center">
               <Tag className="w-16 h-16 mx-auto mb-4 text-slate-400 dark:text-slate-600" />
-              <p className="mb-2 text-lg text-slate-800 dark:text-slate-300">
+              <p className="mb-2 text-lg text-[hsl(var(--vp-text))]">
                 {copy.emptyTitle}
               </p>
-              <p className="text-sm text-slate-600 dark:text-slate-500">
+              <p className="text-sm text-[hsl(var(--vp-muted))]">
                 {copy.emptySubtitle}
               </p>
             </div>
@@ -328,7 +328,7 @@ export default function CategoriesPage() {
               {categories.map((category) => (
                 <div
                   key={category._id}
-                  className="flex items-center justify-between p-4 transition border bg-white rounded-xl border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-800 dark:hover:border-slate-700 dark:hover:bg-slate-900/80"
+                  className="vp-card vp-card-hover p-4 flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
                     <div className="bg-blue-50 p-2.5 rounded-lg border border-blue-100 dark:bg-blue-500/15 dark:border-blue-500/30">

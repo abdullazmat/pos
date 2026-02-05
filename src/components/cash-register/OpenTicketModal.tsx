@@ -74,10 +74,10 @@ export default function OpenTicketModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="relative w-full max-w-md mx-auto bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 receipt-overlay">
+      <div className="relative w-full max-w-md mx-auto bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden receipt-modal">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 no-print">
           <h2 className="text-slate-900 dark:text-white text-xl font-bold">
             {copy.title}
           </h2>
@@ -90,7 +90,7 @@ export default function OpenTicketModal({
         </div>
 
         {/* Ticket Content */}
-        <div className="px-6 py-8">
+        <div className="px-6 py-8 receipt-container">
           {/* Ticket Style */}
           <div className="bg-slate-100 rounded-sm border-2 border-gray-900 p-4 font-mono text-sm text-gray-900 max-w-sm mx-auto">
             {/* Header */}
@@ -153,7 +153,7 @@ export default function OpenTicketModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center gap-3 justify-center">
+        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center gap-3 justify-center no-print">
           <button
             onClick={handlePrint}
             className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition shadow-lg hover:shadow-xl"

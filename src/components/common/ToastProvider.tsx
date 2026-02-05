@@ -20,6 +20,7 @@ export function ToastProvider() {
       theme="colored"
       limit={5}
       stacked={false}
+      toastClassName="vp-toast"
     />
   );
 }

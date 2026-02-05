@@ -11,6 +11,7 @@ export interface IBusiness extends Document {
   website?: string;
   cuitRucDni?: string;
   ticketMessage?: string;
+  ticketLogo?: string;
   paymentMethods?: Array<{
     id: string;
     name: string;
@@ -61,6 +62,10 @@ const businessSchema = new Schema<IBusiness>(
     ticketMessage: {
       type: String,
       default: "¡GRACIAS POR SU COMPRA!\nVuelva pronto",
+    },
+    ticketLogo: {
+      type: String,
+      default: "",
     },
     paymentMethods: {
       type: [

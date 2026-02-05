@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
         website: "www.minegocio.com",
         cuitRucDni: "00-00000000-0",
         ticketMessage: "¡GRACIAS POR SU COMPRA!\nVuelva pronto",
+        ticketLogo: "",
         country: "argentina",
       });
       await newBusiness.save();
@@ -51,6 +52,7 @@ export async function GET(req: NextRequest) {
       website: business.website || "",
       cuitRucDni: business.cuitRucDni || "",
       ticketMessage: business.ticketMessage || "",
+      ticketLogo: business.ticketLogo || "",
       country: business.country || "argentina",
       paymentMethods: business.paymentMethods || [
         { id: "cash", name: "Efectivo", enabled: true },
@@ -83,6 +85,7 @@ export async function POST(req: NextRequest) {
       website,
       cuitRucDni,
       ticketMessage,
+      ticketLogo,
       country,
       paymentMethods,
     } = body;
@@ -108,6 +111,7 @@ export async function POST(req: NextRequest) {
         cuitRucDni: cuitRucDni || "",
         ticketMessage:
           ticketMessage || "¡GRACIAS POR SU COMPRA!\nVuelva pronto",
+        ticketLogo: ticketLogo || "",
         country: country || "argentina",
         paymentMethods: paymentMethods || [
           { id: "cash", name: "Efectivo", enabled: true },
@@ -133,6 +137,7 @@ export async function POST(req: NextRequest) {
       website: business.website || "",
       cuitRucDni: business.cuitRucDni || "",
       ticketMessage: business.ticketMessage || "",
+      ticketLogo: business.ticketLogo || "",
       country: business.country || "argentina",
       paymentMethods: business.paymentMethods || [],
     });

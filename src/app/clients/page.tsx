@@ -441,21 +441,21 @@ export default function ClientsPage() {
           reason={copy.toastBasic}
         />
       )}
-      <div className="min-h-screen bg-white dark:bg-slate-950">
+      <div className="vp-page">
         <Header user={user} showBackButton />
 
-        <main className="px-4 py-8 mx-auto max-w-7xl">
+        <main className="vp-page-inner">
           <div className="mb-8">
-            <h1 className="mb-2 text-3xl font-bold text-slate-900 dark:text-white">
+            <h1 className="vp-section-title mb-2">
               {copy.title}
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="vp-section-subtitle">
               {copy.subtitle}
             </p>
           </div>
 
           {/* Actions Bar */}
-          <div className="flex flex-col items-center justify-between gap-4 p-4 mb-6 bg-white border rounded-lg border-slate-200 sm:flex-row dark:bg-slate-900 dark:border-slate-800">
+          <div className="flex flex-col items-center justify-between gap-4 p-4 mb-6 vp-card sm:flex-row">
             <div className="relative flex-1 w-full">
               <Search className="absolute w-5 h-5 transform -translate-y-1/2 left-3 top-1/2 text-slate-500 dark:text-slate-400" />
               <input
@@ -463,7 +463,7 @@ export default function ClientsPage() {
                 placeholder={copy.searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full py-2 pl-10 pr-4 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-400"
+                className="vp-input pl-10"
               />
             </div>
             <button
@@ -483,7 +483,7 @@ export default function ClientsPage() {
                 });
               }}
               disabled={!canAddClients}
-              className={`bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap ${
+              className={`vp-button vp-button-primary whitespace-nowrap ${
                 !canAddClients ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
@@ -494,14 +494,14 @@ export default function ClientsPage() {
 
           {/* Form */}
           {showForm && (
-            <div className="p-6 mb-6 bg-white border rounded-lg border-slate-200 dark:bg-slate-900 dark:border-slate-800">
-              <h2 className="mb-4 text-xl font-bold text-slate-900 dark:text-white">
+            <div className="vp-card vp-panel mb-6">
+              <h2 className="mb-4 text-xl font-semibold text-[hsl(var(--vp-text))]">
                 {editingId ? copy.formTitleEdit : copy.formTitleNew}
               </h2>
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-4 mb-4 md:grid-cols-2">
                   <div>
-                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <label className="vp-label">
                       {copy.labels.name}
                     </label>
                     <input
@@ -510,12 +510,12 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      className="vp-input"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <label className="vp-label">
                       {copy.labels.document}
                     </label>
                     <input
@@ -524,11 +524,11 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, document: e.target.value })
                       }
-                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      className="vp-input"
                     />
                   </div>
                   <div>
-                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <label className="vp-label">
                       {copy.labels.phone}
                     </label>
                     <input
@@ -537,11 +537,11 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
                       }
-                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      className="vp-input"
                     />
                   </div>
                   <div>
-                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <label className="vp-label">
                       {copy.labels.email}
                     </label>
                     <input
@@ -550,11 +550,11 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
-                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      className="vp-input"
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <label className="vp-label">
                       {copy.labels.address}
                     </label>
                     <input
@@ -563,14 +563,14 @@ export default function ClientsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, address: e.target.value })
                       }
-                      className="w-full px-4 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      className="vp-input"
                     />
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <button
                     type="submit"
-                    className="px-6 py-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                    className="vp-button vp-button-primary"
                   >
                     {editingId ? copy.actions.update : copy.actions.create}
                   </button>
@@ -580,7 +580,7 @@ export default function ClientsPage() {
                       setShowForm(false);
                       setEditingId(null);
                     }}
-                    className="px-6 py-2 font-medium bg-white border rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
+                    className="vp-button"
                   >
                     {copy.actions.cancel}
                   </button>

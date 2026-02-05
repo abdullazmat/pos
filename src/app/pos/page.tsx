@@ -39,6 +39,20 @@ export default function POSPage() {
   const [businessConfig, setBusinessConfig] = useState<any>(null);
   const clientSelectRef = useRef<HTMLSelectElement>(null);
   const [isCartHydrated, setIsCartHydrated] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const [accountLoading, setAccountLoading] = useState(false);
+  const [accountSummary, setAccountSummary] = useState<{
+    balance: number;
+    transactions: Array<{
+      _id: string;
+      type: "charge" | "payment" | "adjustment";
+      amount: number;
+      description?: string;
+      createdAt?: string;
+    }>;
+  } | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentNote, setPaymentNote] = useState("");
 
   useEffect(() => {
     const saved = localStorage.getItem("pos.cartItems");
@@ -74,6 +88,16 @@ export default function POSPage() {
   }, [selectedClient]);
 
   useEffect(() => {
+    setAccountSummary(null);
+  }, [selectedClient?._id]);
+
+  useEffect(() => {
+    if (!selectedClient && showAccountModal) {
+      setShowAccountModal(false);
+    }
+  }, [selectedClient, showAccountModal]);
+
+  useEffect(() => {
     if (!isCartHydrated) return;
     try {
       localStorage.setItem("pos.cartItems", JSON.stringify(cartItems));
@@ -88,6 +112,30 @@ export default function POSPage() {
     return label === key ? defaultText : label;
   };
 
+  const getPosLabel = (key: string, defaultText: string) => {
+    const label = t(key, "pos");
+    return label === key ? defaultText : label;
+  };
+
+  const accountPaymentLabel = getPosLabel(
+    "ui.paymentOptions.account",
+    currentLanguage === "en"
+      ? "Account"
+      : currentLanguage === "pt"
+        ? "Conta corrente"
+        : "Cuenta corriente",
+  );
+
+  const getAccountTypeLabel = (type: "charge" | "payment" | "adjustment") => {
+    if (type === "charge") {
+      return getPosLabel("ui.accountCharge", "Cargo");
+    }
+    if (type === "payment") {
+      return getPosLabel("ui.accountPayment", "Pago");
+    }
+    return getPosLabel("ui.accountAdjustment", "Ajuste");
+  };
+
   const getPaymentMethodLabel = (method: string): string => {
     const methodMap: Record<string, string> = {
       cash: t("ui.paymentOptions.cash", "pos") || "Cash",
@@ -98,8 +146,107 @@ export default function POSPage() {
         t("ui.paymentOptions.bankTransfer", "pos") || "Bank Transfer",
       qr: t("ui.paymentOptions.qr", "pos") || "QR",
       mercadopago: t("ui.paymentOptions.mercadopago", "pos") || "Mercado Pago",
+      account: accountPaymentLabel,
     };
     return methodMap[method] || method;
+  };
+
+  const formatCurrency = (value: number) => {
+    const localeMap: Record<string, string> = {
+      es: "es-AR",
+      en: "en-US",
+      pt: "pt-BR",
+    };
+    return new Intl.NumberFormat(localeMap[currentLanguage] || "en-US", {
+      style: "currency",
+      currency: "ARS",
+    }).format(value || 0);
+  };
+
+  const accountBalanceValue = accountSummary?.balance ?? 0;
+  const accountBalanceLabel =
+    accountBalanceValue < 0
+      ? getPosLabel("ui.balanceCreditLabel", "Saldo a favor")
+      : getPosLabel("ui.balanceDueLabel", "Saldo pendiente");
+  const accountBalanceDisplay = formatCurrency(Math.abs(accountBalanceValue));
+
+  const fetchClientAccount = async () => {
+    if (!selectedClient?._id) return;
+    setAccountLoading(true);
+    try {
+      const response = await apiFetch(
+        `/api/clients/account?clientId=${selectedClient._id}`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const payload = data.data || data;
+        setAccountSummary({
+          balance: payload.balance || 0,
+          transactions: payload.transactions || [],
+        });
+      } else {
+        toast.error(
+          getPosLabel("ui.accountLoadError", "Error al cargar cuenta"),
+        );
+      }
+    } catch (error) {
+      console.error("Failed to load client account", error);
+      toast.error(getPosLabel("ui.accountLoadError", "Error al cargar cuenta"));
+    } finally {
+      setAccountLoading(false);
+    }
+  };
+
+  const handleOpenAccount = async () => {
+    setShowAccountModal(true);
+    await fetchClientAccount();
+  };
+
+  const handleRegisterPayment = async () => {
+    if (!selectedClient?._id) return;
+    const normalized = Number(paymentAmount.replace(",", "."));
+    if (!Number.isFinite(normalized) || normalized <= 0) {
+      toast.error(getPosLabel("ui.accountInvalidAmount", "Monto inválido"));
+      return;
+    }
+
+    if (accountBalanceValue > 0 && normalized > accountBalanceValue) {
+      toast.error(
+        getPosLabel(
+          "ui.accountOverpayError",
+          "El pago supera el saldo pendiente",
+        ),
+      );
+      return;
+    }
+
+    try {
+      const response = await apiFetch("/api/clients/account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: selectedClient._id,
+          amount: normalized,
+          description: paymentNote,
+        }),
+      });
+
+      if (response.ok) {
+        setPaymentAmount("");
+        setPaymentNote("");
+        await fetchClientAccount();
+        toast.success(getPosLabel("ui.accountPaymentSaved", "Pago registrado"));
+      } else {
+        toast.error(
+          getPosLabel("ui.accountPaymentError", "Error al registrar pago"),
+        );
+      }
+    } catch (error) {
+      console.error("Failed to register payment", error);
+      toast.error(
+        getPosLabel("ui.accountPaymentError", "Error al registrar pago"),
+      );
+    }
   };
 
   const handleCheckoutError = (errorPayload: any) => {
@@ -428,6 +575,15 @@ export default function POSPage() {
 
   const handleCheckout = async (paymentMethod: string) => {
     try {
+      if (paymentMethod === "account" && !selectedClient?._id) {
+        toast.error(
+          getPosLabel(
+            "ui.accountRequiresClient",
+            "Selecciona un cliente para cobrar a cuenta",
+          ),
+        );
+        return;
+      }
       const defaultCustomerName =
         currentLanguage === "en"
           ? "Final Consumer"
@@ -445,6 +601,7 @@ export default function POSPage() {
           customerName: selectedClient?.name || defaultCustomerName,
           customerEmail: selectedClient?.email || undefined,
           customerCuit: selectedClient?.document || undefined,
+          clientId: selectedClient?._id || undefined,
         }),
       });
 
@@ -473,6 +630,10 @@ export default function POSPage() {
       setLastSale(sale);
       setShowReceiptModal(true);
       setCartItems([]);
+
+      if (paymentMethod === "account" && selectedClient?._id) {
+        fetchClientAccount();
+      }
     } catch (error) {
       console.error("Checkout error:", error);
       toast.error(t("ui.checkoutProcessError", "pos"));
@@ -491,16 +652,14 @@ export default function POSPage() {
   const title = (t("ui.title", "pos") as string).replace("{role}", displayName);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
+    <div className="vp-page">
       <Header user={user} showBackButton={true} />
 
-      <main className="px-4 py-6 mx-auto max-w-7xl">
-        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-          {title}
-        </h1>
+      <main className="vp-page-inner">
+        <h1 className="vp-section-title mb-10">{title}</h1>
         {registerOpen === false && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="flex items-center justify-center w-16 h-16 mb-4 bg-orange-600 rounded-full dark:bg-orange-500">
+          <div className="vp-card vp-card-hover p-12 flex flex-col items-center justify-center">
+            <div className="flex items-center justify-center w-16 h-16 mb-4 bg-orange-500 rounded-full">
               <svg
                 className="w-8 h-8 text-white"
                 fill="none"
@@ -515,10 +674,10 @@ export default function POSPage() {
                 />
               </svg>
             </div>
-            <p className="mb-1 text-lg font-semibold text-gray-800 dark:text-white">
+            <p className="mb-1 text-lg font-semibold text-[hsl(var(--vp-text))]">
               {t("ui.closedTitle", "pos")}
             </p>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-[hsl(var(--vp-muted))]">
               {t("ui.closedDescription", "pos")}
             </p>
           </div>
@@ -526,8 +685,8 @@ export default function POSPage() {
 
         {registerOpen === true && (
           <>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <div className="space-y-6 lg:col-span-2">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+              <div className="space-y-8 lg:col-span-2">
                 {/* Client Selector */}
                 <div className="mb-2">
                   <ClientSelector
@@ -536,6 +695,31 @@ export default function POSPage() {
                     selectRef={clientSelectRef}
                     selectedClientId={storedClientId}
                   />
+                  {selectedClient ? (
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 vp-panel-sm bg-[hsl(var(--vp-primary))]/8">
+                      <div className="text-sm text-[hsl(var(--vp-text))]">
+                        <span className="font-semibold">
+                          {getPosLabel("ui.accountLabel", "Cuenta")}
+                        </span>
+                        <span className="mx-2 text-[hsl(var(--vp-muted))]">
+                          •
+                        </span>
+                        <span className="text-[hsl(var(--vp-muted))]">
+                          {accountBalanceLabel}:{" "}
+                          {accountSummary ? accountBalanceDisplay : "--"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleOpenAccount}
+                          className="vp-button vp-button-primary text-xs"
+                        >
+                          {getPosLabel("ui.viewAccount", "Ver cuenta")}
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
                 {/* New Keyboard-First Input */}
                 <KeyboardPOSInput
@@ -546,10 +730,10 @@ export default function POSPage() {
                 {/* Legacy Product Search (collapsible) */}
                 <details className="group">
                   <summary className="list-none cursor-pointer">
-                    <div className="flex items-center justify-between p-4 transition rounded-lg bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700">
+                    <div className="flex items-center justify-between vp-panel-sm vp-hover-surface">
                       <div className="flex items-center gap-2">
                         <svg
-                          className="w-5 h-5 text-gray-600 transition-transform dark:text-gray-400 group-open:rotate-90"
+                          className="w-5 h-5 text-[hsl(var(--vp-muted))] transition-transform group-open:rotate-90"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -561,13 +745,13 @@ export default function POSPage() {
                             d="M9 5l7 7-7 7"
                           />
                         </svg>
-                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                        <span className="font-medium text-[hsl(var(--vp-text))]">
                           {t("ui.advancedSearch", "pos") !== "ui.advancedSearch"
                             ? t("ui.advancedSearch", "pos")
                             : "Advanced Search"}
                         </span>
                       </div>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <span className="text-xs text-[hsl(var(--vp-muted))]">
                         {t("ui.clickToExpand", "pos") !== "ui.clickToExpand"
                           ? t("ui.clickToExpand", "pos")
                           : "Click to expand"}
@@ -586,15 +770,26 @@ export default function POSPage() {
                   onUpdateQuantity={handleUpdateQuantity}
                   onApplyDiscount={handleApplyDiscount}
                   onCheckout={handleCheckout}
+                  additionalPaymentMethods={
+                    selectedClient
+                      ? [
+                          {
+                            id: "account",
+                            name: accountPaymentLabel,
+                            enabled: true,
+                          },
+                        ]
+                      : []
+                  }
                 />
               </div>
             </div>
 
             {/* Receipt Modal */}
             {showReceiptModal && lastSale && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-                <div className="w-full max-w-md overflow-y-auto bg-white dark:bg-slate-900 rounded-lg shadow-lg max-h-96 border border-slate-200 dark:border-slate-700">
-                  <div className="p-6 text-slate-900 dark:text-slate-100">
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 receipt-overlay">
+                <div className="w-full max-w-md overflow-y-auto vp-card max-h-96 border border-[hsl(var(--vp-border))] vp-modal receipt-modal">
+                  <div className="p-6 text-slate-900 dark:text-slate-100 receipt-container">
                     {/* Business Header */}
                     <div className="pb-4 mb-4 text-center border-b border-slate-200 dark:border-slate-700">
                       <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
@@ -735,6 +930,137 @@ export default function POSPage() {
                       >
                         {getReceiptLabel("ui.close", "Close")}
                       </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Account Modal */}
+            {showAccountModal && selectedClient && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+                <div className="w-full max-w-2xl overflow-y-auto bg-white dark:bg-slate-900 rounded-lg shadow-lg max-h-[80vh] border border-slate-200 dark:border-slate-700">
+                  <div className="p-6 text-slate-900 dark:text-slate-100">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-xl font-bold">
+                          {getPosLabel("ui.accountTitle", "Cuenta del cliente")}
+                        </h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          {selectedClient?.name}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setShowAccountModal(false)}
+                        className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-200 rounded-lg hover:bg-slate-300 dark:text-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"
+                      >
+                        {getPosLabel("ui.close", "Cerrar")}
+                      </button>
+                    </div>
+
+                    <div className="mb-5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-slate-600 dark:text-slate-300">
+                          {accountBalanceLabel}
+                        </span>
+                        <span className="text-lg font-semibold text-slate-900 dark:text-white">
+                          {accountBalanceDisplay}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mb-6">
+                      <h4 className="mb-2 text-sm font-semibold text-slate-900 dark:text-white">
+                        {getPosLabel("ui.registerPayment", "Registrar pago")}
+                      </h4>
+                      <div className="grid gap-3 md:grid-cols-3">
+                        <div>
+                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                            {getPosLabel("ui.paymentAmount", "Monto")}
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={paymentAmount}
+                            onChange={(e) => setPaymentAmount(e.target.value)}
+                            className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                            {getPosLabel("ui.paymentNote", "Detalle")}
+                          </label>
+                          <input
+                            value={paymentNote}
+                            onChange={(e) => setPaymentNote(e.target.value)}
+                            className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-3 flex justify-end">
+                        <button
+                          onClick={handleRegisterPayment}
+                          className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-500"
+                        >
+                          {getPosLabel("ui.savePayment", "Guardar pago")}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="mb-2 text-sm font-semibold text-slate-900 dark:text-white">
+                        {getPosLabel("ui.accountMovements", "Movimientos")}
+                      </h4>
+                      {accountLoading ? (
+                        <div className="py-6 text-center text-sm text-slate-500">
+                          {getPosLabel("ui.loading", "Cargando...")}
+                        </div>
+                      ) : accountSummary?.transactions?.length ? (
+                        <div className="space-y-2">
+                          {accountSummary.transactions.map((txn) => (
+                            <div
+                              key={txn._id}
+                              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2"
+                            >
+                              <div>
+                                <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                                  {getAccountTypeLabel(txn.type)}
+                                </div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">
+                                  {txn.description || "-"}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div
+                                  className={`text-sm font-semibold ${
+                                    txn.type === "payment"
+                                      ? "text-emerald-600"
+                                      : txn.type === "charge"
+                                        ? "text-rose-600"
+                                        : "text-slate-700 dark:text-slate-200"
+                                  }`}
+                                >
+                                  {formatCurrency(Math.abs(txn.amount))}
+                                </div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">
+                                  {txn.createdAt
+                                    ? new Date(
+                                        txn.createdAt,
+                                      ).toLocaleDateString(undefined)
+                                    : ""}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="py-6 text-center text-sm text-slate-500">
+                          {getPosLabel(
+                            "ui.noAccountMovements",
+                            "Sin movimientos",
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

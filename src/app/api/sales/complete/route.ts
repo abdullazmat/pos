@@ -13,6 +13,7 @@ import User from "@/lib/models/User";
 import { broadcastStockUpdate } from "@/lib/server/stockStream";
 import { generateNextProductInternalId } from "@/lib/utils/productCodeGenerator";
 import { parseNumberInput } from "@/lib/utils/decimalFormatter";
+import ClientAccountTransaction from "@/lib/models/ClientAccountTransaction";
 
 interface SaleItemRequest {
   productId: string;
@@ -23,7 +24,13 @@ interface SaleItemRequest {
 
 interface CompleteSaleRequest {
   items: SaleItemRequest[];
-  paymentMethod: "cash" | "card" | "transfer" | "mercadopago" | "multiple";
+  paymentMethod:
+    | "cash"
+    | "card"
+    | "transfer"
+    | "mercadopago"
+    | "multiple"
+    | "account";
   invoiceChannel: InvoiceChannel;
   customerName: string;
   customerEmail?: string;
@@ -33,6 +40,7 @@ interface CompleteSaleRequest {
   cashRegisterId?: string;
   notes?: string;
   generateInvoice?: boolean;
+  clientId?: string;
 }
 
 /**
@@ -68,6 +76,7 @@ export async function POST(req: NextRequest) {
       cashRegisterId,
       notes,
       generateInvoice = true,
+      clientId,
     } = body;
 
     // Validation
@@ -348,6 +357,7 @@ export async function POST(req: NextRequest) {
     const sale = new Sale({
       businessId: decoded.businessId,
       userId: decoded.userId,
+      clientId: clientId || undefined,
       items: saleItems,
       subtotal,
       discount: totalDiscount,
@@ -368,6 +378,19 @@ export async function POST(req: NextRequest) {
     });
 
     await sale.save();
+
+    if (paymentMethod === "account" && clientId) {
+      await ClientAccountTransaction.create({
+        businessId: decoded.businessId,
+        clientId,
+        type: "charge",
+        amount: totalWithTax,
+        description: "Venta a cuenta",
+        referenceSaleId: sale._id,
+        referenceInvoiceId: invoice?._id,
+        createdBy: decoded.userId,
+      });
+    }
 
     // Record cash movement when a register is open
     // Attach to open cash register (session) if available or provided
@@ -390,7 +413,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    if (openRegister) {
+    if (openRegister && ["cash", "card", "transfer"].includes(paymentMethod)) {
       try {
         const operatorUser = await User.findById(decoded.userId).select(
           "fullName role",

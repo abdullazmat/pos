@@ -4,33 +4,27 @@ import { useLanguage } from "@/lib/context/LanguageContext";
 export default function Hero() {
   const { t } = useLanguage();
   return (
-    <section className="max-w-2xl">
-      <p className="text-blue-600 dark:text-yellow-400 text-sm font-medium mb-4 tracking-wider">
+    <section className="max-w-2xl vp-reveal">
+      <p className="text-[hsl(var(--vp-primary))] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] mb-4">
         {String(t("hero.badge", "landing"))}
       </p>
 
-      <h1 className="text-6xl font-extrabold leading-tight text-gray-900 dark:text-white">
+      <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold leading-[1.05] tracking-tight text-[hsl(var(--vp-text))]">
         {String(t("hero.titleMain", "landing"))} <br />
-        <span className="text-blue-600 dark:text-yellow-400">
+        <span className="text-[hsl(var(--vp-primary))]">
           {String(t("hero.titleHighlight", "landing"))}
         </span>
       </h1>
 
-      <p className="text-gray-700 dark:text-gray-400 mt-8 text-lg leading-relaxed">
+      <p className="text-[hsl(var(--vp-muted))] mt-6 text-lg md:text-xl leading-relaxed max-w-xl">
         {String(t("hero.description", "landing"))}
       </p>
 
-      <div className="flex flex-wrap gap-4 mt-10">
-        <Link
-          href="/auth/register"
-          className="px-8 py-4 bg-blue-600 rounded-xl font-semibold text-white hover:bg-blue-700 transition-all transform hover:scale-105"
-        >
+      <div className="flex flex-wrap gap-4 mt-8 sm:mt-10">
+        <Link href="/auth/register" className="vp-button vp-button-primary">
           {String(t("hero.startFree", "landing"))}
         </Link>
-        <Link
-          href="#features"
-          className="px-8 py-4 border border-gray-400 dark:border-gray-600 rounded-xl font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-all"
-        >
+        <Link href="#features" className="vp-button">
           {String(t("hero.viewFeatures", "landing"))}
         </Link>
       </div>
