@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { apiFetch } from "@/lib/utils/apiFetch";
+import BrandLogo from "@/components/BrandLogo";
 import {
   BarChart3,
   CheckCircle2,
@@ -262,17 +263,13 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
       <div className="border-b border-[hsl(var(--vp-border))] bg-transparent">
         <div className="px-6 py-4 mx-auto max-w-7xl">
           <div className="flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center gap-3 group">
-              <div className="flex items-center justify-center w-10 h-10 transition shadow-sm rounded-lg border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-soft))] group-hover:scale-105">
-                <span className="text-[hsl(var(--vp-primary))] font-semibold text-lg">
-                  V+
-                </span>
-              </div>
-              <div className="flex flex-col leading-tight">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-semibold text-[hsl(var(--vp-text))]">
-                    VentaPlus
-                  </h1>
+            <Link href="/dashboard" className="group">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <BrandLogo
+                    size="lg"
+                    className="group-hover:scale-105 transition"
+                  />
                   <span
                     className={`vp-pill ${
                       planInfo.plan === "Pro"
@@ -283,7 +280,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                     {planInfo.plan}
                   </span>
                 </div>
-                <p className="text-xs text-[hsl(var(--vp-muted))] mt-0.5">
+                <p className="text-xs text-blue-200">
                   {String(t("header.tagline", "pos"))}
                 </p>
               </div>

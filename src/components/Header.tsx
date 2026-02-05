@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LanguageSelector } from "./LanguageSelector";
 import { useLanguage } from "@/lib/context/LanguageContext";
+import BrandLogo from "@/components/BrandLogo";
 
 export default function Header() {
   const { t } = useLanguage();
@@ -31,20 +32,16 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between gap-4">
           {/* Logo + Tagline */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-sm border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-soft))] group-hover:scale-105 transition">
-              <span className="text-[hsl(var(--vp-primary))] font-semibold text-lg">
-                V+
-              </span>
+          <Link href="/" className="group">
+            <div className="flex items-center">
+              <BrandLogo
+                size="lg"
+                className="group-hover:scale-105 transition"
+              />
             </div>
-            <div>
-              <h1 className="text-[hsl(var(--vp-text))] font-semibold text-lg">
-                VentaPlus
-              </h1>
-              <p className="text-[hsl(var(--vp-muted))] text-xs -mt-1 hidden sm:block">
-                {String(t("subtitle", "pricing"))}
-              </p>
-            </div>
+            <p className="text-blue-200 text-xs mt-1 hidden sm:block">
+              {String(t("subtitle", "pricing"))}
+            </p>
           </Link>
 
           {/* Right Buttons */}

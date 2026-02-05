@@ -2,6 +2,7 @@
 "use client";
 
 import { useLanguage } from "@/lib/context/LanguageContext";
+import BrandLogo from "@/components/BrandLogo";
 
 export default function Footer() {
   const { t } = useLanguage();
@@ -12,15 +13,8 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-10">
           {/* Logo + Description */}
           <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-surface))]">
-                <span className="text-[hsl(var(--vp-primary))] font-semibold text-lg">
-                  V+
-                </span>
-              </div>
-              <span className="text-[hsl(var(--vp-text))] font-semibold text-xl">
-                VentaPlus
-              </span>
+            <div className="mb-4">
+              <BrandLogo size="md" />
             </div>
             <p className="text-[hsl(var(--vp-muted))] text-sm leading-relaxed">
               {String(t("subtitle", "pricing"))}
