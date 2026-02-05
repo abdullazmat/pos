@@ -262,12 +262,8 @@ export default function CategoriesPage() {
           {/* Page Header */}
           <div className="flex items-start justify-between gap-4 mb-6">
             <div>
-              <h1 className="vp-section-title mb-1">
-                {copy.title}
-              </h1>
-              <p className="vp-section-subtitle text-sm">
-                {copy.subtitle}
-              </p>
+              <h1 className="vp-section-title mb-1">{copy.title}</h1>
+              <p className="vp-section-subtitle text-sm">{copy.subtitle}</p>
             </div>
             <div className="inline-flex items-center gap-3 vp-card vp-panel-sm">
               <span className="flex items-center gap-2 text-sm font-medium text-[hsl(var(--vp-text))]">
@@ -283,7 +279,7 @@ export default function CategoriesPage() {
               {currentPlan === "BASIC" && (
                 <button
                   onClick={() => router.push("/upgrade")}
-                    className="vp-button vp-button-ghost text-xs"
+                  className="vp-button vp-button-ghost text-xs"
                 >
                   {copy.upgradeCta}
                 </button>

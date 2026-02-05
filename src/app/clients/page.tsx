@@ -446,12 +446,8 @@ export default function ClientsPage() {
 
         <main className="vp-page-inner">
           <div className="mb-8">
-            <h1 className="vp-section-title mb-2">
-              {copy.title}
-            </h1>
-            <p className="vp-section-subtitle">
-              {copy.subtitle}
-            </p>
+            <h1 className="vp-section-title mb-2">{copy.title}</h1>
+            <p className="vp-section-subtitle">{copy.subtitle}</p>
           </div>
 
           {/* Actions Bar */}
@@ -501,9 +497,7 @@ export default function ClientsPage() {
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-4 mb-4 md:grid-cols-2">
                   <div>
-                    <label className="vp-label">
-                      {copy.labels.name}
-                    </label>
+                    <label className="vp-label">{copy.labels.name}</label>
                     <input
                       type="text"
                       value={formData.name}
@@ -515,9 +509,7 @@ export default function ClientsPage() {
                     />
                   </div>
                   <div>
-                    <label className="vp-label">
-                      {copy.labels.document}
-                    </label>
+                    <label className="vp-label">{copy.labels.document}</label>
                     <input
                       type="text"
                       value={formData.document}
@@ -528,9 +520,7 @@ export default function ClientsPage() {
                     />
                   </div>
                   <div>
-                    <label className="vp-label">
-                      {copy.labels.phone}
-                    </label>
+                    <label className="vp-label">{copy.labels.phone}</label>
                     <input
                       type="text"
                       value={formData.phone}
@@ -541,9 +531,7 @@ export default function ClientsPage() {
                     />
                   </div>
                   <div>
-                    <label className="vp-label">
-                      {copy.labels.email}
-                    </label>
+                    <label className="vp-label">{copy.labels.email}</label>
                     <input
                       type="email"
                       value={formData.email}
@@ -554,9 +542,7 @@ export default function ClientsPage() {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="vp-label">
-                      {copy.labels.address}
-                    </label>
+                    <label className="vp-label">{copy.labels.address}</label>
                     <input
                       type="text"
                       value={formData.address}
@@ -568,10 +554,7 @@ export default function ClientsPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    className="vp-button vp-button-primary"
-                  >
+                  <button type="submit" className="vp-button vp-button-primary">
                     {editingId ? copy.actions.update : copy.actions.create}
                   </button>
                   <button

@@ -340,9 +340,7 @@ export default function ExpensesPage() {
             <h1 className="vp-section-title">
               {copy.title.replace(" - Premium", "")}
             </h1>
-            <p className="vp-section-subtitle text-sm">
-              {copy.description}
-            </p>
+            <p className="vp-section-subtitle text-sm">{copy.description}</p>
           </div>
           <button
             onClick={() => setShowForm(true)}
@@ -357,9 +355,7 @@ export default function ExpensesPage() {
           <div className="vp-card vp-panel mb-6">
             <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
               <div className="md:col-span-2">
-                <label className="vp-label">
-                  {copy.labels.description}
-                </label>
+                <label className="vp-label">{copy.labels.description}</label>
                 <input
                   value={formData.description}
                   onChange={(e) =>
@@ -370,9 +366,7 @@ export default function ExpensesPage() {
                 />
               </div>
               <div>
-                <label className="vp-label">
-                  {copy.labels.amount}
-                </label>
+                <label className="vp-label">{copy.labels.amount}</label>
                 <input
                   type="number"
                   step="0.01"
@@ -385,9 +379,7 @@ export default function ExpensesPage() {
                 />
               </div>
               <div>
-                <label className="vp-label">
-                  {copy.labels.category}
-                </label>
+                <label className="vp-label">{copy.labels.category}</label>
                 <input
                   value={formData.category}
                   onChange={(e) =>
@@ -397,9 +389,7 @@ export default function ExpensesPage() {
                 />
               </div>
               <div>
-                <label className="vp-label">
-                  {copy.labels.paymentMethod}
-                </label>
+                <label className="vp-label">{copy.labels.paymentMethod}</label>
                 <select
                   value={formData.paymentMethod}
                   onChange={(e) =>
@@ -418,9 +408,7 @@ export default function ExpensesPage() {
                 </select>
               </div>
               <div>
-                <label className="vp-label">
-                  {copy.labels.date}
-                </label>
+                <label className="vp-label">{copy.labels.date}</label>
                 <input
                   type="date"
                   value={formData.date}
@@ -431,9 +419,7 @@ export default function ExpensesPage() {
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="vp-label">
-                  {copy.labels.notes}
-                </label>
+                <label className="vp-label">{copy.labels.notes}</label>
                 <textarea
                   value={formData.notes}
                   onChange={(e) =>

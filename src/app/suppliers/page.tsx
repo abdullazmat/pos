@@ -677,9 +677,7 @@ export default function SuppliersPage() {
                 <Truck className="w-8 h-8 text-purple-400" />
                 {copy.title}
               </h1>
-              <p className="vp-section-subtitle">
-                {copy.subtitle}
-              </p>
+              <p className="vp-section-subtitle">{copy.subtitle}</p>
             </div>
 
             {/* Action buttons */}

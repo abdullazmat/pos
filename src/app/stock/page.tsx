@@ -267,12 +267,8 @@ export default function StockPage() {
       <main className="vp-page-inner">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="vp-section-title mb-2">
-              {copy.title}
-            </h1>
-            <p className="vp-section-subtitle">
-              {copy.subtitle}
-            </p>
+            <h1 className="vp-section-title mb-2">{copy.title}</h1>
+            <p className="vp-section-subtitle">{copy.subtitle}</p>
           </div>
           <button
             onClick={async () => {
