@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { useLanguage } from "@/lib/context/LanguageContext";
 import { useTranslatedToast } from "@/lib/hooks/useTranslatedToast";
+import Header from "@/components/Header";
 
 export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -74,10 +75,12 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-[#0b0c0e]">
-      <div className="relative w-full max-w-xl">
-        {/* Card */}
-        <div className="bg-[#0b0c0e] border border-gray-800 rounded-2xl p-8 shadow-2xl">
+    <>
+      <Header />
+      <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--vp-bg-page))] p-4 pt-28 text-[hsl(var(--vp-text))]">
+        <div className="relative w-full max-w-xl">
+          {/* Card */}
+          <div className="rounded-2xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-card))] p-8 shadow-[var(--vp-shadow-soft)]">
           {/* Logo/Icon */}
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600">
@@ -99,21 +102,21 @@ export default function ResetPasswordPage() {
 
           {/* Header */}
           <div className="mb-8 text-center">
-            <h1 className="mb-2 text-2xl font-bold text-white">
+            <h1 className="mb-2 text-2xl font-bold text-[hsl(var(--vp-text))]">
               {String(t("resetPassword.title", "auth"))}
             </h1>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[hsl(var(--vp-muted))]">
               {String(t("resetPassword.subtitle", "auth"))}
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="flex items-start gap-3 p-4 mb-6 border rounded-lg bg-red-500/10 border-red-500/30">
+            <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
               <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <span className="text-xs font-bold text-white">!</span>
               </div>
-              <p className="text-sm text-red-200">{error}</p>
+              <p className="text-sm text-red-600 dark:text-red-200">{error}</p>
             </div>
           )}
 
@@ -121,7 +124,7 @@ export default function ResetPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Password Input */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">
+              <label className="block text-sm font-medium text-[hsl(var(--vp-text))]">
                 {String(t("resetPassword.password", "auth"))}{" "}
                 <span className="text-red-400">*</span>
               </label>
@@ -132,12 +135,12 @@ export default function ResetPasswordPage() {
                   required
                   placeholder={String(t("resetPassword.password", "auth"))}
                   minLength={6}
-                  className="w-full py-3 px-4 pr-10 text-white placeholder-gray-500 bg-[#1a1d21] border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                  className="w-full rounded-lg border border-[hsl(var(--vp-border-soft))] bg-[hsl(var(--vp-bg-card-soft))] px-4 py-3 pr-10 text-[hsl(var(--vp-text))] placeholder:text-[hsl(var(--vp-muted-soft))] transition-all focus:outline-none focus:border-[hsl(var(--vp-primary))] focus:ring-2 focus:ring-[hsl(var(--vp-ring)/0.25)]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3.5 text-gray-500 hover:text-gray-400 transition-colors"
+                  className="absolute right-3 top-3.5 text-[hsl(var(--vp-muted-soft))] transition-colors hover:text-[hsl(var(--vp-muted))]"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -150,7 +153,7 @@ export default function ResetPasswordPage() {
 
             {/* Confirm Password Input */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">
+              <label className="block text-sm font-medium text-[hsl(var(--vp-text))]">
                 {String(t("resetPassword.confirmPassword", "auth"))}{" "}
                 <span className="text-red-400">*</span>
               </label>
@@ -163,12 +166,12 @@ export default function ResetPasswordPage() {
                     t("resetPassword.confirmPassword", "auth"),
                   )}
                   minLength={6}
-                  className="w-full py-3 px-4 pr-10 text-white placeholder-gray-500 bg-[#1a1d21] border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                  className="w-full rounded-lg border border-[hsl(var(--vp-border-soft))] bg-[hsl(var(--vp-bg-card-soft))] px-4 py-3 pr-10 text-[hsl(var(--vp-text))] placeholder:text-[hsl(var(--vp-muted-soft))] transition-all focus:outline-none focus:border-[hsl(var(--vp-primary))] focus:ring-2 focus:ring-[hsl(var(--vp-ring)/0.25)]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3.5 text-gray-500 hover:text-gray-400 transition-colors"
+                  className="absolute right-3 top-3.5 text-[hsl(var(--vp-muted-soft))] transition-colors hover:text-[hsl(var(--vp-muted))]"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -185,7 +188,7 @@ export default function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={loading || !token}
-                className="flex items-center justify-center w-full gap-2 py-3 font-semibold text-white transition-all duration-200 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[hsl(var(--vp-primary))] py-3 font-semibold text-white transition-all duration-200 hover:bg-[hsl(var(--vp-primary-strong))] disabled:bg-[hsl(var(--vp-border))] disabled:text-[hsl(var(--vp-muted))]"
               >
                 {loading ? (
                   <>
@@ -216,14 +219,15 @@ export default function ResetPasswordPage() {
               {/* Back to Login */}
               <Link
                 href="/auth/login"
-                className="block w-full py-3 text-center font-medium text-gray-300 transition-all duration-200 bg-[#1a1d21] border border-gray-700 rounded-lg hover:bg-[#1f2226] hover:border-gray-600"
+                className="block w-full rounded-lg border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-card-soft))] py-3 text-center font-medium text-[hsl(var(--vp-text))] transition-all duration-200 hover:bg-[hsl(var(--vp-bg-hover))]"
               >
                 {String(t("forgotPassword.backToLogin", "auth"))}
               </Link>
             </div>
           </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

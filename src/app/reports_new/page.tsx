@@ -15,6 +15,22 @@ import {
   BarChart3,
 } from "lucide-react";
 
+const getKpiValueSize = (value: string) => {
+  const length = value.replace(/\s/g, "").length;
+  if (length >= 18) return "text-lg md:text-xl";
+  if (length >= 14) return "text-xl md:text-2xl";
+  return "text-2xl md:text-3xl";
+};
+
+const getKpiGroupSize = (values: string[]) => {
+  const maxLength = values.reduce((max, value) => {
+    return Math.max(max, value.replace(/\s/g, "").length);
+  }, 0);
+  if (maxLength >= 18) return "text-lg md:text-xl";
+  if (maxLength >= 14) return "text-xl md:text-2xl";
+  return "text-2xl md:text-3xl";
+};
+
 const REPORTS_COPY = {
   es: {
     title: "Reportes y Estadísticas",
@@ -319,6 +335,14 @@ export default function ReportsPage() {
     return tabLabels[tabId] || "";
   };
 
+  const kpiDisplayValues = {
+    totalSales: loading ? "..." : String(reportData?.totalSales || 52),
+    numSales: loading ? "..." : String(reportData?.totalSales || 52),
+    itemsSold: loading ? "..." : String(reportData?.totalItems || 1577),
+    avgTicket: formatCurrency(reportData?.avgTicket || 0),
+  };
+  const kpiSizeClass = getKpiGroupSize(Object.values(kpiDisplayValues));
+
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
       <Header user={user} showBackButton />
@@ -400,8 +424,10 @@ export default function ReportsPage() {
                       </p>
                       <TrendingUp className="w-8 h-8 text-blue-500" />
                     </div>
-                    <p className="text-3xl font-bold text-gray-900">
-                      {loading ? "..." : reportData?.totalSales || 52}
+                    <p
+                      className={`font-bold text-gray-900 leading-tight tabular-nums whitespace-nowrap ${kpiSizeClass}`}
+                    >
+                      {kpiDisplayValues.totalSales}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
                       {copy.kpis.totalSales.desc}
@@ -415,8 +441,10 @@ export default function ReportsPage() {
                       </p>
                       <ShoppingCart className="w-8 h-8 text-green-500" />
                     </div>
-                    <p className="text-3xl font-bold text-gray-900">
-                      {loading ? "..." : reportData?.totalSales || 52}
+                    <p
+                      className={`font-bold text-gray-900 leading-tight tabular-nums whitespace-nowrap ${kpiSizeClass}`}
+                    >
+                      {kpiDisplayValues.numSales}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
                       {copy.kpis.numSales.desc}
@@ -430,8 +458,10 @@ export default function ReportsPage() {
                       </p>
                       <Package className="w-8 h-8 text-purple-500" />
                     </div>
-                    <p className="text-3xl font-bold text-gray-900">
-                      {loading ? "..." : reportData?.totalItems || 1577}
+                    <p
+                      className={`font-bold text-gray-900 leading-tight tabular-nums whitespace-nowrap ${kpiSizeClass}`}
+                    >
+                      {kpiDisplayValues.itemsSold}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
                       {copy.kpis.itemsSold.desc}
@@ -445,8 +475,10 @@ export default function ReportsPage() {
                       </p>
                       <DollarSign className="w-8 h-8 text-orange-500" />
                     </div>
-                    <p className="text-3xl font-bold text-gray-900">
-                      {formatCurrency(reportData?.avgTicket || 0)}
+                    <p
+                      className={`font-bold text-gray-900 leading-tight tabular-nums whitespace-nowrap ${kpiSizeClass}`}
+                    >
+                      {kpiDisplayValues.avgTicket}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
                       {copy.kpis.avgTicket.desc}

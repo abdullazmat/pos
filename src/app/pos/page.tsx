@@ -921,7 +921,7 @@ export default function POSPage() {
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 no-print">
                       <button
                         onClick={() => window.print()}
                         className="flex items-center justify-center flex-1 gap-2 py-2 font-semibold text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"

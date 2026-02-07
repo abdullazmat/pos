@@ -65,9 +65,9 @@ export default function BrandLogo({ size = "md", className }: BrandLogoProps) {
         </svg>
       </div>
       <span
-        className={`font-semibold ${styles.text} text-white tracking-tight shrink-0 leading-tight`}
+        className={`font-semibold ${styles.text} text-[hsl(var(--vp-text))] tracking-tight shrink-0 leading-tight`}
       >
-        Venta<span className="text-[#7CCBFF]">Plus</span>
+        Venta<span className="text-[hsl(var(--vp-primary))]">Plus</span>
       </span>
     </div>
   );

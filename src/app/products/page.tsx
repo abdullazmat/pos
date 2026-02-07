@@ -1744,10 +1744,10 @@ export default function ProductsPage() {
                   </td>
                   <td className="p-3">
                     <span
-                      className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${
+                      className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold border ${
                         product.active
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-red-500/20 text-red-400"
+                          ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-500/20 dark:text-green-300 dark:border-green-500/30"
+                          : "bg-red-100 text-red-700 border-red-200 dark:bg-red-500/20 dark:text-red-300 dark:border-red-500/30"
                       }`}
                     >
                       {product.active

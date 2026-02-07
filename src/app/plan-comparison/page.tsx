@@ -355,7 +355,9 @@ export default function PlanComparisonPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white dark:bg-slate-950">
-        <div className="text-slate-400">{copy.loading}</div>
+        <div className="text-slate-600 dark:text-slate-400">
+          {copy.loading}
+        </div>
       </div>
     );
   }
@@ -467,14 +469,14 @@ export default function PlanComparisonPage() {
         {free ? (
           <span className="text-green-600 dark:text-green-400">✓</span>
         ) : (
-          <span className="text-slate-400 dark:text-slate-500">✕</span>
+          <span className="text-slate-600 dark:text-slate-500">✕</span>
         )}
       </div>
       <div className="text-center">
         {pro ? (
           <span className="text-green-600 dark:text-green-400">✓</span>
         ) : (
-          <span className="text-slate-400 dark:text-slate-500">✕</span>
+          <span className="text-slate-600 dark:text-slate-500">✕</span>
         )}
       </div>
     </div>

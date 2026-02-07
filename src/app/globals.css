@@ -5,9 +5,9 @@
 @layer base {
   :root {
     color-scheme: light;
-    --vp-primary: 221 83% 56%;
-    --vp-primary-strong: 221 83% 50%;
-    --vp-accent: 202 90% 52%;
+    --vp-primary: 221 70% 48%;
+    --vp-primary-strong: 221 70% 42%;
+    --vp-accent: 202 70% 42%;
     --vp-brand: 222 64% 32%;
     --vp-success: 142 71% 45%;
     --vp-warning: 38 92% 50%;
@@ -25,9 +25,9 @@
     --vp-border: 220 16% 88%;
     --vp-border-soft: 220 16% 90%;
     --vp-text: 222 47% 11%;
-    --vp-muted: 215 16% 47%;
-    --vp-muted-soft: 215 16% 55%;
-    --vp-ring: 221 83% 56%;
+    --vp-muted: 215 18% 38%;
+    --vp-muted-soft: 215 14% 45%;
+    --vp-ring: 221 70% 48%;
     --vp-shadow: 0 16px 44px rgba(15, 23, 42, 0.09);
     --vp-shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.07);
     --vp-shadow-float: 0 24px 60px rgba(15, 23, 42, 0.12);
@@ -877,6 +877,17 @@
 
 /* Print styles for receipts */
 @media print {
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
+  html,
+  body {
+    height: auto;
+    overflow: visible;
+  }
+
   body {
     margin: 0;
     padding: 0;
@@ -884,10 +895,20 @@
   }
 
   body * {
+    display: none !important;
     visibility: hidden !important;
   }
 
-  .no-print {
+  body *:has(.receipt-overlay),
+  body .receipt-overlay,
+  body .receipt-overlay * {
+    display: revert !important;
+    visibility: visible !important;
+  }
+
+  .no-print,
+  .receipt-overlay .no-print,
+  .receipt-modal .no-print {
     display: none !important;
   }
 
@@ -921,14 +942,12 @@
 
   .receipt-modal,
   .receipt-modal * {
-    visibility: visible !important;
+    color: #000 !important;
   }
 
   .receipt-modal {
-    position: absolute;
-    left: 50%;
-    top: 0.5in;
-    transform: translateX(-50%);
+    position: static;
+    margin: 0 auto;
     width: 100%;
     max-width: 80mm;
   }

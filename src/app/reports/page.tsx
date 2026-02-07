@@ -16,6 +16,22 @@ import {
   BarChart3,
 } from "lucide-react";
 
+const getKpiValueSize = (value: string) => {
+  const length = value.replace(/\s/g, "").length;
+  if (length >= 18) return "text-lg md:text-xl";
+  if (length >= 14) return "text-xl md:text-2xl";
+  return "text-2xl md:text-3xl";
+};
+
+const getKpiGroupSize = (values: string[]) => {
+  const maxLength = values.reduce((max, value) => {
+    return Math.max(max, value.replace(/\s/g, "").length);
+  }, 0);
+  if (maxLength >= 18) return "text-lg md:text-xl";
+  if (maxLength >= 14) return "text-xl md:text-2xl";
+  return "text-2xl md:text-3xl";
+};
+
 const REPORTS_COPY = {
   es: {
     title: "Reportes y Estadísticas",
@@ -507,6 +523,28 @@ export default function ReportsPage() {
     return tabLabels[tabId] || "";
   };
 
+  const kpiDisplayValues = {
+    totalRevenue: loading
+      ? "..."
+      : reportData?.totalRevenue
+        ? formatCurrency(reportData.totalRevenue)
+        : "$0",
+    totalSales: loading ? "..." : String(reportData?.totalSales || 0),
+    totalItems: loading
+      ? "..."
+      : String(
+          reportData?.totalItems
+            ? Math.floor(Number(reportData.totalItems))
+            : 0,
+        ),
+    avgTicket: loading
+      ? "..."
+      : reportData?.avgTicket
+        ? formatCurrency(reportData.avgTicket)
+        : "$0.00",
+  };
+  const kpiSizeClass = getKpiGroupSize(Object.values(kpiDisplayValues));
+
   return (
     <div className="vp-page">
       <Header user={user} showBackButton />
@@ -578,12 +616,10 @@ export default function ReportsPage() {
                     {copy.kpis.totalSales.title}
                     <TrendingUp className="w-5 h-5 text-[hsl(var(--vp-primary))]" />
                   </div>
-                  <div className="text-3xl font-semibold text-[hsl(var(--vp-text))]">
-                    {loading
-                      ? "..."
-                      : reportData?.totalRevenue
-                        ? formatCurrency(reportData.totalRevenue)
-                        : "$0"}
+                  <div
+                    className={`font-semibold text-[hsl(var(--vp-text))] leading-tight tabular-nums whitespace-nowrap ${kpiSizeClass}`}
+                  >
+                    {kpiDisplayValues.totalRevenue}
                   </div>
                   <p className="text-xs text-[hsl(var(--vp-muted))] mt-1">
                     {copy.kpis.totalSales.desc}
@@ -595,8 +631,10 @@ export default function ReportsPage() {
                     {copy.kpis.numSales.title}
                     <ShoppingCart className="w-5 h-5 text-[hsl(var(--vp-primary))]" />
                   </div>
-                  <div className="text-3xl font-semibold text-[hsl(var(--vp-text))]">
-                    {loading ? "..." : reportData?.totalSales || 0}
+                  <div
+                    className={`font-semibold text-[hsl(var(--vp-text))] leading-tight tabular-nums whitespace-nowrap ${kpiSizeClass}`}
+                  >
+                    {kpiDisplayValues.totalSales}
                   </div>
                   <p className="text-xs text-[hsl(var(--vp-muted))] mt-1">
                     {copy.kpis.numSales.desc}
@@ -608,12 +646,10 @@ export default function ReportsPage() {
                     {copy.kpis.itemsSold.title}
                     <Package className="w-5 h-5 text-[hsl(var(--vp-primary))]" />
                   </div>
-                  <div className="text-3xl font-semibold text-[hsl(var(--vp-text))]">
-                    {loading
-                      ? "..."
-                      : reportData?.totalItems
-                        ? Math.floor(Number(reportData.totalItems))
-                        : 0}
+                  <div
+                    className={`font-semibold text-[hsl(var(--vp-text))] leading-tight tabular-nums whitespace-nowrap ${kpiSizeClass}`}
+                  >
+                    {kpiDisplayValues.totalItems}
                   </div>
                   <p className="text-xs text-[hsl(var(--vp-muted))] mt-1">
                     {copy.kpis.itemsSold.desc}
@@ -625,12 +661,10 @@ export default function ReportsPage() {
                     {copy.kpis.avgTicket.title}
                     <DollarSign className="w-5 h-5 text-[hsl(var(--vp-primary))]" />
                   </div>
-                  <div className="text-3xl font-semibold text-[hsl(var(--vp-text))]">
-                    {loading
-                      ? "..."
-                      : reportData?.avgTicket
-                        ? formatCurrency(reportData.avgTicket)
-                        : "$0.00"}
+                  <div
+                    className={`font-semibold text-[hsl(var(--vp-text))] leading-tight tabular-nums whitespace-nowrap ${kpiSizeClass}`}
+                  >
+                    {kpiDisplayValues.avgTicket}
                   </div>
                   <p className="text-xs text-[hsl(var(--vp-muted))] mt-1">
                     {copy.kpis.avgTicket.desc}

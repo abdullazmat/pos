@@ -39,7 +39,7 @@ export default function Header() {
                 className="group-hover:scale-105 transition"
               />
             </div>
-            <p className="text-blue-200 text-xs mt-1 hidden sm:block">
+            <p className="text-[hsl(var(--vp-muted))] text-xs mt-1 hidden sm:block">
               {String(t("subtitle", "pricing"))}
             </p>
           </Link>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "@/lib/context/LanguageContext";
 import { useTranslatedToast } from "@/lib/hooks/useTranslatedToast";
+import Header from "@/components/Header";
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -44,9 +45,11 @@ export default function ForgotPasswordPage() {
 
   if (emailSent) {
     return (
-      <div className="flex items-center justify-center min-h-screen p-4 bg-[#0b0c0e]">
-        <div className="relative w-full max-w-xl">
-          <div className="bg-[#0b0c0e] border border-gray-800 rounded-2xl p-8 shadow-2xl">
+      <>
+        <Header />
+        <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--vp-bg-page))] p-4 pt-28 text-[hsl(var(--vp-text))]">
+          <div className="relative w-full max-w-xl">
+            <div className="rounded-2xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-card))] p-8 shadow-[var(--vp-shadow-soft)]">
             {/* Success Icon */}
             <div className="flex justify-center mb-6">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-600">
@@ -68,10 +71,10 @@ export default function ForgotPasswordPage() {
 
             {/* Header */}
             <div className="mb-8 text-center">
-              <h1 className="mb-2 text-2xl font-bold text-white">
+              <h1 className="mb-2 text-2xl font-bold text-[hsl(var(--vp-text))]">
                 {String(t("forgotPassword.emailSent", "auth"))}
               </h1>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[hsl(var(--vp-muted))]">
                 {String(t("forgotPassword.emailSentMessage", "auth"))}
               </p>
             </div>
@@ -79,21 +82,24 @@ export default function ForgotPasswordPage() {
             {/* Back to Login */}
             <Link
               href="/auth/login"
-              className="block w-full py-3 font-medium text-center text-white transition-all duration-200 bg-blue-600 rounded-lg hover:bg-blue-700"
+              className="block w-full rounded-lg bg-[hsl(var(--vp-primary))] py-3 text-center font-medium text-white transition-all duration-200 hover:bg-[hsl(var(--vp-primary-strong))]"
             >
               {String(t("forgotPassword.backToLogin", "auth"))}
             </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-[#0b0c0e]">
-      <div className="relative w-full max-w-xl">
-        {/* Card */}
-        <div className="bg-[#0b0c0e] border border-gray-800 rounded-2xl p-8 shadow-2xl">
+    <>
+      <Header />
+      <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--vp-bg-page))] p-4 pt-28 text-[hsl(var(--vp-text))]">
+        <div className="relative w-full max-w-xl">
+          {/* Card */}
+          <div className="rounded-2xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-card))] p-8 shadow-[var(--vp-shadow-soft)]">
           {/* Logo/Icon */}
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600">
@@ -115,10 +121,10 @@ export default function ForgotPasswordPage() {
 
           {/* Header */}
           <div className="mb-8 text-center">
-            <h1 className="mb-2 text-2xl font-bold text-white">
+            <h1 className="mb-2 text-2xl font-bold text-[hsl(var(--vp-text))]">
               {String(t("forgotPassword.title", "auth"))}
             </h1>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[hsl(var(--vp-muted))]">
               {String(t("forgotPassword.subtitle", "auth"))}
             </p>
           </div>
@@ -127,7 +133,7 @@ export default function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email Input */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">
+              <label className="block text-sm font-medium text-[hsl(var(--vp-text))]">
                 {String(t("forgotPassword.email", "auth"))}{" "}
                 <span className="text-red-400">*</span>
               </label>
@@ -136,7 +142,7 @@ export default function ForgotPasswordPage() {
                 name="email"
                 required
                 placeholder={String(t("forgotPassword.email", "auth"))}
-                className="w-full py-3 px-4 text-white placeholder-gray-500 bg-[#1a1d21] border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                className="w-full rounded-lg border border-[hsl(var(--vp-border-soft))] bg-[hsl(var(--vp-bg-card-soft))] px-4 py-3 text-[hsl(var(--vp-text))] placeholder:text-[hsl(var(--vp-muted-soft))] transition-all focus:outline-none focus:border-[hsl(var(--vp-primary))] focus:ring-2 focus:ring-[hsl(var(--vp-ring)/0.25)]"
               />
             </div>
 
@@ -146,7 +152,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center justify-center w-full gap-2 py-3 font-semibold text-white transition-all duration-200 bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[hsl(var(--vp-primary))] py-3 font-semibold text-white transition-all duration-200 hover:bg-[hsl(var(--vp-primary-strong))] disabled:bg-[hsl(var(--vp-border))] disabled:text-[hsl(var(--vp-muted))]"
               >
                 {loading ? (
                   <>
@@ -177,14 +183,15 @@ export default function ForgotPasswordPage() {
               {/* Back to Login */}
               <Link
                 href="/auth/login"
-                className="block w-full py-3 text-center font-medium text-gray-300 transition-all duration-200 bg-[#1a1d21] border border-gray-700 rounded-lg hover:bg-[#1f2226] hover:border-gray-600"
+                className="block w-full rounded-lg border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-card-soft))] py-3 text-center font-medium text-[hsl(var(--vp-text))] transition-all duration-200 hover:bg-[hsl(var(--vp-bg-hover))]"
               >
                 {String(t("forgotPassword.backToLogin", "auth"))}
               </Link>
             </div>
           </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

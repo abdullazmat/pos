@@ -280,7 +280,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                     {planInfo.plan}
                   </span>
                 </div>
-                <p className="text-xs text-blue-200">
+                <p className="text-xs text-[hsl(var(--vp-muted))]">
                   {String(t("header.tagline", "pos"))}
                 </p>
               </div>

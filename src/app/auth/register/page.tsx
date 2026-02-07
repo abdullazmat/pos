@@ -7,6 +7,7 @@ import { Eye, EyeOff, Mail, Lock, User, Check, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/lib/context/LanguageContext";
 import { useTranslatedError } from "@/lib/hooks/useTranslatedError";
 import { useTranslatedToast } from "@/lib/hooks/useTranslatedToast";
+import Header from "@/components/Header";
 
 type SubscriptionPlan = "free" | "paid";
 
@@ -104,53 +105,57 @@ export default function RegisterPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0b0c0e] flex items-center justify-center p-4 py-8">
-      <div className="relative w-full max-w-2xl">
-        {/* Card */}
-        <div className="bg-[#0b0c0e] border border-gray-800 rounded-2xl p-8 shadow-2xl">
-          {/* Logo/Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600">
-              <svg
-                className="w-9 h-9 text-white"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white mb-2">
-              {String(t("register.title", "auth"))}
-            </h1>
-            <p className="text-gray-400 text-sm">
-              {String(t("register.title", "auth"))}
-            </p>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
-              <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-white text-xs font-bold">!</span>
+    <>
+      <Header />
+      <div className="min-h-screen bg-[hsl(var(--vp-bg-page))] flex items-center justify-center p-4 py-8 pt-28 text-[hsl(var(--vp-text))]">
+        <div className="relative w-full max-w-2xl">
+          {/* Card */}
+          <div className="rounded-2xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-card))] p-8 shadow-[var(--vp-shadow-soft)]">
+            {/* Logo/Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600">
+                <svg
+                  className="w-9 h-9 text-white"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
               </div>
-              <p className="text-red-200 text-sm">{error}</p>
             </div>
-          )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="mb-2 text-2xl font-bold text-[hsl(var(--vp-text))]">
+                {String(t("register.title", "auth"))}
+              </h1>
+              <p className="text-sm text-[hsl(var(--vp-muted))]">
+                {String(t("register.title", "auth"))}
+              </p>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-3">
+                <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-white text-xs font-bold">!</span>
+                </div>
+                <p className="text-sm text-red-600 dark:text-red-200">
+                  {error}
+                </p>
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
             {/* Business Name and Owner Name Row */}
             <div className="grid md:grid-cols-2 gap-4">
               {/* Business Name */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-300">
+                <label className="block text-sm font-medium text-[hsl(var(--vp-text))]">
                   {String(t("register.fullName", "auth"))}{" "}
                   <span className="text-red-400">*</span>
                 </label>
@@ -159,13 +164,13 @@ export default function RegisterPage() {
                   name="businessName"
                   required
                   placeholder="Ej: Minimarket El Sol"
-                  className="w-full py-3 px-4 text-white placeholder-gray-500 bg-[#1a1d21] border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                  className="w-full rounded-lg border border-[hsl(var(--vp-border-soft))] bg-[hsl(var(--vp-bg-card-soft))] px-4 py-3 text-[hsl(var(--vp-text))] placeholder:text-[hsl(var(--vp-muted-soft))] transition-all focus:outline-none focus:border-[hsl(var(--vp-primary))] focus:ring-2 focus:ring-[hsl(var(--vp-ring)/0.25)]"
                 />
               </div>
 
               {/* Owner Full Name */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-300">
+                <label className="block text-sm font-medium text-[hsl(var(--vp-text))]">
                   {String(t("register.fullName", "auth"))}{" "}
                   <span className="text-red-400">*</span>
                 </label>
@@ -174,7 +179,7 @@ export default function RegisterPage() {
                   name="fullName"
                   required
                   placeholder="Tu nombre completo"
-                  className="w-full py-3 px-4 text-white placeholder-gray-500 bg-[#1a1d21] border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                  className="w-full rounded-lg border border-[hsl(var(--vp-border-soft))] bg-[hsl(var(--vp-bg-card-soft))] px-4 py-3 text-[hsl(var(--vp-text))] placeholder:text-[hsl(var(--vp-muted-soft))] transition-all focus:outline-none focus:border-[hsl(var(--vp-primary))] focus:ring-2 focus:ring-[hsl(var(--vp-ring)/0.25)]"
                 />
               </div>
             </div>
@@ -183,27 +188,27 @@ export default function RegisterPage() {
             <div className="grid md:grid-cols-2 gap-4">
               {/* Email */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-300">
+                <label className="block text-sm font-medium text-[hsl(var(--vp-text))]">
                   {String(t("register.email", "auth"))}
                 </label>
                 <input
                   type="email"
                   name="email"
                   placeholder="email@ejemplo.com"
-                  className="w-full py-3 px-4 text-white placeholder-gray-500 bg-[#1a1d21] border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                  className="w-full rounded-lg border border-[hsl(var(--vp-border-soft))] bg-[hsl(var(--vp-bg-card-soft))] px-4 py-3 text-[hsl(var(--vp-text))] placeholder:text-[hsl(var(--vp-muted-soft))] transition-all focus:outline-none focus:border-[hsl(var(--vp-primary))] focus:ring-2 focus:ring-[hsl(var(--vp-ring)/0.25)]"
                 />
               </div>
 
               {/* Phone */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-300">
+                <label className="block text-sm font-medium text-[hsl(var(--vp-text))]">
                   Teléfono
                 </label>
                 <input
                   type="tel"
                   name="phone"
                   placeholder="+56 9 1234 5678"
-                  className="w-full py-3 px-4 text-white placeholder-gray-500 bg-[#1a1d21] border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                  className="w-full rounded-lg border border-[hsl(var(--vp-border-soft))] bg-[hsl(var(--vp-bg-card-soft))] px-4 py-3 text-[hsl(var(--vp-text))] placeholder:text-[hsl(var(--vp-muted-soft))] transition-all focus:outline-none focus:border-[hsl(var(--vp-primary))] focus:ring-2 focus:ring-[hsl(var(--vp-ring)/0.25)]"
                 />
               </div>
             </div>
@@ -212,7 +217,7 @@ export default function RegisterPage() {
             <div className="grid md:grid-cols-2 gap-4">
               {/* Username */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-300">
+                <label className="block text-sm font-medium text-[hsl(var(--vp-text))]">
                   {String(t("login.email", "auth"))}{" "}
                   <span className="text-red-400">*</span>
                 </label>
@@ -221,16 +226,16 @@ export default function RegisterPage() {
                   name="username"
                   required
                   placeholder="admin"
-                  className="w-full py-3 px-4 text-white placeholder-gray-500 bg-[#1a1d21] border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                  className="w-full rounded-lg border border-[hsl(var(--vp-border-soft))] bg-[hsl(var(--vp-bg-card-soft))] px-4 py-3 text-[hsl(var(--vp-text))] placeholder:text-[hsl(var(--vp-muted-soft))] transition-all focus:outline-none focus:border-[hsl(var(--vp-primary))] focus:ring-2 focus:ring-[hsl(var(--vp-ring)/0.25)]"
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-[hsl(var(--vp-muted-soft))]">
                   Este será tu usuario para iniciar sesión
                 </p>
               </div>
 
               {/* Password */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-300">
+                <label className="block text-sm font-medium text-[hsl(var(--vp-text))]">
                   {String(t("register.password", "auth"))}{" "}
                   <span className="text-red-400">*</span>
                 </label>
@@ -241,12 +246,12 @@ export default function RegisterPage() {
                     required
                     minLength={6}
                     placeholder="Mínimo 6 caracteres"
-                    className="w-full py-3 px-4 pr-10 text-white placeholder-gray-500 bg-[#1a1d21] border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                    className="w-full rounded-lg border border-[hsl(var(--vp-border-soft))] bg-[hsl(var(--vp-bg-card-soft))] px-4 py-3 pr-10 text-[hsl(var(--vp-text))] placeholder:text-[hsl(var(--vp-muted-soft))] transition-all focus:outline-none focus:border-[hsl(var(--vp-primary))] focus:ring-2 focus:ring-[hsl(var(--vp-ring)/0.25)]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3.5 text-gray-500 hover:text-gray-400 transition-colors"
+                    className="absolute right-3 top-3.5 text-[hsl(var(--vp-muted-soft))] transition-colors hover:text-[hsl(var(--vp-muted))]"
                   >
                     {showPassword ? (
                       <EyeOff className="w-5 h-5" />
@@ -259,7 +264,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Plan Gratuito Badge */}
-            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg flex items-start gap-3 mt-4">
+            <div className="mt-4 flex items-start gap-3 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
               <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0">
                 <svg
                   className="w-5 h-5 text-white"
@@ -274,30 +279,21 @@ export default function RegisterPage() {
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="text-blue-400 font-semibold text-sm mb-1">
+                <p className="mb-1 text-sm font-semibold text-blue-600 dark:text-blue-400">
                   Plan Gratuito Incluido
                 </p>
-                <p className="text-gray-400 text-xs leading-relaxed">
+                <p className="text-xs leading-relaxed text-[hsl(var(--vp-muted))]">
                   Empieza gratis con 100 productos y 2 usuarios. Puedes
                   actualizar a Pro cuando quieras.
                 </p>
               </div>
             </div>
 
-            {/* Back Button */}
-            <button
-              type="button"
-              onClick={() => router.push("/")}
-              className="w-full py-3 mt-6 font-medium text-gray-300 transition-all duration-200 bg-[#1a1d21] border border-gray-700 rounded-lg hover:bg-[#1f2226] hover:border-gray-600"
-            >
-              {String(t("backToTop", "common"))}
-            </button>
-
             {/* Sign Up Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 font-semibold text-white transition-all duration-200 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-70 flex items-center justify-center gap-2"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[hsl(var(--vp-primary))] py-3 font-semibold text-white transition-all duration-200 hover:bg-[hsl(var(--vp-primary-strong))] disabled:bg-[hsl(var(--vp-border))] disabled:text-[hsl(var(--vp-muted))]"
             >
               {loading ? (
                 <>
@@ -324,40 +320,40 @@ export default function RegisterPage() {
                 String(t("register.submit", "auth"))
               )}
             </button>
-          </form>
+            </form>
 
-          {/* Divider */}
-          <div className="mt-6 relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
+            {/* Divider */}
+            <div className="mt-6 relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[hsl(var(--vp-border))]"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-[hsl(var(--vp-bg-card))] text-[hsl(var(--vp-muted))]">
+                  {String(t("register.haveAccount", "auth"))}
+                </span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-slate-800/50 text-gray-400">
-                {String(t("register.haveAccount", "auth"))}
-              </span>
-            </div>
+
+            {/* Login Link */}
+            <p className="mt-6 text-center text-[hsl(var(--vp-muted))]">
+              {String(t("register.haveAccount", "auth"))}{" "}
+              <Link
+                href="/auth/login"
+                className="font-medium text-[hsl(var(--vp-primary))] transition-colors hover:text-[hsl(var(--vp-primary-strong))]"
+              >
+                {String(t("register.loginLink", "auth"))}
+              </Link>
+            </p>
           </div>
 
-          {/* Login Link */}
-          <p className="mt-6 text-center text-gray-300">
-            {String(t("register.haveAccount", "auth"))}{" "}
-            <Link
-              href="/auth/login"
-              className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
-            >
-              {String(t("register.loginLink", "auth"))}
-            </Link>
+          {/* Footer Text */}
+          <p className="mt-6 text-center text-xs text-[hsl(var(--vp-muted-soft))]">
+            {String(t("allRightsReserved", "common"))}
           </p>
         </div>
 
-        {/* Footer Text */}
-        <p className="text-center text-gray-400 text-xs mt-6">
-          {String(t("allRightsReserved", "common"))}
-        </p>
-      </div>
-
-      {/* CSS Animations */}
-      <style>{`
+        {/* CSS Animations */}
+        <style>{`
         @keyframes blob {
           0%, 100% { transform: translate(0, 0) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }
@@ -373,6 +369,7 @@ export default function RegisterPage() {
           animation-delay: 4s;
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }
