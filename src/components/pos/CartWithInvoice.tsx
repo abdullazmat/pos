@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { InvoiceChannel } from "@/lib/models/Invoice";
 import { toast } from "react-toastify";
 import { useLanguage } from "@/lib/context/LanguageContext";
+import { formatARS } from "@/lib/utils/currency";
 import {
   formatQuantity,
   parseQuantity,
@@ -65,16 +66,37 @@ export default function Cart({
   const [quantityInputs, setQuantityInputs] = useState<Record<string, string>>(
     {},
   );
+  const [discountInputs, setDiscountInputs] = useState<Record<string, string>>(
+    {},
+  );
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.quantity * item.unitPrice,
-    0,
-  );
-  const totalDiscount = items.reduce((sum, item) => sum + item.discount, 0);
-  const taxableBase = Math.max(0, subtotal - totalDiscount);
+  const roundPeso = (value: number) => Math.round(value);
+  const getDiscountValue = (item: CartItem) => {
+    const rawInput = discountInputs[item.productId];
+    if (rawInput !== undefined) {
+      const parsed = Number.parseFloat(rawInput.replace(",", "."));
+      if (Number.isFinite(parsed)) {
+        return Math.max(0, roundPeso(parsed));
+      }
+    }
+    return Math.max(
+      0,
+      roundPeso(Number.isFinite(item.discount) ? item.discount : 0),
+    );
+  };
+  const getLineSubtotal = (item: CartItem) =>
+    roundPeso(item.quantity * item.unitPrice);
+  const getLineDiscount = (item: CartItem) => getDiscountValue(item);
+  const getLineTotal = (item: CartItem) =>
+    Math.max(0, getLineSubtotal(item) - getLineDiscount(item));
+
+  const subtotal = items.reduce((sum, item) => sum + getLineSubtotal(item), 0);
+  const total = items.reduce((sum, item) => sum + getLineTotal(item), 0);
+  const totalDiscount = Math.max(0, subtotal - total);
+  const taxableBase = Math.max(0, total);
   const tax = Math.round(taxableBase * 0.21 * 100) / 100;
-  const total = taxableBase + tax;
+  const totalWithTax = taxableBase + tax;
 
   useEffect(() => {
     setQuantityInputs((prev) => {
@@ -90,6 +112,22 @@ export default function Cart({
       return next;
     });
   }, [items, editingProductId]);
+
+  useEffect(() => {
+    setDiscountInputs((prev) => {
+      const next: Record<string, string> = {};
+      items.forEach((item) => {
+        if (prev[item.productId] !== undefined) {
+          next[item.productId] = prev[item.productId];
+          return;
+        }
+        next[item.productId] = String(
+          Number.isFinite(item.discount) ? item.discount : 0,
+        );
+      });
+      return next;
+    });
+  }, [items]);
 
   const handleCheckout = useCallback(async () => {
     if (!customerName.trim()) {
@@ -116,7 +154,7 @@ export default function Cart({
         customerEmail,
         customerCuit,
         ivaType,
-        discount: totalDiscount,
+        discount: 0,
       });
     } finally {
       setIsLoading(false);
@@ -128,15 +166,10 @@ export default function Cart({
     customerEmail,
     customerCuit,
     ivaType,
-    totalDiscount,
     onCheckout,
   ]);
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("es-AR", {
-      style: "currency",
-      currency: "ARS",
-    }).format(value);
+  const formatCurrency = (value: number) => formatARS(value);
 
   return (
     <div className="vp-card vp-card-hover p-7 h-full flex flex-col">
@@ -358,7 +391,7 @@ export default function Cart({
                     className="vp-input text-xs py-1.5"
                   />
                   {item.isSoldByWeight && (
-                    <p className="text-[11px] text-[hsl(var(--vp-muted))] mt-1">
+                    <p className="text-[11px] text-[hsl(var(--vp-muted))] mt-1 whitespace-normal break-words">
                       {t("ui.weightQuantityHint", "pos")}
                     </p>
                   )}
@@ -368,21 +401,28 @@ export default function Cart({
                   <input
                     type="number"
                     min="0"
-                    step="0.01"
-                    value={item.discount}
-                    onChange={(e) =>
+                    step="1"
+                    inputMode="numeric"
+                    value={discountInputs[item.productId] ?? item.discount}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDiscountInputs((prev) => ({
+                        ...prev,
+                        [item.productId]: value,
+                      }));
+                      const parsed = Number.parseFloat(value.replace(",", "."));
                       onApplyDiscount(
                         item.productId,
-                        parseFloat(e.target.value),
-                      )
-                    }
+                        Number.isFinite(parsed) ? parsed : 0,
+                      );
+                    }}
                     className="vp-input text-xs py-1.5"
                   />
                 </div>
                 <div>
                   <label className="vp-label text-xs">Total</label>
                   <div className="px-2 py-1 rounded text-xs font-semibold text-right bg-[hsl(var(--vp-bg-card-soft))] border border-[hsl(var(--vp-border))]">
-                    {formatCurrency(Math.max(0, item.total))}
+                    {formatCurrency(getLineTotal(item))}
                   </div>
                 </div>
               </div>
@@ -402,7 +442,7 @@ export default function Cart({
             {totalDiscount > 0 && (
               <div className="flex justify-between text-rose-500">
                 <span>{t("ui.totalDiscount", "pos")}:</span>
-                <span>-{formatCurrency(totalDiscount)}</span>
+                <span>-{formatARS(totalDiscount)}</span>
               </div>
             )}
             <div className="flex justify-between text-[hsl(var(--vp-muted))]">
@@ -412,7 +452,7 @@ export default function Cart({
             <div className="flex justify-between text-xl font-semibold text-[hsl(var(--vp-text))] bg-[hsl(var(--vp-primary)/0.12)] p-3 rounded-lg border border-[hsl(var(--vp-border))] mt-2">
               <span>{t("ui.total", "pos")}:</span>
               <span className="text-[hsl(var(--vp-primary))]">
-                {formatCurrency(total)}
+                {formatCurrency(totalWithTax)}
               </span>
             </div>
           </div>

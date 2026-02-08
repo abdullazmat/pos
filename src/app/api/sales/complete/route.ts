@@ -10,9 +10,11 @@ import Payment from "@/lib/models/Payment";
 import MercadoPagoService from "@/lib/services/payment/MercadoPagoService";
 import { verifyToken } from "@/lib/utils/jwt";
 import User from "@/lib/models/User";
+import Client from "@/lib/models/Client";
 import { broadcastStockUpdate } from "@/lib/server/stockStream";
 import { generateNextProductInternalId } from "@/lib/utils/productCodeGenerator";
 import { parseNumberInput } from "@/lib/utils/decimalFormatter";
+import { clampDiscountLimit } from "@/lib/utils/discounts";
 import ClientAccountTransaction from "@/lib/models/ClientAccountTransaction";
 
 interface SaleItemRequest {
@@ -117,10 +119,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const userDiscountLimit =
-      typeof saleUser.discountLimit === "number"
-        ? saleUser.discountLimit
-        : null;
+    const userDiscountLimit = clampDiscountLimit(saleUser.discountLimit);
+    let clientDiscountLimit: number | null = null;
+    if (clientId) {
+      const saleClient = await Client.findOne({
+        _id: clientId,
+        business: decoded.businessId,
+      }).select("discountLimit");
+      clientDiscountLimit = clampDiscountLimit(saleClient?.discountLimit);
+    }
+    const effectiveDiscountLimit =
+      typeof userDiscountLimit === "number" &&
+      typeof clientDiscountLimit === "number"
+        ? Math.min(userDiscountLimit, clientDiscountLimit)
+        : typeof userDiscountLimit === "number"
+          ? userDiscountLimit
+          : typeof clientDiscountLimit === "number"
+            ? clientDiscountLimit
+            : null;
 
     const rawSaleDiscount = discount as unknown;
     const normalizedSaleDiscount =
@@ -241,8 +257,8 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      if (userDiscountLimit !== null) {
-        const maxAllowed = (userDiscountLimit / 100) * lineSubtotal;
+      if (effectiveDiscountLimit !== null) {
+        const maxAllowed = (effectiveDiscountLimit / 100) * lineSubtotal;
         if (normalizedDiscount > maxAllowed) {
           return NextResponse.json(
             { error: "Discount exceeds user limit" },
@@ -293,8 +309,8 @@ export async function POST(req: NextRequest) {
 
     const totalDiscount = lineDiscountTotal + normalizedSaleDiscount;
 
-    if (userDiscountLimit !== null) {
-      const maxAllowedTotal = (userDiscountLimit / 100) * grossSubtotal;
+    if (effectiveDiscountLimit !== null) {
+      const maxAllowedTotal = (effectiveDiscountLimit / 100) * grossSubtotal;
       if (totalDiscount > maxAllowedTotal) {
         return NextResponse.json(
           { error: "Discount exceeds user limit" },

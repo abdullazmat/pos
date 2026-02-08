@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { formatARS } from "@/lib/utils/currency";
 import {
   parseQuantity,
   formatQuantity,
@@ -48,6 +49,9 @@ export default function Cart({
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
   const [isLoading, setIsLoading] = useState(false);
   const [quantityInputs, setQuantityInputs] = useState<Record<string, string>>(
+    {},
+  );
+  const [discountInputs, setDiscountInputs] = useState<Record<string, string>>(
     {},
   );
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
@@ -124,12 +128,45 @@ export default function Cart({
     });
   }, [items, editingProductId]);
 
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.quantity * item.unitPrice,
-    0,
-  );
-  const totalDiscount = items.reduce((sum, item) => sum + item.discount, 0);
-  const total = Math.max(0, subtotal - totalDiscount);
+  useEffect(() => {
+    setDiscountInputs((prev) => {
+      const next: Record<string, string> = {};
+      items.forEach((item) => {
+        if (prev[item.productId] !== undefined) {
+          next[item.productId] = prev[item.productId];
+          return;
+        }
+        next[item.productId] = String(
+          Number.isFinite(item.discount) ? item.discount : 0,
+        );
+      });
+      return next;
+    });
+  }, [items]);
+
+  const roundPeso = (value: number) => Math.round(value);
+  const getDiscountValue = (item: CartItem) => {
+    const rawInput = discountInputs[item.productId];
+    if (rawInput !== undefined) {
+      const parsed = Number.parseFloat(rawInput.replace(",", "."));
+      if (Number.isFinite(parsed)) {
+        return Math.max(0, roundPeso(parsed));
+      }
+    }
+    return Math.max(
+      0,
+      roundPeso(Number.isFinite(item.discount) ? item.discount : 0),
+    );
+  };
+  const getLineSubtotal = (item: CartItem) =>
+    roundPeso(item.quantity * item.unitPrice);
+  const getLineDiscount = (item: CartItem) => getDiscountValue(item);
+  const getLineTotal = (item: CartItem) =>
+    Math.max(0, getLineSubtotal(item) - getLineDiscount(item));
+
+  const subtotal = items.reduce((sum, item) => sum + getLineSubtotal(item), 0);
+  const total = items.reduce((sum, item) => sum + getLineTotal(item), 0);
+  const totalDiscount = Math.max(0, subtotal - total);
 
   const handleCheckout = useCallback(async () => {
     setIsLoading(true);
@@ -231,7 +268,7 @@ export default function Cart({
                     {item.productName}
                   </h3>
                   <p className="text-sm text-[hsl(var(--vp-muted))]">
-                    ${item.unitPrice.toFixed(2)} x {item.quantity}
+                    {formatARS(item.unitPrice)} x {item.quantity}
                   </p>
                 </div>
                 <button
@@ -380,7 +417,7 @@ export default function Cart({
                     className="vp-input text-sm h-9"
                   />
                   {item.isSoldByWeight && (
-                    <p className="text-xs text-[hsl(var(--vp-muted))] mt-1">
+                    <p className="text-xs text-[hsl(var(--vp-muted))] mt-1 whitespace-normal break-words">
                       {t("ui.weightQuantityHint", "pos")}
                     </p>
                   )}
@@ -390,24 +427,28 @@ export default function Cart({
                   <input
                     type="number"
                     min="0"
-                    step="0.01"
-                    value={item.discount}
-                    onChange={(e) =>
+                    step="1"
+                    inputMode="numeric"
+                    value={discountInputs[item.productId] ?? item.discount}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDiscountInputs((prev) => ({
+                        ...prev,
+                        [item.productId]: value,
+                      }));
+                      const parsed = Number.parseFloat(value.replace(",", "."));
                       onApplyDiscount(
                         item.productId,
-                        parseFloat(e.target.value) || 0,
-                      )
-                    }
+                        Number.isFinite(parsed) ? parsed : 0,
+                      );
+                    }}
                     className="vp-input text-sm h-9"
                   />
                 </div>
                 <div>
                   <label className="vp-label">{t("ui.total", "pos")}</label>
                   <div className="vp-input-like text-sm h-9">
-                    {Math.max(
-                      0,
-                      item.quantity * item.unitPrice - item.discount,
-                    ).toFixed(2)}
+                    {formatARS(getLineTotal(item))}
                   </div>
                 </div>
               </div>
@@ -421,17 +462,17 @@ export default function Cart({
           <div className="space-y-3 mb-4">
             <div className="flex justify-between text-[hsl(var(--vp-muted))]">
               <span>{t("ui.subtotal", "pos")}:</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>{formatARS(subtotal)}</span>
             </div>
             {totalDiscount > 0 && (
               <div className="flex justify-between text-red-500">
                 <span>{t("ui.totalDiscount", "pos")}:</span>
-                <span>-${totalDiscount.toFixed(2)}</span>
+                <span>-{formatARS(totalDiscount)}</span>
               </div>
             )}
             <div className="flex justify-between text-2xl font-semibold text-[hsl(var(--vp-text))] bg-[hsl(var(--vp-primary))]/10 p-4 rounded-lg border border-[hsl(var(--vp-primary))]/30">
               <span>{t("ui.total", "pos")}:</span>
-              <span>${total.toFixed(2)}</span>
+              <span>{formatARS(total)}</span>
             </div>
           </div>
 

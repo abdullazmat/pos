@@ -6,9 +6,11 @@ import {
   useState,
   useEffect,
   useCallback,
+  Fragment,
 } from "react";
 
-type Language = "es" | "en" | "pt";
+const SUPPORTED_LANGUAGES = ["es", "en", "pt"] as const;
+type Language = (typeof SUPPORTED_LANGUAGES)[number];
 
 interface LanguageContextType {
   currentLanguage: Language;
@@ -645,6 +647,9 @@ const translationsEs = {
       scanPlaceholder: "Escanear o ingresar código de barras... (F6)",
       searchPlaceholder: "Buscar producto por nombre o código... (F5)",
       searching: "Buscando...",
+      statusOnline: "En línea",
+      statusSync: "Sync 0s",
+      statusPrinter: "Impresora OK",
       tipsTitle: "Tips rápidos:",
       tipsBodyStart: "Usa el lector de barras o busca por nombre. Navega con",
       tipsBodyEnd: "y presiona",
@@ -672,7 +677,7 @@ const translationsEs = {
         "El descuento no puede superar el subtotal de la línea",
       discountExceedsUserLimit: "El descuento supera tu límite",
       weightQuantityHint:
-        "Use punto para decimales y coma para miles (ej.: 1.560 o 1,560)",
+        "Use . para decimales y , para miles (ej.: 1.560 o 1,560)",
       paymentMethod: "Método de Pago",
       paymentOptions: {
         cash: "Efectivo",
@@ -750,6 +755,18 @@ const translationsEs = {
       searchCustomer: "Buscar cliente",
       advancedSearch: "Búsqueda Avanzada",
       clickToExpand: "Haga clic para expandir",
+    },
+    receipt: {
+      date: "Fecha:",
+      time: "Hora:",
+      items: "Artículos",
+      noItems: "Sin artículos",
+      subtotal: "Subtotal:",
+      discount: "Descuento:",
+      total: "Total:",
+      paymentMethod: "Método de Pago:",
+      print: "Imprimir",
+      close: "Cerrar",
     },
   },
 };
@@ -1358,6 +1375,9 @@ const translationsEn = {
       scanPlaceholder: "Scan or enter barcode... (F6)",
       searchPlaceholder: "Search product by name or code... (F5)",
       searching: "Searching...",
+      statusOnline: "Online",
+      statusSync: "Sync 0s",
+      statusPrinter: "Printer OK",
       tipsTitle: "Quick tips:",
       tipsBodyStart: "Use the barcode scanner or search by name. Navigate with",
       tipsBodyEnd: "and press",
@@ -1384,7 +1404,7 @@ const translationsEn = {
       discountExceedsSubtotal: "Discount cannot exceed line subtotal",
       discountExceedsUserLimit: "Discount exceeds your limit",
       weightQuantityHint:
-        "Use period for decimals and comma for thousands (e.g., 1.560 or 1,560)",
+        "Use . for decimals, , for thousands (e.g., 1.560 or 1,560)",
       paymentMethod: "Payment Method",
       paymentOptions: {
         cash: "Cash",
@@ -1458,6 +1478,18 @@ const translationsEn = {
       searchCustomer: "Search customer",
       advancedSearch: "Advanced Search",
       clickToExpand: "Click to expand",
+    },
+    receipt: {
+      date: "Date:",
+      time: "Time:",
+      items: "Items",
+      noItems: "No items",
+      subtotal: "Subtotal:",
+      discount: "Discount:",
+      total: "Total:",
+      paymentMethod: "Payment Method:",
+      print: "Print",
+      close: "Close",
     },
   },
 };
@@ -2066,6 +2098,9 @@ const translationsPt = {
       scanPlaceholder: "Escanear ou digitar código de barras... (F6)",
       searchPlaceholder: "Buscar produto por nome ou código... (F5)",
       searching: "Pesquisando...",
+      statusOnline: "Online",
+      statusSync: "Sync 0s",
+      statusPrinter: "Impressora OK",
       tipsTitle: "Dicas rápidas:",
       tipsBodyStart: "Use o leitor de código ou busque pelo nome. Navegue com",
       tipsBodyEnd: "e pressione",
@@ -2093,7 +2128,7 @@ const translationsPt = {
         "O desconto não pode exceder o subtotal da linha",
       discountExceedsUserLimit: "O desconto excede seu limite",
       weightQuantityHint:
-        "Use ponto para decimais e vírgula para milhares (ex.: 1.560 ou 1,560)",
+        "Use . para decimais e , para milhares (ex.: 1.560 ou 1,560)",
       paymentMethod: "Forma de Pagamento",
       paymentOptions: {
         cash: "Dinheiro",
@@ -2170,6 +2205,18 @@ const translationsPt = {
       advancedSearch: "Busca Avançada",
       clickToExpand: "Clique para expandir",
     },
+    receipt: {
+      date: "Data:",
+      time: "Hora:",
+      items: "Itens",
+      noItems: "Sem itens",
+      subtotal: "Subtotal:",
+      discount: "Desconto:",
+      total: "Total:",
+      paymentMethod: "Método de Pagamento:",
+      print: "Imprimir",
+      close: "Fechar",
+    },
   },
 };
 
@@ -2179,11 +2226,21 @@ const translations: Record<Language, Record<string, any>> = {
   pt: translationsPt,
 };
 
+const normalizeLanguage = (value?: string): Language => {
+  const normalized = String(value || "")
+    .toLowerCase()
+    .split("-")[0];
+
+  return (SUPPORTED_LANGUAGES as readonly string[]).includes(normalized)
+    ? (normalized as Language)
+    : "en";
+};
+
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("language") as Language;
-      if (saved && ["es", "en", "pt"].includes(saved)) return saved;
+      const saved = localStorage.getItem("language") as string | null;
+      return normalizeLanguage(saved || undefined);
     }
     return "en";
   });
@@ -2191,23 +2248,50 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setIsClient(true);
-    const savedLanguage =
-      (localStorage.getItem("language") as Language) || "en";
-    const initialLanguage: Language = ["es", "en", "pt"].includes(savedLanguage)
-      ? savedLanguage
-      : "en";
+    const savedLanguage = localStorage.getItem("language") || "en";
+    const initialLanguage = normalizeLanguage(savedLanguage);
 
     setCurrentLanguage(initialLanguage);
     localStorage.setItem("language", initialLanguage);
     document.documentElement.lang = initialLanguage;
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const syncLanguage = () => {
+      const stored = localStorage.getItem("language") || "en";
+      const normalized = normalizeLanguage(stored);
+      if (normalized !== currentLanguage) {
+        setCurrentLanguage(normalized);
+      }
+      document.documentElement.lang = normalized;
+    };
+
+    syncLanguage();
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === "language") {
+        syncLanguage();
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("languagechange", syncLanguage);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("languagechange", syncLanguage);
+    };
+  }, [currentLanguage]);
+
   const handleSetLanguage = (lang: Language) => {
-    setCurrentLanguage(lang);
-    localStorage.setItem("language", lang);
-    document.documentElement.lang = lang;
+    const normalized = normalizeLanguage(lang);
+    setCurrentLanguage(normalized);
+    localStorage.setItem("language", normalized);
+    document.documentElement.lang = normalized;
     // Notify all subscribers about language change
-    notifyLanguageChange(lang);
+    notifyLanguageChange(normalized);
   };
 
   const t = (key: string, namespace: string = "common"): any => {
@@ -2225,7 +2309,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     <LanguageContext.Provider
       value={{ currentLanguage, setLanguage: handleSetLanguage, t }}
     >
-      {isClient && children}
+      {isClient && <Fragment key={currentLanguage}>{children}</Fragment>}
     </LanguageContext.Provider>
   );
 }

@@ -10,6 +10,7 @@ import SubscriptionPremiumModal from "@/components/business-config/SubscriptionP
 import DigitalCertificatesSection from "@/components/business-config/DigitalCertificatesSection";
 import { Eye, Star, Crown } from "lucide-react";
 import { toast } from "react-toastify";
+import { apiFetch } from "@/lib/utils/apiFetch";
 
 interface User {
   id: string;
@@ -447,9 +448,8 @@ export default function BusinessConfigPage() {
 
   const fetchBusinessConfig = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch("/api/business-config", {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await apiFetch("/api/business-config", {
+        method: "GET",
       });
       if (response.ok) {
         const data = await response.json();
@@ -501,22 +501,20 @@ export default function BusinessConfigPage() {
     }
   };
 
-  const handleSaveConfig = async () => {
-    if (!formData.businessName || !formData.email) {
+  const saveBusinessConfig = async (payload: BusinessConfig) => {
+    if (!payload.businessName || !payload.email) {
       toast.error(copy.messages.savingError);
       return;
     }
 
     setSavingConfig(true);
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch("/api/business-config", {
+      const response = await apiFetch("/api/business-config", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -547,6 +545,10 @@ export default function BusinessConfigPage() {
     } finally {
       setSavingConfig(false);
     }
+  };
+
+  const handleSaveConfig = async () => {
+    await saveBusinessConfig(formData);
   };
 
   const togglePaymentMethod = (methodId: string) => {
@@ -605,16 +607,20 @@ export default function BusinessConfigPage() {
 
     const reader = new FileReader();
     reader.onload = () => {
-      setFormData((prev) => ({
-        ...prev,
+      const nextData = {
+        ...formData,
         ticketLogo: typeof reader.result === "string" ? reader.result : "",
-      }));
+      };
+      setFormData(nextData);
+      saveBusinessConfig(nextData);
     };
     reader.readAsDataURL(file);
   };
 
   const handleRemoveLogo = () => {
-    setFormData((prev) => ({ ...prev, ticketLogo: "" }));
+    const nextData = { ...formData, ticketLogo: "" };
+    setFormData(nextData);
+    saveBusinessConfig(nextData);
   };
 
   const resolveSubscriptionPlanId = (plan?: Plan | null) => {
@@ -1255,7 +1261,7 @@ export default function BusinessConfigPage() {
                       <img
                         src={formData.ticketLogo}
                         alt="Logo"
-                        className="object-contain h-10 mx-auto mb-2"
+                        className="w-10 h-10 mx-auto mb-2 rounded-full object-contain"
                       />
                     ) : null}
                     <p className="mb-1 text-sm font-bold">

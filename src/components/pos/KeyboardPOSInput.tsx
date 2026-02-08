@@ -124,18 +124,43 @@ export default function KeyboardPOSInput({
       const data = await response.json();
       const products = data.data?.products || [];
 
-      const normalizedQuery = trimmed.toLowerCase();
+      const normalizeText = (value: string | undefined) =>
+        (value || "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .trim();
+
+      const normalizedQuery = normalizeText(trimmed);
       const startsWithMatches = products.filter((p: any) =>
-        (p.name || "").toLowerCase().startsWith(normalizedQuery),
+        normalizeText(p.name).startsWith(normalizedQuery),
       );
 
-      const fallbackMatches = products.filter(
+      const containsMatches = products.filter(
         (p: any) =>
-          !(p.name || "").toLowerCase().startsWith(normalizedQuery) &&
-          (p.name || "").toLowerCase().includes(normalizedQuery),
+          !normalizeText(p.name).startsWith(normalizedQuery) &&
+          normalizeText(p.name).includes(normalizedQuery),
       );
 
-      const combined = [...startsWithMatches, ...fallbackMatches].slice(0, 8);
+      const nameMatches = [...startsWithMatches, ...containsMatches];
+      const matchedIds = new Set(nameMatches.map((p: any) => String(p._id)));
+
+      const normalizeCode = (value: string | undefined) =>
+        (value || "").replace(/[-\s]/g, "").toLowerCase();
+
+      const codeMatches = products.filter((p: any) => {
+        if (matchedIds.has(String(p._id))) return false;
+        const codeValue = normalizeCode(p.code);
+        if (codeValue && codeValue.includes(normalizedQuery)) return true;
+        if (Array.isArray(p.barcodes)) {
+          return p.barcodes.some((barcode: string) =>
+            normalizeCode(barcode).includes(normalizedQuery),
+          );
+        }
+        return false;
+      });
+
+      const combined = [...nameMatches, ...codeMatches].slice(0, 8);
       setSearchResults(combined);
       setShowResults(combined.length > 0);
     } catch (error) {
@@ -279,7 +304,11 @@ export default function KeyboardPOSInput({
       const normalize = (s: string | undefined) =>
         (s || "").replace(/[-\s]/g, "").toLowerCase();
       const normalizeName = (s: string | undefined) =>
-        (s || "").trim().toLowerCase();
+        (s || "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim()
+          .toLowerCase();
       const normalizedQuery = normalize(code);
       const normalizedNameQuery = normalizeName(code);
 
@@ -732,6 +761,9 @@ export default function KeyboardPOSInput({
           {t("ui.quantityHint", "pos") !== "ui.quantityHint"
             ? t("ui.quantityHint", "pos")
             : "Enter quantity or use multiplier: 50*code"}
+        </p>
+        <p className="text-xs text-[hsl(var(--vp-muted))] mt-1 whitespace-normal break-words">
+          {t("ui.weightQuantityHint", "pos")}
         </p>
       </div>
 

@@ -165,6 +165,18 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
     status: planStatus,
   };
 
+  const languageLabelMap: Record<"es" | "en" | "pt", string> = {
+    es: String(t("spanish", "common")),
+    en: String(t("english", "common")),
+    pt: String(t("portuguese", "common")),
+  };
+  const languageShortMap: Record<"es" | "en" | "pt", string> = {
+    es: "ES",
+    en: "EN",
+    pt: "PT",
+  };
+  const resolvedLanguageShort = languageShortMap[currentLanguage] || "EN";
+
   const getRoleLabel = () => {
     const roleKey = String(user?.role || "user").toLowerCase();
     const roleMap: Record<string, string> = {
@@ -305,7 +317,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                   title={t("language", "common")}
                 >
                   <Globe className="w-4 h-4" />
-                  <span className="uppercase">{currentLanguage}</span>
+                  <span className="uppercase">{resolvedLanguageShort}</span>
                 </button>
                 <div
                   className={`absolute right-0 top-full mt-2 w-48 rounded-xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-surface))] shadow-lg transition-all duration-200 ease-out z-50 ${
@@ -315,7 +327,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                   }`}
                 >
                   <div className="p-2 space-y-1">
-                    {["es", "en", "pt"].map((lang) => (
+                    {(["es", "en", "pt"] as const).map((lang) => (
                       <button
                         key={lang}
                         onClick={() => {
@@ -328,9 +340,12 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
                             : "text-[hsl(var(--vp-text))] hover:bg-[hsl(var(--vp-bg-hover))]"
                         }`}
                       >
-                        {lang === "es" && "🇪🇸 Español"}
-                        {lang === "en" && "🇺🇸 English"}
-                        {lang === "pt" && "🇵🇹 Português"}
+                        <span className="inline-flex items-center gap-2">
+                          <span className="inline-flex items-center justify-center w-7 h-6 rounded-md bg-[hsl(var(--vp-bg-soft))] text-xs font-semibold text-[hsl(var(--vp-muted))]">
+                            {languageShortMap[lang]}
+                          </span>
+                          <span>{languageLabelMap[lang]}</span>
+                        </span>
                       </button>
                     ))}
                   </div>

@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import { toast } from "react-toastify";
+import { formatARS } from "@/lib/utils/currency";
 
 interface ProductSearchProps {
   onAddToCart: (
@@ -266,8 +267,8 @@ export default function ProductSearch({
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold text-emerald-500">
                     {product.isSoldByWeight
-                      ? `${product.price.toFixed(3)} / kg`
-                      : `$${product.price.toFixed(2)}`}
+                      ? `${formatARS(product.price)} / kg`
+                      : formatARS(product.price)}
                   </span>
                   <button
                     onClick={(e) => {

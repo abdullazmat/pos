@@ -3,6 +3,14 @@ import dbConnect from "@/lib/db/connect";
 import Client from "@/lib/models/Client";
 import { verifyToken } from "@/lib/utils/jwt";
 
+const parseDiscountLimit = (value: unknown) => {
+  if (value === null || value === undefined || value === "") return null;
+  const numeric = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(numeric)) return "invalid";
+  if (numeric > 0 && numeric < 1) return numeric * 100;
+  return numeric;
+};
+
 export async function GET(request: Request) {
   try {
     const token = request.headers.get("authorization")?.split(" ")[1];
@@ -26,7 +34,7 @@ export async function GET(request: Request) {
     console.error("Get clients error:", error);
     return NextResponse.json(
       { error: "Failed to fetch clients" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -44,12 +52,24 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, document, phone, email, address } = body;
+    const { name, document, phone, email, address, discountLimit } = body;
 
     if (!name) {
       return NextResponse.json(
         { error: "Client name is required" },
-        { status: 400 }
+        { status: 400 },
+      );
+    }
+
+    const parsedDiscountLimit = parseDiscountLimit(discountLimit);
+    if (
+      parsedDiscountLimit === "invalid" ||
+      (parsedDiscountLimit !== null &&
+        (parsedDiscountLimit < 0 || parsedDiscountLimit > 100))
+    ) {
+      return NextResponse.json(
+        { error: "Discount limit must be a number between 0 and 100" },
+        { status: 400 },
       );
     }
 
@@ -61,6 +81,7 @@ export async function POST(request: Request) {
       phone,
       email,
       address,
+      discountLimit: parsedDiscountLimit,
       business: decoded.businessId,
     });
 
@@ -69,7 +90,7 @@ export async function POST(request: Request) {
     console.error("Create client error:", error);
     return NextResponse.json(
       { error: "Failed to create client" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -87,21 +108,51 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, name, document, phone, email, address } = body;
+    const { id, name, document, phone, email, address, discountLimit } = body;
+    const discountLimitProvided = Object.prototype.hasOwnProperty.call(
+      body,
+      "discountLimit",
+    );
 
     if (!id || !name) {
       return NextResponse.json(
         { error: "Client ID and name are required" },
-        { status: 400 }
+        { status: 400 },
+      );
+    }
+
+    const parsedDiscountLimit = discountLimitProvided
+      ? parseDiscountLimit(discountLimit)
+      : null;
+    if (
+      discountLimitProvided &&
+      (parsedDiscountLimit === "invalid" ||
+        (parsedDiscountLimit !== null &&
+          (parsedDiscountLimit < 0 || parsedDiscountLimit > 100)))
+    ) {
+      return NextResponse.json(
+        { error: "Discount limit must be a number between 0 and 100" },
+        { status: 400 },
       );
     }
 
     await dbConnect();
 
+    const updatePayload: Record<string, unknown> = {
+      name,
+      document,
+      phone,
+      email,
+      address,
+    };
+    if (discountLimitProvided) {
+      updatePayload.discountLimit = parsedDiscountLimit;
+    }
+
     const client = await Client.findOneAndUpdate(
       { _id: id, business: decoded.businessId },
-      { name, document, phone, email, address },
-      { new: true }
+      updatePayload,
+      { new: true },
     );
 
     if (!client) {
@@ -113,7 +164,7 @@ export async function PUT(request: Request) {
     console.error("Update client error:", error);
     return NextResponse.json(
       { error: "Failed to update client" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -136,7 +187,7 @@ export async function DELETE(request: Request) {
     if (!id) {
       return NextResponse.json(
         { error: "Client ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -156,7 +207,7 @@ export async function DELETE(request: Request) {
     console.error("Delete client error:", error);
     return NextResponse.json(
       { error: "Failed to delete client" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

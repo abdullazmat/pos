@@ -24,6 +24,12 @@ const ClientSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    discountLimit: {
+      type: Number,
+      default: null,
+      min: 0,
+      max: 100,
+    },
     business: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Business",
@@ -36,7 +42,7 @@ const ClientSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Index for faster queries

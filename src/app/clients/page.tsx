@@ -25,6 +25,7 @@ interface Client {
   phone?: string;
   email?: string;
   address?: string;
+  discountLimit?: number | null;
 }
 
 const CLIENT_COPY = {
@@ -50,6 +51,7 @@ const CLIENT_COPY = {
       phone: "Teléfono",
       email: "Email",
       address: "Dirección",
+      discountLimit: "Límite de descuento (%)",
     },
     actions: {
       create: "Crear",
@@ -64,6 +66,7 @@ const CLIENT_COPY = {
       name: "Nombre",
       document: "Documento",
       contact: "Contacto",
+      discountLimit: "Límite de descuento",
       actions: "Acciones",
     },
     deleteConfirm: "¿Estás seguro de eliminar este cliente?",
@@ -97,6 +100,7 @@ const CLIENT_COPY = {
       phone: "Phone",
       email: "Email",
       address: "Address",
+      discountLimit: "Discount limit (%)",
     },
     actions: {
       create: "Create",
@@ -111,6 +115,7 @@ const CLIENT_COPY = {
       name: "Name",
       document: "Document",
       contact: "Contact",
+      discountLimit: "Discount limit",
       actions: "Actions",
     },
     deleteConfirm: "Are you sure you want to delete this customer?",
@@ -144,6 +149,7 @@ const CLIENT_COPY = {
       phone: "Telefone",
       email: "Email",
       address: "Endereço",
+      discountLimit: "Limite de desconto (%)",
     },
     actions: {
       create: "Criar",
@@ -158,6 +164,7 @@ const CLIENT_COPY = {
       name: "Nome",
       document: "Documento",
       contact: "Contato",
+      discountLimit: "Limite de desconto",
       actions: "Ações",
     },
     deleteConfirm: "Tem certeza que deseja excluir este cliente?",
@@ -193,6 +200,7 @@ export default function ClientsPage() {
     phone: "",
     email: "",
     address: "",
+    discountLimit: "",
   });
 
   useEffect(() => {
@@ -251,7 +259,20 @@ export default function ClientsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setClients(data.clients);
+        const normalized = (data.clients || []).map((client: Client) => {
+          const rawLimit = (client as any).discountLimit;
+          const parsed =
+            typeof rawLimit === "number"
+              ? rawLimit
+              : rawLimit === null || rawLimit === undefined || rawLimit === ""
+                ? null
+                : Number(rawLimit);
+          return {
+            ...client,
+            discountLimit: Number.isFinite(parsed) ? parsed : null,
+          } as Client;
+        });
+        setClients(normalized);
       } else {
         toast.error(copy.toasts.loadError);
       }
@@ -283,6 +304,8 @@ export default function ClientsPage() {
       const token = localStorage.getItem("accessToken");
       const method = editingId ? "PUT" : "POST";
 
+      const discountLimitValue =
+        formData.discountLimit === "" ? null : Number(formData.discountLimit);
       const response = await fetch("/api/clients", {
         method,
         headers: {
@@ -290,7 +313,9 @@ export default function ClientsPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(
-          editingId ? { id: editingId, ...formData } : formData,
+          editingId
+            ? { id: editingId, ...formData, discountLimit: discountLimitValue }
+            : { ...formData, discountLimit: discountLimitValue },
         ),
       });
 
@@ -304,6 +329,7 @@ export default function ClientsPage() {
           phone: "",
           email: "",
           address: "",
+          discountLimit: "",
         });
         toast.success(copy.toasts.saved);
       } else {
@@ -323,6 +349,10 @@ export default function ClientsPage() {
       phone: client.phone || "",
       email: client.email || "",
       address: client.address || "",
+      discountLimit:
+        typeof client.discountLimit === "number"
+          ? String(client.discountLimit)
+          : "",
     });
     setShowForm(true);
   };
@@ -476,6 +506,7 @@ export default function ClientsPage() {
                   phone: "",
                   email: "",
                   address: "",
+                  discountLimit: "",
                 });
               }}
               disabled={!canAddClients}
@@ -552,6 +583,25 @@ export default function ClientsPage() {
                       className="vp-input"
                     />
                   </div>
+                  <div>
+                    <label className="vp-label">
+                      {copy.labels.discountLimit}
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      step="0.01"
+                      value={formData.discountLimit}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          discountLimit: e.target.value,
+                        })
+                      }
+                      className="vp-input"
+                    />
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button type="submit" className="vp-button vp-button-primary">
@@ -599,6 +649,9 @@ export default function ClientsPage() {
                       {copy.table.contact}
                     </th>
                     <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-600 dark:text-slate-300">
+                      {copy.table.discountLimit}
+                    </th>
+                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-600 dark:text-slate-300">
                       {copy.table.actions}
                     </th>
                   </tr>
@@ -622,6 +675,11 @@ export default function ClientsPage() {
                         <div className="text-xs text-slate-500 dark:text-slate-400">
                           {client.email || ""}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-600 dark:text-slate-400">
+                        {typeof client.discountLimit === "number"
+                          ? `${client.discountLimit}%`
+                          : "-"}
                       </td>
                       <td className="flex gap-2 px-6 py-4 text-sm whitespace-nowrap">
                         <button

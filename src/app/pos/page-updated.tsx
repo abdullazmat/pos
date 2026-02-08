@@ -12,6 +12,7 @@ import { isTokenExpiredSoon } from "@/lib/utils/token";
 import { toast } from "react-toastify";
 import { UpgradePrompt } from "@/components/common/UpgradePrompt";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { getMaxDiscountByLimit } from "@/lib/utils/discounts";
 
 interface CartItem {
   productId: string;
@@ -158,6 +159,22 @@ export default function POSPage() {
           const data = payload?.data ?? payload;
           setRegisterOpen(Boolean(data?.isOpen));
         }
+
+        try {
+          const meRes = await fetch("/api/users/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (meRes.ok) {
+            const mePayload = await meRes.json();
+            const nextUser = mePayload?.data?.user ?? null;
+            if (nextUser) {
+              setUser(nextUser);
+              localStorage.setItem("user", JSON.stringify(nextUser));
+            }
+          }
+        } catch (error) {
+          console.warn("Failed to refresh current user", error);
+        }
       } catch (e) {
         if ((e as any).name !== "AbortError") {
           console.error("Failed to get cash register status", e);
@@ -259,14 +276,10 @@ export default function POSPage() {
                 const rawDiscount = Math.max(0, discount || 0);
                 const lineSubtotal = item.quantity * item.unitPrice;
                 const absoluteMax = Math.max(0, lineSubtotal);
-                const userLimit =
-                  typeof user?.discountLimit === "number"
-                    ? user.discountLimit
-                    : null;
-                const limitMax =
-                  userLimit === null
-                    ? absoluteMax
-                    : Math.max(0, (userLimit / 100) * lineSubtotal);
+                const limitMax = getMaxDiscountByLimit(
+                  lineSubtotal,
+                  user?.discountLimit,
+                );
                 const capped = Math.min(rawDiscount, absoluteMax, limitMax);
                 if (rawDiscount > capped) {
                   toast.warning(
@@ -282,14 +295,10 @@ export default function POSPage() {
                 const rawDiscount = Math.max(0, discount || 0);
                 const lineSubtotal = item.quantity * item.unitPrice;
                 const absoluteMax = Math.max(0, lineSubtotal);
-                const userLimit =
-                  typeof user?.discountLimit === "number"
-                    ? user.discountLimit
-                    : null;
-                const limitMax =
-                  userLimit === null
-                    ? absoluteMax
-                    : Math.max(0, (userLimit / 100) * lineSubtotal);
+                const limitMax = getMaxDiscountByLimit(
+                  lineSubtotal,
+                  user?.discountLimit,
+                );
                 const capped = Math.min(rawDiscount, absoluteMax, limitMax);
                 return Math.max(0, lineSubtotal - capped);
               })(),

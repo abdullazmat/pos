@@ -13,6 +13,8 @@ import Header from "@/components/layout/Header";
 import Loading from "@/components/common/Loading";
 import { isTokenExpiredSoon } from "@/lib/utils/token";
 import { toast } from "react-toastify";
+import { formatARS } from "@/lib/utils/currency";
+import { getMaxDiscountByLimit } from "@/lib/utils/discounts";
 
 interface CartItem {
   productId: string;
@@ -151,17 +153,7 @@ export default function POSPage() {
     return methodMap[method] || method;
   };
 
-  const formatCurrency = (value: number) => {
-    const localeMap: Record<string, string> = {
-      es: "es-AR",
-      en: "en-US",
-      pt: "pt-BR",
-    };
-    return new Intl.NumberFormat(localeMap[currentLanguage] || "en-US", {
-      style: "currency",
-      currency: "ARS",
-    }).format(value || 0);
-  };
+  const formatCurrency = (value: number) => formatARS(value || 0);
 
   const accountBalanceValue = accountSummary?.balance ?? 0;
   const accountBalanceLabel =
@@ -299,6 +291,25 @@ export default function POSPage() {
     return false;
   };
 
+  const normalizeDiscountLimit = (limit: number | null | undefined) => {
+    if (typeof limit !== "number") return null;
+    if (limit > 0 && limit < 1) return limit * 100;
+    return limit;
+  };
+
+  const resolveEffectiveDiscountLimit = () => {
+    const userLimit = normalizeDiscountLimit(user?.discountLimit);
+    const clientLimit = normalizeDiscountLimit(selectedClient?.discountLimit);
+    if (typeof userLimit === "number" && typeof clientLimit === "number") {
+      return Math.min(userLimit, clientLimit);
+    }
+    return typeof userLimit === "number"
+      ? userLimit
+      : typeof clientLimit === "number"
+        ? clientLimit
+        : null;
+  };
+
   useEffect(() => {
     const userStr = localStorage.getItem("user");
     if (!userStr) {
@@ -341,12 +352,14 @@ export default function POSPage() {
           const payload = await res.json();
           const data = payload?.data ?? payload;
           setRegisterOpen(Boolean(data?.isOpen));
+        } else {
+          setRegisterOpen(false);
         }
 
         // Fetch business config
         try {
-          const configRes = await fetch("/api/business-config", {
-            headers: { Authorization: `Bearer ${token}` },
+          const configRes = await apiFetch("/api/business-config", {
+            method: "GET",
           });
           if (configRes.ok) {
             const configData = await configRes.json();
@@ -362,6 +375,7 @@ export default function POSPage() {
         }
       } catch (e) {
         if ((e as any).name !== "AbortError") {
+          setRegisterOpen(false);
           toast.error(
             t("ui.cashRegisterStatusError", "pos") !==
               "ui.cashRegisterStatusError"
@@ -481,48 +495,42 @@ export default function POSPage() {
   };
 
   const handleApplyDiscount = (productId: string, discount: number) => {
+    const effectiveLimit = resolveEffectiveDiscountLimit();
     setCartItems((prev) =>
       prev.map((item) =>
         item.productId === productId
           ? {
               ...item,
               discount: (() => {
-                const rawDiscount = Math.max(0, discount || 0);
-                const lineSubtotal = item.quantity * item.unitPrice;
-                const absoluteMax = Math.max(0, lineSubtotal);
-                const userLimit =
-                  typeof user?.discountLimit === "number"
-                    ? user.discountLimit
-                    : null;
-                const limitMax =
-                  userLimit === null
-                    ? absoluteMax
-                    : Math.max(0, (userLimit / 100) * lineSubtotal);
-                const capped = Math.min(rawDiscount, absoluteMax, limitMax);
-                if (rawDiscount > capped) {
-                  toast.warning(
+                const raw = Number.isFinite(discount) ? discount : 0;
+                const normalized = Math.max(0, Math.round(raw));
+                const lineSubtotal = Math.round(item.quantity * item.unitPrice);
+                const maxAllowed = Math.min(
+                  lineSubtotal,
+                  getMaxDiscountByLimit(lineSubtotal, effectiveLimit),
+                );
+                if (normalized > maxAllowed) {
+                  toast.error(
                     t("ui.discountLimitExceeded", "pos") !==
                       "ui.discountLimitExceeded"
                       ? (t("ui.discountLimitExceeded", "pos") as string)
                       : "Discount exceeds your limit",
                   );
                 }
-                return capped;
+                return Math.min(normalized, maxAllowed);
               })(),
               total: (() => {
-                const rawDiscount = Math.max(0, discount || 0);
-                const lineSubtotal = item.quantity * item.unitPrice;
-                const absoluteMax = Math.max(0, lineSubtotal);
-                const userLimit =
-                  typeof user?.discountLimit === "number"
-                    ? user.discountLimit
-                    : null;
-                const limitMax =
-                  userLimit === null
-                    ? absoluteMax
-                    : Math.max(0, (userLimit / 100) * lineSubtotal);
-                const capped = Math.min(rawDiscount, absoluteMax, limitMax);
-                return Math.max(0, lineSubtotal - capped);
+                const rawDiscount = Number.isFinite(discount) ? discount : 0;
+                const normalized = Math.max(0, Math.round(rawDiscount));
+                const lineSubtotal = Math.round(item.quantity * item.unitPrice);
+                const maxAllowed = Math.min(
+                  lineSubtotal,
+                  getMaxDiscountByLimit(lineSubtotal, effectiveLimit),
+                );
+                return Math.max(
+                  0,
+                  lineSubtotal - Math.min(normalized, maxAllowed),
+                );
               })(),
             }
           : item,
@@ -584,6 +592,34 @@ export default function POSPage() {
         );
         return;
       }
+
+      const grossSubtotal = cartItems.reduce((sum, item) => {
+        const lineSubtotal = Math.round(item.quantity * item.unitPrice);
+        return sum + Math.max(0, lineSubtotal);
+      }, 0);
+      const totalDiscount = cartItems.reduce((sum, item) => {
+        const lineSubtotal = Math.round(item.quantity * item.unitPrice);
+        const rawDiscount = Math.max(0, Math.round(item.discount || 0));
+        return sum + Math.min(lineSubtotal, rawDiscount);
+      }, 0);
+
+      if (totalDiscount > grossSubtotal) {
+        toast.error(t("ui.discountExceedsSubtotal", "pos") as string);
+        return;
+      }
+
+      const resolvedLimit = resolveEffectiveDiscountLimit();
+      if (typeof resolvedLimit === "number") {
+        const maxAllowedTotal = Math.max(
+          0,
+          Math.round((resolvedLimit / 100) * grossSubtotal),
+        );
+        if (totalDiscount > maxAllowedTotal) {
+          toast.error(t("ui.discountExceedsUserLimit", "pos") as string);
+          return;
+        }
+      }
+
       const defaultCustomerName =
         currentLanguage === "en"
           ? "Final Consumer"
@@ -809,6 +845,13 @@ export default function POSPage() {
                   <div className="p-6 text-slate-900 dark:text-slate-100 receipt-container">
                     {/* Business Header */}
                     <div className="pb-4 mb-4 text-center border-b border-slate-200 dark:border-slate-700">
+                      {businessConfig?.ticketLogo && (
+                        <img
+                          src={businessConfig.ticketLogo}
+                          alt={businessConfig?.businessName || "Logo"}
+                          className="mx-auto mb-2 h-12 w-12 rounded-full object-contain"
+                        />
+                      )}
                       <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                         {businessConfig?.businessName || "Recibo de Venta"}
                       </h2>
@@ -865,15 +908,15 @@ export default function POSPage() {
                               <div>
                                 <div>{item.productName}</div>
                                 <div className="text-xs text-slate-500 dark:text-slate-400">
-                                  {item.quantity} x ${item.unitPrice.toFixed(2)}
+                                  {item.quantity} x{" "}
+                                  {formatCurrency(item.unitPrice)}
                                 </div>
                               </div>
                               <div className="text-right">
-                                $
-                                {(
+                                {formatCurrency(
                                   item.quantity * item.unitPrice -
-                                  (item.discount || 0)
-                                ).toFixed(2)}
+                                    (item.discount || 0),
+                                )}
                               </div>
                             </div>
                           ))
@@ -891,19 +934,19 @@ export default function POSPage() {
                         <span className="text-slate-600 dark:text-slate-400">
                           {getReceiptLabel("receipt.subtotal", "Subtotal:")}
                         </span>
-                        <span>${lastSale?.subtotal?.toFixed(2) || "0.00"}</span>
+                        <span>{formatCurrency(lastSale?.subtotal || 0)}</span>
                       </div>
                       <div className="flex justify-between text-red-600 dark:text-red-400">
                         <span>
                           {getReceiptLabel("receipt.discount", "Discount:")}
                         </span>
-                        <span>-${(lastSale?.discount || 0).toFixed(2)}</span>
+                        <span>-{formatCurrency(lastSale?.discount || 0)}</span>
                       </div>
                       <div className="flex justify-between font-bold text-slate-900 dark:text-slate-100">
                         <span>
                           {getReceiptLabel("receipt.total", "Total:")}
                         </span>
-                        <span>${lastSale?.total?.toFixed(2) || "0.00"}</span>
+                        <span>{formatCurrency(lastSale?.total || 0)}</span>
                       </div>
                     </div>
 

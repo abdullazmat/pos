@@ -9,6 +9,7 @@ interface Client {
   name: string;
   email?: string;
   phone?: string;
+  discountLimit?: number | null;
 }
 
 interface ClientSelectorProps {
@@ -106,7 +107,11 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
         </option>
         {clients.map((client) => (
           <option key={String(client._id)} value={String(client._id)}>
-            {client.name} {client.email ? `(${client.email})` : ""}
+            {client.name}
+            {client.email ? ` (${client.email})` : ""}
+            {typeof client.discountLimit === "number"
+              ? ` · ${client.discountLimit}%`
+              : ""}
           </option>
         ))}
         {!loading && clients.length === 0 && (
@@ -128,6 +133,13 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
           "messages.clientsUpgradeRequired"
             ? t("messages.clientsUpgradeRequired", "pos")
             : "Búsqueda de clientes disponible solo en el plan Pro"}
+        </p>
+      )}
+      {value && typeof value.discountLimit === "number" && (
+        <p className="mt-2 text-xs text-amber-400">
+          {t("ui.discount", "pos") !== "ui.discount"
+            ? `${t("ui.discount", "pos")}: ${value.discountLimit}%`
+            : `Discount limit: ${value.discountLimit}%`}
         </p>
       )}
     </div>

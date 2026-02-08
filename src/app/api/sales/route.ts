@@ -14,6 +14,7 @@ import {
 import { broadcastStockUpdate } from "@/lib/server/stockStream";
 import { generateNextProductInternalId } from "@/lib/utils/productCodeGenerator";
 import { parseNumberInput } from "@/lib/utils/decimalFormatter";
+import { clampDiscountLimit } from "@/lib/utils/discounts";
 
 export async function GET(req: NextRequest) {
   try {
@@ -177,10 +178,7 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse("User not found", 404);
     }
 
-    const userDiscountLimit =
-      typeof saleUser.discountLimit === "number"
-        ? saleUser.discountLimit
-        : null;
+    const userDiscountLimit = clampDiscountLimit(saleUser.discountLimit);
 
     const rawSaleDiscount = discount as unknown;
     const normalizedSaleDiscount =

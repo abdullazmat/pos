@@ -334,11 +334,12 @@ function generateHTMLReceipt(data: any): string {
         }
 
         .logo {
-          max-width: 140px;
-          max-height: 80px;
+          width: 64px;
+          height: 64px;
           margin: 0 auto 8px;
           display: block;
           object-fit: contain;
+          border-radius: 50%;
         }
         
         .receipt-title {
