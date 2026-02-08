@@ -1,10 +1,33 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { CheckIcon } from "@radix-ui/react-icons";
-import { useLang, useLanguage } from "@/lib/hooks/useLang";
+import { useLanguage } from "@/lib/context/LanguageContext";
 
 export default function PricingSection() {
-  const t = useLang("pricing");
-  const { t: tCommon } = useLanguage();
+  const { t } = useLanguage();
+  const content = t("pricingSection", "landing") as {
+    title: string;
+    subtitle: string;
+    billingTitle: string;
+    billingMonthly: string;
+    billingAnnual: string;
+    billingSavings: string;
+    mostPopular: string;
+    cta: string;
+    plans: Array<{
+      name: string;
+      monthly: string;
+      annual: string;
+      caption: string;
+      usage: string;
+      features: string[];
+      featured?: boolean;
+    }>;
+  };
+  const plans = content?.plans ?? [];
+  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
 
   return (
     <section
@@ -17,114 +40,106 @@ export default function PricingSection() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6">
-        {/* Title */}
-        <div className="text-center mb-16">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-soft))] text-xs uppercase tracking-[0.2em] text-[hsl(var(--vp-muted))]">
-            {String(tCommon("pricing", "common"))}
-          </span>
-          <h2 className="vp-section-title mt-5">{t("title")}</h2>
-          <p className="vp-section-subtitle text-lg">{t("subtitle")}</p>
+        <div className="text-center mb-12">
+          <p className="text-sm font-semibold tracking-[0.24em] uppercase text-[hsl(var(--vp-muted))]">
+            {String(t("pricing", "common"))}
+          </p>
+          <h2 className="vp-section-title mt-4">{content?.title}</h2>
+          <p className="vp-section-subtitle text-lg max-w-2xl mx-auto">
+            {content?.subtitle}
+          </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {/* Plan Gratuito */}
-          <div className="group relative">
-            <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-[hsl(var(--vp-primary))]/10 via-transparent to-[hsl(var(--vp-primary))]/5 opacity-0 blur transition duration-300 group-hover:opacity-100" />
-            <div className="relative h-full rounded-2xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg))]/85 p-8 sm:p-10 shadow-[0_20px_50px_-30px_rgba(15,23,42,0.6)] backdrop-blur-sm">
-              <div className="flex items-start justify-between">
-                <h3 className="text-2xl font-semibold text-[hsl(var(--vp-text))]">
-                  {t("free")}
-                </h3>
-                <span className="text-xs uppercase tracking-[0.2em] text-[hsl(var(--vp-muted))]">
-                  {t("freeDescription")}
-                </span>
-              </div>
+        <div className="flex flex-col items-center gap-4 mb-12">
+          <p className="text-sm font-semibold text-[hsl(var(--vp-text))]">
+            {content?.billingTitle}
+          </p>
+          <div className="inline-flex items-center gap-3 rounded-full border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg))] px-4 py-2">
+            <span className="text-sm font-medium text-[hsl(var(--vp-text))]">
+              {content?.billingMonthly}
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                setBilling((prev) =>
+                  prev === "monthly" ? "annual" : "monthly",
+                )
+              }
+              className={`relative h-7 w-14 rounded-full transition ${
+                billing === "annual"
+                  ? "bg-[hsl(var(--vp-primary))]"
+                  : "bg-[hsl(var(--vp-border))]"
+              }`}
+              aria-pressed={billing === "annual"}
+            >
+              <span
+                className={`absolute top-0.5 h-6 w-6 rounded-full bg-white transition ${
+                  billing === "annual" ? "right-1" : "left-1"
+                }`}
+              />
+            </button>
+            <span className="text-sm font-medium text-[hsl(var(--vp-text))]">
+              {content?.billingAnnual}
+            </span>
+          </div>
+          <span className="text-xs uppercase tracking-[0.2em] text-[hsl(var(--vp-muted))]">
+            {content?.billingSavings}
+          </span>
+        </div>
 
-              <div className="mt-6 flex items-end gap-3">
-                <span className="text-4xl sm:text-5xl font-semibold text-[hsl(var(--vp-text))]">
-                  {t("freePrice")}
+        <div className="grid gap-6 md:grid-cols-2">
+          {plans.map((plan, index) => (
+            <div
+              key={`${plan.name}-${index}`}
+              className={`relative rounded-3xl border bg-[hsl(var(--vp-bg))] p-6 shadow-[0_20px_45px_-35px_rgba(15,23,42,0.55)] ${
+                plan.featured
+                  ? "border-[hsl(var(--vp-primary))]"
+                  : "border-[hsl(var(--vp-border))]"
+              }`}
+            >
+              {plan.featured ? (
+                <span className="absolute -top-4 left-1/2 -translate-x-1/2 vp-pill border border-[hsl(var(--vp-primary))]/30 bg-[hsl(var(--vp-bg))]">
+                  {content?.mostPopular}
                 </span>
-                <span className="text-[hsl(var(--vp-muted))] mb-1">
-                  {t("freeSubtitle")}
-                </span>
+              ) : null}
+              <div className="rounded-2xl bg-[hsl(var(--vp-bg-soft))] px-4 py-2 text-center text-sm font-semibold text-[hsl(var(--vp-text))]">
+                {plan.name}
               </div>
-
-              <ul className="mt-10 space-y-4">
-                {t("freeFeatures", true).map((item: string) => (
+              <div className="mt-5 text-center">
+                <p className="text-3xl font-semibold text-[hsl(var(--vp-text))]">
+                  {billing === "monthly" ? plan.monthly : plan.annual}
+                </p>
+                <p className="text-xs uppercase tracking-[0.2em] text-[hsl(var(--vp-muted))]">
+                  {plan.caption}
+                </p>
+                <p className="mt-3 text-sm text-[hsl(var(--vp-muted))]">
+                  {plan.usage}
+                </p>
+              </div>
+              <ul className="mt-6 space-y-3 text-sm">
+                {plan.features.map((item) => (
                   <li key={item} className="flex items-start gap-3">
-                    <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--vp-primary))]/10 text-[hsl(var(--vp-primary))]">
-                      <CheckIcon className="h-4 w-4" />
+                    <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[hsl(var(--vp-primary))]/10 text-[hsl(var(--vp-primary))]">
+                      <CheckIcon className="h-3.5 w-3.5" />
                     </span>
-                    <span className="text-[hsl(var(--vp-muted))] leading-relaxed">
-                      {item}
-                    </span>
+                    <span className="text-[hsl(var(--vp-muted))]">{item}</span>
                   </li>
                 ))}
               </ul>
-
               <Link
-                href="/auth/register"
-                className="w-full inline-flex justify-center mt-10 vp-button"
+                href={
+                  plan.featured
+                    ? "/auth/register?plan=pro"
+                    : "/auth/register?plan=free"
+                }
+                className={`mt-6 inline-flex w-full justify-center vp-button ${
+                  plan.featured ? "vp-button-primary" : ""
+                }`}
               >
-                {t("startFree")}
+                {content?.cta}
               </Link>
             </div>
-          </div>
-
-          {/* Plan Pro – Featured */}
-          <div className="group relative">
-            <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-[hsl(var(--vp-primary))]/50 via-[hsl(var(--vp-primary))]/10 to-transparent opacity-80 blur" />
-            <div className="relative h-full rounded-2xl border border-[hsl(var(--vp-primary))] bg-[hsl(var(--vp-bg))]/90 p-8 sm:p-10 shadow-[0_25px_60px_-30px_rgba(37,99,235,0.55)] backdrop-blur-sm">
-              <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-10">
-                <span className="vp-pill shadow-[0_10px_25px_rgba(37,99,235,0.35)] border border-[hsl(var(--vp-primary))]/30 bg-[hsl(var(--vp-bg))]">
-                  {t("mostPopular")}
-                </span>
-              </div>
-
-              <div className="flex items-start justify-between">
-                <h3 className="text-2xl font-semibold text-[hsl(var(--vp-text))]">
-                  {t("pro")}
-                </h3>
-                <span className="text-xs uppercase tracking-[0.2em] text-[hsl(var(--vp-primary))]">
-                  {t("proDescription")}
-                </span>
-              </div>
-
-              <div className="mt-6 flex items-end gap-3">
-                <span className="text-4xl sm:text-5xl font-semibold text-[hsl(var(--vp-text))]">
-                  {t("proPrice")}
-                </span>
-                <span className="text-[hsl(var(--vp-muted))] mb-1">
-                  {t("proSubtitle")}
-                </span>
-              </div>
-
-              <p className="text-[hsl(var(--vp-muted))] mt-4 text-sm">
-                {t("proDescription")}
-              </p>
-
-              <ul className="mt-8 space-y-4">
-                {t("proFeatures", true).map((item: string) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--vp-primary))]/15 text-[hsl(var(--vp-primary))]">
-                      <CheckIcon className="h-4 w-4" />
-                    </span>
-                    <span className="text-[hsl(var(--vp-muted))] leading-relaxed">
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/auth/register?plan=pro"
-                className="w-full inline-flex justify-center mt-10 vp-button vp-button-primary"
-              >
-                {t("tryFree")}
-              </Link>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

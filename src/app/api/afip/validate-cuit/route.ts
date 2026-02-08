@@ -7,6 +7,8 @@ import {
 } from "@/lib/utils/helpers";
 import AFIPService from "@/lib/services/afipService";
 
+export const dynamic = "force-dynamic";
+
 /**
  * POST /api/afip/validate-cuit
  * Validate CUIT format and AFIP registration

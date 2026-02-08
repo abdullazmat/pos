@@ -45,7 +45,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="#cta"
+                  href="#how-it-works"
                   className="hover:text-[hsl(var(--vp-text))] transition"
                 >
                   {String(t("documentation", "common"))}

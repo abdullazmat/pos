@@ -91,6 +91,13 @@ const translationsEs = {
       badge: "⭐ POS para kioscos y mostrador",
       titleMain: "Cobrá rápido",
       titleHighlight: "sin vueltas",
+      titleLines: [
+        "Tenemos todo",
+        "lo que necesitás",
+        "para organizar",
+        "tu negocio",
+      ],
+      titleHighlightIndex: 0,
       description:
         "VentaPlus es el POS para kioscos y comercios de mostrador: menos pasos para cobrar, pantallas claras para el personal y una operación estable todo el día.",
       startFree: "Empezar Gratis →",
@@ -155,6 +162,197 @@ const translationsEs = {
         "Pensado para kioscos, retail chico y atención en caja donde la velocidad importa.",
       startFreeNow: "Empezar Gratis Ahora →",
       noCard: "Sin tarjeta de crédito • Configuración en 2 minutos",
+    },
+    promoCta: {
+      eyebrow: "Precios congelados",
+      title: "Todos los planes congelados por tus primeros 3 meses",
+      subtitle:
+        "Empezá con todos los módulos activos y escalá al mismo precio.",
+      primaryCta: "Empezar prueba gratis",
+    },
+    pricingSection: {
+      title: "Congelamos tus primeros 3 meses con VentaPlus",
+      subtitle:
+        "Mantené todos los módulos activos mientras escalás ventas, stock, compras y operaciones fiscales con confianza.",
+      billingTitle: "Elegí tu ciclo de facturación",
+      billingMonthly: "Mensual",
+      billingAnnual: "Anual",
+      billingSavings: "Ahorrá hasta 15% con facturación anual",
+      mostPopular: "Más popular",
+      cta: "Empezar prueba gratis",
+      plans: [
+        {
+          name: "Gratis",
+          monthly: "$0",
+          annual: "$0",
+          caption: "ARS por mes",
+          usage: "Hasta 100 productos, 2 usuarios",
+          features: [
+            "Sistema POS + escaneo de códigos",
+            "Control básico de caja",
+            "Gestión de stock",
+            "Reportes básicos",
+            "Teclado personalizado",
+          ],
+        },
+        {
+          name: "Pro",
+          monthly: "$24.990",
+          annual: "$21.900",
+          caption: "ARS por mes",
+          usage: "Productos y usuarios ilimitados",
+          features: [
+            "Múltiples medios de pago",
+            "Ventas a crédito y descuentos",
+            "Arqueos y retiros de caja",
+            "Reportes avanzados + exportaciones",
+            "Mercado Pago",
+          ],
+          featured: true,
+        },
+      ],
+    },
+    supportSection: {
+      eyebrow: "Soporte",
+      title: "Todo nuestro equipo a tu servicio",
+      subtitle:
+        "VentaPlus combina onboarding experto, soporte ágil y guía proactiva para que tu equipo nunca se sienta solo.",
+      items: [
+        {
+          title: "Personas reales cuando las necesitás",
+          description:
+            "Desde la implementación hasta la operación diaria, nuestros especialistas están disponibles por chat y email.",
+        },
+        {
+          title: "Respuestas rápidas, guía clara",
+          description:
+            "Ayuda inmediata con flujos, integraciones y configuración fiscal.",
+        },
+        {
+          title: "Soporte que escala con vos",
+          description:
+            "Asistencia prioritaria y seguimientos de éxito para crecer con confianza.",
+        },
+      ],
+    },
+    testimonialsSection: {
+      eyebrow: "Testimonios",
+      title: "Lo que dicen nuestros clientes",
+      subtitle:
+        "Historias reales de comercios que crecen con VentaPlus en Argentina.",
+      metricCaption: "Verificado en los últimos 90 días.",
+      highlightLabel: "Destacado",
+      highlightCaption:
+        "Flujos integrados, listo para fiscal y permisos por equipo.",
+      controls: {
+        previous: "Testimonio anterior",
+        next: "Siguiente testimonio",
+        dotPrefix: "Ver testimonio de",
+      },
+      items: [
+        {
+          id: "darjeeling",
+          quote:
+            "En plena pandemia empezamos con planillas. Dos años después, VentaPlus nos ayudó a operar tres locales con la misma claridad del primer día.",
+          name: "Lali Hernández",
+          role: "Fundadora, Darjeeling Goods",
+          location: "Rosario, AR",
+          metricLabel: "Precisión de stock",
+          metricValue: "98%",
+          highlight: "Listo para multi-sucursal",
+        },
+        {
+          id: "panaderia-central",
+          quote:
+            "Los cajeros aprendieron el flujo en una tarde. El cierre diario ahora es una rutina de 4 minutos y los márgenes por fin se ven claros.",
+          name: "Matías Gutiérrez",
+          role: "Operaciones, Panadería Central",
+          location: "Córdoba, AR",
+          metricLabel: "Cierre diario más rápido",
+          metricValue: "4 min",
+          highlight: "Márgenes claros",
+        },
+        {
+          id: "almacen-norte",
+          quote:
+            "Desde comprobantes fiscales hasta alertas de stock, todo se siente conectado. Por fin confiamos en los números y podemos planificar compras con seguridad.",
+          name: "Carmen Ibáñez",
+          role: "Dueña, Almacén Norte",
+          location: "Mendoza, AR",
+          metricLabel: "Quiebres de stock",
+          metricValue: "-42%",
+          highlight: "Listo para fiscal",
+        },
+      ],
+    },
+    trustedDemo: {
+      title: "Estas empresas ya confían en VentaPlus",
+      demoTitle: "¿Te gustaría ver una demostración en vivo?",
+      demoSubtitle: "Registrate con el formulario y reservá la fecha.",
+      demoCta: "Quiero una demo",
+      demoImageAlt: "Demo de VentaPlus",
+    },
+    businessInsights: {
+      heroEyebrow: "Tu negocio está a un clic",
+      heroTitle: "Entendé cómo está tu negocio en todo momento",
+      heroSubtitle:
+        "¿Querés ahorrar horas con un solo clic? VentaPlus simplifica la gestión, automatiza tareas y ordena procesos.",
+      blocks: [
+        {
+          title: "Control de caja",
+          subtitle: "Seguimiento de efectivo y bancos.",
+          description:
+            "Monitoreá aperturas/cierres, ventas diarias y saldos en tiempo real.",
+          alt: "Panel de control de caja de VentaPlus",
+        },
+        {
+          title: "Ventas y POS",
+          subtitle: "Vendé rápido desde el punto de venta.",
+          description:
+            "Creá ventas en segundos, gestioná descuentos y aceptá efectivo, tarjeta, transferencia o Mercado Pago.",
+          alt: "Pantalla de punto de venta de VentaPlus",
+        },
+        {
+          title: "Gastos",
+          subtitle: "Registrá compras y pagos.",
+          description:
+            "Seguí proveedores, vencimientos y categorías para ordenar el flujo de caja.",
+          alt: "Pantalla de gastos de VentaPlus",
+        },
+        {
+          title: "Stock",
+          subtitle: "Controlá productos y depósitos.",
+          description:
+            "Gestioná productos, categorías, códigos y movimientos con trazabilidad total.",
+          alt: "Pantalla de inventario de VentaPlus",
+        },
+        {
+          title: "Información",
+          subtitle: "Reportes fiscales y de gestión.",
+          description:
+            "Generá reportes de ventas, compras e IVA con resúmenes listos para contabilidad y AFIP/ARCA.",
+          cta: "Ver más",
+          alt: "Pantalla de reportes fiscales de VentaPlus",
+        },
+        {
+          title: "Integraciones",
+          subtitle: "Pagos y servicios fiscales conectados.",
+          description:
+            "Integrá Mercado Pago y facturación electrónica AFIP/ARCA para automatizar validaciones.",
+          cta: "Ver más",
+          alt: "Pantalla de integraciones de VentaPlus",
+        },
+      ],
+      bottomEyebrow: "Confiado por equipos en crecimiento",
+      bottomTitle: "Más de 2.500 negocios usan VentaPlus todos los días",
+      bottomSubtitle:
+        "Centralizá ventas, compras, stock y fiscal en una plataforma pensada para retail real.",
+      bottomCta: "Empezar prueba gratis",
+      bottomNote: "Sin tarjeta de crédito",
+      bottomImageAlt: "Vista general de la plataforma VentaPlus",
+    },
+    posPreview: {
+      alt: "Vista previa de analíticas del panel",
     },
     designSystem: {
       badge: "Sistema de diseño",
@@ -824,6 +1022,13 @@ const translationsEn = {
       badge: "⭐ POS for kiosks and counter sales",
       titleMain: "Fast checkout",
       titleHighlight: "for daily sales",
+      titleLines: [
+        "We have everything",
+        "you need to",
+        "organize your",
+        "business",
+      ],
+      titleHighlightIndex: 0,
       description:
         "VentaPlus is the POS for kiosks, small retail, and counter service: fewer steps to charge, clear screens for staff, and stable operation during daily rushes.",
       startFree: "Start Free →",
@@ -887,6 +1092,196 @@ const translationsEn = {
         "Built for kiosks, small retail, and counter service where speed matters.",
       startFreeNow: "Start Free Now →",
       noCard: "No credit card • Setup in 2 minutes",
+    },
+    promoCta: {
+      eyebrow: "Prices frozen",
+      title: "All plans locked for your first 3 months",
+      subtitle: "Start with every module enabled and scale at the same price.",
+      primaryCta: "Start free trial",
+    },
+    pricingSection: {
+      title: "We’re freezing your first 3 months with VentaPlus",
+      subtitle:
+        "Keep every module unlocked while you scale sales, stock, purchases, and fiscal operations with confidence.",
+      billingTitle: "Choose your billing cycle",
+      billingMonthly: "Monthly",
+      billingAnnual: "Annual",
+      billingSavings: "Save up to 15% with annual billing",
+      mostPopular: "Most popular",
+      cta: "Start free trial",
+      plans: [
+        {
+          name: "Free",
+          monthly: "$0",
+          annual: "$0",
+          caption: "ARS per month",
+          usage: "Up to 100 products, 2 users",
+          features: [
+            "POS system + code scanning",
+            "Basic cash control",
+            "Stock management",
+            "Basic reports",
+            "Custom keyboard",
+          ],
+        },
+        {
+          name: "Pro",
+          monthly: "$24,990",
+          annual: "$21,900",
+          caption: "ARS per month",
+          usage: "Unlimited products and users",
+          features: [
+            "Multiple payment methods",
+            "Credit sales and discounts",
+            "Cash audits and withdrawals",
+            "Advanced reports + exports",
+            "Mercado Pago",
+          ],
+          featured: true,
+        },
+      ],
+    },
+    supportSection: {
+      eyebrow: "Support",
+      title: "Our entire team at your service",
+      subtitle:
+        "VentaPlus combines expert onboarding, responsive support, and proactive guidance so your team never feels alone.",
+      items: [
+        {
+          title: "Real humans when you need them",
+          description:
+            "From onboarding to daily operations, our specialists are available by chat and email to keep you moving.",
+        },
+        {
+          title: "Fast answers, clear guidance",
+          description:
+            "Get instant help with workflows, integrations, and fiscal setup so your team stays productive.",
+        },
+        {
+          title: "Support that scales with you",
+          description:
+            "Priority assistance and success check-ins help you grow confidently as your operation expands.",
+        },
+      ],
+    },
+    testimonialsSection: {
+      eyebrow: "Testimonials",
+      title: "What our customers say",
+      subtitle:
+        "Real stories from retailers growing with VentaPlus across Argentina.",
+      metricCaption: "Verified over the last 90 days.",
+      highlightLabel: "Highlight",
+      highlightCaption:
+        "Built-in workflows, fiscal ready, and team permissions.",
+      controls: {
+        previous: "Previous testimonial",
+        next: "Next testimonial",
+        dotPrefix: "Show testimonial from",
+      },
+      items: [
+        {
+          id: "darjeeling",
+          quote:
+            "In the middle of the pandemic we started with spreadsheets. Two years later, VentaPlus helped us run three stores with the same clarity we had on day one.",
+          name: "Lali Hernández",
+          role: "Founder, Darjeeling Goods",
+          location: "Rosario, AR",
+          metricLabel: "Inventory accuracy",
+          metricValue: "98%",
+          highlight: "Multi-store ready",
+        },
+        {
+          id: "panaderia-central",
+          quote:
+            "Cashiers learned the flow in one afternoon. The daily close is now a 4-minute routine and our margins are finally visible.",
+          name: "Matías Gutiérrez",
+          role: "Operations, Panadería Central",
+          location: "Córdoba, AR",
+          metricLabel: "Faster daily close",
+          metricValue: "4 min",
+          highlight: "Clear margins",
+        },
+        {
+          id: "almacen-norte",
+          quote:
+            "From fiscal receipts to stock alerts, everything feels connected. We finally trust the numbers and can plan purchases with confidence.",
+          name: "Carmen Ibáñez",
+          role: "Owner, Almacén Norte",
+          location: "Mendoza, AR",
+          metricLabel: "Stockouts reduced",
+          metricValue: "-42%",
+          highlight: "Fiscal ready",
+        },
+      ],
+    },
+    trustedDemo: {
+      title: "These companies already trust VentaPlus",
+      demoTitle: "Would you like to see a live demonstration?",
+      demoSubtitle: "Sign up using the form below and save the date!",
+      demoCta: "I want a demo",
+      demoImageAlt: "VentaPlus demo",
+    },
+    businessInsights: {
+      heroEyebrow: "Your business is just a click away",
+      heroTitle: "Understand where your business is at all times",
+      heroSubtitle:
+        "Would you like to save hours of work with a simple click? VentaPlus simplifies the management of your business, automating tasks and streamlining all your processes.",
+      blocks: [
+        {
+          title: "Cash Control",
+          subtitle: "Track cash, banks, and daily totals.",
+          description:
+            "Monitor cash register openings/closures, daily sales totals, and balances across cash and bank accounts in real time.",
+          alt: "VentaPlus cash control dashboard",
+        },
+        {
+          title: "Sales & POS",
+          subtitle: "Sell fast with the point of sale.",
+          description:
+            "Create sales in seconds, manage discounts, and accept cash, card, transfer, or Mercado Pago payments from the same screen.",
+          alt: "VentaPlus point of sale screen",
+        },
+        {
+          title: "Expenses",
+          subtitle: "Register purchases and payments.",
+          description:
+            "Track suppliers, due dates, and expense categories to keep your cash flow clear and your payments on time.",
+          alt: "VentaPlus expenses screen",
+        },
+        {
+          title: "Stock",
+          subtitle: "Control products and warehouses.",
+          description:
+            "Manage products, categories, barcode scanning, and stock movements across warehouses with full traceability.",
+          alt: "VentaPlus inventory management screen",
+        },
+        {
+          title: "Information",
+          subtitle: "Fiscal and management reports.",
+          description:
+            "Generate sales, purchases, and IVA reports with export-ready summaries for accounting and AFIP/ARCA workflows.",
+          cta: "Learn more",
+          alt: "VentaPlus fiscal reports screen",
+        },
+        {
+          title: "Integrations",
+          subtitle: "Payments and fiscal services connected.",
+          description:
+            "Integrate Mercado Pago and AFIP/ARCA electronic invoicing to automate payment and fiscal validation flows.",
+          cta: "Learn more",
+          alt: "VentaPlus integrations screen",
+        },
+      ],
+      bottomEyebrow: "Trusted by growing teams",
+      bottomTitle: "More than 2,500 businesses run VentaPlus every day",
+      bottomSubtitle:
+        "Centralize sales, purchases, stock, and fiscal operations in one platform designed for real-world retail.",
+      bottomCta: "Start free trial",
+      bottomNote: "No credit card required",
+      bottomImageAlt: "VentaPlus platform overview",
+    },
+    posPreview: {
+      alt: "Dashboard analytics preview",
     },
     designSystem: {
       badge: "Design system",
@@ -1547,6 +1942,13 @@ const translationsPt = {
       badge: "⭐ POS para quiosques e balcão",
       titleMain: "Cobrança rápida",
       titleHighlight: "no balcão",
+      titleLines: [
+        "Temos tudo",
+        "o que você precisa",
+        "para organizar",
+        "seu negócio",
+      ],
+      titleHighlightIndex: 0,
       description:
         "VentaPlus é o POS para quiosques, varejo pequeno e atendimento no balcão: menos etapas para cobrar, telas claras para a equipe e operação estável o dia todo.",
       startFree: "Começar Gratuitamente →",
@@ -1609,6 +2011,196 @@ const translationsPt = {
         "Feito para quiosques, varejo pequeno e atendimento em caixa onde velocidade importa.",
       startFreeNow: "Começar Gratuitamente Agora →",
       noCard: "Sem cartão de crédito • Configuração em 2 minutos",
+    },
+    promoCta: {
+      eyebrow: "Preços congelados",
+      title: "Todos os planos congelados pelos seus primeiros 3 meses",
+      subtitle: "Comece com todos os módulos ativos e escale pelo mesmo preço.",
+      primaryCta: "Começar teste grátis",
+    },
+    pricingSection: {
+      title: "Congelamos seus primeiros 3 meses com a VentaPlus",
+      subtitle:
+        "Mantenha todos os módulos liberados enquanto você escala vendas, estoque, compras e operações fiscais com confiança.",
+      billingTitle: "Escolha seu ciclo de cobrança",
+      billingMonthly: "Mensal",
+      billingAnnual: "Anual",
+      billingSavings: "Economize até 15% com cobrança anual",
+      mostPopular: "Mais popular",
+      cta: "Começar teste grátis",
+      plans: [
+        {
+          name: "Grátis",
+          monthly: "$0",
+          annual: "$0",
+          caption: "ARS por mês",
+          usage: "Até 100 produtos, 2 usuários",
+          features: [
+            "Sistema POS + leitura de códigos",
+            "Controle básico de caixa",
+            "Gestão de estoque",
+            "Relatórios básicos",
+            "Teclado personalizado",
+          ],
+        },
+        {
+          name: "Pro",
+          monthly: "$24.990",
+          annual: "$21.900",
+          caption: "ARS por mês",
+          usage: "Produtos e usuários ilimitados",
+          features: [
+            "Múltiplos meios de pagamento",
+            "Vendas a crédito e descontos",
+            "Auditorias e retiradas de caixa",
+            "Relatórios avançados + exportações",
+            "Mercado Pago",
+          ],
+          featured: true,
+        },
+      ],
+    },
+    supportSection: {
+      eyebrow: "Suporte",
+      title: "Toda a nossa equipe ao seu serviço",
+      subtitle:
+        "A VentaPlus combina onboarding especializado, suporte ágil e orientação proativa para sua equipe nunca ficar sozinha.",
+      items: [
+        {
+          title: "Pessoas reais quando você precisa",
+          description:
+            "Do onboarding à operação diária, nossos especialistas estão disponíveis por chat e email.",
+        },
+        {
+          title: "Respostas rápidas, orientação clara",
+          description:
+            "Ajuda imediata com fluxos, integrações e configuração fiscal.",
+        },
+        {
+          title: "Suporte que cresce com você",
+          description:
+            "Atendimento prioritário e acompanhamento de sucesso ajudam você a crescer com confiança.",
+        },
+      ],
+    },
+    testimonialsSection: {
+      eyebrow: "Depoimentos",
+      title: "O que nossos clientes dizem",
+      subtitle:
+        "Histórias reais de varejistas crescendo com a VentaPlus na Argentina.",
+      metricCaption: "Verificado nos últimos 90 dias.",
+      highlightLabel: "Destaque",
+      highlightCaption:
+        "Fluxos integrados, pronto para fiscal e permissões por equipe.",
+      controls: {
+        previous: "Depoimento anterior",
+        next: "Próximo depoimento",
+        dotPrefix: "Ver depoimento de",
+      },
+      items: [
+        {
+          id: "darjeeling",
+          quote:
+            "No meio da pandemia começamos com planilhas. Dois anos depois, a VentaPlus nos ajudou a operar três lojas com a mesma clareza do primeiro dia.",
+          name: "Lali Hernández",
+          role: "Fundadora, Darjeeling Goods",
+          location: "Rosario, AR",
+          metricLabel: "Precisão do estoque",
+          metricValue: "98%",
+          highlight: "Pronto para múltiplas lojas",
+        },
+        {
+          id: "panaderia-central",
+          quote:
+            "Os caixas aprenderam o fluxo em uma tarde. O fechamento diário agora é uma rotina de 4 minutos e nossas margens finalmente estão visíveis.",
+          name: "Matías Gutiérrez",
+          role: "Operações, Panadería Central",
+          location: "Córdoba, AR",
+          metricLabel: "Fechamento diário mais rápido",
+          metricValue: "4 min",
+          highlight: "Margens claras",
+        },
+        {
+          id: "almacen-norte",
+          quote:
+            "De comprovantes fiscais a alertas de estoque, tudo parece conectado. Finalmente confiamos nos números e podemos planejar compras com confiança.",
+          name: "Carmen Ibáñez",
+          role: "Proprietária, Almacén Norte",
+          location: "Mendoza, AR",
+          metricLabel: "Rupturas de estoque",
+          metricValue: "-42%",
+          highlight: "Pronto para fiscal",
+        },
+      ],
+    },
+    trustedDemo: {
+      title: "Estas empresas já confiam na VentaPlus",
+      demoTitle: "Gostaria de ver uma demonstração ao vivo?",
+      demoSubtitle: "Cadastre-se no formulário abaixo e reserve a data!",
+      demoCta: "Quero uma demo",
+      demoImageAlt: "Demonstração da VentaPlus",
+    },
+    businessInsights: {
+      heroEyebrow: "Seu negócio está a um clique",
+      heroTitle: "Entenda como está o seu negócio o tempo todo",
+      heroSubtitle:
+        "Quer economizar horas com um clique? A VentaPlus simplifica a gestão, automatiza tarefas e organiza processos.",
+      blocks: [
+        {
+          title: "Controle de caixa",
+          subtitle: "Acompanhe caixa, bancos e totais diários.",
+          description:
+            "Monitore aberturas/fechamentos, totais diários e saldos em tempo real.",
+          alt: "Painel de controle de caixa da VentaPlus",
+        },
+        {
+          title: "Vendas e PDV",
+          subtitle: "Venda rápido com o ponto de venda.",
+          description:
+            "Crie vendas em segundos, gerencie descontos e aceite dinheiro, cartão, transferência ou Mercado Pago.",
+          alt: "Tela do ponto de venda da VentaPlus",
+        },
+        {
+          title: "Despesas",
+          subtitle: "Registre compras e pagamentos.",
+          description:
+            "Acompanhe fornecedores, vencimentos e categorias para manter o fluxo de caixa claro.",
+          alt: "Tela de despesas da VentaPlus",
+        },
+        {
+          title: "Estoque",
+          subtitle: "Controle produtos e depósitos.",
+          description:
+            "Gerencie produtos, categorias, leitura de códigos e movimentos com rastreabilidade total.",
+          alt: "Tela de estoque da VentaPlus",
+        },
+        {
+          title: "Informações",
+          subtitle: "Relatórios fiscais e de gestão.",
+          description:
+            "Gere relatórios de vendas, compras e IVA com resumos prontos para contabilidade e AFIP/ARCA.",
+          cta: "Saiba mais",
+          alt: "Tela de relatórios fiscais da VentaPlus",
+        },
+        {
+          title: "Integrações",
+          subtitle: "Pagamentos e serviços fiscais conectados.",
+          description:
+            "Integre Mercado Pago e faturamento eletrônico AFIP/ARCA para automatizar validações.",
+          cta: "Saiba mais",
+          alt: "Tela de integrações da VentaPlus",
+        },
+      ],
+      bottomEyebrow: "Confiado por equipes em crescimento",
+      bottomTitle: "Mais de 2.500 negócios usam a VentaPlus todos os dias",
+      bottomSubtitle:
+        "Centralize vendas, compras, estoque e fiscal em uma plataforma feita para o varejo real.",
+      bottomCta: "Começar teste grátis",
+      bottomNote: "Sem cartão de crédito",
+      bottomImageAlt: "Visão geral da plataforma VentaPlus",
+    },
+    posPreview: {
+      alt: "Prévia de análises do painel",
     },
     designSystem: {
       badge: "Sistema de design",

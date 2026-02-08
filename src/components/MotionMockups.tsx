@@ -152,16 +152,32 @@ export default function MotionMockups() {
   const copy = COPY[currentLanguage as keyof typeof COPY] || COPY.es;
 
   return (
-    <section className="vp-section vp-section-muted vp-reveal">
+    <section className="vp-section vp-reveal relative overflow-hidden">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[hsl(var(--vp-primary))]/15 blur-[140px]" />
+        <div className="absolute bottom-[-30%] right-[-10%] h-80 w-80 rounded-full bg-[hsl(var(--vp-warning))]/10 blur-[140px]" />
+      </div>
+
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="vp-section-title">{copy.title}</h2>
-          <p className="vp-section-subtitle text-base">{copy.subtitle}</p>
+        <div className="text-center mb-14">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-soft))] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-[hsl(var(--vp-muted))]">
+            {String(
+              require("@/lib/context/LanguageContext")
+                .useLanguage()
+                .t("features", "common"),
+            )}
+          </span>
+          <h2 className="vp-section-title mt-6 text-3xl sm:text-4xl">
+            {copy.title}
+          </h2>
+          <p className="vp-section-subtitle text-lg max-w-2xl mx-auto">
+            {copy.subtitle}
+          </p>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           <div
-            className="vp-card vp-card-hover p-6 relative overflow-hidden text-[hsl(var(--vp-text))] min-h-[340px] vp-reveal"
+            className="relative overflow-hidden rounded-3xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg))]/85 p-7 text-[hsl(var(--vp-text))] min-h-[340px] shadow-[0_20px_50px_-30px_rgba(15,23,42,0.6)] backdrop-blur-sm transition duration-300 hover:-translate-y-1"
             style={{ "--vp-reveal-delay": "0ms" } as CSSProperties}
           >
             <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--vp-primary))]/10 to-transparent" />
@@ -173,7 +189,7 @@ export default function MotionMockups() {
                 {copy.labels.register}
               </span>
             </div>
-            <div className="relative vp-card vp-card-soft border border-[hsl(var(--vp-border))] overflow-hidden shadow-[0_16px_32px_rgba(15,23,42,0.35)]">
+            <div className="relative rounded-2xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-card))] overflow-hidden shadow-[0_16px_32px_rgba(15,23,42,0.35)]">
               <div className="bg-[hsl(var(--vp-bg-soft))] px-3 py-2 text-xs border-b border-[hsl(var(--vp-border))]">
                 POS · {copy.labels.cart}
               </div>
@@ -220,7 +236,7 @@ export default function MotionMockups() {
           </div>
 
           <div
-            className="vp-card vp-card-hover p-6 relative overflow-hidden text-[hsl(var(--vp-text))] min-h-[340px] vp-reveal"
+            className="relative overflow-hidden rounded-3xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg))]/85 p-7 text-[hsl(var(--vp-text))] min-h-[340px] shadow-[0_20px_50px_-30px_rgba(15,23,42,0.6)] backdrop-blur-sm transition duration-300 hover:-translate-y-1"
             style={{ "--vp-reveal-delay": "120ms" } as CSSProperties}
           >
             <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--vp-primary))]/10 to-transparent" />
@@ -233,7 +249,7 @@ export default function MotionMockups() {
               </span>
             </div>
             <div className="relative space-y-3">
-              <div className="vp-card vp-card-soft border border-[hsl(var(--vp-border))] p-3 shadow-[0_12px_26px_rgba(15,23,42,0.3)]">
+              <div className="rounded-2xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-card))] p-3 shadow-[0_12px_26px_rgba(15,23,42,0.3)]">
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div className="space-y-1 min-w-0">
                     <p className="text-[hsl(var(--vp-muted))]">
@@ -295,7 +311,7 @@ export default function MotionMockups() {
           </div>
 
           <div
-            className="vp-card vp-card-hover p-6 relative overflow-hidden text-[hsl(var(--vp-text))] min-h-[340px] vp-reveal"
+            className="relative overflow-hidden rounded-3xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg))]/85 p-7 text-[hsl(var(--vp-text))] min-h-[340px] shadow-[0_20px_50px_-30px_rgba(15,23,42,0.6)] backdrop-blur-sm transition duration-300 hover:-translate-y-1"
             style={{ "--vp-reveal-delay": "240ms" } as CSSProperties}
           >
             <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--vp-primary))]/10 to-transparent" />

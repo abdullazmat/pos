@@ -4,15 +4,17 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Hero from "@/components/hero";
-import Stats from "@/components/stats";
 import PosPreview from "@/components/PosPreview";
-import MotionMockups from "@/components/MotionMockups";
 import FeaturesSection from "@/components/FeaturesSection";
-import SystemInActionSection from "@/components/SystemInActionSection";
+import HowItWorksSection from "@/components/HowItWorksSection";
 import CheckoutWorkflowSection from "@/components/CheckoutWorkflowSection";
 import PricingSection from "@/components/PricingSection";
 import CTASection from "@/components/CTASection";
+import SupportSection from "@/components/SupportSection";
+import TestimonialSection from "@/components/TestimonialSection";
 import Footer from "@/components/Footer";
+import TrustedDemoSection from "@/components/TrustedDemoSection";
+import BusinessInsightsSection from "@/components/BusinessInsightsSection";
 import { useLanguage } from "@/lib/context/LanguageContext";
 
 export default function Home() {
@@ -82,11 +84,10 @@ export default function Home() {
       <Header />
 
       <main id="top" className="vp-page">
-        <div className="px-6 pt-32 pb-32 mx-auto max-w-7xl">
-          <div className="grid lg:grid-cols-2 gap-20 items-center min-h-[78vh]">
+        <div className="px-4 sm:px-6 pt-24 sm:pt-32 pb-20 sm:pb-32 mx-auto max-w-7xl">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[70vh] sm:min-h-[78vh]">
             <div className="space-y-12">
               <Hero />
-              <Stats />
             </div>
 
             <div className="justify-center hidden lg:flex">
@@ -96,20 +97,23 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex justify-center mt-16 lg:hidden">
-            <div className="w-full max-w-xl vp-mockup-shell vp-float">
+          <div className="flex justify-center mt-10 sm:mt-16 lg:hidden">
+            <div className="w-full max-w-md sm:max-w-xl vp-mockup-shell vp-float">
               <PosPreview />
             </div>
           </div>
         </div>
       </main>
 
-      <SystemInActionSection />
+      <TrustedDemoSection />
       <FeaturesSection />
+      <HowItWorksSection />
+      <BusinessInsightsSection />
       <CheckoutWorkflowSection />
       <PricingSection />
-      <MotionMockups />
       <CTASection />
+      <SupportSection />
+      <TestimonialSection />
       <Footer />
     </>
   );
