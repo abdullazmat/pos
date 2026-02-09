@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import Sale from "@/lib/models/Sale";
-import Invoice, { InvoiceChannel, InvoiceType } from "@/lib/models/Invoice";
+import Invoice, {
+  IInvoice,
+  InvoiceChannel,
+  InvoiceType,
+} from "@/lib/models/Invoice";
 import Product from "@/lib/models/Product";
 import StockHistory from "@/lib/models/StockHistory";
 import CashRegister from "@/lib/models/CashRegister";
@@ -667,7 +671,9 @@ export async function POST(req: NextRequest) {
     let receiptIsProvisional = false;
 
     if (invoice) {
-      const refreshedInvoice = await Invoice.findById(invoice._id).lean();
+      const refreshedInvoice = await Invoice.findById(invoice._id)
+        .lean<Pick<IInvoice, "channel" | "fiscalData" | "status" | "arcaStatus">>()
+        .exec();
       const isFiscalInvoice =
         refreshedInvoice?.channel === InvoiceChannel.ARCA ||
         refreshedInvoice?.channel === InvoiceChannel.WSFE;

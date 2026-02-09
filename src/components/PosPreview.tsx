@@ -3,8 +3,7 @@
 import Image from "next/image";
 import { useLanguage } from "@/lib/context/LanguageContext";
 
-const HERO_IMAGE_URL =
-  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=80";
+const HERO_IMAGE_URL = "/images/hero-image.jpeg";
 
 export default function PosPreview() {
   const { t } = useLanguage();

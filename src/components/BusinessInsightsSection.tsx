@@ -1,18 +1,24 @@
 "use client";
 
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/lib/context/LanguageContext";
 
-import controlPanelImage from "../../dashbaord images/control de caja.jpeg";
-import incomeImage from "../../dashbaord images/punto de venta.jpeg";
-import expensesImage from "../../dashbaord images/Gastos.jpeg";
-import stockImage from "../../dashbaord images/Categorias.jpeg";
-import informationImage from "../../dashbaord images/Screenshot_7.png";
-import integrationsImage from "../../dashbaord images/Screenshot_9.png";
-import tourImage from "../../dashbaord images/WhatsApp Image 2025-12-09 at 11.25.13.jpeg";
+import controlPanelImage from "../../dashbaord images/new images/cash register.png";
+import incomeImage from "../../dashbaord images/new images/POS page.png";
+import expensesImage from "../../dashbaord images/new images/expenses.png";
+import stockImage from "../../dashbaord images/new images/Stock report.png";
+import informationImage from "../../dashbaord images/new images/Fiscal Reports - VAT.png";
+import integrationsImage from "../../dashbaord images/new images/Business Configuration.png";
+import tourImage from "../../dashbaord images/new images/Product Management.png";
 
-const INSIGHT_BLOCKS = [
+type InsightBlock = {
+  image: StaticImageData;
+  href?: string;
+  imageFit?: string;
+};
+
+const INSIGHT_BLOCKS: InsightBlock[] = [
   {
     image: controlPanelImage,
   },
@@ -28,7 +34,6 @@ const INSIGHT_BLOCKS = [
   {
     image: informationImage,
     href: "/reports",
-    imageFit: "object-cover",
   },
   {
     image: integrationsImage,
@@ -59,9 +64,9 @@ export default function BusinessInsightsSection() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-[hsl(var(--vp-warning)/0.25)]">
-        <div className="absolute -right-24 top-10 h-64 w-64 rounded-full bg-[hsl(var(--vp-warning)/0.3)]" />
-        <div className="absolute -left-16 bottom-8 h-48 w-48 rounded-full bg-[hsl(var(--vp-warning)/0.2)]" />
+      <section className="relative overflow-hidden bg-[hsl(var(--vp-primary)/0.08)]">
+        <div className="absolute -right-24 top-10 h-64 w-64 rounded-full bg-[hsl(var(--vp-primary)/0.12)]" />
+        <div className="absolute -left-16 bottom-8 h-48 w-48 rounded-full bg-[hsl(var(--vp-primary)/0.08)]" />
         <div className="relative mx-auto max-w-5xl px-6 py-20 text-center sm:py-24">
           <p className="text-sm font-semibold tracking-[0.2em] text-[hsl(var(--vp-text))]">
             {content?.heroEyebrow}
@@ -114,7 +119,7 @@ export default function BusinessInsightsSection() {
                       isReversed ? "lg:order-1" : ""
                     }`}
                   >
-                    <div className="relative w-full aspect-[4/3] bg-[hsl(var(--vp-bg-soft))] p-4">
+                    <div className="relative w-full aspect-[16/9] bg-[hsl(var(--vp-bg-soft))] p-0">
                       <Image
                         src={block.image}
                         alt={copy?.alt ?? ""}
@@ -159,13 +164,13 @@ export default function BusinessInsightsSection() {
             <div className="relative">
               <div className="absolute -inset-6 rounded-[32px] bg-[hsl(var(--vp-primary))]/10 blur-2xl" />
               <div className="relative overflow-hidden rounded-3xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg))] shadow-[0_30px_70px_-45px_rgba(15,23,42,0.7)]">
-                <div className="relative aspect-[16/9] w-full bg-[hsl(var(--vp-bg-soft))] p-2 sm:p-3">
+                <div className="relative aspect-[2/1] w-full bg-[hsl(var(--vp-bg-soft))] p-2 sm:p-3">
                   <Image
                     src={tourImage}
                     alt={content?.bottomImageAlt ?? ""}
                     fill
                     sizes="(max-width: 1024px) 100vw, 560px"
-                    className="object-cover"
+                    className="object-contain"
                   />
                 </div>
               </div>

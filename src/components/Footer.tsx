@@ -1,6 +1,7 @@
 // components/Footer.tsx
 "use client";
 
+import Link from "next/link";
 import { useLanguage } from "@/lib/context/LanguageContext";
 import BrandLogo from "@/components/BrandLogo";
 
@@ -14,11 +15,16 @@ export default function Footer() {
           {/* Logo + Description */}
           <div>
             <div className="mb-4">
-              <BrandLogo size="md" />
+              <Link href="/" aria-label="VentaPlus">
+                <BrandLogo size="md" />
+              </Link>
             </div>
-            <p className="text-[hsl(var(--vp-muted))] text-sm leading-relaxed">
+            <Link
+              href="/"
+              className="text-[hsl(var(--vp-muted))] text-sm leading-relaxed inline-block hover:text-[hsl(var(--vp-text))] transition"
+            >
               {String(t("subtitle", "pricing"))}
-            </p>
+            </Link>
           </div>
 
           {/* Producto */}
@@ -28,28 +34,28 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-[hsl(var(--vp-muted))] text-sm">
               <li>
-                <a
-                  href="#features"
+                <Link
+                  href="/#features"
                   className="hover:text-[hsl(var(--vp-text))] transition"
                 >
                   {String(t("features", "common"))}
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#pricing"
+                <Link
+                  href="/#pricing"
                   className="hover:text-[hsl(var(--vp-text))] transition"
                 >
                   {String(t("pricing", "common"))}
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#how-it-works"
+                <Link
+                  href="/#how-it-works"
                   className="hover:text-[hsl(var(--vp-text))] transition"
                 >
                   {String(t("documentation", "common"))}
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -61,38 +67,28 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-[hsl(var(--vp-muted))] text-sm">
               <li>
-                <a
-                  href="mailto:soporte@ventaplus.pro?subject=Necesito%20ayuda"
+                <Link
+                  href="/help"
                   className="hover:text-[hsl(var(--vp-text))] transition"
                 >
                   {String(t("help", "common"))}
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="mailto:hola@ventaplus.pro"
+                <Link
+                  href="/contact"
                   className="hover:text-[hsl(var(--vp-text))] transition"
                 >
                   {String(t("contact", "common"))}
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="https://status.poscloud.app"
+                <Link
+                  href="/status"
                   className="hover:text-[hsl(var(--vp-text))] transition"
-                  target="_blank"
-                  rel="noreferrer"
                 >
                   {String(t("serviceStatus", "common"))}
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#top"
-                  className="hover:text-[hsl(var(--vp-text))] transition"
-                >
-                  {String(t("backToTop", "common"))}
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -104,20 +100,20 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-[hsl(var(--vp-muted))] text-sm">
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/terms"
                   className="hover:text-[hsl(var(--vp-text))] transition"
                 >
                   {String(t("terms", "common"))}
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/privacy"
                   className="hover:text-[hsl(var(--vp-text))] transition"
                 >
                   {String(t("privacy", "common"))}
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
