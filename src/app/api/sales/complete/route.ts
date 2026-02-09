@@ -672,7 +672,9 @@ export async function POST(req: NextRequest) {
 
     if (invoice) {
       const refreshedInvoice = await Invoice.findById(invoice._id)
-        .lean<Pick<IInvoice, "channel" | "fiscalData" | "status" | "arcaStatus">>()
+        .lean<
+          Pick<IInvoice, "channel" | "fiscalData" | "status" | "arcaStatus">
+        >()
         .exec();
       const isFiscalInvoice =
         refreshedInvoice?.channel === InvoiceChannel.ARCA ||
