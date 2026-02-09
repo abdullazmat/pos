@@ -8,6 +8,11 @@ import Header from "@/components/layout/Header";
 import { UserCog, Edit, Trash2, X } from "lucide-react";
 import { toast } from "react-toastify";
 import { useBusinessDateTime } from "@/lib/hooks/useBusinessDateTime";
+import {
+  clampDiscountLimit,
+  MAX_DISCOUNT_PERCENT,
+  normalizeDiscountLimit,
+} from "@/lib/utils/discounts";
 
 interface User {
   id: string;
@@ -74,7 +79,7 @@ const ADMIN_COPY = {
         usernameEdit: "juanperez",
         email: "juan@ejemplo.com (debe ser único)",
         emailEdit: "juan@ejemplo.com",
-        discountLimit: "0 - 100",
+        discountLimit: `0 - ${MAX_DISCOUNT_PERCENT}`,
         password: "Mínimo 6 caracteres",
         phone: "+54 9 11 1234-5678",
       },
@@ -100,6 +105,7 @@ const ADMIN_COPY = {
       updateError: "Error al actualizar usuario",
       deleteSuccess: "Usuario eliminado exitosamente",
       deleteError: "Error al eliminar usuario",
+      discountLimitClamped: "El limite maximo de descuento es 5%",
       mustHaveAdmin: "Debe existir al menos un administrador.",
       userLimitReached:
         "El límite de usuarios en el plan gratuito es 2/2. Actualiza tu plan para agregar más usuarios.",
@@ -160,7 +166,7 @@ const ADMIN_COPY = {
         usernameEdit: "johndoe",
         email: "john@example.com (must be unique)",
         emailEdit: "john@example.com",
-        discountLimit: "0 - 100",
+        discountLimit: `0 - ${MAX_DISCOUNT_PERCENT}`,
         password: "Minimum 6 characters",
         phone: "+1 (555) 123-4567",
       },
@@ -186,6 +192,7 @@ const ADMIN_COPY = {
       updateError: "Error updating user",
       deleteSuccess: "User deleted successfully",
       deleteError: "Error deleting user",
+      discountLimitClamped: "The maximum discount limit is 5%",
       mustHaveAdmin: "At least one administrator is required.",
       userLimitReached:
         "The free plan user limit is 2/2. Upgrade your plan to add more users.",
@@ -247,7 +254,7 @@ const ADMIN_COPY = {
         usernameEdit: "joaosilva",
         email: "joao@exemplo.com (deve ser único)",
         emailEdit: "joao@exemplo.com",
-        discountLimit: "0 - 100",
+        discountLimit: `0 - ${MAX_DISCOUNT_PERCENT}`,
         password: "Mínimo 6 caracteres",
         phone: "+55 11 98765-4321",
       },
@@ -273,6 +280,7 @@ const ADMIN_COPY = {
       updateError: "Erro ao atualizar usuário",
       deleteSuccess: "Usuário deletado com sucesso",
       deleteError: "Erro ao deletar usuário",
+      discountLimitClamped: "O limite maximo de desconto e 5%",
       userLimitReached:
         "O limite de usuários no plano gratuito é 2/2. Atualize seu plano para adicionar mais usuários.",
       cannotDelete: "Você não pode excluir seu próprio usuário.",
@@ -449,6 +457,15 @@ export default function AdminPage() {
 
     try {
       const token = localStorage.getItem("accessToken");
+      const rawDiscountLimit =
+        formData.discountLimit === "" ? null : Number(formData.discountLimit);
+      const normalizedLimit = normalizeDiscountLimit(rawDiscountLimit ?? null);
+      if (
+        typeof normalizedLimit === "number" &&
+        normalizedLimit > MAX_DISCOUNT_PERCENT
+      ) {
+        toast.info(copy.toasts.discountLimitClamped);
+      }
       const response = await fetch("/api/users", {
         method: "POST",
         headers: {
@@ -458,9 +475,9 @@ export default function AdminPage() {
         body: JSON.stringify({
           ...formData,
           discountLimit:
-            formData.discountLimit === ""
+            rawDiscountLimit === null
               ? null
-              : Number(formData.discountLimit),
+              : clampDiscountLimit(rawDiscountLimit),
         }),
       });
 
@@ -534,6 +551,17 @@ export default function AdminPage() {
 
     try {
       const token = localStorage.getItem("accessToken");
+      const rawDiscountLimit =
+        editFormData.discountLimit === ""
+          ? null
+          : Number(editFormData.discountLimit);
+      const normalizedLimit = normalizeDiscountLimit(rawDiscountLimit ?? null);
+      if (
+        typeof normalizedLimit === "number" &&
+        normalizedLimit > MAX_DISCOUNT_PERCENT
+      ) {
+        toast.info(copy.toasts.discountLimitClamped);
+      }
       const response = await fetch("/api/users", {
         method: "PATCH",
         headers: {
@@ -544,9 +572,9 @@ export default function AdminPage() {
           userId: userToEdit._id,
           ...editFormData,
           discountLimit:
-            editFormData.discountLimit === ""
+            rawDiscountLimit === null
               ? null
-              : Number(editFormData.discountLimit),
+              : clampDiscountLimit(rawDiscountLimit),
         }),
       });
 
@@ -984,7 +1012,7 @@ export default function AdminPage() {
                   <input
                     type="number"
                     min={0}
-                    max={100}
+                    max={MAX_DISCOUNT_PERCENT}
                     step={1}
                     value={formData.discountLimit}
                     onChange={(e) =>
@@ -1175,7 +1203,7 @@ export default function AdminPage() {
                   <input
                     type="number"
                     min={0}
-                    max={100}
+                    max={MAX_DISCOUNT_PERCENT}
                     step={1}
                     value={editFormData.discountLimit}
                     onChange={(e) =>

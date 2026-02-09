@@ -5,6 +5,7 @@ import SupplierDocument from "@/lib/models/SupplierDocument";
 import Supplier from "@/lib/models/Supplier";
 import PaymentOrderAudit from "@/lib/models/PaymentOrderAudit";
 import { verifyToken } from "@/lib/utils/jwt";
+import { computeSupplierDocumentStatus } from "@/lib/utils/supplierDocumentStatus";
 
 interface PaymentOrderItemInput {
   documentId: string;
@@ -131,6 +132,9 @@ export async function POST(req: NextRequest) {
       if (doc.type === "CREDIT_NOTE") {
         throw new Error("Credit notes must be applied in creditNotes list");
       }
+      if (doc.status === "CANCELLED" || doc.balance <= 0) {
+        throw new Error("Document is not available");
+      }
       if (applyAmount <= 0 || applyAmount > doc.balance) {
         throw new Error("Invalid document amount");
       }
@@ -152,6 +156,9 @@ export async function POST(req: NextRequest) {
       const applyAmount = Number(input?.applyAmount || 0);
       if (doc.type !== "CREDIT_NOTE") {
         throw new Error("Only credit notes can be applied as compensation");
+      }
+      if (doc.status === "CANCELLED" || doc.balance <= 0) {
+        throw new Error("Credit note is not available");
       }
       if (applyAmount <= 0 || applyAmount > doc.balance) {
         throw new Error("Invalid credit note amount");

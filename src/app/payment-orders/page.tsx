@@ -16,10 +16,18 @@ interface SupplierDocument {
   supplierId: string;
   type: "INVOICE" | "DEBIT_NOTE" | "CREDIT_NOTE";
   documentNumber: string;
+  pointOfSale?: string;
   date: string;
+  dueDate?: string;
   totalAmount: number;
   balance: number;
-  status: "OPEN" | "PAID" | "CANCELLED";
+  status:
+    | "PENDING"
+    | "DUE_SOON"
+    | "OVERDUE"
+    | "PARTIALLY_APPLIED"
+    | "APPLIED"
+    | "CANCELLED";
 }
 
 interface PaymentOrder {
@@ -50,8 +58,10 @@ const COPY = {
     paymentsTitle: "Medios de pago",
     newDocumentTitle: "Nuevo documento",
     documentType: "Tipo de documento",
+    pointOfSale: "Punto de venta",
     documentNumber: "Número",
     documentDate: "Fecha",
+    documentDueDate: "Vencimiento",
     documentAmount: "Importe",
     documentNotes: "Observaciones",
     createDocument: "Crear documento",
@@ -109,8 +119,10 @@ const COPY = {
     paymentsTitle: "Payment methods",
     newDocumentTitle: "New document",
     documentType: "Document type",
+    pointOfSale: "Point of sale",
     documentNumber: "Number",
     documentDate: "Date",
+    documentDueDate: "Due date",
     documentAmount: "Amount",
     documentNotes: "Notes",
     createDocument: "Create document",
@@ -168,8 +180,10 @@ const COPY = {
     paymentsTitle: "Meios de pagamento",
     newDocumentTitle: "Novo documento",
     documentType: "Tipo de documento",
+    pointOfSale: "Ponto de venda",
     documentNumber: "Número",
     documentDate: "Data",
+    documentDueDate: "Vencimento",
     documentAmount: "Valor",
     documentNotes: "Observações",
     createDocument: "Criar documento",
@@ -237,8 +251,10 @@ export default function PaymentOrdersPage() {
 
   const [docForm, setDocForm] = useState({
     type: "INVOICE",
+    pointOfSale: "",
     documentNumber: "",
     date: "",
+    dueDate: "",
     totalAmount: "",
     notes: "",
   });
@@ -292,16 +308,16 @@ export default function PaymentOrdersPage() {
   const loadSupplierDocs = async (id: string) => {
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await fetch(
-        `/api/supplier-documents?supplierId=${id}&status=OPEN`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const response = await fetch(`/api/supplier-documents?supplierId=${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await response.json();
       const allDocs: SupplierDocument[] = data?.documents || [];
-      setDocuments(allDocs.filter((doc) => doc.type !== "CREDIT_NOTE"));
-      setCreditNotes(allDocs.filter((doc) => doc.type === "CREDIT_NOTE"));
+      const availableDocs = allDocs.filter(
+        (doc) => doc.balance > 0 && doc.status !== "CANCELLED",
+      );
+      setDocuments(availableDocs.filter((doc) => doc.type !== "CREDIT_NOTE"));
+      setCreditNotes(availableDocs.filter((doc) => doc.type === "CREDIT_NOTE"));
     } catch (error) {
       console.error("Load supplier docs error:", error);
       toast.error(copy.toasts.loadError);
@@ -330,6 +346,14 @@ export default function PaymentOrdersPage() {
       toast.error(copy.toasts.supplierRequired);
       return;
     }
+    if (docForm.type !== "CREDIT_NOTE" && !docForm.dueDate) {
+      toast.error(copy.toasts.validationError);
+      return;
+    }
+    if (!docForm.totalAmount || Number(docForm.totalAmount) <= 0) {
+      toast.error(copy.toasts.validationError);
+      return;
+    }
     try {
       const token = localStorage.getItem("accessToken");
       const response = await fetch("/api/supplier-documents", {
@@ -341,8 +365,10 @@ export default function PaymentOrdersPage() {
         body: JSON.stringify({
           supplierId,
           type: docForm.type,
+          pointOfSale: docForm.pointOfSale || undefined,
           documentNumber: docForm.documentNumber,
           date: docForm.date || undefined,
+          dueDate: docForm.dueDate || undefined,
           totalAmount: Number(docForm.totalAmount || 0),
           notes: docForm.notes || undefined,
         }),
@@ -355,8 +381,10 @@ export default function PaymentOrdersPage() {
       toast.success(copy.toasts.docCreated);
       setDocForm({
         type: "INVOICE",
+        pointOfSale: "",
         documentNumber: "",
         date: "",
+        dueDate: "",
         totalAmount: "",
         notes: "",
       });
@@ -569,6 +597,17 @@ export default function PaymentOrdersPage() {
               </select>
               <input
                 className="w-full text-sm"
+                placeholder={copy.pointOfSale}
+                value={docForm.pointOfSale}
+                onChange={(e) =>
+                  setDocForm((prev) => ({
+                    ...prev,
+                    pointOfSale: e.target.value,
+                  }))
+                }
+              />
+              <input
+                className="w-full text-sm"
                 placeholder={copy.documentNumber}
                 value={docForm.documentNumber}
                 onChange={(e) =>
@@ -586,6 +625,20 @@ export default function PaymentOrdersPage() {
                   setDocForm((prev) => ({ ...prev, date: e.target.value }))
                 }
               />
+              {docForm.type !== "CREDIT_NOTE" && (
+                <input
+                  type="date"
+                  className="w-full text-sm"
+                  placeholder={copy.documentDueDate}
+                  value={docForm.dueDate}
+                  onChange={(e) =>
+                    setDocForm((prev) => ({
+                      ...prev,
+                      dueDate: e.target.value,
+                    }))
+                  }
+                />
+              )}
               <input
                 className="w-full text-sm"
                 placeholder={copy.documentAmount}

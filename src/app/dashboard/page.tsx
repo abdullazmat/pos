@@ -19,6 +19,10 @@ interface User {
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [alerts, setAlerts] = useState<{ dueSoon: number; overdue: number }>({
+    dueSoon: 0,
+    overdue: 0,
+  });
   const router = useRouter();
   const { subscription } = useSubscription();
   const { t } = useLanguage();
@@ -48,6 +52,27 @@ export default function Dashboard() {
       setLoading(false);
     }
   }, [router]);
+
+  useEffect(() => {
+    const loadAlerts = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+        const response = await fetch("/api/supplier-documents?alerts=true", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        setAlerts({
+          dueSoon: data?.alerts?.dueSoon || 0,
+          overdue: data?.alerts?.overdue || 0,
+        });
+      } catch (error) {
+        console.error("Failed to load due date alerts", error);
+      }
+    };
+
+    void loadAlerts();
+  }, []);
 
   if (loading) {
     return (
@@ -149,10 +174,7 @@ export default function Dashboard() {
 
         {/* Main Navigation Cards */}
         <div className="grid md:grid-cols-4 gap-6">
-          <Link
-            href="/pos"
-            className="vp-card vp-card-hover p-6"
-          >
+          <Link href="/pos" className="vp-card vp-card-hover p-6">
             <h3 className="text-2xl font-bold mb-2 text-[hsl(var(--vp-primary))]">
               ⚡
             </h3>
@@ -164,10 +186,7 @@ export default function Dashboard() {
             </p>
           </Link>
 
-          <Link
-            href="/products"
-            className="vp-card vp-card-hover p-6"
-          >
+          <Link href="/products" className="vp-card vp-card-hover p-6">
             <h3 className="text-2xl font-bold mb-2 text-[hsl(var(--vp-primary))]">
               📦
             </h3>
@@ -179,10 +198,7 @@ export default function Dashboard() {
             </p>
           </Link>
 
-          <Link
-            href="/reports"
-            className="vp-card vp-card-hover p-6"
-          >
+          <Link href="/reports" className="vp-card vp-card-hover p-6">
             <h3 className="text-2xl font-bold mb-2 text-[hsl(var(--vp-primary))]">
               📊
             </h3>
@@ -195,10 +211,7 @@ export default function Dashboard() {
           </Link>
 
           {user?.role === "admin" && (
-            <Link
-              href="/admin"
-              className="vp-card vp-card-hover p-6"
-            >
+            <Link href="/admin" className="vp-card vp-card-hover p-6">
               <h3 className="text-2xl font-bold mb-2 text-[hsl(var(--vp-primary))]">
                 ⚙️
               </h3>
@@ -210,6 +223,20 @@ export default function Dashboard() {
               </p>
             </Link>
           )}
+        </div>
+
+        <div className="mt-10 vp-card p-6">
+          <h3 className="text-lg font-semibold text-[hsl(var(--vp-text))] mb-3">
+            Supplier Due Date Alerts
+          </h3>
+          <div className="flex flex-wrap gap-3">
+            <div className="px-3 py-2 rounded-lg bg-amber-50 text-amber-700 text-sm">
+              Due soon: {alerts.dueSoon}
+            </div>
+            <div className="px-3 py-2 rounded-lg bg-rose-50 text-rose-700 text-sm">
+              Overdue: {alerts.overdue}
+            </div>
+          </div>
         </div>
 
         <div className="mt-12 vp-card p-6">

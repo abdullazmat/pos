@@ -1,4 +1,5 @@
 import { Schema, model, Document, models } from "mongoose";
+import { MAX_DISCOUNT_PERCENT } from "@/lib/utils/discounts";
 
 export interface IUser extends Document {
   email: string;
@@ -17,9 +18,9 @@ export interface IUser extends Document {
 }
 
 const ROLE_DEFAULT_DISCOUNT_LIMITS: Record<IUser["role"], number> = {
-  admin: 100,
-  supervisor: 20,
-  cashier: 10,
+  admin: MAX_DISCOUNT_PERCENT,
+  supervisor: MAX_DISCOUNT_PERCENT,
+  cashier: MAX_DISCOUNT_PERCENT,
 };
 
 const userSchema = new Schema<IUser>(
@@ -57,7 +58,7 @@ const userSchema = new Schema<IUser>(
     discountLimit: {
       type: Number,
       min: 0,
-      max: 100,
+      max: MAX_DISCOUNT_PERCENT,
       default: function (this: IUser) {
         return ROLE_DEFAULT_DISCOUNT_LIMITS[this.role ?? "cashier"] ?? 0;
       },

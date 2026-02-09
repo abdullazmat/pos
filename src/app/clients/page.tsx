@@ -17,6 +17,11 @@ import {
 import { toast } from "react-toastify";
 import { UpgradePrompt } from "@/components/common/UpgradePrompt";
 import { PLAN_FEATURES } from "@/lib/utils/planFeatures";
+import {
+  clampDiscountLimit,
+  MAX_DISCOUNT_PERCENT,
+  normalizeDiscountLimit,
+} from "@/lib/utils/discounts";
 
 interface Client {
   _id: string;
@@ -75,6 +80,7 @@ const CLIENT_COPY = {
       subscriptionError: "Error al cargar suscripción",
       saveError: "Error al guardar cliente",
       deleteError: "Error al eliminar cliente",
+      discountLimitClamped: "El límite de descuento máximo es 5%",
       saved: "Cliente guardado",
       deleted: "Cliente eliminado",
     },
@@ -124,6 +130,7 @@ const CLIENT_COPY = {
       subscriptionError: "Failed to load subscription",
       saveError: "Failed to save customer",
       deleteError: "Failed to delete customer",
+      discountLimitClamped: "The maximum discount limit is 5%",
       saved: "Customer saved",
       deleted: "Customer deleted",
     },
@@ -173,6 +180,7 @@ const CLIENT_COPY = {
       subscriptionError: "Erro ao carregar assinatura",
       saveError: "Erro ao salvar cliente",
       deleteError: "Erro ao excluir cliente",
+      discountLimitClamped: "O limite maximo de desconto e 5%",
       saved: "Cliente salvo",
       deleted: "Cliente excluído",
     },
@@ -269,7 +277,9 @@ export default function ClientsPage() {
                 : Number(rawLimit);
           return {
             ...client,
-            discountLimit: Number.isFinite(parsed) ? parsed : null,
+            discountLimit: clampDiscountLimit(
+              Number.isFinite(parsed) ? parsed : null,
+            ),
           } as Client;
         });
         setClients(normalized);
@@ -304,8 +314,17 @@ export default function ClientsPage() {
       const token = localStorage.getItem("accessToken");
       const method = editingId ? "PUT" : "POST";
 
-      const discountLimitValue =
+      const rawDiscountLimit =
         formData.discountLimit === "" ? null : Number(formData.discountLimit);
+      const normalizedLimit = normalizeDiscountLimit(rawDiscountLimit ?? null);
+      if (
+        typeof normalizedLimit === "number" &&
+        normalizedLimit > MAX_DISCOUNT_PERCENT
+      ) {
+        toast.info(copy.toasts.discountLimitClamped);
+      }
+      const discountLimitValue =
+        rawDiscountLimit === null ? null : clampDiscountLimit(rawDiscountLimit);
       const response = await fetch("/api/clients", {
         method,
         headers: {
@@ -590,7 +609,7 @@ export default function ClientsPage() {
                     <input
                       type="number"
                       min={0}
-                      max={100}
+                      max={MAX_DISCOUNT_PERCENT}
                       step="0.01"
                       value={formData.discountLimit}
                       onChange={(e) =>

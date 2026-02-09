@@ -16,6 +16,29 @@ import { generateNextProductInternalId } from "@/lib/utils/productCodeGenerator"
 import { parseNumberInput } from "@/lib/utils/decimalFormatter";
 import { clampDiscountLimit } from "@/lib/utils/discounts";
 import ClientAccountTransaction from "@/lib/models/ClientAccountTransaction";
+import "@/lib/server/arcaRetryScheduler";
+
+const getMockArcaStatus = () => {
+  const status = process.env.ARCA_MOCK_STATUS?.toUpperCase();
+  if (
+    status === "APPROVED" ||
+    status === "PENDING_CAE" ||
+    status === "REJECTED"
+  ) {
+    return status;
+  }
+  return null;
+};
+
+const isMockArcaEnabled = () => {
+  return (
+    process.env.ARCA_MOCK_ENABLED === "true" || Boolean(getMockArcaStatus())
+  );
+};
+
+const generateMockCae = () => {
+  return `${Date.now()}`.slice(-13).padStart(13, "0");
+};
 
 interface SaleItemRequest {
   productId: string;
@@ -69,7 +92,7 @@ export async function POST(req: NextRequest) {
     const {
       items,
       paymentMethod,
-      invoiceChannel = InvoiceChannel.INTERNAL,
+      invoiceChannel: rawInvoiceChannel,
       customerName,
       customerEmail,
       customerCuit,
@@ -80,6 +103,18 @@ export async function POST(req: NextRequest) {
       generateInvoice = true,
       clientId,
     } = body;
+
+    const invoiceChannel =
+      rawInvoiceChannel ??
+      (isMockArcaEnabled() && customerCuit
+        ? InvoiceChannel.ARCA
+        : InvoiceChannel.INTERNAL);
+
+    const resolvedIvaType =
+      ivaType ||
+      (isMockArcaEnabled() && invoiceChannel === InvoiceChannel.ARCA
+        ? "RESPONSABLE_INSCRIPTO"
+        : undefined);
 
     // Validation
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -100,7 +135,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (invoiceChannel === InvoiceChannel.ARCA && !ivaType) {
+    if (invoiceChannel === InvoiceChannel.ARCA && !resolvedIvaType) {
       return NextResponse.json(
         { error: "IVA type is required for ARCA invoices" },
         { status: 400 },
@@ -356,7 +391,7 @@ export async function POST(req: NextRequest) {
         customerName,
         customerEmail,
         customerCuit,
-        ivaType,
+        ivaType: resolvedIvaType,
         items: invoiceItems,
         subtotal,
         taxAmount,
@@ -367,6 +402,60 @@ export async function POST(req: NextRequest) {
         notes,
         date: new Date(),
       });
+
+      if (
+        invoice &&
+        (invoiceChannel === InvoiceChannel.ARCA ||
+          invoiceChannel === InvoiceChannel.WSFE) &&
+        isMockArcaEnabled()
+      ) {
+        const mockStatus = getMockArcaStatus() || "PENDING_CAE";
+        const mockCae = generateMockCae();
+        const mockCaeVto = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .slice(0, 10)
+          .replace(/-/g, "");
+        const fiscalDefaults = {
+          "fiscalData.comprobanteTipo": customerCuit ? 1 : 6,
+          "fiscalData.pointOfSale": 1,
+          "fiscalData.invoiceSequence": nextNumber,
+        };
+
+        if (mockStatus === "APPROVED") {
+          await Invoice.updateOne(
+            { _id: invoice._id },
+            {
+              status: "AUTHORIZED",
+              arcaStatus: "APPROVED",
+              "fiscalData.cae": mockCae,
+              "fiscalData.caeNro": mockCae,
+              "fiscalData.caeVto": mockCaeVto,
+              "fiscalData.caeStatus": "AUTHORIZED",
+              ...fiscalDefaults,
+            },
+          );
+        } else if (mockStatus === "REJECTED") {
+          await Invoice.updateOne(
+            { _id: invoice._id },
+            {
+              status: "PENDING_CAE",
+              arcaStatus: "REJECTED",
+              "fiscalData.caeStatus": "REJECTED",
+              ...fiscalDefaults,
+            },
+          );
+        } else {
+          await Invoice.updateOne(
+            { _id: invoice._id },
+            {
+              status: "PENDING_CAE",
+              arcaStatus: "PENDING",
+              "fiscalData.caeStatus": "PENDING",
+              ...fiscalDefaults,
+            },
+          );
+        }
+      }
     }
 
     // Create sale record
@@ -565,10 +654,62 @@ export async function POST(req: NextRequest) {
     if (paymentMethod !== "mercadopago" && invoice) {
       invoice.paymentStatus = "PAID";
       await invoice.save();
+    }
 
-      // Update sale
-      sale.paymentStatus = "completed";
-      await sale.save();
+    let receiptStatus = "INTERNAL" as
+      | "INTERNAL"
+      | "APPROVED"
+      | "PENDING_CAE"
+      | "REJECTED"
+      | "CANCELED_BY_NC"
+      | "CAE_REQUIRED";
+    let receiptType = "NONE" as "NONE" | "FISCAL" | "PROVISIONAL";
+    let receiptIsProvisional = false;
+
+    if (invoice) {
+      const refreshedInvoice = await Invoice.findById(invoice._id).lean();
+      const isFiscalInvoice =
+        refreshedInvoice?.channel === InvoiceChannel.ARCA ||
+        refreshedInvoice?.channel === InvoiceChannel.WSFE;
+      const cae =
+        refreshedInvoice?.fiscalData?.cae ||
+        refreshedInvoice?.fiscalData?.caeNro;
+      const caeAuthorized =
+        refreshedInvoice?.status === "AUTHORIZED" ||
+        refreshedInvoice?.fiscalData?.caeStatus === "AUTHORIZED" ||
+        refreshedInvoice?.arcaStatus === "APPROVED";
+      const caePending =
+        refreshedInvoice?.status === "PENDING_CAE" ||
+        refreshedInvoice?.fiscalData?.caeStatus === "PENDING" ||
+        refreshedInvoice?.arcaStatus === "PENDING" ||
+        refreshedInvoice?.arcaStatus === "SENT";
+      const caeRejected =
+        refreshedInvoice?.arcaStatus === "REJECTED" ||
+        refreshedInvoice?.fiscalData?.caeStatus === "REJECTED";
+      const cancelledByNc =
+        refreshedInvoice?.status === "CANCELLED" ||
+        refreshedInvoice?.status === "VOIDED";
+
+      if (!isFiscalInvoice) {
+        receiptStatus = "INTERNAL";
+        receiptType = "NONE";
+      } else if (cancelledByNc) {
+        receiptStatus = "CANCELED_BY_NC";
+        receiptType = "NONE";
+      } else if (caeRejected) {
+        receiptStatus = "REJECTED";
+        receiptType = "NONE";
+      } else if (caeAuthorized && cae) {
+        receiptStatus = "APPROVED";
+        receiptType = "FISCAL";
+      } else if (caePending) {
+        receiptStatus = "PENDING_CAE";
+        receiptType = "PROVISIONAL";
+        receiptIsProvisional = true;
+      } else {
+        receiptStatus = "CAE_REQUIRED";
+        receiptType = "NONE";
+      }
     }
 
     return NextResponse.json(
@@ -588,6 +729,9 @@ export async function POST(req: NextRequest) {
           cashRegisterId: resolvedCashRegisterId,
           customerName,
           items: saleItems,
+          fiscalStatus: receiptStatus,
+          receiptType,
+          isProvisional: receiptIsProvisional,
           ...paymentData,
         },
         message: "Sale completed successfully",

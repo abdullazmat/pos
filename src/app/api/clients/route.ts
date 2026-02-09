@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import Client from "@/lib/models/Client";
 import { verifyToken } from "@/lib/utils/jwt";
+import { MAX_DISCOUNT_PERCENT } from "@/lib/utils/discounts";
 
 const parseDiscountLimit = (value: unknown) => {
   if (value === null || value === undefined || value === "") return null;
@@ -65,10 +66,12 @@ export async function POST(request: Request) {
     if (
       parsedDiscountLimit === "invalid" ||
       (parsedDiscountLimit !== null &&
-        (parsedDiscountLimit < 0 || parsedDiscountLimit > 100))
+        (parsedDiscountLimit < 0 || parsedDiscountLimit > MAX_DISCOUNT_PERCENT))
     ) {
       return NextResponse.json(
-        { error: "Discount limit must be a number between 0 and 100" },
+        {
+          error: `Discount limit must be a number between 0 and ${MAX_DISCOUNT_PERCENT}`,
+        },
         { status: 400 },
       );
     }
@@ -128,10 +131,13 @@ export async function PUT(request: Request) {
       discountLimitProvided &&
       (parsedDiscountLimit === "invalid" ||
         (parsedDiscountLimit !== null &&
-          (parsedDiscountLimit < 0 || parsedDiscountLimit > 100)))
+          (parsedDiscountLimit < 0 ||
+            parsedDiscountLimit > MAX_DISCOUNT_PERCENT)))
     ) {
       return NextResponse.json(
-        { error: "Discount limit must be a number between 0 and 100" },
+        {
+          error: `Discount limit must be a number between 0 and ${MAX_DISCOUNT_PERCENT}`,
+        },
         { status: 400 },
       );
     }

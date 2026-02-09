@@ -5,6 +5,7 @@ import Invoice, { InvoiceStatus } from "@/lib/models/Invoice";
 import Business from "@/lib/models/Business";
 import InvoiceAudit from "@/lib/models/InvoiceAudit";
 import { verifyToken } from "@/lib/utils/jwt";
+import "@/lib/server/arcaRetryScheduler";
 
 export const dynamic = "force-dynamic";
 
@@ -91,15 +92,17 @@ export async function GET(req: NextRequest) {
       return invoice?.customerCuit ? "A" : "B";
     })();
 
+    const fiscalDocumentLabel = `INVOICE ${fiscalLetter}`;
+    const provisionalDocumentLabel = "BUDGET";
     const documentTypeLabel = isFiscalInvoice
-      ? `Factura Fiscal ${fiscalLetter}`
-      : "Comprobante de Venta";
+      ? fiscalDocumentLabel
+      : provisionalDocumentLabel;
 
     const fiscalDecision = (() => {
       if (!isFiscalInvoice) {
         return {
           action: "PRINT_INTERNAL",
-          documentLabel: "Comprobante de Venta",
+          documentLabel: provisionalDocumentLabel,
           fiscalStatus: "INTERNAL",
         };
       }
@@ -108,7 +111,7 @@ export async function GET(req: NextRequest) {
         return {
           action: "BLOCK",
           documentLabel: "Nota de Crédito",
-          fiscalStatus: "CANCELLED_BY_NC",
+          fiscalStatus: "CANCELED_BY_NC",
           reason: "Sale cancelled by credit note",
         };
       }
@@ -125,7 +128,7 @@ export async function GET(req: NextRequest) {
       if (caeAuthorized && cae) {
         return {
           action: "PRINT_FISCAL",
-          documentLabel: documentTypeLabel,
+          documentLabel: fiscalDocumentLabel,
           fiscalStatus: "APPROVED",
         };
       }
@@ -133,7 +136,7 @@ export async function GET(req: NextRequest) {
       if (caePending) {
         return {
           action: "PRINT_PROVISIONAL",
-          documentLabel: "Presupuesto (Provisorio)",
+          documentLabel: provisionalDocumentLabel,
           fiscalStatus: "PENDING_CAE",
         };
       }
@@ -155,20 +158,17 @@ export async function GET(req: NextRequest) {
         ? `${String(fiscalPos).padStart(4, "0")}-${String(fiscalSequence).padStart(8, "0")}`
         : null;
 
-    const fiscalQrAvailable = Boolean(caeAuthorized && cae);
-    const fiscalValidityLabel = isFiscalInvoice
-      ? caeAuthorized && cae
-        ? "Válida ante ARCA"
-        : "No válida"
-      : "No aplica";
-    const fiscalUsageLabel = isFiscalInvoice
-      ? caeAuthorized && cae
-        ? "Documento definitivo"
-        : "Contingencia / respaldo"
-      : "No aplica";
-    const fiscalEditLabel = isFiscalInvoice
-      ? "No editable (solo NC)"
-      : "No editable";
+    const isFiscalPrint = fiscalDecision.action === "PRINT_FISCAL";
+    const fiscalQrAvailable = Boolean(isFiscalPrint && cae);
+    const fiscalValidityLabel = isFiscalPrint
+      ? "Valid before ARCA"
+      : "Not valid";
+    const fiscalUsageLabel = isFiscalPrint
+      ? "Final legal document"
+      : "Contingency / Backup";
+    const fiscalEditLabel = isFiscalPrint
+      ? "Editable only for credit notes"
+      : "Not editable";
 
     if (fiscalDecision.action === "BLOCK") {
       return NextResponse.json(
@@ -207,7 +207,7 @@ export async function GET(req: NextRequest) {
       receiptNumber:
         invoice?.invoiceNumber ||
         `VENTA-${(sale as any)._id.toString().slice(-6)}`,
-      documentNumber: fiscalNumber,
+      documentNumber: isFiscalPrint ? fiscalNumber : null,
       date: new Date((sale as any).createdAt).toLocaleString("es-AR"),
       logoUrl: businessConfig?.ticketLogo || "",
       documentType: fiscalDecision.documentLabel,
@@ -238,13 +238,25 @@ export async function GET(req: NextRequest) {
       ticketMessage, // Add the ticket message
     };
 
-    if (format === "html") {
+    if (format === "json") {
+      return NextResponse.json({ receipt: receiptData });
+    } else if (format === "html") {
       try {
+        const existingPrint = invoice?._id
+          ? await InvoiceAudit.exists({
+              invoice: invoice._id,
+              action: "PRINT",
+            })
+          : null;
+
+        const receiptType =
+          fiscalDecision.action === "PRINT_FISCAL" ? "FISCAL" : "PROVISIONAL";
+
         await InvoiceAudit.create({
           business: decoded.businessId,
           invoice: invoice?._id,
           action: "PRINT",
-          actionDescription: `Receipt printed: ${receiptData.documentType}`,
+          actionDescription: `Receipt ${existingPrint ? "reprinted" : "printed"}: ${receiptData.documentType}`,
           userId: decoded.userId,
           userEmail: decoded.email,
           metadata: {
@@ -253,16 +265,14 @@ export async function GET(req: NextRequest) {
             documentType: receiptData.documentType,
             fiscalStatus: receiptData.fiscalStatus,
             provisional: receiptData.isProvisional,
+            printType: existingPrint ? "reprint" : "print",
+            receiptType,
           },
         });
       } catch (auditError) {
         console.error("Receipt audit log error:", auditError);
       }
-    }
 
-    if (format === "json") {
-      return NextResponse.json({ receipt: receiptData });
-    } else if (format === "html") {
       // Generate HTML receipt for printing
       const html = generateHTMLReceipt(receiptData);
       return new NextResponse(html, {
@@ -441,6 +451,17 @@ function generateHTMLReceipt(data: any): string {
             font-size: 10px;
             margin: 5px 0;
         }
+
+        .provisional-notice {
+          border: 2px solid #b00020;
+          color: #b00020;
+          font-weight: bold;
+          text-align: center;
+          padding: 6px;
+          font-size: 12px;
+          margin: 8px 0;
+          text-transform: uppercase;
+        }
         
         @media print {
             body {
@@ -496,7 +517,7 @@ function generateHTMLReceipt(data: any): string {
         
         ${
           data.isProvisional
-            ? `<div class="status-pending">COMPROBANTE PROVISORIO - SIN VALIDEZ FISCAL</div>`
+            ? `<div class="provisional-notice">PROVISIONAL RECEIPT - NO FISCAL VALUE</div>`
             : ""
         }
 

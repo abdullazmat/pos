@@ -1,3 +1,5 @@
+export const MAX_DISCOUNT_PERCENT = 5;
+
 export const normalizeDiscountLimit = (
   limit: number | null | undefined,
 ): number | null => {
@@ -11,7 +13,7 @@ export const clampDiscountLimit = (
 ): number | null => {
   const normalized = normalizeDiscountLimit(limit);
   if (normalized === null) return null;
-  return Math.min(100, Math.max(0, normalized));
+  return Math.min(MAX_DISCOUNT_PERCENT, Math.max(0, normalized));
 };
 
 export const getMaxDiscountByLimit = (

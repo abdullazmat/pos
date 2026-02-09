@@ -9,6 +9,7 @@ import {
 } from "@/lib/utils/helpers";
 import bcrypt from "bcryptjs";
 import { PLAN_FEATURES } from "@/lib/utils/planFeatures";
+import { MAX_DISCOUNT_PERCENT } from "@/lib/utils/discounts";
 
 const parseDiscountLimit = (value: unknown) => {
   if (value === null || value === undefined || value === "") return null;
@@ -76,10 +77,10 @@ export async function POST(req: NextRequest) {
     if (
       parsedDiscountLimit === "invalid" ||
       (parsedDiscountLimit !== null &&
-        (parsedDiscountLimit < 0 || parsedDiscountLimit > 100))
+        (parsedDiscountLimit < 0 || parsedDiscountLimit > MAX_DISCOUNT_PERCENT))
     ) {
       return generateErrorResponse(
-        "Discount limit must be a number between 0 and 100",
+        `Discount limit must be a number between 0 and ${MAX_DISCOUNT_PERCENT}`,
         400,
       );
     }
@@ -303,10 +304,11 @@ export async function PATCH(req: NextRequest) {
       discountLimitProvided &&
       (parsedDiscountLimit === "invalid" ||
         (parsedDiscountLimit !== null &&
-          (parsedDiscountLimit < 0 || parsedDiscountLimit > 100)))
+          (parsedDiscountLimit < 0 ||
+            parsedDiscountLimit > MAX_DISCOUNT_PERCENT)))
     ) {
       return generateErrorResponse(
-        "Discount limit must be a number between 0 and 100",
+        `Discount limit must be a number between 0 and ${MAX_DISCOUNT_PERCENT}`,
         400,
       );
     }

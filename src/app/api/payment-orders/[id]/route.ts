@@ -4,7 +4,9 @@ import PaymentOrder from "@/lib/models/PaymentOrder";
 import SupplierDocument from "@/lib/models/SupplierDocument";
 import TreasuryMovement from "@/lib/models/TreasuryMovement";
 import PaymentOrderAudit from "@/lib/models/PaymentOrderAudit";
+import SupplierDocumentAudit from "@/lib/models/SupplierDocumentAudit";
 import { verifyToken } from "@/lib/utils/jwt";
+import { computeSupplierDocumentStatus } from "@/lib/utils/supplierDocumentStatus";
 
 export async function GET(
   req: NextRequest,
@@ -104,8 +106,25 @@ export async function PUT(
         }
         const newBalance = Math.max(0, supplierDoc.balance - doc.amount);
         supplierDoc.balance = newBalance;
-        supplierDoc.status = newBalance === 0 ? "PAID" : "OPEN";
+        supplierDoc.appliedPaymentsTotal =
+          (supplierDoc.appliedPaymentsTotal || 0) + doc.amount;
+        supplierDoc.status = computeSupplierDocumentStatus(supplierDoc);
         await supplierDoc.save();
+
+        await SupplierDocumentAudit.create({
+          businessId: decoded.businessId,
+          documentId: supplierDoc._id,
+          supplierId: supplierDoc.supplierId,
+          action: "APPLY_PAYMENT",
+          actionDescription: `Applied payment order #${paymentOrder.orderNumber} to ${supplierDoc.documentNumber}`,
+          userId: decoded.userId,
+          userEmail: decoded.email,
+          ipAddress: req.headers.get("x-forwarded-for") || undefined,
+          metadata: {
+            paymentOrderId: paymentOrder._id,
+            amount: doc.amount,
+          },
+        });
       }
 
       for (const doc of paymentOrder.creditNotes) {
@@ -122,8 +141,25 @@ export async function PUT(
         }
         const newBalance = Math.max(0, supplierDoc.balance - doc.amount);
         supplierDoc.balance = newBalance;
-        supplierDoc.status = newBalance === 0 ? "PAID" : "OPEN";
+        supplierDoc.appliedCreditsTotal =
+          (supplierDoc.appliedCreditsTotal || 0) + doc.amount;
+        supplierDoc.status = computeSupplierDocumentStatus(supplierDoc);
         await supplierDoc.save();
+
+        await SupplierDocumentAudit.create({
+          businessId: decoded.businessId,
+          documentId: supplierDoc._id,
+          supplierId: supplierDoc.supplierId,
+          action: "APPLY_CREDIT",
+          actionDescription: `Applied credit note ${supplierDoc.documentNumber} in payment order #${paymentOrder.orderNumber}`,
+          userId: decoded.userId,
+          userEmail: decoded.email,
+          ipAddress: req.headers.get("x-forwarded-for") || undefined,
+          metadata: {
+            paymentOrderId: paymentOrder._id,
+            amount: doc.amount,
+          },
+        });
       }
 
       for (const payment of paymentOrder.payments) {

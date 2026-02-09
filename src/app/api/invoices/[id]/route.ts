@@ -65,6 +65,20 @@ export async function PUT(
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
+    const isApprovedFiscal =
+      existingInvoice.status === "AUTHORIZED" ||
+      existingInvoice.arcaStatus === "APPROVED" ||
+      existingInvoice.fiscalData?.caeStatus === "AUTHORIZED";
+
+    if (isApprovedFiscal) {
+      return NextResponse.json(
+        {
+          error: "Fiscal invoices cannot be modified. Use Credit Note.",
+        },
+        { status: 403 },
+      );
+    }
+
     if (
       existingInvoice.channel === "ARCA" ||
       existingInvoice.channel === "WSFE"
@@ -127,6 +141,20 @@ export async function DELETE(
 
     if (!existingInvoice) {
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+    }
+
+    const isApprovedFiscal =
+      existingInvoice.status === "AUTHORIZED" ||
+      existingInvoice.arcaStatus === "APPROVED" ||
+      existingInvoice.fiscalData?.caeStatus === "AUTHORIZED";
+
+    if (isApprovedFiscal) {
+      return NextResponse.json(
+        {
+          error: "Fiscal invoices cannot be modified. Use Credit Note.",
+        },
+        { status: 403 },
+      );
     }
 
     if (

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { MAX_DISCOUNT_PERCENT } from "@/lib/utils/discounts";
 
 const ClientSchema = new mongoose.Schema(
   {
@@ -28,7 +29,7 @@ const ClientSchema = new mongoose.Schema(
       type: Number,
       default: null,
       min: 0,
-      max: 100,
+      max: MAX_DISCOUNT_PERCENT,
     },
     business: {
       type: mongoose.Schema.Types.ObjectId,

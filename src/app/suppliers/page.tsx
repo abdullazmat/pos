@@ -47,6 +47,10 @@ const SUPPLIER_COPY = {
       activeTitle: "Proveedores Activos",
       activeDesc: "Proveedores operativos",
     },
+    alerts: {
+      dueSoon: "Alertas por vencer",
+      overdue: "Vencidos",
+    },
     searchPlaceholder: "Buscar por nombre, documento, teléfono o email...",
     formTitleNew: "Nuevo Proveedor",
     formTitleEdit: "Editar Proveedor",
@@ -123,6 +127,10 @@ const SUPPLIER_COPY = {
       activeTitle: "Active Suppliers",
       activeDesc: "Operational suppliers",
     },
+    alerts: {
+      dueSoon: "Due soon alerts",
+      overdue: "Overdue",
+    },
     searchPlaceholder: "Search by name, document, phone or email...",
     formTitleNew: "New Supplier",
     formTitleEdit: "Edit Supplier",
@@ -197,6 +205,10 @@ const SUPPLIER_COPY = {
       totalDesc: "Fornecedores registrados",
       activeTitle: "Fornecedores Ativos",
       activeDesc: "Fornecedores operacionais",
+    },
+    alerts: {
+      dueSoon: "Alertas a vencer",
+      overdue: "Vencidos",
     },
     searchPlaceholder: "Buscar por nome, documento, telefone ou email...",
     formTitleNew: "Novo Fornecedor",
@@ -278,6 +290,10 @@ export default function SuppliersPage() {
   const [subscription, setSubscription] = useState<any>(null);
   const [showLimitPrompt, setShowLimitPrompt] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [alerts, setAlerts] = useState<{ dueSoon: number; overdue: number }>({
+    dueSoon: 0,
+    overdue: 0,
+  });
   const [supplierToDelete, setSupplierToDelete] = useState<{
     id: string;
     name: string;
@@ -307,7 +323,24 @@ export default function SuppliersPage() {
     setUser(JSON.parse(userStr));
     fetchSuppliers();
     loadSubscription();
+    loadAlerts();
   }, [router, mounted]);
+
+  const loadAlerts = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch("/api/supplier-documents?alerts=true", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      setAlerts({
+        dueSoon: data?.alerts?.dueSoon || 0,
+        overdue: data?.alerts?.overdue || 0,
+      });
+    } catch (error) {
+      console.error("Load supplier document alerts error:", error);
+    }
+  };
 
   const loadSubscription = async () => {
     try {
@@ -728,6 +761,15 @@ export default function SuppliersPage() {
                   {copy.limitReached}
                 </span>
               )}
+          </div>
+
+          <div className="flex flex-wrap gap-3 mb-6">
+            <div className="px-4 py-2 rounded-lg bg-amber-50 text-amber-700 text-sm">
+              {copy.alerts.dueSoon}: {alerts.dueSoon}
+            </div>
+            <div className="px-4 py-2 rounded-lg bg-rose-50 text-rose-700 text-sm">
+              {copy.alerts.overdue}: {alerts.overdue}
+            </div>
           </div>
 
           {/* Stats Cards */}

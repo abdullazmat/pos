@@ -3,6 +3,7 @@ import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import { apiFetch } from "@/lib/utils/apiFetch";
 import { useSubscription } from "@/lib/hooks/useSubscription";
 import { toast } from "react-toastify";
+import { clampDiscountLimit } from "@/lib/utils/discounts";
 
 interface Client {
   _id: string;
@@ -43,7 +44,12 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
         const res = await apiFetch("/api/clients", { method: "GET" });
         if (res.ok) {
           const data = await res.json();
-          setClients(data.data?.clients || data.clients || []);
+          const rawClients = data.data?.clients || data.clients || [];
+          const normalized = rawClients.map((client: Client) => ({
+            ...client,
+            discountLimit: clampDiscountLimit(client.discountLimit),
+          }));
+          setClients(normalized);
         } else {
           const error = await res.json().catch(() => ({}));
           toast.error(

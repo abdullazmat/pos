@@ -194,6 +194,20 @@ export async function PUT(req: NextRequest) {
         });
 
         if (invoice) {
+          const isApprovedFiscal =
+            invoice.status === "AUTHORIZED" ||
+            invoice.arcaStatus === "APPROVED" ||
+            invoice.fiscalData?.caeStatus === "AUTHORIZED";
+
+          if (isApprovedFiscal) {
+            return NextResponse.json(
+              {
+                error: "Fiscal invoices cannot be modified. Use Credit Note.",
+              },
+              { status: 403 },
+            );
+          }
+
           invoice.paymentStatus =
             paymentStatus === "completed"
               ? "PAID"
@@ -255,6 +269,29 @@ export async function DELETE(req: NextRequest) {
 
     if (!sale) {
       return NextResponse.json({ error: "Sale not found" }, { status: 404 });
+    }
+
+    if (sale.invoice) {
+      const invoice = await Invoice.findOne({
+        _id: sale.invoice,
+        business: decoded.businessId,
+      });
+
+      if (invoice) {
+        const isApprovedFiscal =
+          invoice.status === "AUTHORIZED" ||
+          invoice.arcaStatus === "APPROVED" ||
+          invoice.fiscalData?.caeStatus === "AUTHORIZED";
+
+        if (isApprovedFiscal) {
+          return NextResponse.json(
+            {
+              error: "Fiscal invoices cannot be modified. Use Credit Note.",
+            },
+            { status: 403 },
+          );
+        }
+      }
     }
 
     // Only allow deletion of pending or failed sales

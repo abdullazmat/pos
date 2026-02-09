@@ -14,7 +14,10 @@ import Loading from "@/components/common/Loading";
 import { isTokenExpiredSoon } from "@/lib/utils/token";
 import { toast } from "react-toastify";
 import { formatARS } from "@/lib/utils/currency";
-import { getMaxDiscountByLimit } from "@/lib/utils/discounts";
+import {
+  clampDiscountLimit,
+  getMaxDiscountByLimit,
+} from "@/lib/utils/discounts";
 
 interface CartItem {
   productId: string;
@@ -38,6 +41,7 @@ export default function POSPage() {
   const [registerOpen, setRegisterOpen] = useState<boolean | null>(null);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [lastSale, setLastSale] = useState<any>(null);
+  const [receiptDetails, setReceiptDetails] = useState<any>(null);
   const [businessConfig, setBusinessConfig] = useState<any>(null);
   const clientSelectRef = useRef<HTMLSelectElement>(null);
   const [isCartHydrated, setIsCartHydrated] = useState(false);
@@ -291,15 +295,9 @@ export default function POSPage() {
     return false;
   };
 
-  const normalizeDiscountLimit = (limit: number | null | undefined) => {
-    if (typeof limit !== "number") return null;
-    if (limit > 0 && limit < 1) return limit * 100;
-    return limit;
-  };
-
   const resolveEffectiveDiscountLimit = () => {
-    const userLimit = normalizeDiscountLimit(user?.discountLimit);
-    const clientLimit = normalizeDiscountLimit(selectedClient?.discountLimit);
+    const userLimit = clampDiscountLimit(user?.discountLimit);
+    const clientLimit = clampDiscountLimit(selectedClient?.discountLimit);
     if (typeof userLimit === "number" && typeof clientLimit === "number") {
       return Math.min(userLimit, clientLimit);
     }
@@ -646,7 +644,13 @@ export default function POSPage() {
         console.error("Checkout API error:", error.error);
         const handled = handleCheckoutError(error);
         if (!handled) {
-          toast.error(t("ui.checkoutError", "pos"));
+          const message =
+            typeof error?.error === "string"
+              ? error.error
+              : typeof error?.message === "string"
+                ? error.message
+                : null;
+          toast.error(message || t("ui.checkoutError", "pos"));
         }
         return;
       }
@@ -664,7 +668,27 @@ export default function POSPage() {
 
       toast.success(t("ui.checkoutSuccess", "pos"));
       setLastSale(sale);
+      setReceiptDetails(null);
       setShowReceiptModal(true);
+      const saleId = sale?.id || sale?._id;
+      if (saleId) {
+        void (async () => {
+          try {
+            const receiptResponse = await apiFetch(
+              `/api/sales/receipt?saleId=${saleId}&format=json&lang=${currentLanguage}`,
+            );
+            if (receiptResponse.ok) {
+              const receiptPayload = await receiptResponse.json();
+              const receipt = receiptPayload.receipt || receiptPayload.data;
+              if (receipt) {
+                setReceiptDetails(receipt);
+              }
+            }
+          } catch (error) {
+            console.error("Failed to load receipt details", error);
+          }
+        })();
+      }
       setCartItems([]);
 
       if (paymentMethod === "account" && selectedClient?._id) {
@@ -686,6 +710,26 @@ export default function POSPage() {
   const displayName =
     user?.role === "admin" ? roleLabel : user?.fullName || roleLabel;
   const title = (t("ui.title", "pos") as string).replace("{role}", displayName);
+  const receiptIsFiscal = Boolean(
+    receiptDetails?.documentType?.startsWith("INVOICE") ||
+    lastSale?.receiptType === "FISCAL",
+  );
+  const receiptIsProvisional = Boolean(
+    receiptDetails?.documentType === "BUDGET" ||
+    receiptDetails?.isProvisional ||
+    lastSale?.receiptType === "PROVISIONAL",
+  );
+  const receiptDocumentType = receiptDetails?.documentType
+    ? receiptDetails.documentType
+    : lastSale?.receiptType === "FISCAL"
+      ? "INVOICE"
+      : "BUDGET";
+  const receiptNumbering = receiptIsFiscal
+    ? receiptDetails?.documentNumber
+    : receiptDetails?.receiptNumber || lastSale?.invoiceNumber;
+  const receiptPrintingBehavior = receiptIsFiscal
+    ? "ARCA responds OK"
+    : "ARCA does not respond";
 
   return (
     <div className="vp-page">
@@ -707,6 +751,82 @@ export default function POSPage() {
           </div>
           <div className="text-sm text-[hsl(var(--vp-muted))]">
             {formatDate(new Date())} · {formatTime(new Date())}
+          </div>
+        </div>
+        <div className="vp-card p-6 mb-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-[hsl(var(--vp-text))]">
+                Provisional Receipt vs Fiscal Invoice
+              </h2>
+              <p className="text-sm text-[hsl(var(--vp-muted))]">
+                Receipt type is automatic. Cashiers cannot choose it manually.
+              </p>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="vp-table">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>Provisional Receipt (Budget)</th>
+                  <th>Fiscal Invoice (A / B)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Document Type</td>
+                  <td>BUDGET</td>
+                  <td>INVOICE A / INVOICE B</td>
+                </tr>
+                <tr>
+                  <td>Numbering</td>
+                  <td>Internal (e.g., 01-003)</td>
+                  <td>ARCA / fiscal (e.g., 0001-00001234)</td>
+                </tr>
+                <tr>
+                  <td>CAE &amp; Expiration</td>
+                  <td>No</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <td>Fiscal QR</td>
+                  <td>No</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <td>Fiscal Validity</td>
+                  <td>Not valid</td>
+                  <td>Valid before ARCA</td>
+                </tr>
+                <tr>
+                  <td>Usage</td>
+                  <td>Contingency / Backup</td>
+                  <td>Final legal document</td>
+                </tr>
+                <tr>
+                  <td>When it is printed</td>
+                  <td>ARCA does not respond</td>
+                  <td>ARCA responds OK</td>
+                </tr>
+                <tr>
+                  <td>Editing</td>
+                  <td>Not editable</td>
+                  <td>Editable only for credit notes</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-5">
+            <h3 className="text-sm font-semibold text-[hsl(var(--vp-text))] mb-2">
+              Quick Visual Summary
+            </h3>
+            <ul className="text-sm text-[hsl(var(--vp-muted))] space-y-1">
+              <li>Provisional = temporary backup, no fiscal validity</li>
+              <li>Fiscal = final legal document</li>
+              <li>Fiscal invoice never prints without CAE</li>
+              <li>Corrections via Credit Note only</li>
+            </ul>
           </div>
         </div>
         <h1 className="vp-section-title mb-10">{title}</h1>
@@ -874,6 +994,11 @@ export default function POSPage() {
 
                     {/* Receipt Content */}
                     <div className="py-4 mb-4 space-y-2 text-sm border-t border-b border-slate-200 dark:border-slate-700">
+                      {receiptIsProvisional && (
+                        <div className="mb-2 rounded border-2 border-red-600 bg-red-50 px-3 py-2 text-center text-xs font-bold uppercase text-red-700">
+                          BUDGET - NOT VALID
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <span className="text-slate-600 dark:text-slate-400">
                           {getReceiptLabel("receipt.date", "Date:")}
@@ -892,6 +1017,71 @@ export default function POSPage() {
                           {lastSale?.createdAt
                             ? formatTime(lastSale.createdAt)
                             : "-"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mb-4 text-xs rounded-lg border border-slate-200 dark:border-slate-700 p-3 space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Document Type</span>
+                        <span className="font-semibold">
+                          {receiptDocumentType}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Numbering</span>
+                        <span className="font-semibold">
+                          {receiptNumbering || "-"}
+                        </span>
+                      </div>
+                      {receiptIsFiscal && (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">CAE</span>
+                            <span className="font-semibold">
+                              {receiptDetails?.cae || "-"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">
+                              CAE Expiration
+                            </span>
+                            <span className="font-semibold">
+                              {receiptDetails?.caeVto || "-"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Fiscal QR</span>
+                            <span className="font-semibold">
+                              {receiptDetails?.fiscalQrAvailable ? "Yes" : "No"}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Fiscal Validity</span>
+                        <span className="font-semibold">
+                          {receiptDetails?.fiscalValidityLabel || "-"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Usage</span>
+                        <span className="font-semibold">
+                          {receiptDetails?.fiscalUsageLabel || "-"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">
+                          Printing Behavior
+                        </span>
+                        <span className="font-semibold">
+                          {receiptPrintingBehavior}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Editing</span>
+                        <span className="font-semibold">
+                          {receiptDetails?.fiscalEditLabel || "-"}
                         </span>
                       </div>
                     </div>

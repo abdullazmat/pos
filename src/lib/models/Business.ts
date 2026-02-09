@@ -21,6 +21,10 @@ export interface IBusiness extends Document {
   country?: string;
   subscriptionId?: Schema.Types.ObjectId;
 
+  migrations?: {
+    discountLimitMax5?: Date;
+  };
+
   // Fiscal Configuration
   fiscalConfig?: {
     country?: string; // "Argentina", "Chile", "Perú", etc.
@@ -88,6 +92,12 @@ const businessSchema = new Schema<IBusiness>(
     subscriptionId: {
       type: Schema.Types.ObjectId,
       ref: "Subscription",
+    },
+    migrations: {
+      type: {
+        discountLimitMax5: Date,
+      },
+      default: {},
     },
     // Fiscal Configuration
     fiscalConfig: {
