@@ -206,7 +206,7 @@ const translationsEs = {
             "Ventas a crédito y descuentos",
             "Arqueos y retiros de caja",
             "Reportes avanzados + exportaciones",
-            "Mercado Pago",
+            "Integraciones fiscales",
           ],
           featured: true,
         },
@@ -309,7 +309,7 @@ const translationsEs = {
           title: "Ventas y POS",
           subtitle: "Vendé rápido desde el punto de venta.",
           description:
-            "Creá ventas en segundos, gestioná descuentos y aceptá efectivo, tarjeta, transferencia o Mercado Pago.",
+            "Creá ventas en segundos, gestioná descuentos y aceptá efectivo, tarjeta o transferencia.",
           alt: "Pantalla de punto de venta de VentaPlus",
         },
         {
@@ -338,7 +338,7 @@ const translationsEs = {
           title: "Integraciones",
           subtitle: "Pagos y servicios fiscales conectados.",
           description:
-            "Integrá Mercado Pago y facturación electrónica AFIP/ARCA para automatizar validaciones.",
+            "Integrá facturación electrónica AFIP/ARCA y servicios fiscales para automatizar validaciones.",
           cta: "Ver más",
           alt: "Pantalla de integraciones de VentaPlus",
         },
@@ -352,7 +352,8 @@ const translationsEs = {
       bottomImageAlt: "Vista general de la plataforma VentaPlus",
     },
     posPreview: {
-      alt: "Vista previa de analíticas del panel",
+      alt: "Personal de minimercado usando POS",
+      image: "/images/hero-es.jpg",
     },
     designSystem: {
       badge: "Sistema de diseño",
@@ -1136,7 +1137,7 @@ const translationsEn = {
             "Credit sales and discounts",
             "Cash audits and withdrawals",
             "Advanced reports + exports",
-            "Mercado Pago",
+            "Fiscal integrations",
           ],
           featured: true,
         },
@@ -1239,7 +1240,7 @@ const translationsEn = {
           title: "Sales & POS",
           subtitle: "Sell fast with the point of sale.",
           description:
-            "Create sales in seconds, manage discounts, and accept cash, card, transfer, or Mercado Pago payments from the same screen.",
+            "Create sales in seconds, manage discounts, and accept cash, card, or transfer payments from the same screen.",
           alt: "VentaPlus point of sale screen",
         },
         {
@@ -1268,7 +1269,7 @@ const translationsEn = {
           title: "Integrations",
           subtitle: "Payments and fiscal services connected.",
           description:
-            "Integrate Mercado Pago and AFIP/ARCA electronic invoicing to automate payment and fiscal validation flows.",
+            "Integrate AFIP/ARCA electronic invoicing and fiscal services to automate validation flows.",
           cta: "Learn more",
           alt: "VentaPlus integrations screen",
         },
@@ -1282,7 +1283,8 @@ const translationsEn = {
       bottomImageAlt: "VentaPlus platform overview",
     },
     posPreview: {
-      alt: "Dashboard analytics preview",
+      alt: "Minimart counter staff using POS",
+      image: "/images/hero-en.jpg",
     },
     designSystem: {
       badge: "Design system",
@@ -2056,7 +2058,7 @@ const translationsPt = {
             "Vendas a crédito e descontos",
             "Auditorias e retiradas de caixa",
             "Relatórios avançados + exportações",
-            "Mercado Pago",
+            "Integrações fiscais",
           ],
           featured: true,
         },
@@ -2159,7 +2161,7 @@ const translationsPt = {
           title: "Vendas e PDV",
           subtitle: "Venda rápido com o ponto de venda.",
           description:
-            "Crie vendas em segundos, gerencie descontos e aceite dinheiro, cartão, transferência ou Mercado Pago.",
+            "Crie vendas em segundos, gerencie descontos e aceite dinheiro, cartão ou transferência.",
           alt: "Tela do ponto de venda da VentaPlus",
         },
         {
@@ -2188,7 +2190,7 @@ const translationsPt = {
           title: "Integrações",
           subtitle: "Pagamentos e serviços fiscais conectados.",
           description:
-            "Integre Mercado Pago e faturamento eletrônico AFIP/ARCA para automatizar validações.",
+            "Integre faturamento eletrônico AFIP/ARCA e serviços fiscais para automatizar validações.",
           cta: "Saiba mais",
           alt: "Tela de integrações da VentaPlus",
         },
@@ -2202,7 +2204,8 @@ const translationsPt = {
       bottomImageAlt: "Visão geral da plataforma VentaPlus",
     },
     posPreview: {
-      alt: "Prévia de análises do painel",
+      alt: "Equipe do minimercado usando POS",
+      image: "/images/hero-pt.jpg",
     },
     designSystem: {
       badge: "Sistema de design",
