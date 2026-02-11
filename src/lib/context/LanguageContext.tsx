@@ -957,7 +957,8 @@ const translationsEs = {
       clickToExpand: "Haga clic para expandir",
       fiscalComparison: {
         title: "Recibo Provisorio vs Factura Fiscal",
-        subtitle: "El tipo de comprobante es automático. Los cajeros no pueden elegirlo manualmente.",
+        subtitle:
+          "El tipo de comprobante es automático. Los cajeros no pueden elegirlo manualmente.",
         feature: "Característica",
         provisionalReceipt: "Recibo Provisorio (Presupuesto)",
         fiscalInvoice: "Factura Fiscal (A / B)",
@@ -984,7 +985,8 @@ const translationsEs = {
         notEditable: "No editable",
         editableCreditNotes: "Editable solo para notas de crédito",
         quickSummaryTitle: "Resumen Visual Rápido",
-        summaryProvisional: "Provisorio = respaldo temporal, sin validez fiscal",
+        summaryProvisional:
+          "Provisorio = respaldo temporal, sin validez fiscal",
         summaryFiscal: "Fiscal = documento legal definitivo",
         summaryNeverPrints: "La factura fiscal nunca se imprime sin CAE",
         summaryCorrections: "Correcciones solo vía Nota de Crédito",
@@ -1913,7 +1915,8 @@ const translationsEn = {
       clickToExpand: "Click to expand",
       fiscalComparison: {
         title: "Provisional Receipt vs Fiscal Invoice",
-        subtitle: "Receipt type is automatic. Cashiers cannot choose it manually.",
+        subtitle:
+          "Receipt type is automatic. Cashiers cannot choose it manually.",
         feature: "Feature",
         provisionalReceipt: "Provisional Receipt (Budget)",
         fiscalInvoice: "Fiscal Invoice (A / B)",
@@ -1940,7 +1943,8 @@ const translationsEn = {
         notEditable: "Not editable",
         editableCreditNotes: "Editable only for credit notes",
         quickSummaryTitle: "Quick Visual Summary",
-        summaryProvisional: "Provisional = temporary backup, no fiscal validity",
+        summaryProvisional:
+          "Provisional = temporary backup, no fiscal validity",
         summaryFiscal: "Fiscal = final legal document",
         summaryNeverPrints: "Fiscal invoice never prints without CAE",
         summaryCorrections: "Corrections via Credit Note only",
@@ -2872,7 +2876,8 @@ const translationsPt = {
       clickToExpand: "Clique para expandir",
       fiscalComparison: {
         title: "Recibo Provisório vs Fatura Fiscal",
-        subtitle: "O tipo de comprovante é automático. Os caixas não podem escolhê-lo manualmente.",
+        subtitle:
+          "O tipo de comprovante é automático. Os caixas não podem escolhê-lo manualmente.",
         feature: "Característica",
         provisionalReceipt: "Recibo Provisório (Orçamento)",
         fiscalInvoice: "Fatura Fiscal (A / B)",
@@ -2899,7 +2904,8 @@ const translationsPt = {
         notEditable: "Não editável",
         editableCreditNotes: "Editável apenas para notas de crédito",
         quickSummaryTitle: "Resumo Visual Rápido",
-        summaryProvisional: "Provisório = backup temporário, sem validade fiscal",
+        summaryProvisional:
+          "Provisório = backup temporário, sem validade fiscal",
         summaryFiscal: "Fiscal = documento legal definitivo",
         summaryNeverPrints: "Fatura fiscal nunca é impressa sem CAE",
         summaryCorrections: "Correções somente via Nota de Crédito",

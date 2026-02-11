@@ -60,7 +60,10 @@ export default function TrustedDemoSection() {
             <p className="text-[hsl(var(--vp-muted))] text-base sm:text-lg leading-relaxed max-w-xl">
               {content?.demoSubtitle}
             </p>
-            <Link href="/contact" className="px-6 py-3 vp-button vp-button-primary vp-micro inline-block">
+            <Link
+              href="/contact"
+              className="px-6 py-3 vp-button vp-button-primary vp-micro inline-block"
+            >
               {content?.demoCta}
             </Link>
           </div>
