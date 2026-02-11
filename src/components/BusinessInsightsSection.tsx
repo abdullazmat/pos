@@ -1,48 +1,41 @@
 "use client";
 
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/lib/context/LanguageContext";
 
-import controlPanelImage from "../../dashbaord images/new images/cash register.png";
-import incomeImage from "../../dashbaord images/new images/POS page.png";
-import expensesImage from "../../dashbaord images/new images/expenses.png";
-import stockImage from "../../dashbaord images/new images/Stock report.png";
-import informationImage from "../../dashbaord images/new images/Fiscal Reports - VAT.png";
-import integrationsImage from "../../dashbaord images/new images/Business Configuration.png";
-import tourImage from "../../dashbaord images/new images/Product Management.png";
+/** Image filenames in public/images/sections/{en,es,pt}/ */
+const SECTION_IMAGES = {
+  cashRegister: "cash-register.png",
+  posPage: "pos-page.png",
+  expenses: "expenses.png",
+  stockReport: "stock-report.png",
+  fiscalReports: "fiscal-reports.png",
+  businessConfig: "business-configuration.png",
+  productManagement: "product-management.png",
+} as const;
+
+function sectionImage(lang: string, file: string) {
+  return `/images/sections/${lang}/${file}`;
+}
 
 type InsightBlock = {
-  image: StaticImageData;
+  imageKey: keyof typeof SECTION_IMAGES;
   href?: string;
   imageFit?: string;
 };
 
 const INSIGHT_BLOCKS: InsightBlock[] = [
-  {
-    image: controlPanelImage,
-  },
-  {
-    image: incomeImage,
-  },
-  {
-    image: expensesImage,
-  },
-  {
-    image: stockImage,
-  },
-  {
-    image: informationImage,
-    href: "/reports",
-  },
-  {
-    image: integrationsImage,
-    href: "/payment",
-  },
+  { imageKey: "cashRegister" },
+  { imageKey: "posPage" },
+  { imageKey: "expenses" },
+  { imageKey: "stockReport" },
+  { imageKey: "fiscalReports", href: "/reports" },
+  { imageKey: "businessConfig", href: "/payment" },
 ];
 
 export default function BusinessInsightsSection() {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const content = t("businessInsights", "landing") as {
     heroEyebrow: string;
     heroTitle: string;
@@ -121,7 +114,10 @@ export default function BusinessInsightsSection() {
                   >
                     <div className="relative w-full aspect-[16/9] bg-[hsl(var(--vp-bg-soft))] p-0">
                       <Image
-                        src={block.image}
+                        src={sectionImage(
+                          currentLanguage,
+                          SECTION_IMAGES[block.imageKey],
+                        )}
                         alt={copy?.alt ?? ""}
                         fill
                         sizes="(max-width: 1024px) 100vw, 520px"
@@ -166,7 +162,10 @@ export default function BusinessInsightsSection() {
               <div className="relative overflow-hidden rounded-3xl border border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg))] shadow-[0_30px_70px_-45px_rgba(15,23,42,0.7)]">
                 <div className="relative aspect-[2/1] w-full bg-[hsl(var(--vp-bg-soft))] p-2 sm:p-3">
                   <Image
-                    src={tourImage}
+                    src={sectionImage(
+                      currentLanguage,
+                      SECTION_IMAGES.productManagement,
+                    )}
                     alt={content?.bottomImageAlt ?? ""}
                     fill
                     sizes="(max-width: 1024px) 100vw, 560px"

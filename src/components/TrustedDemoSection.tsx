@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useLanguage } from "@/lib/context/LanguageContext";
 
 const LOGOS = [
@@ -59,9 +60,9 @@ export default function TrustedDemoSection() {
             <p className="text-[hsl(var(--vp-muted))] text-base sm:text-lg leading-relaxed max-w-xl">
               {content?.demoSubtitle}
             </p>
-            <button className="px-6 py-3 vp-button vp-button-primary vp-micro">
+            <Link href="/contact" className="px-6 py-3 vp-button vp-button-primary vp-micro inline-block">
               {content?.demoCta}
-            </button>
+            </Link>
           </div>
 
           <div className="rounded-3xl overflow-hidden bg-[hsl(var(--vp-bg-card))] shadow-[0_24px_60px_rgba(15,23,42,0.12)]">

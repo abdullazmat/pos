@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useLanguage } from "@/lib/context/LanguageContext";
 
-const DEFAULT_HERO_IMAGE_URL = "/images/hero-en.jpg";
+const DEFAULT_HERO_IMAGE_URL = "/images/hero-en.png";
 
 export default function PosPreview() {
   const { t } = useLanguage();
