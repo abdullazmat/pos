@@ -15,7 +15,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 // Enable Vercel-only integrations (analytics / speed insights) only when
 // running on Vercel or when explicitly enabled via NEXT_PUBLIC_ENABLE_VERCEL.
-const enableVercelIntegration = !!process.env.VERCEL || process.env.NEXT_PUBLIC_ENABLE_VERCEL === "1";
+const enableVercelIntegration =
+  !!process.env.VERCEL || process.env.NEXT_PUBLIC_ENABLE_VERCEL === "1";
 
 export const metadata: Metadata = {
   title: "VentaPlus",
