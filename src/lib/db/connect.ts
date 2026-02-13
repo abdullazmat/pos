@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { runAfipStartupValidation } from "@/lib/afip";
 
 const MONGODB_URI = process.env.MONGODB_URI || "";
 
@@ -29,6 +30,12 @@ async function dbConnect() {
 
   try {
     cached.conn = await cached.promise;
+    // Run AFIP startup validation once after DB connect (best-effort)
+    try {
+      runAfipStartupValidation();
+    } catch (e) {
+      // ignore
+    }
   } catch (e) {
     cached.promise = null;
     throw e;

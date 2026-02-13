@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useLanguage } from "@/lib/context/LanguageContext";
+import { printReceipt } from "@/lib/utils/printReceipt";
 
 const OPEN_TICKET_COPY = {
   es: {
@@ -70,7 +71,7 @@ export default function OpenTicketModal({
   if (!open) return null;
 
   const handlePrint = () => {
-    window.print();
+    printReceipt();
   };
 
   return (

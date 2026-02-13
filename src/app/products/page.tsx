@@ -561,6 +561,9 @@ export default function ProductsPage() {
       setProducts(data.data?.products || []);
     } catch (error) {
       console.error("Load products error:", error);
+      toast.error(t("errorLoadingProducts", "common") as string, {
+        toastId: "products-load-error",
+      });
     } finally {
       if (isInitialLoading) {
         setLoading(false);
@@ -580,6 +583,9 @@ export default function ProductsPage() {
       setCategories(data.categories || data.data?.categories || []);
     } catch (error) {
       console.error("Load categories error:", error);
+      toast.error(t("errorLoadingCategories", "common") as string, {
+        toastId: "categories-load-error",
+      });
     }
   };
   const handleImportExcel = async (fileParam?: File | null) => {

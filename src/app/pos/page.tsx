@@ -18,6 +18,7 @@ import {
   clampDiscountLimit,
   getMaxDiscountByLimit,
 } from "@/lib/utils/discounts";
+import { printReceipt } from "@/lib/utils/printReceipt";
 
 interface CartItem {
   productId: string;
@@ -47,6 +48,11 @@ export default function POSPage() {
   const [isCartHydrated, setIsCartHydrated] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [accountLoading, setAccountLoading] = useState(false);
+  const [invoiceChannel, setInvoiceChannel] = useState<"INTERNAL" | "ARCA">(
+    "INTERNAL",
+  );
+  const [customerCuit, setCustomerCuit] = useState("");
+  const [ivaType, setIvaType] = useState("CONSUMIDOR_FINAL");
   const [accountSummary, setAccountSummary] = useState<{
     balance: number;
     transactions: Array<{
@@ -125,11 +131,7 @@ export default function POSPage() {
 
   const accountPaymentLabel = getPosLabel(
     "ui.paymentOptions.account",
-    currentLanguage === "en"
-      ? "Account"
-      : currentLanguage === "pt"
-        ? "Conta corrente"
-        : "Cuenta corriente",
+    t("ui.paymentAccount", "pos") as string,
   );
 
   const getAccountTypeLabel = (type: "charge" | "payment" | "adjustment") => {
@@ -246,6 +248,19 @@ export default function POSPage() {
   };
 
   const handleCheckoutError = (errorPayload: any) => {
+    // Prefer errorCode-based localization from the API
+    const code = errorPayload?.errorCode;
+    if (code) {
+      const key = `ui.saleErr_${code}`;
+      const localized = t(key, "pos") as string;
+      // If the key resolves to something different from the key itself, use it
+      if (localized && localized !== key && !localized.startsWith("ui.")) {
+        toast.error(localized);
+        return true;
+      }
+    }
+
+    // Fallback: regex matching on the English error message
     const message =
       typeof errorPayload?.error === "string"
         ? errorPayload.error
@@ -275,6 +290,41 @@ export default function POSPage() {
 
     if (/invalid discount/i.test(message)) {
       toast.error(t("ui.discountInvalid", "pos") as string);
+      return true;
+    }
+
+    if (/cash register is not open/i.test(message)) {
+      toast.error(t("ui.saleErr_REGISTER_NOT_OPEN", "pos") as string);
+      return true;
+    }
+
+    if (/invalid quantity/i.test(message)) {
+      toast.error(t("ui.saleErr_INVALID_QUANTITY", "pos") as string);
+      return true;
+    }
+
+    if (/quantity must be greater than 0/i.test(message)) {
+      toast.error(t("ui.saleErr_QUANTITY_ZERO", "pos") as string);
+      return true;
+    }
+
+    if (/product not found/i.test(message)) {
+      toast.error(t("ui.saleErr_PRODUCT_NOT_FOUND", "pos") as string);
+      return true;
+    }
+
+    if (/no items in sale/i.test(message)) {
+      toast.error(t("ui.saleErr_NO_ITEMS", "pos") as string);
+      return true;
+    }
+
+    if (/cuit must be 11 digits/i.test(message)) {
+      toast.error(t("ui.cuitInvalidFormat", "pos") as string);
+      return true;
+    }
+
+    if (/cuit is required/i.test(message)) {
+      toast.error(t("ui.cuitRequiredRI", "pos") as string);
       return true;
     }
 
@@ -365,9 +415,11 @@ export default function POSPage() {
           }
         } catch (e) {
           toast.error(
-            t("ui.businessConfigError", "pos") !== "ui.businessConfigError"
-              ? t("ui.businessConfigError", "pos")
-              : "Error al cargar configuración del negocio",
+            getPosLabel(
+              "ui.businessConfigError",
+              "Error loading business settings",
+            ),
+            { toastId: "pos-business-config-error" },
           );
           console.error("Failed to get business config", e);
         }
@@ -375,10 +427,11 @@ export default function POSPage() {
         if ((e as any).name !== "AbortError") {
           setRegisterOpen(false);
           toast.error(
-            t("ui.cashRegisterStatusError", "pos") !==
-              "ui.cashRegisterStatusError"
-              ? t("ui.cashRegisterStatusError", "pos")
-              : "Error al cargar estado de caja",
+            getPosLabel(
+              "ui.cashRegisterStatusError",
+              "Error loading cash register status",
+            ),
+            { toastId: "pos-cash-register-error" },
           );
           console.error("Failed to get cash register status", e);
         }
@@ -427,19 +480,9 @@ export default function POSPage() {
     const actualQuantity =
       quantity !== undefined ? quantity : isSoldByWeight ? 0.1 : 1;
 
-    console.log("handleAddToCart called", {
-      productId,
-      name,
-      price,
-      quantity: actualQuantity,
-      isSoldByWeight,
-    });
-
     setCartItems((prev) => {
-      console.log("Previous cart items", prev);
       const existing = prev.find((item) => item.productId === productId);
       const normalizedPrice = price;
-      console.log("normalizedPrice", normalizedPrice);
 
       if (existing) {
         // Add to existing item
@@ -494,6 +537,7 @@ export default function POSPage() {
 
   const handleApplyDiscount = (productId: string, discount: number) => {
     const effectiveLimit = resolveEffectiveDiscountLimit();
+    let limitExceeded = false;
     setCartItems((prev) =>
       prev.map((item) =>
         item.productId === productId
@@ -508,12 +552,7 @@ export default function POSPage() {
                   getMaxDiscountByLimit(lineSubtotal, effectiveLimit),
                 );
                 if (normalized > maxAllowed) {
-                  toast.error(
-                    t("ui.discountLimitExceeded", "pos") !==
-                      "ui.discountLimitExceeded"
-                      ? (t("ui.discountLimitExceeded", "pos") as string)
-                      : "Discount exceeds your limit",
-                  );
+                  limitExceeded = true;
                 }
                 return Math.min(normalized, maxAllowed);
               })(),
@@ -534,6 +573,14 @@ export default function POSPage() {
           : item,
       ),
     );
+    if (limitExceeded) {
+      toast.error(
+        t("ui.discountLimitExceeded", "pos") !== "ui.discountLimitExceeded"
+          ? (t("ui.discountLimitExceeded", "pos") as string)
+          : "Discount exceeds your limit",
+        { toastId: "discount-limit" },
+      );
+    }
   };
 
   const handleCustomerAction = (
@@ -581,6 +628,27 @@ export default function POSPage() {
 
   const handleCheckout = async (paymentMethod: string) => {
     try {
+      // CUIT is only mandatory for Responsable Inscripto (Factura A)
+      if (
+        invoiceChannel === "ARCA" &&
+        ivaType === "RESPONSABLE_INSCRIPTO" &&
+        !customerCuit?.replace(/\D/g, "")
+      ) {
+        toast.error(t("ui.cuitRequiredRI", "pos") as string);
+        return;
+      }
+      // Validate CUIT format (11 digits) for Responsable Inscripto
+      if (
+        invoiceChannel === "ARCA" &&
+        ivaType === "RESPONSABLE_INSCRIPTO" &&
+        customerCuit
+      ) {
+        const cleanCuit = customerCuit.replace(/\D/g, "");
+        if (cleanCuit.length !== 11) {
+          toast.error(t("ui.cuitInvalidFormat", "pos") as string);
+          return;
+        }
+      }
       if (paymentMethod === "account" && !selectedClient?._id) {
         toast.error(
           getPosLabel(
@@ -618,12 +686,7 @@ export default function POSPage() {
         }
       }
 
-      const defaultCustomerName =
-        currentLanguage === "en"
-          ? "Final Consumer"
-          : currentLanguage === "pt"
-            ? "Consumidor Final"
-            : "Consumidor Final";
+      const defaultCustomerName = t("ui.finalConsumer", "pos") as string;
       const response = await apiFetch("/api/sales/complete", {
         method: "POST",
         headers: {
@@ -632,9 +695,14 @@ export default function POSPage() {
         body: JSON.stringify({
           items: cartItems,
           paymentMethod,
+          invoiceChannel,
           customerName: selectedClient?.name || defaultCustomerName,
           customerEmail: selectedClient?.email || undefined,
-          customerCuit: selectedClient?.document || undefined,
+          customerCuit:
+            invoiceChannel === "ARCA"
+              ? customerCuit || selectedClient?.document || undefined
+              : selectedClient?.document || undefined,
+          ivaType: invoiceChannel === "ARCA" ? ivaType : undefined,
           clientId: selectedClient?._id || undefined,
         }),
       });
@@ -657,8 +725,6 @@ export default function POSPage() {
 
       const data = await response.json();
       const sale = data.data?.sale || data.sale;
-
-      console.log("Sale response data:", { data, sale });
 
       if (!sale) {
         console.error("No sale data in response:", data);
@@ -715,21 +781,22 @@ export default function POSPage() {
     lastSale?.receiptType === "FISCAL",
   );
   const receiptIsProvisional = Boolean(
-    receiptDetails?.documentType === "BUDGET" ||
-    receiptDetails?.isProvisional ||
-    lastSale?.receiptType === "PROVISIONAL",
+    receiptDetails?.isProvisional || lastSale?.receiptType === "PROVISIONAL",
   );
-  const receiptDocumentType = receiptDetails?.documentType
-    ? receiptDetails.documentType
-    : lastSale?.receiptType === "FISCAL"
-      ? "INVOICE"
-      : "BUDGET";
-  const receiptNumbering = receiptIsFiscal
-    ? receiptDetails?.documentNumber
-    : receiptDetails?.receiptNumber || lastSale?.invoiceNumber;
+  const receiptDocumentType = receiptIsFiscal
+    ? receiptDetails?.documentType || "INVOICE"
+    : receiptIsProvisional
+      ? (t("ui.provisionalDocType", "pos") as string)
+      : receiptDetails?.documentType || "BUDGET";
+  const receiptNumbering =
+    receiptIsFiscal || receiptIsProvisional
+      ? receiptDetails?.documentNumber || lastSale?.invoiceNumber
+      : receiptDetails?.receiptNumber || lastSale?.invoiceNumber;
   const receiptPrintingBehavior = receiptIsFiscal
-    ? "ARCA responds OK"
-    : "ARCA does not respond";
+    ? (t("ui.arcaRespondedOk", "pos") as string)
+    : receiptIsProvisional
+      ? (t("ui.pendingCaeRetry", "pos") as string)
+      : (t("ui.arcaNotResponding", "pos") as string);
 
   return (
     <div className="vp-page">
@@ -1061,6 +1128,82 @@ export default function POSPage() {
                 </details>
               </div>
               <div>
+                {/* Invoice Channel Selector */}
+                <div className="vp-card vp-card-soft p-3 mb-3">
+                  <div className="flex items-center gap-3 mb-2">
+                    <label className="vp-label text-xs font-semibold whitespace-nowrap">
+                      {t("ui.invoiceTypeLabel", "pos")}
+                    </label>
+                    <select
+                      value={invoiceChannel}
+                      onChange={(e) => {
+                        const newChannel = e.target.value as
+                          | "INTERNAL"
+                          | "ARCA";
+                        setInvoiceChannel(newChannel);
+                        // Reset ivaType to default when switching channels
+                        // to prevent stale values from a previous ARCA selection
+                        if (newChannel === "INTERNAL") {
+                          setIvaType("CONSUMIDOR_FINAL");
+                        }
+                      }}
+                      className="vp-input text-xs flex-1"
+                    >
+                      <option value="INTERNAL">
+                        {t("ui.internalNonFiscal", "pos")}
+                      </option>
+                      <option value="ARCA">
+                        {t("ui.arcaFiscalInvoice", "pos")}
+                      </option>
+                    </select>
+                  </div>
+                  {invoiceChannel === "ARCA" && (
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <div>
+                        <label className="vp-label text-[11px]">
+                          CUIT{ivaType === "RESPONSABLE_INSCRIPTO" ? " *" : ""}
+                        </label>
+                        <input
+                          type="text"
+                          value={customerCuit}
+                          onChange={(e) => setCustomerCuit(e.target.value)}
+                          placeholder={
+                            ivaType === "RESPONSABLE_INSCRIPTO"
+                              ? "20-12345678-9"
+                              : (t("ui.optional", "pos") as string)
+                          }
+                          className="vp-input text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="vp-label text-[11px]">
+                          {t("ui.vatTypeLabel", "pos")}
+                        </label>
+                        <select
+                          value={ivaType}
+                          onChange={(e) => setIvaType(e.target.value)}
+                          className="vp-input text-xs"
+                        >
+                          <option value="CONSUMIDOR_FINAL">
+                            {t("ui.finalConsumer", "pos")}
+                          </option>
+                          <option value="RESPONSABLE_INSCRIPTO">
+                            {t("ui.registeredTaxpayer", "pos")}
+                          </option>
+                          <option value="MONOTRIBUTISTA">
+                            {t("ui.monotributista", "pos")}
+                          </option>
+                          <option value="EXENTO">
+                            {t("ui.vatExempt", "pos")}
+                          </option>
+                          <option value="NO_CATEGORIZADO">
+                            {t("ui.uncategorizedIva", "pos")}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <Cart
                   items={cartItems}
                   onRemove={handleRemoveFromCart}
@@ -1085,8 +1228,18 @@ export default function POSPage() {
             {/* Receipt Modal */}
             {showReceiptModal && lastSale && (
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 receipt-overlay">
-                <div className="w-full max-w-md overflow-y-auto vp-card max-h-96 border border-[hsl(var(--vp-border))] vp-modal receipt-modal">
-                  <div className="p-6 text-slate-900 dark:text-slate-100 receipt-container">
+                <div
+                  className="w-full max-w-sm overflow-y-auto vp-card border border-[hsl(var(--vp-border))] vp-modal receipt-modal"
+                  style={{ maxHeight: "90vh" }}
+                >
+                  <div
+                    className="p-5 text-slate-900 dark:text-slate-100 receipt-container"
+                    style={{
+                      fontFamily: "'Courier New', monospace",
+                      fontSize: "12px",
+                      lineHeight: 1.5,
+                    }}
+                  >
                     {/* Business Header */}
                     <div className="pb-4 mb-4 text-center border-b border-slate-200 dark:border-slate-700">
                       {businessConfig?.ticketLogo && (
@@ -1097,7 +1250,8 @@ export default function POSPage() {
                         />
                       )}
                       <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                        {businessConfig?.businessName || "Recibo de Venta"}
+                        {businessConfig?.businessName ||
+                          (t("ui.salesReceipt", "pos") as string)}
                       </h2>
                       {businessConfig?.address && (
                         <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
@@ -1117,27 +1271,52 @@ export default function POSPage() {
                     </div>
 
                     {/* Receipt Content */}
-                    <div className="py-4 mb-4 space-y-2 text-sm border-t border-b border-slate-200 dark:border-slate-700">
+                    <div
+                      className="mb-3 space-y-1"
+                      style={{
+                        borderBottom: "2px dashed currentColor",
+                        paddingBottom: "8px",
+                      }}
+                    >
                       {receiptIsProvisional && (
-                        <div className="mb-2 rounded border-2 border-red-600 bg-red-50 px-3 py-2 text-center text-xs font-bold uppercase text-red-700">
-                          BUDGET - NOT VALID
+                        <div
+                          className="mb-2 rounded border-2 border-amber-500 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 text-center font-bold uppercase text-amber-700 dark:text-amber-400"
+                          style={{ fontSize: "11px" }}
+                        >
+                          {t("ui.provisionalPendingCae", "pos")}
                         </div>
                       )}
-                      <div className="flex justify-between">
-                        <span className="text-slate-600 dark:text-slate-400">
+                      {!receiptIsFiscal &&
+                        !receiptIsProvisional &&
+                        lastSale?.receiptType !== "FISCAL" && (
+                          <div
+                            className="mb-2 rounded border-2 border-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-center font-bold uppercase text-slate-600 dark:text-slate-400"
+                            style={{ fontSize: "11px" }}
+                          >
+                            {t("ui.budgetNotValidAsInvoice", "pos")}
+                          </div>
+                        )}
+                      <div
+                        className="flex justify-between"
+                        style={{ fontSize: "11px" }}
+                      >
+                        <span style={{ opacity: 0.6 }}>
                           {getReceiptLabel("receipt.date", "Date:")}
                         </span>
-                        <span className="font-semibold">
+                        <span className="font-bold">
                           {lastSale?.createdAt
                             ? formatDate(lastSale.createdAt)
                             : "-"}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-600 dark:text-slate-400">
+                      <div
+                        className="flex justify-between"
+                        style={{ fontSize: "11px" }}
+                      >
+                        <span style={{ opacity: 0.6 }}>
                           {getReceiptLabel("receipt.time", "Time:")}
                         </span>
-                        <span className="font-semibold">
+                        <span className="font-bold">
                           {lastSale?.createdAt
                             ? formatTime(lastSale.createdAt)
                             : "-"}
@@ -1145,142 +1324,229 @@ export default function POSPage() {
                       </div>
                     </div>
 
-                    <div className="mb-4 text-xs rounded-lg border border-slate-200 dark:border-slate-700 p-3 space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Document Type</span>
-                        <span className="font-semibold">
+                    <div
+                      className="mb-4 rounded border border-slate-200 dark:border-slate-700 p-3 space-y-2"
+                      style={{ fontSize: "11px" }}
+                    >
+                      <div className="flex justify-between gap-2">
+                        <span className="text-slate-500 dark:text-slate-400">
+                          {t("ui.documentTypeLabel", "pos")}
+                        </span>
+                        <span className="font-bold text-right">
                           {receiptDocumentType}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Numbering</span>
-                        <span className="font-semibold">
+
+                      <div className="flex justify-between gap-2">
+                        <span className="text-slate-500 dark:text-slate-400">
+                          {t("ui.numberingLabel", "pos")}
+                        </span>
+                        <span className="font-bold text-right">
                           {receiptNumbering || "-"}
                         </span>
                       </div>
-                      {receiptIsFiscal && (
+
+                      {(receiptIsFiscal || receiptIsProvisional) && (
                         <>
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">CAE</span>
-                            <span className="font-semibold">
-                              {receiptDetails?.cae || "-"}
+                          <div className="flex justify-between gap-2">
+                            <span className="text-slate-500 dark:text-slate-400">
+                              CAE:
+                            </span>
+                            <span
+                              className={`font-bold text-right ${receiptIsProvisional && !receiptIsFiscal ? "text-amber-600 dark:text-amber-400" : ""}`}
+                            >
+                              {receiptIsFiscal
+                                ? receiptDetails?.cae || "-"
+                                : t("ui.pendingStatus", "pos")}
                             </span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">
-                              CAE Expiration
+                          {receiptIsFiscal && (
+                            <div className="flex justify-between gap-2">
+                              <span className="text-slate-500 dark:text-slate-400">
+                                {t("ui.caeExpirationLabel", "pos")}
+                              </span>
+                              <span className="font-bold text-right">
+                                {receiptDetails?.caeVto || "-"}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex justify-between gap-2">
+                            <span className="text-slate-500 dark:text-slate-400">
+                              {t("ui.fiscalQrLabel", "pos")}
                             </span>
-                            <span className="font-semibold">
-                              {receiptDetails?.caeVto || "-"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">Fiscal QR</span>
-                            <span className="font-semibold">
-                              {receiptDetails?.fiscalQrAvailable ? "Yes" : "No"}
+                            <span className="font-bold text-right">
+                              {receiptIsFiscal
+                                ? receiptDetails?.fiscalQrAvailable
+                                  ? t("ui.yes", "pos")
+                                  : "No"
+                                : t("ui.pendingSingle", "pos")}
                             </span>
                           </div>
                         </>
                       )}
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Fiscal Validity</span>
-                        <span className="font-semibold">
-                          {receiptDetails?.fiscalValidityLabel || "-"}
+
+                      <div className="flex justify-between gap-2">
+                        <span className="text-slate-500 dark:text-slate-400">
+                          {t("ui.fiscalValidityLabel", "pos")}
+                        </span>
+                        <span className="font-bold text-right">
+                          {receiptIsProvisional
+                            ? t("ui.validOnceApproved", "pos")
+                            : receiptDetails?.fiscalValidityLabel || "-"}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Usage</span>
-                        <span className="font-semibold">
+
+                      <div className="flex justify-between gap-2">
+                        <span className="text-slate-500 dark:text-slate-400">
+                          {t("ui.usageLabel", "pos")}
+                        </span>
+                        <span className="font-bold text-right">
                           {receiptDetails?.fiscalUsageLabel || "-"}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">
-                          Printing Behavior
+
+                      <div className="flex justify-between gap-2">
+                        <span className="text-slate-500 dark:text-slate-400">
+                          {t("ui.printBehaviorLabel", "pos")}
                         </span>
-                        <span className="font-semibold">
+                        <span className="font-bold text-right">
                           {receiptPrintingBehavior}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Editing</span>
-                        <span className="font-semibold">
+
+                      <div className="flex justify-between gap-2">
+                        <span className="text-slate-500 dark:text-slate-400">
+                          {t("ui.editingLabel", "pos")}
+                        </span>
+                        <span className="font-bold text-right">
                           {receiptDetails?.fiscalEditLabel || "-"}
                         </span>
                       </div>
                     </div>
 
                     {/* Items */}
-                    <div className="mb-4 text-sm">
-                      <h3 className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
+                    <div
+                      className="mb-3"
+                      style={{
+                        borderBottom: "1px dashed currentColor",
+                        paddingBottom: "8px",
+                      }}
+                    >
+                      <div
+                        className="mb-2 font-bold"
+                        style={{ fontSize: "12px" }}
+                      >
                         {getReceiptLabel("receipt.items", "Items")}
-                      </h3>
-                      <div className="space-y-1 text-slate-700 dark:text-slate-300">
-                        {lastSale?.items && lastSale.items.length > 0 ? (
-                          lastSale.items.map((item: any, idx: number) => (
-                            <div key={idx} className="flex justify-between">
-                              <div>
-                                <div>{item.productName}</div>
-                                <div className="text-xs text-slate-500 dark:text-slate-400">
-                                  {item.quantity} x{" "}
-                                  {formatCurrency(item.unitPrice)}
-                                </div>
-                              </div>
-                              <div className="text-right">
+                      </div>
+                      {lastSale?.items && lastSale.items.length > 0 ? (
+                        lastSale.items.map((item: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="mb-2"
+                            style={{ fontSize: "11px" }}
+                          >
+                            <div className="font-bold">{item.productName}</div>
+                            <div
+                              className="flex justify-between"
+                              style={{ color: "inherit", opacity: 0.7 }}
+                            >
+                              <span>
+                                {item.quantity} x{" "}
+                                {formatCurrency(item.unitPrice)}
+                              </span>
+                              <span
+                                className="font-bold"
+                                style={{ opacity: 1 }}
+                              >
                                 {formatCurrency(
                                   item.quantity * item.unitPrice -
                                     (item.discount || 0),
                                 )}
-                              </div>
+                              </span>
                             </div>
-                          ))
-                        ) : (
-                          <div className="italic text-slate-400 dark:text-slate-500">
-                            {getReceiptLabel("receipt.noItems", "No items")}
+                            {(item.discount || 0) > 0 && (
+                              <div style={{ fontSize: "10px", opacity: 0.6 }}>
+                                Desc: -{formatCurrency(item.discount)}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
+                        ))
+                      ) : (
+                        <div
+                          style={{
+                            fontStyle: "italic",
+                            opacity: 0.5,
+                            fontSize: "11px",
+                          }}
+                        >
+                          {getReceiptLabel("receipt.noItems", "No items")}
+                        </div>
+                      )}
                     </div>
 
                     {/* Totals */}
-                    <div className="pt-3 mb-4 space-y-1 text-sm border-t border-slate-200 dark:border-slate-700">
-                      <div className="flex justify-between">
-                        <span className="text-slate-600 dark:text-slate-400">
+                    <div className="mb-3" style={{ fontSize: "11px" }}>
+                      <div className="flex justify-between mb-1">
+                        <span>
                           {getReceiptLabel("receipt.subtotal", "Subtotal:")}
                         </span>
                         <span>{formatCurrency(lastSale?.subtotal || 0)}</span>
                       </div>
-                      <div className="flex justify-between text-red-600 dark:text-red-400">
+                      <div className="flex justify-between mb-1">
                         <span>
                           {getReceiptLabel("receipt.discount", "Discount:")}
                         </span>
                         <span>-{formatCurrency(lastSale?.discount || 0)}</span>
                       </div>
-                      <div className="flex justify-between font-bold text-slate-900 dark:text-slate-100">
-                        <span>
-                          {getReceiptLabel("receipt.total", "Total:")}
-                        </span>
-                        <span>{formatCurrency(lastSale?.total || 0)}</span>
+                      {(lastSale?.tax || 0) > 0 && (
+                        <div className="flex justify-between mb-1">
+                          <span>{t("ui.taxLabel", "pos")}</span>
+                          <span>{formatCurrency(lastSale?.tax || 0)}</span>
+                        </div>
+                      )}
+                      <div
+                        style={{
+                          borderTop: "2px dashed currentColor",
+                          borderBottom: "2px dashed currentColor",
+                          padding: "4px 0",
+                          margin: "6px 0",
+                        }}
+                      >
+                        <div
+                          className="flex justify-between font-bold"
+                          style={{ fontSize: "13px" }}
+                        >
+                          <span>TOTAL:</span>
+                          <span>
+                            {formatCurrency(
+                              lastSale?.totalWithTax || lastSale?.total || 0,
+                            )}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
                     {/* Payment Method */}
-                    <div className="p-2 mb-6 text-sm text-slate-700 dark:text-slate-300 rounded bg-slate-50 dark:bg-slate-800">
-                      <span className="text-slate-600 dark:text-slate-400">
-                        {getReceiptLabel(
-                          "receipt.paymentMethod",
-                          "Payment Method:",
-                        )}
-                      </span>
-                      <span className="ml-2 font-semibold">
+                    <div
+                      className="text-center mb-4"
+                      style={{ fontSize: "11px", opacity: 0.7 }}
+                    >
+                      {getReceiptLabel(
+                        "receipt.paymentMethod",
+                        "Payment Method:",
+                      )}{" "}
+                      <span className="font-bold" style={{ opacity: 1 }}>
                         {getPaymentMethodLabel(lastSale?.paymentMethod)}
                       </span>
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex gap-3 no-print">
+                    <div
+                      className="flex gap-3 no-print"
+                      style={{ fontFamily: "inherit" }}
+                    >
                       <button
-                        onClick={() => window.print()}
+                        onClick={() => printReceipt()}
                         className="flex items-center justify-center flex-1 gap-2 py-2 font-semibold text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"
                       >
                         <svg

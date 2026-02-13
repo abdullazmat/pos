@@ -398,7 +398,9 @@ export default function FiscalReportsPage() {
   const [libroIVAData, setLibroIVAData] = useState<LibroIVARow[]>([]);
   const [configCountry, setConfigCountry] = useState("argentina");
   const [configTaxRate, setConfigTaxRate] = useState("21");
-  const [configFiscalRegime, setConfigFiscalRegime] = useState("general");
+  const [configFiscalRegime, setConfigFiscalRegime] = useState(
+    "RESPONSABLE_INSCRIPTO",
+  );
   const [configFiscalId, setConfigFiscalId] = useState("");
   const [validationErrors, setValidationErrors] = useState<{
     country?: string;
@@ -1102,13 +1104,13 @@ export default function FiscalReportsPage() {
                           : "border-gray-300 dark:border-gray-700 focus:ring-blue-500"
                       }`}
                     >
-                      <option value="general">
+                      <option value="RESPONSABLE_INSCRIPTO">
                         {t.configuracion.regimenGeneral}
                       </option>
-                      <option value="simplificado">
+                      <option value="EXENTO">
                         {t.configuracion.regimenSimplificado}
                       </option>
-                      <option value="monotributo">
+                      <option value="MONOTRIBUTO">
                         {t.configuracion.monotributo}
                       </option>
                     </select>

@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AFIP / ARCA Integration Status Report — pos-saas</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 18mm 16mm;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 11px;
+        color: #1a1a1a;
+        line-height: 1.55;
+        max-width: 210mm;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1 {
+        font-size: 20px;
+        border-bottom: 3px solid #0d47a1;
+        padding-bottom: 8px;
+        color: #0d47a1;
+        margin-top: 0;
+      }
+      h2 {
+        font-size: 15px;
+        color: #0d47a1;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 4px;
+        margin-top: 28px;
+      }
+      h3 {
+        font-size: 12px;
+        color: #333;
+        margin-top: 16px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0 16px 0;
+        font-size: 10.5px;
+      }
+      th {
+        background: #0d47a1;
+        color: #fff;
+        padding: 6px 8px;
+        text-align: left;
+        font-weight: 600;
+      }
+      td {
+        padding: 5px 8px;
+        border: 1px solid #ddd;
+        vertical-align: top;
+      }
+      tr:nth-child(even) td {
+        background: #f5f7fa;
+      }
+      .tag {
+        display: inline-block;
+        padding: 1px 7px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .tag-green {
+        background: #c8e6c9;
+        color: #1b5e20;
+      }
+      .tag-yellow {
+        background: #fff9c4;
+        color: #f57f17;
+      }
+      .tag-orange {
+        background: #ffe0b2;
+        color: #e65100;
+      }
+      .tag-red {
+        background: #ffcdd2;
+        color: #b71c1c;
+      }
+      .tag-blue {
+        background: #bbdefb;
+        color: #0d47a1;
+      }
+      code,
+      .mono {
+        font-family: "Cascadia Code", "Consolas", monospace;
+        font-size: 10px;
+        background: #eef;
+        padding: 1px 4px;
+        border-radius: 2px;
+      }
+      .section-box {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 12px 14px;
+        margin: 14px 0;
+        background: #fafbfc;
+      }
+      .risk {
+        border-left: 4px solid #d32f2f;
+        padding-left: 10px;
+        margin: 8px 0;
+      }
+      .rec {
+        border-left: 4px solid #1976d2;
+        padding-left: 10px;
+        margin: 8px 0;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+      ul {
+        padding-left: 18px;
+      }
+      li {
+        margin-bottom: 3px;
+      }
+      .header-meta {
+        color: #666;
+        font-size: 10px;
+        margin-bottom: 20px;
+      }
+      .footer {
+        text-align: center;
+        color: #999;
+        font-size: 9px;
+        margin-top: 30px;
+        border-top: 1px solid #ddd;
+        padding-top: 8px;
+      }
+      .severity-crit {
+        color: #b71c1c;
+        font-weight: 700;
+      }
+      .severity-high {
+        color: #e65100;
+        font-weight: 700;
+      }
+      .severity-med {
+        color: #f57f17;
+        font-weight: 600;
+      }
+      .severity-info {
+        color: #1565c0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🏛️ AFIP / ARCA Integration Status Report</h1>
+    <p class="header-meta">
+      <strong>Project:</strong> pos-saas &nbsp;|&nbsp;
+      <strong>Date:</strong> February 11, 2026 &nbsp;|&nbsp;
+      <strong>Type:</strong> Technical Audit &nbsp;|&nbsp;
+      <strong>Status:</strong>
+      <span class="tag tag-yellow">Mock-Only — Not Production-Ready</span>
+    </p>
+
+    <!-- ===== SECTION A ===== -->
+    <h2>Section A — Implemented Features</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Feature</th>
+          <th>Status</th>
+          <th>Location</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>AFIP config object</td>
+          <td><span class="tag tag-green">✅ Done</span></td>
+          <td><code>src/lib/afip.ts</code></td>
+          <td>
+            Reads <code>AFIP_ENVIRONMENT</code>, <code>AFIP_CUIT</code>,
+            <code>AFIP_CERT_PATH</code>, <code>AFIP_KEY_PATH</code> from
+            <code>process.env</code>. Defines WSAA and WSFEv1 endpoints for
+            testing &amp; production.
+          </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>WSFEv1 service class</td>
+          <td><span class="tag tag-yellow">⚠️ Scaffold</span></td>
+          <td><code>src/lib/services/wsfev1.ts</code></td>
+          <td>
+            Class <code>WSFEv1Service</code> with methods:
+            <code>getWsaaToken()</code>, <code>requestCAE()</code>,
+            <code>getLastAuthorizedNumber()</code>,
+            <code>queryCaeStatus()</code>. SOAP XML templates present for
+            LoginCMS, FECAESolicitar, FECompUltimoAutorizado, FECompConsultar.
+          </td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>LoginCMS SOAP XML template</td>
+          <td><span class="tag tag-green">✅ Built</span></td>
+          <td><code>wsfev1.ts L241-254</code></td>
+          <td>
+            <code>createLoginCMSSoapRequest()</code> builds SOAP envelope for
+            WSAA endpoint.
+          </td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>XML signing with private key</td>
+          <td><span class="tag tag-orange">⚠️ Partial</span></td>
+          <td><code>wsfev1.ts L392-397</code></td>
+          <td>
+            <code>signXml()</code> uses
+            <code>crypto.createSign('RSA-SHA256')</code>. This is a raw RSA
+            signature, <strong>NOT</strong> the PKCS#7/CMS that AFIP requires.
+          </td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Certificate &amp; key file reading</td>
+          <td><span class="tag tag-green">✅ Code present</span></td>
+          <td><code>wsfev1.ts L93-94</code></td>
+          <td>
+            <code>fs.readFileSync(this.certificatePath)</code> and
+            <code>fs.readFileSync(this.keyPath)</code> in
+            <code>getWsaaToken()</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>WSAA / WSFEv1 endpoint URLs</td>
+          <td><span class="tag tag-green">✅ Correct</span></td>
+          <td><code>src/lib/afip.ts L23-31</code></td>
+          <td>
+            Testing: <code>wsaahomo.afip.gov.ar</code>. Production:
+            <code>wsaa.afip.gov.ar</code>, <code>servicios1.afip.gov.ar</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Testing vs production switch</td>
+          <td><span class="tag tag-green">✅ Done</span></td>
+          <td><code>afip.ts L13</code></td>
+          <td>
+            <code>AFIP_ENVIRONMENT</code> selects URL set. Consumed by
+            <code>arcaRetryService.ts</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>Mock mode (ARCA)</td>
+          <td><span class="tag tag-green">✅ Fully done</span></td>
+          <td>
+            <code>sales/complete/route.ts L25-43</code><br /><code
+              >arcaRetryService.ts L30-50</code
+            >
+          </td>
+          <td>
+            <code>ARCA_MOCK_ENABLED</code> +
+            <code>ARCA_MOCK_STATUS</code> control mock responses. Generates fake
+            CAE, simulates APPROVED / REJECTED / PENDING.
+          </td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>Retry logic</td>
+          <td><span class="tag tag-green">✅ Fully done</span></td>
+          <td>
+            <code>arcaRetryService.ts L131-406</code><br /><code
+              >arcaRetryScheduler.ts</code
+            >
+          </td>
+          <td>
+            <code>runArcaRetry()</code> queries pending invoices, attempts CAE
+            via WSFEv1 or mock. Scheduler runs on <code>setInterval</code> per
+            <code>ARCA_RETRY_INTERVAL_MINUTES</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>Cron endpoint for retry</td>
+          <td><span class="tag tag-green">✅ Done</span></td>
+          <td><code>api/cron/arca/retry-pending/route.ts</code></td>
+          <td>
+            <code>POST/GET</code> with <code>CRON_SECRET</code> header auth.
+          </td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td>Invoice model with ARCA fields</td>
+          <td><span class="tag tag-green">✅ Done</span></td>
+          <td><code>src/lib/models/Invoice.ts</code></td>
+          <td>
+            <code>InvoiceChannel.ARCA</code>, <code>.WSFE</code>,
+            <code>InvoiceStatus.PENDING_CAE</code>, <code>arcaStatus</code>,
+            <code>fiscalData.cae/caeVto/caeNro/caeStatus</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td>Certificate upload API</td>
+          <td><span class="tag tag-green">✅ Done</span></td>
+          <td><code>api/fiscal-config/certificates/route.ts</code></td>
+          <td>
+            Accepts <code>.crt/.cer</code> and <code>.key/.pem</code>. Validates
+            PEM headers. Stores metadata in FiscalConfiguration model.
+          </td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td>Certificate status API</td>
+          <td><span class="tag tag-green">✅ Done</span></td>
+          <td><code>api/fiscal-config/certificates/status/route.ts</code></td>
+          <td>Returns cert + key upload status and expiry.</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>FiscalConfiguration model</td>
+          <td><span class="tag tag-green">✅ Done</span></td>
+          <td><code>src/lib/models/FiscalConfiguration.ts</code></td>
+          <td>
+            Stores <code>certificateDigital</code>,
+            <code>privateKey</code> metadata, <code>wsaaToken</code>,
+            <code>cuit</code>, <code>pointOfSale</code>,
+            <code>lastIssuedNumbers</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>15</td>
+          <td>CUIT validation</td>
+          <td><span class="tag tag-green">✅ Done</span></td>
+          <td><code>afipService.ts L136-164</code></td>
+          <td>
+            <code>AFIPService.validateCUIT()</code> with correct modulus-11
+            algorithm.
+          </td>
+        </tr>
+        <tr>
+          <td>16</td>
+          <td>AFIP API routes</td>
+          <td><span class="tag tag-yellow">⚠️ Scaffold</span></td>
+          <td>
+            <code>api/afip/config</code>, <code>validate-cuit</code>,
+            <code>authorize-invoice</code>
+          </td>
+          <td>
+            Config, CUIT validation, and authorize-invoice endpoints present
+            (use mock service).
+          </td>
+        </tr>
+        <tr>
+          <td>17</td>
+          <td>Audit trail</td>
+          <td><span class="tag tag-green">✅ Done</span></td>
+          <td><code>arcaRetryService.ts</code></td>
+          <td>
+            <code>InvoiceAudit</code> records for <code>CAE_REQUEST</code> and
+            <code>CAE_RECEIVED</code> events.
+          </td>
+        </tr>
+        <tr>
+          <td>18</td>
+          <td>Idempotency (FECompConsultar)</td>
+          <td><span class="tag tag-green">✅ Wired</span></td>
+          <td><code>arcaRetryService.ts L271-300</code></td>
+          <td>
+            Retry service calls <code>queryCaeStatus()</code> before issuing new
+            CAE request.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ===== SECTION B ===== -->
+    <h2 class="page-break">Section B — Missing / Non-Functional Components</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Gap</th>
+          <th>Severity</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><code>soapCall()</code> is a no-op</td>
+          <td><span class="severity-crit">🔴 CRITICAL</span></td>
+          <td>
+            <code>wsfev1.ts L449-465</code> — The method logs and
+            <strong>returns empty string <code>""</code></strong
+            >. No HTTP POST is executed. All WSFEv1 operations (auth, CAE,
+            query) silently fail in non-mock mode.
+          </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>CMS (PKCS#7) signing NOT implemented</td>
+          <td><span class="severity-crit">🔴 CRITICAL</span></td>
+          <td>
+            AFIP WSAA requires the login ticket wrapped in a
+            <strong>PKCS#7 CMS SignedData</strong> structure (base64). Current
+            <code>signXml()</code> uses
+            <code>crypto.createSign('RSA-SHA256')</code> — raw RSA, not CMS.
+            AFIP will reject with <em>"Firma del ticket inválida"</em>. Requires
+            <code>node-forge</code> or similar.
+          </td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>No SOAP library installed</td>
+          <td><span class="severity-crit">🔴 CRITICAL</span></td>
+          <td>
+            <code>package.json</code> has <strong>no</strong> SOAP dependency
+            (<code>node-soap</code>, <code>soap</code>, <code>xml2js</code>,
+            <code>xml-crypto</code>). The stub cannot work in production.
+          </td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Certificate file content NOT persisted</td>
+          <td><span class="severity-high">🟠 HIGH</span></td>
+          <td>
+            Upload API stores only <strong>metadata</strong> (filename, size,
+            hash). Actual PEM content is discarded.
+            <code>encryptCertificate()</code> and
+            <code>storeCertificateFile()</code> are TODO. WSFEv1 reads from
+            filesystem paths — disconnect between upload and signing flow.
+          </td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Mock directory does not exist</td>
+          <td><span class="severity-high">🟠 HIGH</span></td>
+          <td>
+            <code>.env.local</code> references
+            <code>C:\pos-saas\mock\afip-cert.pem</code> and
+            <code>afip-key.pem</code>. The <code>mock/</code> directory
+            <strong>does not exist</strong>. <code>fs.readFileSync()</code> will
+            throw <code>ENOENT</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><code>AFIPService</code> is fully mocked</td>
+          <td><span class="severity-med">🟡 MEDIUM</span></td>
+          <td>
+            <code>authenticate()</code> returns
+            <code>AFIP_TOKEN_&lt;timestamp&gt;</code>.
+            <code>authorizeInvoice()</code> returns fake CAE. None call AFIP
+            endpoints. The <code>/api/afip/authorize-invoice</code> route uses
+            this mock, <strong>not</strong> <code>WSFEv1Service</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>No WSAA token caching</td>
+          <td><span class="severity-med">🟡 MEDIUM</span></td>
+          <td>
+            <code>getWsaaToken()</code> authenticates on every retry batch. WSAA
+            tokens valid 12h. <code>FiscalConfiguration.wsaaToken</code> field
+            exists but is <strong>never read/written</strong> by retry service.
+          </td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>LoginCMS SOAP body is incorrect</td>
+          <td><span class="severity-med">🟡 MEDIUM</span></td>
+          <td>
+            <code>&lt;in0&gt;</code> should contain the CMS-signed base64 blob,
+            not raw ticket XML + separate params.
+          </td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>FECAESolicitar XML structure has errors</td>
+          <td><span class="severity-med">🟡 MEDIUM</span></td>
+          <td>
+            Uses <code>&lt;FECompConsReq&gt;</code> instead of
+            <code>&lt;FECAEDetRequest&gt;</code>. Uses
+            <code>&lt;PercepIVA&gt;</code> instead of
+            <code>&lt;Importe&gt;</code>. Will produce SOAP faults against AFIP.
+          </td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>XML response parsing is fragile</td>
+          <td><span class="severity-med">🟡 MEDIUM</span></td>
+          <td>
+            <code>extractFromXml()</code> uses simple regex. SOAP responses with
+            namespaced tags (e.g., <code>&lt;wsfe:CAE&gt;</code>) fail to match.
+            No XML parser library.
+          </td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td>Certificate expiry extraction is a stub</td>
+          <td><span class="severity-med">🟡 MEDIUM</span></td>
+          <td>
+            <code>extractCertificateExpiryDate()</code> always returns
+            <code>undefined</code>. No X.509 parsing.
+          </td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td>WSAA token never saved from retry</td>
+          <td><span class="severity-med">🟡 MEDIUM</span></td>
+          <td>
+            Retry service creates fresh <code>WSFEv1Service</code>, calls
+            <code>getWsaaToken()</code>, but token is
+            <strong>not saved</strong> to DB for reuse.
+          </td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td><code>AFIP_CUIT = 00000000000</code></td>
+          <td><span class="severity-info">ℹ️ INFO</span></td>
+          <td>
+            Placeholder value. Will fail CUIT validation and all AFIP requests.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ===== SECTION C ===== -->
+    <h2>Section C — Environment Variable Validation</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Value in .env.local</th>
+          <th>Read in Code</th>
+          <th>Used Correctly</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>AFIP_ENVIRONMENT</code></td>
+          <td><code>testing</code></td>
+          <td>✅ afip.ts, arcaRetryService.ts</td>
+          <td>✅ Selects URL set</td>
+        </tr>
+        <tr>
+          <td><code>AFIP_CUIT</code></td>
+          <td><code>00000000000</code></td>
+          <td>✅ afip.ts → WSFEv1 &lt;Cuit&gt;</td>
+          <td>⚠️ Placeholder — invalid</td>
+        </tr>
+        <tr>
+          <td><code>AFIP_CERT_PATH</code></td>
+          <td><code>C:\pos-saas\mock\afip-cert.pem</code></td>
+          <td>✅ afip.ts → WSFEv1 readFileSync</td>
+          <td>❌ File does not exist</td>
+        </tr>
+        <tr>
+          <td><code>AFIP_KEY_PATH</code></td>
+          <td><code>C:\pos-saas\mock\afip-key.pem</code></td>
+          <td>✅ afip.ts → WSFEv1 readFileSync</td>
+          <td>❌ File does not exist</td>
+        </tr>
+        <tr>
+          <td><code>ARCA_MOCK_ENABLED</code></td>
+          <td><code>true</code></td>
+          <td>✅ sales/complete, arcaRetryService</td>
+          <td>✅ Bypasses real AFIP</td>
+        </tr>
+        <tr>
+          <td><code>ARCA_MOCK_STATUS</code></td>
+          <td><code>PENDING_CAE</code></td>
+          <td>✅ sales/complete, arcaRetryService</td>
+          <td>✅ Controls mock outcome</td>
+        </tr>
+        <tr>
+          <td><code>ARCA_RETRY_ENABLED</code></td>
+          <td><code>true</code></td>
+          <td>✅ arcaRetryScheduler.ts</td>
+          <td>✅ Gates scheduler start</td>
+        </tr>
+        <tr>
+          <td><code>ARCA_RETRY_INTERVAL_MINUTES</code></td>
+          <td><code>5</code></td>
+          <td>✅ arcaRetryScheduler.ts</td>
+          <td>✅ Parsed correctly</td>
+        </tr>
+        <tr>
+          <td><code>ARCA_RETRY_BATCH_SIZE</code></td>
+          <td><code>25</code></td>
+          <td>✅ arcaRetryScheduler.ts</td>
+          <td>✅ Parsed correctly</td>
+        </tr>
+        <tr>
+          <td><code>CRON_SECRET</code></td>
+          <td>Set</td>
+          <td>✅ cron/arca/retry-pending</td>
+          <td>✅ Auth for cron endpoint</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ===== SECTION D ===== -->
+    <h2 class="page-break">Section D — Risk Issues</h2>
+
+    <div class="section-box">
+      <div class="risk">
+        <strong>1. Production will fail immediately</strong> —
+        <code>soapCall()</code> returns <code>""</code>. Even with valid
+        certificates, no AFIP communication occurs. The entire non-mock WSFEv1
+        flow is dead code.
+      </div>
+      <div class="risk">
+        <strong>2. Security: Private key handling gap</strong> — Certificate
+        upload API accepts private keys but
+        <strong>does not persist the file content</strong>. WSFEv1 reads keys
+        from filesystem paths that don't exist. No bridge between upload and
+        signing.
+      </div>
+      <div class="risk">
+        <strong>3. Wrong CMS signing algorithm</strong> — AFIP requires
+        PKCS#7/CMS wrapping. Current <code>crypto.createSign</code> produces a
+        detached RSA signature. AFIP will reject with
+        <em>"Firma del ticket de requerimiento inválida"</em>.
+      </div>
+      <div class="risk">
+        <strong>4. Two parallel disconnected service paths</strong> —
+        <code>AFIPService</code> (mock-only, used by <code>/api/afip/*</code>)
+        and <code>WSFEv1Service</code> (skeleton, used by retry) are
+        disconnected. No shared token or config flow.
+      </div>
+      <div class="risk">
+        <strong>5. FECAESolicitar XML does not match AFIP WSDL</strong> — Wrong
+        element names (<code>FECompConsReq</code> instead of
+        <code>FECAEDetRequest</code>, <code>PercepIVA</code> instead of
+        <code>Importe</code>). Will produce SOAP faults.
+      </div>
+      <div class="risk">
+        <strong>6. No SOAP fault or HTTP error handling</strong> —
+        <code>soapCall()</code> doesn't check HTTP status codes. All XML parsing
+        uses regex without namespace awareness.
+      </div>
+    </div>
+
+    <!-- ===== SECTION E ===== -->
+    <h2>Section E — Recommendations</h2>
+
+    <div class="section-box">
+      <div class="rec">
+        <strong>1. Install <code>soap</code> or <code>node-forge</code></strong>
+        — A proper SOAP client library and a CMS signing library are required.
+        The manual XML + regex approach is fragile and error-prone.
+      </div>
+      <div class="rec">
+        <strong>2. Implement real CMS signing</strong> — Replace
+        <code>signXml()</code> with PKCS#7 SignedData generation: create login
+        ticket XML → sign with private key + certificate → base64-encode PKCS#7
+        → send to WSAA LoginCMS.
+      </div>
+      <div class="rec">
+        <strong>3. Implement <code>soapCall()</code></strong> — Replace the stub
+        with an actual <code>fetch()</code> or SOAP client POST to AFIP
+        endpoints, with <code>Content-Type: text/xml</code>, error handling, and
+        timeout management.
+      </div>
+      <div class="rec">
+        <strong>4. Bridge certificate upload to WSFEv1</strong> — Either: (a)
+        persist uploaded PEM content to disk/encrypted storage and set paths
+        dynamically, or (b) load certificates from the DB at WSAA auth time.
+      </div>
+      <div class="rec">
+        <strong>5. Fix FECAESolicitar XML</strong> — Align element names with
+        official AFIP WSFEv1 WSDL: <code>&lt;FECAEReq&gt;</code>,
+        <code>&lt;FeCabReq&gt;</code>, <code>&lt;FeDetReq&gt;</code>,
+        <code>&lt;FECAEDetRequest&gt;</code>, <code>&lt;Importe&gt;</code>.
+      </div>
+      <div class="rec">
+        <strong>6. Cache WSAA tokens</strong> — Save token+sign+expiry from
+        <code>getWsaaToken()</code> into
+        <code>FiscalConfiguration.wsaaToken</code> and reuse until expiry (12h).
+      </div>
+      <div class="rec">
+        <strong>7. Unify service paths</strong> — Merge or redirect
+        <code>/api/afip/authorize-invoice</code> to use
+        <code>WSFEv1Service</code> instead of mock <code>AFIPService</code>.
+      </div>
+      <div class="rec">
+        <strong>8. Create mock PEM files</strong> — Generate self-signed test
+        cert+key in <code>mock/</code> so non-mock code doesn't crash with
+        ENOENT.
+      </div>
+      <div class="rec">
+        <strong>9. Add an XML parser</strong> — Replace regex extraction with
+        <code>fast-xml-parser</code> to handle SOAP namespaces reliably.
+      </div>
+      <div class="rec">
+        <strong>10. Validate against AFIP homologation</strong> — Test entire
+        flow against <code>wsaahomo.afip.gov.ar</code> with a real testing
+        certificate before production.
+      </div>
+    </div>
+
+    <!-- ===== SUMMARY ===== -->
+    <h2 class="page-break">Executive Summary</h2>
+
+    <div class="section-box" style="border-left: 5px solid #0d47a1">
+      <p>
+        The project has a <strong>comprehensive structural scaffold</strong> for
+        AFIP/ARCA integration — models, retry logic, mock mode, cron jobs, and
+        API routes are well-organized and functional for local development.
+      </p>
+      <p>
+        However, the
+        <strong>core AFIP communication layer is non-functional</strong>:
+      </p>
+      <ul>
+        <li><code>soapCall()</code> is a stub that returns an empty string</li>
+        <li>
+          CMS/PKCS#7 signing is incorrectly implemented (raw RSA instead of CMS)
+        </li>
+        <li>No SOAP library is installed in the project</li>
+        <li>
+          Certificate files referenced in environment variables do not exist on
+          disk
+        </li>
+        <li>
+          Uploaded certificates are not persisted (content discarded, only
+          metadata saved)
+        </li>
+        <li>
+          FECAESolicitar XML uses incorrect element names per the AFIP WSDL
+        </li>
+      </ul>
+      <p>
+        The system currently operates <strong>entirely in mock mode</strong> and
+        <strong>cannot issue real CAEs</strong>. To reach production readiness,
+        approximately <strong>5–8 engineering days</strong> of focused work are
+        estimated, covering: CMS signing, SOAP implementation, certificate
+        storage bridge, XML corrections, token caching, and homologation
+        testing.
+      </p>
+    </div>
+
+    <!-- ===== FILE MAP ===== -->
+    <h2>File Reference Map</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>src/lib/afip.ts</code></td>
+          <td>AFIP config constants, endpoints, invoice types, VAT rates</td>
+        </tr>
+        <tr>
+          <td><code>src/lib/services/afipService.ts</code></td>
+          <td>Mock AFIP service (auth, authorize, taxpayer)</td>
+        </tr>
+        <tr>
+          <td><code>src/lib/services/wsfev1.ts</code></td>
+          <td>
+            WSFEv1 service class (WSAA token, CAE request, SOAP templates)
+          </td>
+        </tr>
+        <tr>
+          <td><code>src/lib/server/arcaRetryService.ts</code></td>
+          <td>Retry logic for pending CAE invoices</td>
+        </tr>
+        <tr>
+          <td><code>src/lib/server/arcaRetryScheduler.ts</code></td>
+          <td>Interval-based retry scheduler</td>
+        </tr>
+        <tr>
+          <td><code>src/lib/models/Invoice.ts</code></td>
+          <td>Invoice model with ARCA/fiscal fields</td>
+        </tr>
+        <tr>
+          <td><code>src/lib/models/FiscalConfiguration.ts</code></td>
+          <td>Per-business fiscal config, cert storage, WSAA token</td>
+        </tr>
+        <tr>
+          <td><code>src/app/api/afip/config/route.ts</code></td>
+          <td>GET AFIP config options</td>
+        </tr>
+        <tr>
+          <td><code>src/app/api/afip/validate-cuit/route.ts</code></td>
+          <td>POST CUIT validation</td>
+        </tr>
+        <tr>
+          <td><code>src/app/api/afip/authorize-invoice/route.ts</code></td>
+          <td>POST invoice authorization (mock)</td>
+        </tr>
+        <tr>
+          <td><code>src/app/api/fiscal-config/certificates/route.ts</code></td>
+          <td>POST certificate/key upload</td>
+        </tr>
+        <tr>
+          <td>
+            <code>src/app/api/fiscal-config/certificates/status/route.ts</code>
+          </td>
+          <td>GET certificate status</td>
+        </tr>
+        <tr>
+          <td><code>src/app/api/cron/arca/retry-pending/route.ts</code></td>
+          <td>Cron endpoint for ARCA retry</td>
+        </tr>
+        <tr>
+          <td><code>src/app/api/sales/complete/route.ts</code></td>
+          <td>Sale completion with ARCA mock integration</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer">
+      AFIP / ARCA Integration Status Report — pos-saas — Generated February 11,
+      2026
+    </div>
+  </body>
+</html>

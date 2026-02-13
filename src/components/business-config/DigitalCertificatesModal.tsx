@@ -56,9 +56,9 @@ const MODAL_COPY = {
     privateKeyTitle: "Clave Privada",
     noCertificateLoaded: "No hay certificado cargado",
     noPrivateKeyLoaded: "No hay clave privada cargada",
-    uploadCertificate: "Subir Certificado (.crt)",
+    uploadCertificate: "Subir Certificado (.crt/.pem)",
     uploadPrivateKey: "Subir Clave Privada (.key)",
-    supportedFormatsCrt: "Formatos soportados: .crt, .cer (máx. 1MB)",
+    supportedFormatsCrt: "Formatos soportados: .crt, .cer, .pem (máx. 1MB)",
     supportedFormatsKey: "Formatos soportados: .key, .pem (máx. 1MB)",
     securityWarning:
       "🔒 Seguridad: Tu clave privada se almacena de forma segura y nunca se muestra ni transmite.",
@@ -76,7 +76,7 @@ const MODAL_COPY = {
     uploadError: "Error al subir el certificado",
     privateKeyUploadSuccess: "Clave privada subida exitosamente",
     privateKeyUploadError: "Error al subir la clave privada",
-    invalidCertFile: "Por favor suelta un archivo .crt o .cer",
+    invalidCertFile: "Por favor suelta un archivo .crt, .cer o .pem",
     invalidKeyFile: "Por favor suelta un archivo .key o .pem",
     uploadedAt: "Subido el:",
     expiryDate: "Vence el:",
@@ -93,7 +93,7 @@ const MODAL_COPY = {
     pendingDescription:
       "You need to upload both files (certificate and private key) to enable electronic invoicing.",
     whatAreFiles: "What are these files?",
-    certificateLabel: "Certificate (.crt):",
+    certificateLabel: "Certificate (.crt/.pem):",
     certificateDesc:
       "It is your public digital identity issued by the tax authority.",
     privateKeyLabel: "Private Key (.key):",
@@ -104,9 +104,9 @@ const MODAL_COPY = {
     privateKeyTitle: "Private Key",
     noCertificateLoaded: "No certificate loaded",
     noPrivateKeyLoaded: "No private key loaded",
-    uploadCertificate: "Upload Certificate (.crt)",
+    uploadCertificate: "Upload Certificate (.crt/.pem)",
     uploadPrivateKey: "Upload Private Key (.key)",
-    supportedFormatsCrt: "Supported formats: .crt, .cer (max. 1MB)",
+    supportedFormatsCrt: "Supported formats: .crt, .cer, .pem (max. 1MB)",
     supportedFormatsKey: "Supported formats: .key, .pem (max. 1MB)",
     securityWarning:
       "🔒 Security: Your private key is stored securely and never displayed or transmitted.",
@@ -124,7 +124,7 @@ const MODAL_COPY = {
     uploadError: "Error uploading certificate",
     privateKeyUploadSuccess: "Private key uploaded successfully",
     privateKeyUploadError: "Error uploading private key",
-    invalidCertFile: "Please drop a .crt or .cer file",
+    invalidCertFile: "Please drop a .crt, .cer or .pem file",
     invalidKeyFile: "Please drop a .key or .pem file",
     uploadedAt: "Uploaded on:",
     expiryDate: "Expires on:",
@@ -141,7 +141,7 @@ const MODAL_COPY = {
     pendingDescription:
       "Você precisa carregar ambos os arquivos (certificado e chave privada) para ativar a faturação eletrônica.",
     whatAreFiles: "O que são esses arquivos?",
-    certificateLabel: "Certificado (.crt):",
+    certificateLabel: "Certificado (.crt/.pem):",
     certificateDesc:
       "É sua identidade digital pública emitida pela autoridade tributária.",
     privateKeyLabel: "Chave Privada (.key):",
@@ -152,9 +152,9 @@ const MODAL_COPY = {
     privateKeyTitle: "Chave Privada",
     noCertificateLoaded: "Nenhum certificado carregado",
     noPrivateKeyLoaded: "Nenhuma chave privada carregada",
-    uploadCertificate: "Carregar Certificado (.crt)",
+    uploadCertificate: "Carregar Certificado (.crt/.pem)",
     uploadPrivateKey: "Carregar Chave Privada (.key)",
-    supportedFormatsCrt: "Formatos suportados: .crt, .cer (máx. 1MB)",
+    supportedFormatsCrt: "Formatos suportados: .crt, .cer, .pem (máx. 1MB)",
     supportedFormatsKey: "Formatos suportados: .key, .pem (máx. 1MB)",
     securityWarning:
       "🔒 Segurança: Sua chave privada é armazenada com segurança e nunca é exibida ou transmitida.",
@@ -172,7 +172,7 @@ const MODAL_COPY = {
     uploadError: "Erro ao carregar certificado",
     privateKeyUploadSuccess: "Chave privada carregada com sucesso",
     privateKeyUploadError: "Erro ao carregar chave privada",
-    invalidCertFile: "Por favor, solte um arquivo .crt ou .cer",
+    invalidCertFile: "Por favor, solte um arquivo .crt, .cer ou .pem",
     invalidKeyFile: "Por favor, solte um arquivo .key ou .pem",
     uploadedAt: "Carregado em:",
     expiryDate: "Vence em:",
@@ -251,7 +251,12 @@ export default function DigitalCertificatesModal({
     e.preventDefault();
     e.stopPropagation();
     const file = e.dataTransfer.files[0];
-    if (file && (file.name.endsWith(".crt") || file.name.endsWith(".cer"))) {
+    if (
+      file &&
+      (file.name.endsWith(".crt") ||
+        file.name.endsWith(".cer") ||
+        file.name.endsWith(".pem"))
+    ) {
       setSelectedCertificate(file);
     } else {
       toast.error(copy.invalidCertFile);
@@ -515,7 +520,7 @@ export default function DigitalCertificatesModal({
                 <input
                   type="file"
                   id="cert-upload"
-                  accept=".crt,.cer"
+                  accept=".crt,.cer,.pem"
                   onChange={handleCertificateChange}
                   className="hidden"
                 />

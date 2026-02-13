@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import { apiFetch } from "@/lib/utils/apiFetch";
 import Header from "@/components/layout/Header";
+import { toast } from "react-toastify";
 import { useSubscription } from "@/lib/hooks/useSubscription";
 import {
   Calendar,
@@ -456,6 +457,9 @@ export default function ReportsPage() {
       });
     } catch (error) {
       console.error("Error fetching report data:", error);
+      toast.error(t("errorLoadingReports", "common") as string, {
+        toastId: "reports-load-error",
+      });
       setReportData({
         totalSales: 0,
         totalRevenue: 0,

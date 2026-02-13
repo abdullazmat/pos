@@ -34,7 +34,12 @@ export interface IInvoice extends Document {
   customerPhone?: string;
 
   // ARCA-specific fields
-  ivaType?: "RESPONSABLE_INSCRIPTO" | "MONOTRIBUTISTA" | "NO_CATEGORIZADO";
+  ivaType?:
+    | "RESPONSABLE_INSCRIPTO"
+    | "MONOTRIBUTISTA"
+    | "NO_CATEGORIZADO"
+    | "CONSUMIDOR_FINAL"
+    | "EXENTO";
   arcaStatus?: "PENDING" | "SENT" | "APPROVED" | "REJECTED";
 
   // Fiscal/WSFEv1 fields (Electronic Invoicing)
@@ -154,7 +159,13 @@ const InvoiceSchema = new Schema<IInvoice>(
     // ARCA-specific
     ivaType: {
       type: String,
-      enum: ["RESPONSABLE_INSCRIPTO", "MONOTRIBUTISTA", "NO_CATEGORIZADO"],
+      enum: [
+        "RESPONSABLE_INSCRIPTO",
+        "MONOTRIBUTISTA",
+        "NO_CATEGORIZADO",
+        "CONSUMIDOR_FINAL",
+        "EXENTO",
+      ],
     },
     arcaStatus: {
       type: String,

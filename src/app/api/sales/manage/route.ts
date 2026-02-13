@@ -31,15 +31,22 @@ export async function GET(req: NextRequest) {
 
     await dbConnect();
 
+    // Helper: ensure endDate covers the entire day (set to 23:59:59.999)
+    const endOfDay = (dateStr: string) => {
+      const d = new Date(dateStr);
+      d.setHours(23, 59, 59, 999);
+      return d;
+    };
+
     if (type === "detail" && saleId) {
       // Get specific sale with all details
       const sale = await Sale.findOne({
         _id: saleId,
-        business: decoded.businessId,
+        businessId: decoded.businessId,
       })
         .populate("invoice")
-        .populate("cashRegister")
-        .populate("user", "fullName email")
+        .populate("cashRegisterId")
+        .populate("userId", "fullName email")
         .lean();
 
       if (!sale) {
@@ -61,12 +68,12 @@ export async function GET(req: NextRequest) {
 
     if (type === "analytics") {
       // Get sales analytics for date range
-      const query: any = { business: decoded.businessId };
+      const query: any = { businessId: decoded.businessId };
 
       if (startDate && endDate) {
         query.createdAt = {
           $gte: new Date(startDate),
-          $lte: new Date(endDate),
+          $lte: endOfDay(endDate),
         };
       }
 
@@ -106,12 +113,12 @@ export async function GET(req: NextRequest) {
     }
 
     // Default: list sales
-    const query: any = { business: decoded.businessId };
+    const query: any = { businessId: decoded.businessId };
 
     if (startDate && endDate) {
       query.createdAt = {
         $gte: new Date(startDate),
-        $lte: new Date(endDate),
+        $lte: endOfDay(endDate),
       };
     }
 
@@ -123,8 +130,11 @@ export async function GET(req: NextRequest) {
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip)
-      .populate("invoice", "invoiceNumber totalAmount paymentStatus")
-      .populate("user", "fullName")
+      .populate(
+        "invoice",
+        "invoiceNumber totalAmount paymentStatus channel arcaStatus status fiscalData ivaType arcaLastError arcaRetryCount",
+      )
+      .populate("userId", "fullName")
       .lean();
 
     const total = await Sale.countDocuments(query);
@@ -176,7 +186,7 @@ export async function PUT(req: NextRequest) {
 
     const sale = await Sale.findOne({
       _id: saleId,
-      business: decoded.businessId,
+      businessId: decoded.businessId,
     });
 
     if (!sale) {
@@ -264,7 +274,7 @@ export async function DELETE(req: NextRequest) {
 
     const sale = await Sale.findOne({
       _id: saleId,
-      business: decoded.businessId,
+      businessId: decoded.businessId,
     });
 
     if (!sale) {
@@ -311,7 +321,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Delete sale
-    await Sale.deleteOne({ _id: saleId, business: decoded.businessId });
+    await Sale.deleteOne({ _id: saleId, businessId: decoded.businessId });
 
     return NextResponse.json({ message: "Sale deleted successfully" });
   } catch (error) {

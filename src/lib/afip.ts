@@ -21,13 +21,13 @@ export const AFIP_CONFIG = {
 
   // AFIP endpoints
   wsaaUrl: {
-    production: "https://wsaa.afip.gov.ar/ws/services/LoginCMS",
-    testing: "https://wsaahomo.afip.gov.ar/ws/services/LoginCMS",
+    production: "https://wsaa.afip.gov.ar/ws/services/LoginCms",
+    testing: "https://wsaahomo.afip.gov.ar/ws/services/LoginCms",
   },
 
   invoicingServiceUrl: {
     production: "https://servicios1.afip.gov.ar/wsfev1/service.asmx",
-    testing: "https://servicios1905.afip.gov.ar/wsfev1/service.asmx",
+    testing: "https://wswhomo.afip.gov.ar/wsfev1/service.asmx",
   },
 
   // Default company data
@@ -47,9 +47,10 @@ export const INVOICE_TYPES = {
 export const VAT_RATES = {
   exempt: { id: 1, rate: 0, name: "Exento" },
   not_taxable: { id: 2, rate: 0, name: "No Gravado" },
-  standard: { id: 3, rate: 21, name: "IVA 21%" },
+  zero: { id: 3, rate: 0, name: "IVA 0%" },
   reduced: { id: 4, rate: 10.5, name: "IVA 10.5%" },
-  additional: { id: 5, rate: 27, name: "IVA 27%" },
+  standard: { id: 5, rate: 21, name: "IVA 21%" },
+  additional: { id: 6, rate: 27, name: "IVA 27%" },
 };
 
 // Document types
@@ -59,3 +60,41 @@ export const DOCUMENT_TYPES = {
   dni: { id: 96, name: "DNI" },
   passport: { id: 94, name: "Pasaporte" },
 };
+
+// Runtime validation on startup (best-effort, non-blocking)
+import { validateAfipFiles } from "@/lib/services/afipValidator";
+
+export function runAfipStartupValidation() {
+  try {
+    const res = validateAfipFiles({
+      certPath: AFIP_CONFIG.certificatePath,
+      keyPath: AFIP_CONFIG.keyPath,
+      cuit: AFIP_CONFIG.cuit,
+    });
+    if (!res.ok) {
+      // Log but do not throw — app can still run in mock mode
+      // Important issues should be surfaced to admin UI
+      // eslint-disable-next-line no-console
+      console.warn("[AFIP STARTUP VALIDATION] Issues detected:", res.issues);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log("[AFIP STARTUP VALIDATION] Certificate and key validated.");
+    }
+    return res;
+  } catch (e: any) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      "[AFIP STARTUP VALIDATION] Unexpected error:",
+      e && e.message ? e.message : e,
+    );
+    return {
+      ok: false,
+      issues: [
+        {
+          code: "STARTUP_VALIDATION_ERROR",
+          message: e && e.message ? e.message : String(e),
+        },
+      ],
+    };
+  }
+}

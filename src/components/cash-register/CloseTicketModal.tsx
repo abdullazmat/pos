@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useLanguage } from "@/lib/context/LanguageContext";
+import { printReceipt } from "@/lib/utils/printReceipt";
 
 const CLOSE_TICKET_COPY = {
   es: {
@@ -132,7 +133,7 @@ export default function CloseTicketModal({
   }
 
   const handlePrint = () => {
-    window.print();
+    printReceipt();
   };
 
   const locale = t("__locale__", "common") || "es-AR";

@@ -20,6 +20,7 @@ import CloseBoxModal from "@/components/cash-register/CloseBoxModal";
 import CloseTicketModal, {
   CloseTicketData,
 } from "@/components/cash-register/CloseTicketModal";
+import { printReceipt } from "@/lib/utils/printReceipt";
 
 const CASH_COPY = {
   es: {
@@ -1745,7 +1746,7 @@ export default function CashRegisterPage() {
             />
             <div className="flex items-center justify-center gap-3 p-4 border-t border-slate-200 dark:border-slate-700 no-print">
               <button
-                onClick={() => window.print()}
+                onClick={() => printReceipt()}
                 className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition"
               >
                 {copy.receiptPrint}
@@ -1781,7 +1782,7 @@ export default function CashRegisterPage() {
             />
             <div className="flex items-center justify-center gap-3 p-4 border-t border-slate-200 dark:border-slate-700 no-print">
               <button
-                onClick={() => window.print()}
+                onClick={() => printReceipt()}
                 className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition"
               >
                 {copy.receiptPrint}

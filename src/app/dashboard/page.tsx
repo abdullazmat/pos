@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { useSubscription } from "@/lib/hooks/useSubscription";
+import { toast } from "react-toastify";
 import { Zap, Calendar, Check } from "lucide-react";
 import { useLanguage } from "@/lib/context/LanguageContext";
 import { useBusinessDateTime } from "@/lib/hooks/useBusinessDateTime";
@@ -68,6 +69,9 @@ export default function Dashboard() {
         });
       } catch (error) {
         console.error("Failed to load due date alerts", error);
+        toast.error(t("errorLoadingData", "common") as string, {
+          toastId: "dashboard-alerts-error",
+        });
       }
     };
 

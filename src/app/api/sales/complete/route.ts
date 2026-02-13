@@ -15,6 +15,7 @@ import MercadoPagoService from "@/lib/services/payment/MercadoPagoService";
 import { verifyToken } from "@/lib/utils/jwt";
 import User from "@/lib/models/User";
 import Client from "@/lib/models/Client";
+import FiscalConfiguration from "@/lib/models/FiscalConfiguration";
 import { broadcastStockUpdate } from "@/lib/server/stockStream";
 import { generateNextProductInternalId } from "@/lib/utils/productCodeGenerator";
 import { parseNumberInput } from "@/lib/utils/decimalFormatter";
@@ -35,9 +36,7 @@ const getMockArcaStatus = () => {
 };
 
 const isMockArcaEnabled = () => {
-  return (
-    process.env.ARCA_MOCK_ENABLED === "true" || Boolean(getMockArcaStatus())
-  );
+  return process.env.ARCA_MOCK_ENABLED === "true";
 };
 
 const generateMockCae = () => {
@@ -64,7 +63,12 @@ interface CompleteSaleRequest {
   customerName: string;
   customerEmail?: string;
   customerCuit?: string; // Required for ARCA
-  ivaType?: "RESPONSABLE_INSCRIPTO" | "MONOTRIBUTISTA" | "NO_CATEGORIZADO";
+  ivaType?:
+    | "RESPONSABLE_INSCRIPTO"
+    | "MONOTRIBUTISTA"
+    | "NO_CATEGORIZADO"
+    | "CONSUMIDOR_FINAL"
+    | "EXENTO";
   discount?: number;
   cashRegisterId?: string;
   notes?: string;
@@ -116,34 +120,65 @@ export async function POST(req: NextRequest) {
 
     const resolvedIvaType =
       ivaType ||
-      (isMockArcaEnabled() && invoiceChannel === InvoiceChannel.ARCA
-        ? "RESPONSABLE_INSCRIPTO"
-        : undefined);
+      (invoiceChannel === InvoiceChannel.ARCA ? "CONSUMIDOR_FINAL" : undefined);
 
     // Validation
     if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ error: "No items in sale" }, { status: 400 });
-    }
-
-    if (!customerName) {
       return NextResponse.json(
-        { error: "Customer name is required" },
+        { errorCode: "NO_ITEMS", error: "No items in sale" },
         { status: 400 },
       );
     }
 
-    if (invoiceChannel === InvoiceChannel.ARCA && !customerCuit) {
+    if (!customerName) {
       return NextResponse.json(
-        { error: "CUIT is required for ARCA invoices" },
+        {
+          errorCode: "CUSTOMER_NAME_REQUIRED",
+          error: "Customer name is required",
+        },
         { status: 400 },
       );
     }
 
     if (invoiceChannel === InvoiceChannel.ARCA && !resolvedIvaType) {
       return NextResponse.json(
-        { error: "IVA type is required for ARCA invoices" },
+        {
+          errorCode: "IVA_TYPE_REQUIRED",
+          error: "IVA type is required for ARCA invoices",
+        },
         { status: 400 },
       );
+    }
+
+    // CUIT is mandatory only for Responsable Inscripto (Factura A)
+    // For Factura B (CF, Mono, Exento, NoCat), AFIP accepts DocTipo=99/DocNro=0
+    if (
+      invoiceChannel === InvoiceChannel.ARCA &&
+      resolvedIvaType === "RESPONSABLE_INSCRIPTO" &&
+      !customerCuit?.replace(/\D/g, "")
+    ) {
+      return NextResponse.json(
+        {
+          errorCode: "CUIT_REQUIRED_RI",
+          error: "CUIT is required for Responsable Inscripto invoices",
+        },
+        { status: 400 },
+      );
+    }
+
+    // Validate CUIT format (11 digits) when provided for Factura A
+    if (
+      invoiceChannel === InvoiceChannel.ARCA &&
+      resolvedIvaType === "RESPONSABLE_INSCRIPTO" &&
+      customerCuit
+    ) {
+      const cleanCuit = customerCuit.replace(/\D/g, "");
+      if (cleanCuit.length !== 11) {
+        return NextResponse.json(
+          { errorCode: "CUIT_INVALID_FORMAT", error: "CUIT must be 11 digits" },
+          { status: 400 },
+        );
+      }
     }
 
     await dbConnect();
@@ -155,7 +190,10 @@ export async function POST(req: NextRequest) {
     }).select("discountLimit");
 
     if (!saleUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json(
+        { errorCode: "USER_NOT_FOUND", error: "User not found" },
+        { status: 404 },
+      );
     }
 
     const userDiscountLimit = clampDiscountLimit(saleUser.discountLimit);
@@ -189,12 +227,18 @@ export async function POST(req: NextRequest) {
       normalizedSaleDiscount === null ||
       Number.isNaN(normalizedSaleDiscount)
     ) {
-      return NextResponse.json({ error: "Invalid discount" }, { status: 400 });
+      return NextResponse.json(
+        { errorCode: "INVALID_DISCOUNT", error: "Invalid discount" },
+        { status: 400 },
+      );
     }
 
     if (normalizedSaleDiscount < 0) {
       return NextResponse.json(
-        { error: "Discount must be 0 or higher" },
+        {
+          errorCode: "DISCOUNT_NEGATIVE",
+          error: "Discount must be 0 or higher",
+        },
         { status: 400 },
       );
     }
@@ -209,7 +253,10 @@ export async function POST(req: NextRequest) {
 
       if (!register) {
         return NextResponse.json(
-          { error: "Cash register is not open" },
+          {
+            errorCode: "REGISTER_NOT_OPEN",
+            error: "Cash register is not open",
+          },
           { status: 400 },
         );
       }
@@ -234,13 +281,16 @@ export async function POST(req: NextRequest) {
 
       if (normalizedQuantity === null || Number.isNaN(normalizedQuantity)) {
         return NextResponse.json(
-          { error: "Invalid quantity" },
+          { errorCode: "INVALID_QUANTITY", error: "Invalid quantity" },
           { status: 400 },
         );
       }
       if (normalizedQuantity <= 0) {
         return NextResponse.json(
-          { error: "Quantity must be greater than 0" },
+          {
+            errorCode: "QUANTITY_ZERO",
+            error: "Quantity must be greater than 0",
+          },
           { status: 400 },
         );
       }
@@ -252,7 +302,10 @@ export async function POST(req: NextRequest) {
 
       if (!product) {
         return NextResponse.json(
-          { error: `Product not found: ${item.productId}` },
+          {
+            errorCode: "PRODUCT_NOT_FOUND",
+            error: `Product not found: ${item.productId}`,
+          },
           { status: 404 },
         );
       }
@@ -260,7 +313,31 @@ export async function POST(req: NextRequest) {
       if (product.stock < normalizedQuantity) {
         return NextResponse.json(
           {
+            errorCode: "INSUFFICIENT_STOCK",
             error: `Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${normalizedQuantity}`,
+          },
+          { status: 400 },
+        );
+      }
+
+      // Validate unitPrice matches the product's actual price (prevents tampered requests)
+      const expectedPrice =
+        typeof product.price === "object" && product.price !== null
+          ? parseFloat(product.price.toString())
+          : Number(product.price);
+      const submittedPrice =
+        typeof (item.unitPrice as any) === "object" && item.unitPrice !== null
+          ? parseFloat(String(item.unitPrice))
+          : Number(item.unitPrice);
+      if (
+        Number.isNaN(submittedPrice) ||
+        submittedPrice <= 0 ||
+        Math.abs(submittedPrice - expectedPrice) > 0.01
+      ) {
+        return NextResponse.json(
+          {
+            errorCode: "PRICE_MISMATCH",
+            error: `Price mismatch for ${product.name}. Expected: ${expectedPrice}, Received: ${submittedPrice}`,
           },
           { status: 400 },
         );
@@ -276,14 +353,17 @@ export async function POST(req: NextRequest) {
 
       if (normalizedDiscount === null || Number.isNaN(normalizedDiscount)) {
         return NextResponse.json(
-          { error: "Invalid discount" },
+          { errorCode: "INVALID_DISCOUNT", error: "Invalid discount" },
           { status: 400 },
         );
       }
 
       if (normalizedDiscount < 0) {
         return NextResponse.json(
-          { error: "Discount must be 0 or higher" },
+          {
+            errorCode: "DISCOUNT_NEGATIVE",
+            error: "Discount must be 0 or higher",
+          },
           { status: 400 },
         );
       }
@@ -291,7 +371,10 @@ export async function POST(req: NextRequest) {
       const lineSubtotal = normalizedQuantity * item.unitPrice;
       if (normalizedDiscount > lineSubtotal) {
         return NextResponse.json(
-          { error: "Discount cannot exceed line subtotal" },
+          {
+            errorCode: "DISCOUNT_EXCEEDS_LINE",
+            error: "Discount cannot exceed line subtotal",
+          },
           { status: 400 },
         );
       }
@@ -300,7 +383,10 @@ export async function POST(req: NextRequest) {
         const maxAllowed = (effectiveDiscountLimit / 100) * lineSubtotal;
         if (normalizedDiscount > maxAllowed) {
           return NextResponse.json(
-            { error: "Discount exceeds user limit" },
+            {
+              errorCode: "DISCOUNT_EXCEEDS_LIMIT",
+              error: "Discount exceeds user limit",
+            },
             { status: 400 },
           );
         }
@@ -341,7 +427,10 @@ export async function POST(req: NextRequest) {
     );
     if (normalizedSaleDiscount > maxAdditionalDiscount) {
       return NextResponse.json(
-        { error: "Discount cannot exceed subtotal" },
+        {
+          errorCode: "DISCOUNT_EXCEEDS_SUBTOTAL",
+          error: "Discount cannot exceed subtotal",
+        },
         { status: 400 },
       );
     }
@@ -352,7 +441,10 @@ export async function POST(req: NextRequest) {
       const maxAllowedTotal = (effectiveDiscountLimit / 100) * grossSubtotal;
       if (totalDiscount > maxAllowedTotal) {
         return NextResponse.json(
-          { error: "Discount exceeds user limit" },
+          {
+            errorCode: "DISCOUNT_EXCEEDS_LIMIT",
+            error: "Discount exceeds user limit",
+          },
           { status: 400 },
         );
       }
@@ -376,10 +468,10 @@ export async function POST(req: NextRequest) {
     }).sort({ invoiceNumber: -1 });
 
     const nextNumber = lastInvoice
-      ? parseInt(lastInvoice.invoiceNumber.split("-")[1]) + 1
+      ? parseInt(lastInvoice.invoiceNumber.split("-").pop() || "0") + 1
       : 1;
     const invoiceNumber = `${datePrefix}-${String(nextNumber).padStart(
-      3,
+      5,
       "0",
     )}`;
 
@@ -420,7 +512,8 @@ export async function POST(req: NextRequest) {
           .slice(0, 10)
           .replace(/-/g, "");
         const fiscalDefaults = {
-          "fiscalData.comprobanteTipo": customerCuit ? 1 : 6,
+          "fiscalData.comprobanteTipo":
+            resolvedIvaType === "RESPONSABLE_INSCRIPTO" ? 1 : 6,
           "fiscalData.pointOfSale": 1,
           "fiscalData.invoiceSequence": nextNumber,
         };
@@ -459,6 +552,37 @@ export async function POST(req: NextRequest) {
             },
           );
         }
+      } else if (
+        invoice &&
+        (invoiceChannel === InvoiceChannel.ARCA ||
+          invoiceChannel === InvoiceChannel.WSFE) &&
+        !isMockArcaEnabled()
+      ) {
+        // Real mode: set fiscal data so the retry service can process this invoice
+        let pointOfSale = 1;
+        try {
+          const fiscalConfig = await FiscalConfiguration.findOne({
+            business: decoded.businessId,
+          }).lean();
+          if (fiscalConfig && (fiscalConfig as any).pointOfSale) {
+            pointOfSale = (fiscalConfig as any).pointOfSale;
+          }
+        } catch (e) {
+          console.error("[SALE] Error loading fiscal config for POS:", e);
+        }
+
+        await Invoice.updateOne(
+          { _id: invoice._id },
+          {
+            status: "PENDING_CAE",
+            arcaStatus: "PENDING",
+            "fiscalData.comprobanteTipo":
+              resolvedIvaType === "RESPONSABLE_INSCRIPTO" ? 1 : 6,
+            "fiscalData.pointOfSale": pointOfSale,
+            "fiscalData.invoiceSequence": nextNumber,
+            "fiscalData.caeStatus": "PENDING",
+          },
+        );
       }
     }
 
@@ -537,11 +661,16 @@ export async function POST(req: NextRequest) {
           await sale.save();
         }
 
-        // Update register balances and totals
-        openRegister.currentBalance =
-          (openRegister.currentBalance || 0) + totalWithTax;
-        openRegister.salesTotal = (openRegister.salesTotal || 0) + totalWithTax;
-        await openRegister.save();
+        // Update register balances and totals atomically
+        await CashRegister.updateOne(
+          { _id: openRegister._id },
+          {
+            $inc: {
+              currentBalance: totalWithTax,
+              salesTotal: totalWithTax,
+            },
+          },
+        );
 
         await CashMovement.create({
           businessId: decoded.businessId,
@@ -643,9 +772,9 @@ export async function POST(req: NextRequest) {
         await sale.save();
       } catch (error) {
         console.error("Mercado Pago error:", error);
-        // Don't fail the sale, just log the error
         return NextResponse.json(
           {
+            errorCode: "MERCADOPAGO_FAILED",
             error: "Failed to create Mercado Pago payment",
             details: (error as any).message,
           },
@@ -656,8 +785,12 @@ export async function POST(req: NextRequest) {
 
     // Update invoice payment status if payment was successful
     if (paymentMethod !== "mercadopago" && invoice) {
-      invoice.paymentStatus = "PAID";
-      await invoice.save();
+      try {
+        invoice.paymentStatus = "PAID";
+        await invoice.save();
+      } catch (invoiceSaveError) {
+        console.error("Invoice payment status update error:", invoiceSaveError);
+      }
     }
 
     let receiptStatus = "INTERNAL" as
@@ -749,7 +882,11 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Complete sale error:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: (error as any).message },
+      {
+        errorCode: "SERVER_ERROR",
+        error: "Internal server error",
+        details: (error as any).message,
+      },
       { status: 500 },
     );
   }

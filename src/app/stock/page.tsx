@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import { useSubscription } from "@/lib/hooks/useSubscription";
+import { toast } from "react-toastify";
 import {
   Package,
   AlertTriangle,
@@ -155,7 +156,7 @@ const CURRENCY_LOCALE = {
 
 export default function StockPage() {
   const router = useRouter();
-  const { currentLanguage } = useGlobalLanguage();
+  const { currentLanguage, t } = useGlobalLanguage();
   const copy = (STOCK_COPY[currentLanguage] ||
     STOCK_COPY.en) as typeof STOCK_COPY.en;
   const stockLocale =
@@ -240,6 +241,11 @@ export default function StockPage() {
       }
     } catch (error) {
       console.error("Error fetching products:", error);
+      if (!silent) {
+        toast.error(t("errorLoadingStock", "common") as string, {
+          toastId: "stock-load-error",
+        });
+      }
     } finally {
       if (!silent) setLoading(false);
     }
@@ -292,6 +298,9 @@ export default function StockPage() {
                 URL.revokeObjectURL(url);
               } catch (e) {
                 console.error("Export error:", e);
+                toast.error(t("errorLoadingData", "common") as string, {
+                  toastId: "stock-export-error",
+                });
               }
             }}
             className="bg-emerald-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-700 flex items-center gap-2"

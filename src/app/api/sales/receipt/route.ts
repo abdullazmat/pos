@@ -16,6 +16,148 @@ const DEFAULT_TICKET_MESSAGES: Record<string, string> = {
   pt: "OBRIGADO PELA SUA COMPRA!\nVolte em breve",
 };
 
+// Receipt label translations
+const RECEIPT_LABELS: Record<string, Record<string, string>> = {
+  es: {
+    invoicePrefix: "FACTURA",
+    budget: "PRESUPUESTO",
+    saleReceipt: "COMPROBANTE DE VENTA",
+    docType: "Tipo de documento:",
+    numbering: "Numeración:",
+    caeLabel: "CAE:",
+    caeExpiry: "Vencimiento CAE:",
+    fiscalQr: "QR Fiscal:",
+    fiscalValidity: "Validez fiscal:",
+    usage: "Uso:",
+    edition: "Edición:",
+    client: "Cliente:",
+    cuit: "CUIT:",
+    subtotal: "Subtotal:",
+    discount: "Descuento:",
+    tax21: "Impuesto (21%):",
+    total: "TOTAL:",
+    payment: "Pago:",
+    paymentPending: "PAGO PENDIENTE",
+    provisional: "COMPROBANTE PROVISIONAL - SIN VALOR FISCAL",
+    vtoCae: "Vto CAE:",
+    yes: "Sí",
+    no: "No",
+    validBeforeArca: "Válido ante ARCA",
+    notValid: "No válido",
+    finalLegalDoc: "Documento legal definitivo",
+    contingencyBackup: "Contingencia / Respaldo",
+    editableOnlyForCN: "Editable solo para notas de crédito",
+    notEditable: "No editable",
+    desc: "Desc:",
+    cash: "Efectivo",
+    card: "Tarjeta",
+    transfer: "Transferencia",
+    check: "Cheque",
+    bankTransfer: "Transferencia bancaria",
+    online: "Online",
+    qr: "QR",
+    mercadopago: "Mercado Pago",
+    multiple: "Múltiple",
+    account: "Cuenta corriente",
+    creditNote: "Nota de Crédito",
+    none: "Ninguno",
+    numberPrefix: "Nº",
+  },
+  en: {
+    invoicePrefix: "INVOICE",
+    budget: "BUDGET",
+    saleReceipt: "SALE RECEIPT",
+    docType: "Document type:",
+    numbering: "Number:",
+    caeLabel: "CAE:",
+    caeExpiry: "CAE Expiry:",
+    fiscalQr: "Fiscal QR:",
+    fiscalValidity: "Fiscal validity:",
+    usage: "Usage:",
+    edition: "Edition:",
+    client: "Client:",
+    cuit: "CUIT:",
+    subtotal: "Subtotal:",
+    discount: "Discount:",
+    tax21: "Tax (21%):",
+    total: "TOTAL:",
+    payment: "Payment:",
+    paymentPending: "PAYMENT PENDING",
+    provisional: "PROVISIONAL RECEIPT - NO FISCAL VALUE",
+    vtoCae: "CAE Exp:",
+    yes: "Yes",
+    no: "No",
+    validBeforeArca: "Valid before ARCA",
+    notValid: "Not valid",
+    finalLegalDoc: "Final legal document",
+    contingencyBackup: "Contingency / Backup",
+    editableOnlyForCN: "Editable only for credit notes",
+    notEditable: "Not editable",
+    desc: "Disc:",
+    cash: "Cash",
+    card: "Card",
+    transfer: "Transfer",
+    check: "Check",
+    bankTransfer: "Bank Transfer",
+    online: "Online",
+    qr: "QR",
+    mercadopago: "Mercado Pago",
+    multiple: "Multiple",
+    account: "Account",
+    creditNote: "Credit Note",
+    none: "None",
+    numberPrefix: "No.",
+  },
+  pt: {
+    invoicePrefix: "FATURA",
+    budget: "ORÇAMENTO",
+    saleReceipt: "COMPROVANTE DE VENDA",
+    docType: "Tipo de documento:",
+    numbering: "Numeração:",
+    caeLabel: "CAE:",
+    caeExpiry: "Vencimento CAE:",
+    fiscalQr: "QR Fiscal:",
+    fiscalValidity: "Validade fiscal:",
+    usage: "Uso:",
+    edition: "Edição:",
+    client: "Cliente:",
+    cuit: "CUIT:",
+    subtotal: "Subtotal:",
+    discount: "Desconto:",
+    tax21: "Imposto (21%):",
+    total: "TOTAL:",
+    payment: "Pagamento:",
+    paymentPending: "PAGAMENTO PENDENTE",
+    provisional: "COMPROVANTE PROVISÓRIO - SEM VALOR FISCAL",
+    vtoCae: "Vto CAE:",
+    yes: "Sim",
+    no: "Não",
+    validBeforeArca: "Válido perante ARCA",
+    notValid: "Não válido",
+    finalLegalDoc: "Documento legal definitivo",
+    contingencyBackup: "Contingência / Backup",
+    editableOnlyForCN: "Editável apenas para notas de crédito",
+    notEditable: "Não editável",
+    desc: "Desc:",
+    cash: "Dinheiro",
+    card: "Cartão",
+    transfer: "Transferência",
+    check: "Cheque",
+    bankTransfer: "Transferência bancária",
+    online: "Online",
+    qr: "QR",
+    mercadopago: "Mercado Pago",
+    multiple: "Múltiplo",
+    account: "Conta corrente",
+    creditNote: "Nota de Crédito",
+    none: "Nenhum",
+    numberPrefix: "Nº",
+  },
+};
+
+const getLabel = (lang: string, key: string): string =>
+  RECEIPT_LABELS[lang]?.[key] || RECEIPT_LABELS.en[key] || key;
+
 /**
  * GET - Generate receipt/invoice for sale
  * Returns printable receipt data or PDF
@@ -48,7 +190,7 @@ export async function GET(req: NextRequest) {
 
     const sale = await Sale.findOne({
       _id: saleId,
-      business: decoded.businessId,
+      businessId: decoded.businessId,
     })
       .populate("invoice")
       .lean();
@@ -92,8 +234,8 @@ export async function GET(req: NextRequest) {
       return invoice?.customerCuit ? "A" : "B";
     })();
 
-    const fiscalDocumentLabel = `INVOICE ${fiscalLetter}`;
-    const provisionalDocumentLabel = "BUDGET";
+    const fiscalDocumentLabel = `${getLabel(lang, "invoicePrefix")} ${fiscalLetter}`;
+    const provisionalDocumentLabel = getLabel(lang, "budget");
     const documentTypeLabel = isFiscalInvoice
       ? fiscalDocumentLabel
       : provisionalDocumentLabel;
@@ -110,7 +252,7 @@ export async function GET(req: NextRequest) {
       if (cancelledByNc) {
         return {
           action: "BLOCK",
-          documentLabel: "Nota de Crédito",
+          documentLabel: getLabel(lang, "creditNote"),
           fiscalStatus: "CANCELED_BY_NC",
           reason: "Sale cancelled by credit note",
         };
@@ -119,7 +261,7 @@ export async function GET(req: NextRequest) {
       if (caeRejected) {
         return {
           action: "BLOCK",
-          documentLabel: "Ninguno",
+          documentLabel: getLabel(lang, "none"),
           fiscalStatus: "REJECTED",
           reason: "Fiscal data rejected",
         };
@@ -143,7 +285,7 @@ export async function GET(req: NextRequest) {
 
       return {
         action: "BLOCK",
-        documentLabel: "Ninguno",
+        documentLabel: getLabel(lang, "none"),
         fiscalStatus: "CAE_REQUIRED",
         reason: "CAE required for fiscal invoice",
       };
@@ -161,14 +303,14 @@ export async function GET(req: NextRequest) {
     const isFiscalPrint = fiscalDecision.action === "PRINT_FISCAL";
     const fiscalQrAvailable = Boolean(isFiscalPrint && cae);
     const fiscalValidityLabel = isFiscalPrint
-      ? "Valid before ARCA"
-      : "Not valid";
+      ? getLabel(lang, "validBeforeArca")
+      : getLabel(lang, "notValid");
     const fiscalUsageLabel = isFiscalPrint
-      ? "Final legal document"
-      : "Contingency / Backup";
+      ? getLabel(lang, "finalLegalDoc")
+      : getLabel(lang, "contingencyBackup");
     const fiscalEditLabel = isFiscalPrint
-      ? "Editable only for credit notes"
-      : "Not editable";
+      ? getLabel(lang, "editableOnlyForCN")
+      : getLabel(lang, "notEditable");
 
     if (fiscalDecision.action === "BLOCK") {
       return NextResponse.json(
@@ -202,13 +344,25 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Safe numeric conversion for MongoDB Decimal128 values
+    const toNum = (v: any): number => {
+      if (v == null) return 0;
+      if (typeof v === "number") return v;
+      if (typeof v === "object" && v.$numberDecimal != null)
+        return parseFloat(v.$numberDecimal);
+      if (typeof v === "string") return parseFloat(v) || 0;
+      return Number(v) || 0;
+    };
+
     // Format receipt data
     const receiptData = {
       receiptNumber:
         invoice?.invoiceNumber ||
         `VENTA-${(sale as any)._id.toString().slice(-6)}`,
       documentNumber: isFiscalPrint ? fiscalNumber : null,
-      date: new Date((sale as any).createdAt).toLocaleString("es-AR"),
+      date: new Date((sale as any).createdAt).toLocaleString(
+        lang === "es" ? "es-AR" : lang === "pt" ? "pt-BR" : "en-US",
+      ),
       logoUrl: businessConfig?.ticketLogo || "",
       documentType: fiscalDecision.documentLabel,
       fiscalStatus: fiscalDecision.fiscalStatus,
@@ -221,18 +375,20 @@ export async function GET(req: NextRequest) {
       isProvisional: fiscalDecision.action === "PRINT_PROVISIONAL",
       items: (sale as any).items.map((item: any) => ({
         description: item.productName,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        discount: item.discount || 0,
-        total: item.total,
+        quantity: toNum(item.quantity),
+        unitPrice: toNum(item.unitPrice),
+        discount: toNum(item.discount),
+        total: toNum(item.total),
       })),
-      subtotal: (sale as any).subtotal,
-      discount: (sale as any).discount || 0,
-      tax: (sale as any).tax || 0,
-      total: (sale as any).totalWithTax || (sale as any).total,
+      subtotal: toNum((sale as any).subtotal),
+      discount: toNum((sale as any).discount),
+      tax: toNum((sale as any).tax),
+      total: toNum((sale as any).totalWithTax) || toNum((sale as any).total),
       paymentMethod: (sale as any).paymentMethod,
       paymentStatus: (sale as any).paymentStatus,
-      customerName: invoice?.customerName || "Cliente",
+      customerName:
+        invoice?.customerName ||
+        (lang === "en" ? "Customer" : lang === "pt" ? "Cliente" : "Cliente"),
       customerCuit: invoice?.customerCuit,
       notes: invoice?.notes,
       ticketMessage, // Add the ticket message
@@ -274,7 +430,7 @@ export async function GET(req: NextRequest) {
       }
 
       // Generate HTML receipt for printing
-      const html = generateHTMLReceipt(receiptData);
+      const html = generateHTMLReceipt(receiptData, lang);
       return new NextResponse(html, {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
@@ -296,23 +452,29 @@ export async function GET(req: NextRequest) {
 /**
  * Generate HTML receipt for thermal printer or screen printing
  */
-function generateHTMLReceipt(data: any): string {
+function generateHTMLReceipt(data: any, lang: string = "en"): string {
+  const L = (key: string) => getLabel(lang, key);
+  const currencyLocale =
+    lang === "es" ? "es-AR" : lang === "pt" ? "pt-BR" : "en-US";
+
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("es-AR", {
+    new Intl.NumberFormat(currencyLocale, {
       style: "currency",
       currency: "ARS",
     }).format(value);
 
   const formatNumber = (value: number) =>
-    new Intl.NumberFormat("es-AR", { minimumFractionDigits: 2 }).format(value);
+    new Intl.NumberFormat(currencyLocale, { minimumFractionDigits: 2 }).format(
+      value,
+    );
 
   return `
 <!DOCTYPE html>
-<html lang="es">
+<html lang="${lang}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprobante ${data.receiptNumber}</title>
+    <title>${L("saleReceipt")} ${data.receiptNumber}</title>
     <style>
         * {
             margin: 0;
@@ -374,10 +536,21 @@ function generateHTMLReceipt(data: any): string {
             border-bottom: 1px dashed #ddd;
             padding-bottom: 8px;
             font-size: 11px;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 3px 8px;
+            align-items: baseline;
         }
         
         .customer-label {
             color: #666;
+            white-space: nowrap;
+        }
+        
+        .customer-value {
+            text-align: right;
+            font-weight: 600;
+            word-break: break-word;
         }
         
         .items {
@@ -387,24 +560,34 @@ function generateHTMLReceipt(data: any): string {
         }
         
         .item-row {
-            display: grid;
-            grid-template-columns: 1fr auto auto;
-            gap: 5px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px dotted #eee;
             font-size: 11px;
-            align-items: center;
         }
         
-        .item-desc {
-            grid-column: 1;
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 2px;
         }
         
-        .item-qty {
-            text-align: right;
+        .item-details {
+            display: flex;
+            justify-content: space-between;
+            color: #555;
+            font-size: 10px;
+            margin-top: 2px;
         }
         
-        .item-price {
-            text-align: right;
+        .item-total {
+            font-weight: bold;
+            color: #000;
+        }
+        
+        .item-discount {
+            font-size: 10px;
+            color: #888;
+            margin-top: 1px;
         }
         
         .totals {
@@ -415,7 +598,8 @@ function generateHTMLReceipt(data: any): string {
         .total-row {
             display: flex;
             justify-content: space-between;
-            margin: 4px 0;
+            margin: 5px 0;
+            gap: 10px;
         }
         
         .total-row.final {
@@ -483,32 +667,39 @@ function generateHTMLReceipt(data: any): string {
             <div class="receipt-title">${
               data.documentType
                 ? data.documentType.toUpperCase()
-                : "COMPROBANTE DE VENTA"
+                : L("saleReceipt")
             }</div>
-            <div class="receipt-number">Nº ${data.documentNumber || data.receiptNumber}</div>
+            <div class="receipt-number">${L("numberPrefix")} ${data.documentNumber || data.receiptNumber}</div>
             <div class="receipt-date">${data.date}</div>
         </div>
 
           <div class="customer-info">
-            <div><span class="customer-label">Tipo de documento:</span> ${data.documentType || "Comprobante"}</div>
-            <div><span class="customer-label">Numeración:</span> ${data.documentNumber || data.receiptNumber}</div>
-            <div><span class="customer-label">CAE:</span> ${data.cae ? "Sí" : "No"}</div>
-            <div><span class="customer-label">Vencimiento CAE:</span> ${data.caeVto || "No"}</div>
-            <div><span class="customer-label">QR Fiscal:</span> ${data.fiscalQrAvailable ? "Sí" : "No"}</div>
-            <div><span class="customer-label">Validez fiscal:</span> ${data.fiscalValidityLabel}</div>
-            <div><span class="customer-label">Uso:</span> ${data.fiscalUsageLabel}</div>
-            <div><span class="customer-label">Edición:</span> ${data.fiscalEditLabel}</div>
+            <span class="customer-label">${L("docType")}</span>
+            <span class="customer-value">${data.documentType || L("saleReceipt")}</span>
+            <span class="customer-label">${L("numbering")}</span>
+            <span class="customer-value">${data.documentNumber || data.receiptNumber}</span>
+            <span class="customer-label">${L("caeLabel")}</span>
+            <span class="customer-value">${data.cae ? L("yes") : L("no")}</span>
+            <span class="customer-label">${L("caeExpiry")}</span>
+            <span class="customer-value">${data.caeVto || L("no")}</span>
+            <span class="customer-label">${L("fiscalQr")}</span>
+            <span class="customer-value">${data.fiscalQrAvailable ? L("yes") : L("no")}</span>
+            <span class="customer-label">${L("fiscalValidity")}</span>
+            <span class="customer-value">${data.fiscalValidityLabel}</span>
+            <span class="customer-label">${L("usage")}</span>
+            <span class="customer-value">${data.fiscalUsageLabel}</span>
+            <span class="customer-label">${L("edition")}</span>
+            <span class="customer-value">${data.fiscalEditLabel}</span>
           </div>
         
         ${
           data.customerName
             ? `<div class="customer-info">
-            <div><span class="customer-label">Cliente:</span> ${
-              data.customerName
-            }</div>
+            <span class="customer-label">${L("client")}</span>
+            <span class="customer-value">${data.customerName}</span>
             ${
               data.customerCuit
-                ? `<div><span class="customer-label">CUIT:</span> ${data.customerCuit}</div>`
+                ? `<span class="customer-label">${L("cuit")}</span><span class="customer-value">${data.customerCuit}</span>`
                 : ""
             }
         </div>`
@@ -517,15 +708,16 @@ function generateHTMLReceipt(data: any): string {
         
         ${
           data.isProvisional
-            ? `<div class="provisional-notice">PROVISIONAL RECEIPT - NO FISCAL VALUE</div>`
+            ? `<div class="provisional-notice">${L("provisional")}</div>`
             : ""
         }
 
         ${
           data.cae
             ? `<div class="customer-info">
-                <div><span class="customer-label">CAE:</span> ${data.cae}</div>
-                ${data.caeVto ? `<div><span class="customer-label">Vto CAE:</span> ${data.caeVto}</div>` : ""}
+                <span class="customer-label">CAE:</span>
+                <span class="customer-value" style="font-family: 'Courier New', monospace; font-weight: bold;">${data.cae}</span>
+                ${data.caeVto ? `<span class="customer-label">${L("vtoCae")}</span><span class="customer-value">${data.caeVto}</span>` : ""}
               </div>`
             : ""
         }
@@ -535,17 +727,16 @@ function generateHTMLReceipt(data: any): string {
               .map(
                 (item: any) => `
                 <div class="item-row">
-                    <div class="item-desc">
-                        ${item.description}
-                        ${item.quantity > 1 ? ` x${item.quantity}` : ""}
-                        ${
-                          item.discount > 0
-                            ? `<div style="font-size: 10px; color: #888;">Desc: -${formatCurrency(item.discount)}</div>`
-                            : ""
-                        }
+                    <div class="item-name">${item.description}</div>
+                    <div class="item-details">
+                        <span>${item.quantity} x ${formatCurrency(item.unitPrice)}</span>
+                        <span class="item-total">${formatCurrency(item.total)}</span>
                     </div>
-                    <div class="item-qty">${item.quantity}</div>
-                    <div class="item-price">${formatCurrency(item.total)}</div>
+                    ${
+                      item.discount > 0
+                        ? `<div class="item-discount">${L("desc")} -${formatCurrency(item.discount)}</div>`
+                        : ""
+                    }
                 </div>
             `,
               )
@@ -554,44 +745,56 @@ function generateHTMLReceipt(data: any): string {
         
         <div class="totals">
             <div class="total-row">
-                <span>Subtotal:</span>
+                <span>${L("subtotal")}</span>
                 <span>${formatCurrency(data.subtotal)}</span>
             </div>
             <div class="total-row">
-              <span>Descuento:</span>
+              <span>${L("discount")}</span>
               <span>-${formatCurrency(data.discount)}</span>
             </div>
             ${
               data.tax > 0
                 ? `<div class="total-row">
-                <span>Impuesto (21%):</span>
+                <span>${L("tax21")}</span>
                 <span>${formatCurrency(data.tax)}</span>
             </div>`
                 : ""
             }
             <div class="total-row final">
-                <span>TOTAL:</span>
+                <span>${L("total")}</span>
                 <span>${formatCurrency(data.total)}</span>
             </div>
         </div>
         
         <div class="payment-method">
-            Pago: ${
+            ${L("payment")} ${
               data.paymentMethod === "mercadopago"
-                ? "Mercado Pago"
+                ? L("mercadopago")
                 : data.paymentMethod === "cash"
-                  ? "Efectivo"
+                  ? L("cash")
                   : data.paymentMethod === "card"
-                    ? "Tarjeta"
+                    ? L("card")
                     : data.paymentMethod === "transfer"
-                      ? "Transferencia"
-                      : data.paymentMethod
+                      ? L("transfer")
+                      : data.paymentMethod === "check"
+                        ? L("check")
+                        : data.paymentMethod === "bankTransfer"
+                          ? L("bankTransfer")
+                          : data.paymentMethod === "qr"
+                            ? L("qr")
+                            : data.paymentMethod === "online"
+                              ? L("online")
+                              : data.paymentMethod === "multiple"
+                                ? L("multiple")
+                                : data.paymentMethod === "account"
+                                  ? L("account")
+                                  : data.paymentMethod
             }
         </div>
         
         ${
           data.paymentStatus === "pending"
-            ? `<div class="status-pending">PAGO PENDIENTE</div>`
+            ? `<div class="status-pending">${L("paymentPending")}</div>`
             : ""
         }
         
@@ -604,9 +807,9 @@ function generateHTMLReceipt(data: any): string {
         }
         
         <div class="footer">
-            <div style="white-space: pre-wrap;">${data.ticketMessage || "¡Gracias por su compra!"}</div>
+            <div style="white-space: pre-wrap;">${data.ticketMessage || (RECEIPT_LABELS[lang]?.saleReceipt ? DEFAULT_TICKET_MESSAGES[lang] : DEFAULT_TICKET_MESSAGES.en) || ""}</div>
             <div style="margin-top: 5px;">${new Date().toLocaleString(
-              "es-AR",
+              lang === "es" ? "es-AR" : lang === "pt" ? "pt-BR" : "en-US",
             )}</div>
         </div>
     </div>

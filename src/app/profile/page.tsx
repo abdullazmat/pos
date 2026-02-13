@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 import Loading from "@/components/common/Loading";
 import { useLanguage } from "@/lib/context/LanguageContext";
+import { toast } from "react-toastify";
 
 interface UserProfile {
   fullName: string;
@@ -69,6 +70,9 @@ export default function ProfilePage() {
       }
     } catch (err) {
       console.error("Error loading profile", err);
+      toast.error(t("errorLoadingProfile", "common") as string, {
+        toastId: "profile-load-error",
+      });
     } finally {
       setLoading(false);
     }

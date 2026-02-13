@@ -86,6 +86,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
       label: t("nav.cashRegister", "pos"),
       icon: DollarSign,
     },
+    { href: "/sales", label: t("nav.sales", "pos"), icon: Receipt },
   ];
 
   const supervisorNavItems = [
@@ -95,6 +96,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
       label: t("nav.cashRegister", "pos"),
       icon: DollarSign,
     },
+    { href: "/sales", label: t("nav.sales", "pos"), icon: Receipt },
     { href: "/products", label: t("nav.products", "pos"), icon: Package },
     { href: "/categories", label: t("nav.categories", "pos"), icon: Tag },
     { href: "/stock", label: t("nav.stock", "pos"), icon: Package },

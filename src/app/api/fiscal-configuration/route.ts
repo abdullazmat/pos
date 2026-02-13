@@ -26,9 +26,9 @@ export async function GET(req: NextRequest) {
     const config = await FiscalConfiguration.findOne({ business: businessId });
 
     return generateSuccessResponse({
-      country: config?.country || "argentina",
+      country: config?.country || "Argentina",
       taxRate: config?.taxRate || 21,
-      fiscalRegime: config?.fiscalRegime || "general",
+      fiscalRegime: config?.fiscalRegime || "RESPONSABLE_INSCRIPTO",
       fiscalId: config?.fiscalId || "",
     });
   } catch (error: any) {
@@ -59,6 +59,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Normalize fiscalRegime to valid enum values
+    const regimeMap: Record<string, string> = {
+      general: "RESPONSABLE_INSCRIPTO",
+      simplificado: "EXENTO",
+      monotributo: "MONOTRIBUTO",
+      RESPONSABLE_INSCRIPTO: "RESPONSABLE_INSCRIPTO",
+      MONOTRIBUTO: "MONOTRIBUTO",
+      EXENTO: "EXENTO",
+      NO_CATEGORIZADO: "NO_CATEGORIZADO",
+    };
+    const normalizedRegime = regimeMap[fiscalRegime] || "RESPONSABLE_INSCRIPTO";
+
     await dbConnect();
 
     // Update or create configuration
@@ -68,11 +80,11 @@ export async function POST(req: NextRequest) {
         business: businessId,
         country,
         taxRate: parseFloat(taxRate),
-        fiscalRegime,
+        fiscalRegime: normalizedRegime,
         fiscalId,
         updatedAt: new Date(),
       },
-      { upsert: true, new: true },
+      { upsert: true, new: true, runValidators: true },
     );
 
     return generateSuccessResponse({
