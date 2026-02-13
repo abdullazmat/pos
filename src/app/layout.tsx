@@ -13,6 +13,10 @@ import { ThemeProvider as CustomThemeProvider } from "@/lib/context/ThemeContext
 
 const inter = Inter({ subsets: ["latin"] });
 
+// Enable Vercel-only integrations (analytics / speed insights) only when
+// running on Vercel or when explicitly enabled via NEXT_PUBLIC_ENABLE_VERCEL.
+const enableVercelIntegration = !!process.env.VERCEL || process.env.NEXT_PUBLIC_ENABLE_VERCEL === "1";
+
 export const metadata: Metadata = {
   title: "VentaPlus",
   description: "VentaPlus SaaS POS",
@@ -45,8 +49,8 @@ export default function RootLayout({
             >
               <ToastProvider />
               {children}
-              <Analytics />
-              <SpeedInsights />
+              {enableVercelIntegration && <Analytics />}
+              {enableVercelIntegration && <SpeedInsights />}
             </ThemeProvider>
           </LanguageProvider>
         </CustomThemeProvider>
