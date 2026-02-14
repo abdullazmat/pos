@@ -441,7 +441,8 @@ const orderStatusColor = (status: string) => {
 export default function PaymentOrdersPage() {
   const router = useRouter();
   const { currentLanguage } = useGlobalLanguage();
-  const copy = (COPY[currentLanguage as keyof typeof COPY] || COPY.es) as CopyType;
+  const copy = (COPY[currentLanguage as keyof typeof COPY] ||
+    COPY.es) as CopyType;
 
   /* ── Auth ── */
   const [user, setUser] = useState<any>(null);
@@ -762,7 +763,7 @@ export default function PaymentOrdersPage() {
 
   if (loading) {
     return (
-      <div className="vp-page flex items-center justify-center">
+      <div className="flex items-center justify-center vp-page">
         <div className="vp-card px-6 py-4 text-[hsl(var(--vp-muted))] vp-fade-in">
           Loading...
         </div>
@@ -775,7 +776,7 @@ export default function PaymentOrdersPage() {
     if (!detailOrder) return null;
     const o = detailOrder;
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
         <div className="vp-card w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 relative">
           <button
             onClick={() => {
@@ -830,20 +831,20 @@ export default function PaymentOrdersPage() {
                   <table className="w-full text-xs border-collapse">
                     <thead>
                       <tr className="bg-[hsl(var(--vp-bg-secondary))]">
-                        <th className="text-left p-2 border">
+                        <th className="p-2 text-left border">
                           {copy.cols.type}
                         </th>
-                        <th className="text-left p-2 border">
+                        <th className="p-2 text-left border">
                           {copy.cols.number}
                         </th>
-                        <th className="text-left p-2 border">
+                        <th className="p-2 text-left border">
                           {copy.cols.date}
                         </th>
-                        <th className="text-right p-2 border">Saldo Ant.</th>
-                        <th className="text-right p-2 border">
+                        <th className="p-2 text-right border">Saldo Ant.</th>
+                        <th className="p-2 text-right border">
                           {copy.appliedAmount}
                         </th>
-                        <th className="text-right p-2 border">Saldo Post.</th>
+                        <th className="p-2 text-right border">Saldo Post.</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -855,13 +856,13 @@ export default function PaymentOrdersPage() {
                           </td>
                           <td className="p-2 border">{d.documentNumber}</td>
                           <td className="p-2 border">{fmtDate(d.date)}</td>
-                          <td className="p-2 border text-right">
+                          <td className="p-2 text-right border">
                             {formatCurrency(d.balanceBefore)}
                           </td>
-                          <td className="p-2 border text-right font-semibold">
+                          <td className="p-2 font-semibold text-right border">
                             {formatCurrency(d.amount)}
                           </td>
-                          <td className="p-2 border text-right">
+                          <td className="p-2 text-right border">
                             {formatCurrency(d.balanceAfter)}
                           </td>
                         </tr>
@@ -881,13 +882,13 @@ export default function PaymentOrdersPage() {
                     <table className="w-full text-xs border-collapse">
                       <thead>
                         <tr className="bg-[hsl(var(--vp-bg-secondary))]">
-                          <th className="text-left p-2 border">
+                          <th className="p-2 text-left border">
                             {copy.cols.number}
                           </th>
-                          <th className="text-left p-2 border">
+                          <th className="p-2 text-left border">
                             {copy.cols.date}
                           </th>
-                          <th className="text-right p-2 border">
+                          <th className="p-2 text-right border">
                             {copy.appliedAmount}
                           </th>
                         </tr>
@@ -897,7 +898,7 @@ export default function PaymentOrdersPage() {
                           <tr key={i}>
                             <td className="p-2 border">{d.documentNumber}</td>
                             <td className="p-2 border">{fmtDate(d.date)}</td>
-                            <td className="p-2 border text-right font-semibold text-green-700">
+                            <td className="p-2 font-semibold text-right text-green-700 border">
                               -{formatCurrency(d.amount)}
                             </td>
                           </tr>
@@ -917,11 +918,11 @@ export default function PaymentOrdersPage() {
                   <table className="w-full text-xs border-collapse">
                     <thead>
                       <tr className="bg-[hsl(var(--vp-bg-secondary))]">
-                        <th className="text-left p-2 border">Medio</th>
-                        <th className="text-left p-2 border">
+                        <th className="p-2 text-left border">Medio</th>
+                        <th className="p-2 text-left border">
                           {copy.reference}
                         </th>
-                        <th className="text-right p-2 border">{copy.amount}</th>
+                        <th className="p-2 text-right border">{copy.amount}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -931,7 +932,7 @@ export default function PaymentOrdersPage() {
                             {(copy.paymentMethods as any)[p.method] || p.method}
                           </td>
                           <td className="p-2 border">{p.reference || "-"}</td>
-                          <td className="p-2 border text-right font-semibold">
+                          <td className="p-2 font-semibold text-right border">
                             {formatCurrency(p.amount)}
                           </td>
                         </tr>
@@ -943,7 +944,7 @@ export default function PaymentOrdersPage() {
 
               {/* Totals */}
               <div className="flex justify-end mb-4">
-                <div className="w-64 text-sm space-y-1">
+                <div className="w-64 space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span>{copy.totalDocuments}:</span>
                     <span>{formatCurrency(o.documentsTotal)}</span>
@@ -954,7 +955,7 @@ export default function PaymentOrdersPage() {
                       <span>-{formatCurrency(o.creditNotesTotal)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between font-bold border-t pt-1">
+                  <div className="flex justify-between pt-1 font-bold border-t">
                     <span>{copy.netPayable}:</span>
                     <span>{formatCurrency(o.netPayable)}</span>
                   </div>
@@ -977,7 +978,7 @@ export default function PaymentOrdersPage() {
           ) : (
             /* Channel 2: Simplified */
             <>
-              <div className="border-l-4 border-amber-400 pl-4 mb-4">
+              <div className="pl-4 mb-4 border-l-4 border-amber-400">
                 <div className="space-y-2 text-sm">
                   {o.documents.map((d, i) => (
                     <div key={i} className="flex justify-between">
@@ -999,7 +1000,7 @@ export default function PaymentOrdersPage() {
                     </div>
                   ))}
                 </div>
-                <div className="border-t mt-3 pt-2">
+                <div className="pt-2 mt-3 border-t">
                   {o.payments.map((p, i) => (
                     <div key={i} className="flex justify-between text-sm">
                       <span>
@@ -1009,7 +1010,7 @@ export default function PaymentOrdersPage() {
                     </div>
                   ))}
                 </div>
-                <div className="border-t mt-3 pt-2 text-lg font-bold flex justify-between">
+                <div className="flex justify-between pt-2 mt-3 text-lg font-bold border-t">
                   <span>Total:</span>
                   <span>{formatCurrency(o.netPayable)}</span>
                 </div>
@@ -1018,16 +1019,16 @@ export default function PaymentOrdersPage() {
           )}
 
           {/* Print + Close */}
-          <div className="flex gap-2 mt-4 justify-end">
+          <div className="flex justify-end gap-2 mt-4">
             <button
               onClick={() => handlePrint(o._id, "a4")}
-              className="vp-button vp-button-ghost text-sm"
+              className="text-sm vp-button vp-button-ghost"
             >
               🖨 {copy.printA4}
             </button>
             <button
               onClick={() => handlePrint(o._id, "ticket")}
-              className="vp-button vp-button-ghost text-sm"
+              className="text-sm vp-button vp-button-ghost"
             >
               🎫 {copy.printTicket}
             </button>
@@ -1036,7 +1037,7 @@ export default function PaymentOrdersPage() {
                 setDetailOrder(null);
                 setDetailChannel(1);
               }}
-              className="vp-button vp-button-primary text-sm"
+              className="text-sm vp-button vp-button-primary"
             >
               {copy.close}
             </button>
@@ -1050,9 +1051,9 @@ export default function PaymentOrdersPage() {
   const renderCreateSection = () => {
     if (!showCreate || !supplierId) return null;
     return (
-      <div className="space-y-4 mb-6">
+      <div className="mb-6 space-y-4">
         {/* Documents to apply */}
-        <div className="vp-card p-4">
+        <div className="p-4 vp-card">
           <h3 className="text-sm font-semibold text-[hsl(var(--vp-text))] mb-3">
             {copy.documentsTitle}
           </h3>
@@ -1081,7 +1082,7 @@ export default function PaymentOrdersPage() {
                     step="0.01"
                     min="0"
                     max={doc.balance}
-                    className="w-28 text-sm text-right border rounded px-2 py-1"
+                    className="px-2 py-1 text-sm text-right border rounded w-28"
                     placeholder={copy.applyAmount}
                     value={applyAmounts[doc._id] || ""}
                     onChange={(e) =>
@@ -1099,7 +1100,7 @@ export default function PaymentOrdersPage() {
 
         {/* Credit Notes */}
         {creditNotes.length > 0 && (
-          <div className="vp-card p-4">
+          <div className="p-4 vp-card">
             <h3 className="text-sm font-semibold text-[hsl(var(--vp-text))] mb-3">
               {copy.creditNotesTitle}
             </h3>
@@ -1113,7 +1114,7 @@ export default function PaymentOrdersPage() {
                     <span className="font-mono text-xs">
                       {doc.documentNumber}
                     </span>
-                    <span className="text-green-600 text-xs ml-2">
+                    <span className="ml-2 text-xs text-green-600">
                       {copy.balance}: {formatCurrency(doc.balance)}
                     </span>
                   </div>
@@ -1122,7 +1123,7 @@ export default function PaymentOrdersPage() {
                     step="0.01"
                     min="0"
                     max={doc.balance}
-                    className="w-28 text-sm text-right border rounded px-2 py-1"
+                    className="px-2 py-1 text-sm text-right border rounded w-28"
                     placeholder={copy.applyAmount}
                     value={applyCreditAmounts[doc._id] || ""}
                     onChange={(e) =>
@@ -1139,7 +1140,7 @@ export default function PaymentOrdersPage() {
         )}
 
         {/* Payment Methods */}
-        <div className="vp-card p-4">
+        <div className="p-4 vp-card">
           <h3 className="text-sm font-semibold text-[hsl(var(--vp-text))] mb-3">
             {copy.paymentsTitle}
           </h3>
@@ -1187,7 +1188,7 @@ export default function PaymentOrdersPage() {
             ))}
           </div>
           <button
-            className="mt-2 text-indigo-600 hover:text-indigo-700 text-xs"
+            className="mt-2 text-xs text-indigo-600 hover:text-indigo-700"
             onClick={addPayment}
           >
             + {copy.addPayment}
@@ -1195,9 +1196,9 @@ export default function PaymentOrdersPage() {
         </div>
 
         {/* Notes */}
-        <div className="vp-card p-4">
+        <div className="p-4 vp-card">
           <input
-            className="w-full text-sm border rounded px-3 py-2"
+            className="w-full px-3 py-2 text-sm border rounded"
             placeholder={copy.notesPlaceholder}
             value={orderNotes}
             onChange={(e) => setOrderNotes(e.target.value)}
@@ -1205,8 +1206,8 @@ export default function PaymentOrdersPage() {
         </div>
 
         {/* Totals + Submit */}
-        <div className="vp-card p-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mb-3">
+        <div className="p-4 vp-card">
+          <div className="grid grid-cols-2 gap-3 mb-3 text-sm md:grid-cols-4">
             <div>
               <span className="text-[hsl(var(--vp-muted))] text-xs">
                 {copy.totalDocuments}
@@ -1241,21 +1242,21 @@ export default function PaymentOrdersPage() {
               <span className="text-[hsl(var(--vp-muted))] text-xs">
                 {copy.netPayable}
               </span>
-              <p className="font-bold text-lg">
+              <p className="text-lg font-bold">
                 {formatCurrency(totals.netPayable)}
               </p>
             </div>
           </div>
           <div className="flex gap-2">
             <button
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+              className="flex-1 px-4 py-2 text-sm font-semibold text-white rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50"
               onClick={handleCreatePaymentOrder}
               disabled={creating}
             >
               {creating ? "..." : copy.createOrder}
             </button>
             <button
-              className="vp-button vp-button-ghost text-sm"
+              className="text-sm vp-button vp-button-ghost"
               onClick={resetForm}
             >
               {copy.cancel}
@@ -1281,7 +1282,7 @@ export default function PaymentOrdersPage() {
 
       <main className="vp-page-inner">
         {/* Title + Channel pills */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="vp-section-title">{copy.title}</h1>
             <p className="vp-section-subtitle">{copy.subtitle}</p>
@@ -1316,8 +1317,8 @@ export default function PaymentOrdersPage() {
         </div>
 
         {/* Filters row */}
-        <div className="vp-card p-4 mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="p-4 mb-4 vp-card">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-5">
             <div>
               <SupplierSearch
                 suppliers={suppliers}
@@ -1387,7 +1388,7 @@ export default function PaymentOrdersPage() {
         {renderCreateSection()}
 
         {/* Payment Orders Table */}
-        <div className="vp-card overflow-hidden">
+        <div className="overflow-hidden vp-card">
           <div className="p-4 border-b border-[hsl(var(--vp-border))]">
             <h2 className="text-base font-semibold text-[hsl(var(--vp-text))]">
               {copy.orderList}
@@ -1400,12 +1401,12 @@ export default function PaymentOrdersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-[hsl(var(--vp-bg-secondary))] text-[hsl(var(--vp-muted))] text-xs">
-                  <th className="text-left p-3">{copy.cols.date}</th>
-                  <th className="text-left p-3">{copy.cols.orderNumber}</th>
-                  <th className="text-left p-3">{copy.cols.supplier}</th>
-                  <th className="text-right p-3">{copy.cols.netPayable}</th>
-                  <th className="text-center p-3">{copy.cols.orderStatus}</th>
-                  <th className="text-center p-3">{copy.cols.actions}</th>
+                  <th className="p-3 text-left">{copy.cols.date}</th>
+                  <th className="p-3 text-left">{copy.cols.orderNumber}</th>
+                  <th className="p-3 text-left">{copy.cols.supplier}</th>
+                  <th className="p-3 text-right">{copy.cols.netPayable}</th>
+                  <th className="p-3 text-center">{copy.cols.orderStatus}</th>
+                  <th className="p-3 text-center">{copy.cols.actions}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1433,7 +1434,7 @@ export default function PaymentOrdersPage() {
                       <td className="p-3 text-xs">
                         {supplierMap[o.supplierId] || "-"}
                       </td>
-                      <td className="p-3 text-right font-semibold">
+                      <td className="p-3 font-semibold text-right">
                         {formatCurrency(o.netPayable)}
                       </td>
                       <td className="p-3 text-center">
@@ -1444,13 +1445,13 @@ export default function PaymentOrdersPage() {
                         </span>
                       </td>
                       <td className="p-3 text-center">
-                        <div className="flex items-center gap-1 justify-center">
+                        <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => {
                               setDetailOrder(o);
                               setDetailChannel(activeChannel as 1 | 2);
                             }}
-                            className="px-2 py-1 text-xs text-indigo-600 hover:bg-indigo-50 rounded"
+                            className="px-2 py-1 text-xs text-indigo-600 rounded hover:bg-indigo-50"
                           >
                             {copy.detail}
                           </button>
@@ -1458,13 +1459,13 @@ export default function PaymentOrdersPage() {
                             <>
                               <button
                                 onClick={() => handleConfirm(o._id)}
-                                className="px-2 py-1 text-xs text-white bg-indigo-600 hover:bg-indigo-700 rounded"
+                                className="px-2 py-1 text-xs text-white bg-indigo-600 rounded hover:bg-indigo-700"
                               >
                                 {copy.confirm}
                               </button>
                               <button
                                 onClick={() => handleCancel(o._id)}
-                                className="px-2 py-1 text-xs text-white bg-rose-600 hover:bg-rose-700 rounded"
+                                className="px-2 py-1 text-xs text-white rounded bg-rose-600 hover:bg-rose-700"
                               >
                                 {copy.cancel}
                               </button>
@@ -1473,7 +1474,7 @@ export default function PaymentOrdersPage() {
                           {o.status === "CONFIRMED" && (
                             <button
                               onClick={() => handleCancel(o._id)}
-                              className="px-2 py-1 text-xs text-rose-600 hover:bg-rose-50 rounded"
+                              className="px-2 py-1 text-xs rounded text-rose-600 hover:bg-rose-50"
                             >
                               {copy.cancel}
                             </button>
