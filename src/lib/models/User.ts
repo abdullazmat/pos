@@ -10,6 +10,7 @@ export interface IUser extends Document {
   role: "admin" | "supervisor" | "cashier";
   isActive: boolean;
   discountLimit?: number | null;
+  internalPin?: string;
   businessId: Schema.Types.ObjectId;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
@@ -71,6 +72,10 @@ const userSchema = new Schema<IUser>(
       type: Schema.Types.ObjectId,
       ref: "Business",
       required: true,
+    },
+    internalPin: {
+      type: String,
+      select: false,
     },
     resetPasswordToken: {
       type: String,

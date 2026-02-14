@@ -29,6 +29,7 @@ export interface IPaymentOrder extends Document {
   orderNumber: number;
   date: Date;
   supplierId: Schema.Types.ObjectId;
+  channel: 1 | 2;
   status: PaymentOrderStatus;
   documents: IPaymentOrderDocument[];
   creditNotes: IPaymentOrderDocument[];
@@ -44,6 +45,10 @@ export interface IPaymentOrder extends Document {
   approvedByEmail?: string;
   confirmedAt?: Date;
   confirmationIp?: string;
+  cancelledAt?: Date;
+  cancelledBy?: Schema.Types.ObjectId;
+  cancelledByEmail?: string;
+  cancelReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -67,6 +72,12 @@ const paymentOrderSchema = new Schema<IPaymentOrder>(
     supplierId: {
       type: Schema.Types.ObjectId,
       ref: "Supplier",
+      required: true,
+    },
+    channel: {
+      type: Number,
+      enum: [1, 2],
+      default: 1,
       required: true,
     },
     status: {
@@ -207,6 +218,13 @@ const paymentOrderSchema = new Schema<IPaymentOrder>(
     approvedByEmail: String,
     confirmedAt: Date,
     confirmationIp: String,
+    cancelledAt: Date,
+    cancelledBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    cancelledByEmail: String,
+    cancelReason: String,
   },
   {
     timestamps: true,
@@ -215,6 +233,7 @@ const paymentOrderSchema = new Schema<IPaymentOrder>(
 
 paymentOrderSchema.index({ businessId: 1, orderNumber: -1 });
 paymentOrderSchema.index({ businessId: 1, supplierId: 1, date: -1 });
+paymentOrderSchema.index({ businessId: 1, channel: 1, date: -1 });
 
 export default models.PaymentOrder ||
   model<IPaymentOrder>("PaymentOrder", paymentOrderSchema);

@@ -107,6 +107,11 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
       icon: FileText,
     },
     {
+      href: "/payment-orders",
+      label: t("nav.paymentOrders", "pos"),
+      icon: Receipt,
+    },
+    {
       href: "/keyboard-config",
       label: t("nav.keyboardConfig", "pos"),
       icon: Keyboard,

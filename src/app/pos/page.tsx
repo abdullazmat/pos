@@ -820,206 +820,226 @@ export default function POSPage() {
             {formatDate(new Date())} · {formatTime(new Date())}
           </div>
         </div>
-        <div className="vp-card p-6 mb-8">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <div>
-              <h2 className="text-lg font-semibold text-[hsl(var(--vp-text))]">
+        <details className="vp-card mb-8 group">
+          <summary className="p-6 cursor-pointer list-none flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <svg
+                className="w-5 h-5 text-[hsl(var(--vp-muted))] transition-transform group-open:rotate-90"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+              <div>
+                <h2 className="text-lg font-semibold text-[hsl(var(--vp-text))]">
+                  {getPosLabel(
+                    "ui.fiscalComparison.title",
+                    "Provisional Receipt vs Fiscal Invoice",
+                  )}
+                </h2>
+                <p className="text-sm text-[hsl(var(--vp-muted))]">
+                  {getPosLabel(
+                    "ui.fiscalComparison.subtitle",
+                    "Receipt type is automatic. Cashiers cannot choose it manually.",
+                  )}
+                </p>
+              </div>
+            </div>
+          </summary>
+          <div className="px-6 pb-6">
+            <div className="overflow-x-auto">
+              <table className="vp-table">
+                <thead>
+                  <tr>
+                    <th>
+                      {getPosLabel("ui.fiscalComparison.feature", "Feature")}
+                    </th>
+                    <th>
+                      {getPosLabel(
+                        "ui.fiscalComparison.provisionalReceipt",
+                        "Provisional Receipt (Budget)",
+                      )}
+                    </th>
+                    <th>
+                      {getPosLabel(
+                        "ui.fiscalComparison.fiscalInvoice",
+                        "Fiscal Invoice (A / B)",
+                      )}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.documentType",
+                        "Document Type",
+                      )}
+                    </td>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.documentTypeBudget",
+                        "BUDGET",
+                      )}
+                    </td>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.documentTypeFiscal",
+                        "INVOICE A / INVOICE B",
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.numbering",
+                        "Numbering",
+                      )}
+                    </td>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.numberingInternal",
+                        "Internal (e.g., 01-003)",
+                      )}
+                    </td>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.numberingFiscal",
+                        "ARCA / fiscal (e.g., 0001-00001234)",
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.caeExpiration",
+                        "CAE & Expiration",
+                      )}
+                    </td>
+                    <td>{getPosLabel("ui.fiscalComparison.no", "No")}</td>
+                    <td>{getPosLabel("ui.fiscalComparison.yes", "Yes")}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      {getPosLabel("ui.fiscalComparison.fiscalQR", "Fiscal QR")}
+                    </td>
+                    <td>{getPosLabel("ui.fiscalComparison.no", "No")}</td>
+                    <td>{getPosLabel("ui.fiscalComparison.yes", "Yes")}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.fiscalValidity",
+                        "Fiscal Validity",
+                      )}
+                    </td>
+                    <td>
+                      {getPosLabel("ui.fiscalComparison.notValid", "Not valid")}
+                    </td>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.validBeforeArca",
+                        "Valid before ARCA",
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>{getPosLabel("ui.fiscalComparison.usage", "Usage")}</td>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.contingencyBackup",
+                        "Contingency / Backup",
+                      )}
+                    </td>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.finalLegalDocument",
+                        "Final legal document",
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.whenPrinted",
+                        "When it is printed",
+                      )}
+                    </td>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.arcaNoResponse",
+                        "ARCA does not respond",
+                      )}
+                    </td>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.arcaRespondsOK",
+                        "ARCA responds OK",
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      {getPosLabel("ui.fiscalComparison.editing", "Editing")}
+                    </td>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.notEditable",
+                        "Not editable",
+                      )}
+                    </td>
+                    <td>
+                      {getPosLabel(
+                        "ui.fiscalComparison.editableCreditNotes",
+                        "Editable only for credit notes",
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-5">
+              <h3 className="text-sm font-semibold text-[hsl(var(--vp-text))] mb-2">
                 {getPosLabel(
-                  "ui.fiscalComparison.title",
-                  "Provisional Receipt vs Fiscal Invoice",
+                  "ui.fiscalComparison.quickSummaryTitle",
+                  "Quick Visual Summary",
                 )}
-              </h2>
-              <p className="text-sm text-[hsl(var(--vp-muted))]">
-                {getPosLabel(
-                  "ui.fiscalComparison.subtitle",
-                  "Receipt type is automatic. Cashiers cannot choose it manually.",
-                )}
-              </p>
+              </h3>
+              <ul className="text-sm text-[hsl(var(--vp-muted))] space-y-1">
+                <li>
+                  {getPosLabel(
+                    "ui.fiscalComparison.summaryProvisional",
+                    "Provisional = temporary backup, no fiscal validity",
+                  )}
+                </li>
+                <li>
+                  {getPosLabel(
+                    "ui.fiscalComparison.summaryFiscal",
+                    "Fiscal = final legal document",
+                  )}
+                </li>
+                <li>
+                  {getPosLabel(
+                    "ui.fiscalComparison.summaryNeverPrints",
+                    "Fiscal invoice never prints without CAE",
+                  )}
+                </li>
+                <li>
+                  {getPosLabel(
+                    "ui.fiscalComparison.summaryCorrections",
+                    "Corrections via Credit Note only",
+                  )}
+                </li>
+              </ul>
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="vp-table">
-              <thead>
-                <tr>
-                  <th>
-                    {getPosLabel("ui.fiscalComparison.feature", "Feature")}
-                  </th>
-                  <th>
-                    {getPosLabel(
-                      "ui.fiscalComparison.provisionalReceipt",
-                      "Provisional Receipt (Budget)",
-                    )}
-                  </th>
-                  <th>
-                    {getPosLabel(
-                      "ui.fiscalComparison.fiscalInvoice",
-                      "Fiscal Invoice (A / B)",
-                    )}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.documentType",
-                      "Document Type",
-                    )}
-                  </td>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.documentTypeBudget",
-                      "BUDGET",
-                    )}
-                  </td>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.documentTypeFiscal",
-                      "INVOICE A / INVOICE B",
-                    )}
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    {getPosLabel("ui.fiscalComparison.numbering", "Numbering")}
-                  </td>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.numberingInternal",
-                      "Internal (e.g., 01-003)",
-                    )}
-                  </td>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.numberingFiscal",
-                      "ARCA / fiscal (e.g., 0001-00001234)",
-                    )}
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.caeExpiration",
-                      "CAE & Expiration",
-                    )}
-                  </td>
-                  <td>{getPosLabel("ui.fiscalComparison.no", "No")}</td>
-                  <td>{getPosLabel("ui.fiscalComparison.yes", "Yes")}</td>
-                </tr>
-                <tr>
-                  <td>
-                    {getPosLabel("ui.fiscalComparison.fiscalQR", "Fiscal QR")}
-                  </td>
-                  <td>{getPosLabel("ui.fiscalComparison.no", "No")}</td>
-                  <td>{getPosLabel("ui.fiscalComparison.yes", "Yes")}</td>
-                </tr>
-                <tr>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.fiscalValidity",
-                      "Fiscal Validity",
-                    )}
-                  </td>
-                  <td>
-                    {getPosLabel("ui.fiscalComparison.notValid", "Not valid")}
-                  </td>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.validBeforeArca",
-                      "Valid before ARCA",
-                    )}
-                  </td>
-                </tr>
-                <tr>
-                  <td>{getPosLabel("ui.fiscalComparison.usage", "Usage")}</td>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.contingencyBackup",
-                      "Contingency / Backup",
-                    )}
-                  </td>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.finalLegalDocument",
-                      "Final legal document",
-                    )}
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.whenPrinted",
-                      "When it is printed",
-                    )}
-                  </td>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.arcaNoResponse",
-                      "ARCA does not respond",
-                    )}
-                  </td>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.arcaRespondsOK",
-                      "ARCA responds OK",
-                    )}
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    {getPosLabel("ui.fiscalComparison.editing", "Editing")}
-                  </td>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.notEditable",
-                      "Not editable",
-                    )}
-                  </td>
-                  <td>
-                    {getPosLabel(
-                      "ui.fiscalComparison.editableCreditNotes",
-                      "Editable only for credit notes",
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-5">
-            <h3 className="text-sm font-semibold text-[hsl(var(--vp-text))] mb-2">
-              {getPosLabel(
-                "ui.fiscalComparison.quickSummaryTitle",
-                "Quick Visual Summary",
-              )}
-            </h3>
-            <ul className="text-sm text-[hsl(var(--vp-muted))] space-y-1">
-              <li>
-                {getPosLabel(
-                  "ui.fiscalComparison.summaryProvisional",
-                  "Provisional = temporary backup, no fiscal validity",
-                )}
-              </li>
-              <li>
-                {getPosLabel(
-                  "ui.fiscalComparison.summaryFiscal",
-                  "Fiscal = final legal document",
-                )}
-              </li>
-              <li>
-                {getPosLabel(
-                  "ui.fiscalComparison.summaryNeverPrints",
-                  "Fiscal invoice never prints without CAE",
-                )}
-              </li>
-              <li>
-                {getPosLabel(
-                  "ui.fiscalComparison.summaryCorrections",
-                  "Corrections via Credit Note only",
-                )}
-              </li>
-            </ul>
-          </div>
-        </div>
+        </details>
         <h1 className="vp-section-title mb-10">{title}</h1>
         {registerOpen === false && (
           <div className="vp-card vp-card-hover p-12 flex flex-col items-center justify-center">

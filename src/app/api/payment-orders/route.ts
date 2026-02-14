@@ -31,12 +31,33 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const supplierId = searchParams.get("supplierId");
     const status = searchParams.get("status");
+    const channel = searchParams.get("channel");
+    const dateFrom = searchParams.get("dateFrom");
+    const dateTo = searchParams.get("dateTo");
 
     await dbConnect();
 
     const filter: any = { businessId: decoded.businessId };
     if (supplierId) filter.supplierId = supplierId;
     if (status) filter.status = status;
+
+    // Channel filtering — default to ch1 (includes legacy null)
+    if (channel === "2") {
+      filter.channel = 2;
+    } else {
+      filter.channel = { $in: [1, null, undefined] };
+    }
+
+    // Date range
+    if (dateFrom || dateTo) {
+      filter.date = {};
+      if (dateFrom) filter.date.$gte = new Date(dateFrom);
+      if (dateTo) {
+        const end = new Date(dateTo);
+        end.setHours(23, 59, 59, 999);
+        filter.date.$lte = end;
+      }
+    }
 
     const paymentOrders = await PaymentOrder.find(filter)
       .sort({ orderNumber: -1 })
@@ -65,6 +86,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       supplierId,
+      channel = 1,
       documents = [],
       creditNotes = [],
       payments = [],
@@ -76,6 +98,11 @@ export async function POST(req: NextRequest) {
         { error: "Supplier and documents are required" },
         { status: 400 },
       );
+    }
+
+    const channelNum = Number(channel);
+    if (channelNum !== 1 && channelNum !== 2) {
+      return NextResponse.json({ error: "Invalid channel" }, { status: 400 });
     }
 
     await dbConnect();
@@ -213,6 +240,7 @@ export async function POST(req: NextRequest) {
       businessId: decoded.businessId,
       orderNumber: nextOrderNumber,
       supplierId,
+      channel: channelNum,
       status: "PENDING",
       documents: documentsEntries,
       creditNotes: creditNoteEntries,

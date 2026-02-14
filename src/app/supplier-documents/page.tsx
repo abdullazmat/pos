@@ -1,10 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
+import {
+  Channel2Modal,
+  Channel2Bar,
+} from "@/components/supplier-documents/Channel2Modal";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { apiFetch } from "@/lib/utils/apiFetch";
 import { toast } from "react-toastify";
+import SupplierSearch from "@/components/shared/SupplierSearch";
+
+/* ─────────────────  Interfaces  ───────────────── */
 
 interface Supplier {
   _id: string;
@@ -19,10 +27,28 @@ interface Attachment {
   uploadedAt?: string;
 }
 
+type DocType =
+  | "INVOICE"
+  | "INVOICE_A"
+  | "INVOICE_B"
+  | "INVOICE_C"
+  | "DEBIT_NOTE"
+  | "CREDIT_NOTE"
+  | "FISCAL_DELIVERY_NOTE";
+
+type DocStatus =
+  | "PENDING"
+  | "DUE_SOON"
+  | "OVERDUE"
+  | "PARTIALLY_APPLIED"
+  | "APPLIED"
+  | "CANCELLED";
+
 interface SupplierDocument {
   _id: string;
   supplierId: string;
-  type: "INVOICE" | "DEBIT_NOTE" | "CREDIT_NOTE";
+  channel: 1 | 2;
+  type: DocType;
   pointOfSale?: string;
   documentNumber: string;
   date: string;
@@ -31,28 +57,26 @@ interface SupplierDocument {
   balance: number;
   appliedPaymentsTotal?: number;
   appliedCreditsTotal?: number;
-  status:
-    | "PENDING"
-    | "DUE_SOON"
-    | "OVERDUE"
-    | "PARTIALLY_APPLIED"
-    | "APPLIED"
-    | "CANCELLED";
+  status: DocStatus;
+  impactsStock?: boolean;
+  impactsCosts?: boolean;
   notes?: string;
   attachments?: Attachment[];
 }
 
+/* ─────────────────  i18n  ───────────────── */
+
 const COPY = {
   es: {
     title: "Documentos de Proveedor",
-    subtitle: "Carga y seguimiento de facturas, debitos y creditos",
+    subtitle: "Carga y seguimiento de comprobantes fiscales e internos",
     supplierLabel: "Proveedor",
     newDocument: "Nuevo documento",
     editDocument: "Editar documento",
     documentType: "Tipo de documento",
     pointOfSale: "Punto de venta",
-    documentNumber: "Numero",
-    issueDate: "Fecha de emision",
+    documentNumber: "Número de comprobante",
+    issueDate: "Fecha de emisión",
     dueDate: "Vencimiento",
     amount: "Importe",
     notes: "Notas",
@@ -60,7 +84,7 @@ const COPY = {
     save: "Guardar",
     edit: "Editar",
     cancel: "Cancelar",
-    applyCredit: "Aplicar nota de credito",
+    applyCredit: "Aplicar NC",
     selectTarget: "Documento destino",
     applyAmount: "Importe a aplicar",
     apply: "Aplicar",
@@ -71,34 +95,59 @@ const COPY = {
     dueSoon: "Por vencer",
     overdue: "Vencidos",
     noDocuments: "No hay documentos cargados",
+    channel1Label: "Canal 1 – Legal / Fiscal",
+    channel2Label: "Canal 2 – Interno / Gestión",
+    channel1Short: "Fiscal",
+    channel2Short: "Interno",
+    activateChannel2: "Activar Modo Interno",
+    impactsStock: "Impacta stock",
+    impactsCosts: "Impacta costos",
+    channelTag: "Canal",
+    exportAccountant: "Exportar para contador",
+    totalDocs: "Total documentos",
+    totalAmount: "Monto total",
+    pendingBalance: "Saldo pendiente",
     toasts: {
       loadError: "Error al cargar datos",
       created: "Documento creado",
       updated: "Documento actualizado",
       cancelled: "Documento cancelado",
       uploadError: "Error al subir archivo",
-      applyOk: "Nota de credito aplicada",
-      applyError: "Error al aplicar nota de credito",
+      applyOk: "Nota de crédito aplicada",
+      applyError: "Error al aplicar NC",
       supplierRequired: "Selecciona un proveedor",
       dueDateRequired: "El vencimiento es obligatorio",
-      amountRequired: "Ingresa un importe valido",
-      creditSelectionRequired: "Selecciona una nota de credito y destino",
+      amountRequired: "Ingresa un importe válido",
+      docNumberRequired: "El número de comprobante es obligatorio",
+      creditSelectionRequired: "Selecciona NC y destino",
     },
     types: {
-      invoice: "Factura",
-      debit: "Nota Debito",
-      credit: "Nota Credito",
+      INVOICE: "Factura",
+      INVOICE_A: "Factura A",
+      INVOICE_B: "Factura B",
+      INVOICE_C: "Factura C",
+      DEBIT_NOTE: "Nota de Débito",
+      CREDIT_NOTE: "Nota de Crédito",
+      FISCAL_DELIVERY_NOTE: "Remito Fiscal",
+    },
+    statusLabels: {
+      PENDING: "Pendiente",
+      DUE_SOON: "Por vencer",
+      OVERDUE: "Vencido",
+      PARTIALLY_APPLIED: "Parcial",
+      APPLIED: "Aplicado",
+      CANCELLED: "Cancelado",
     },
   },
   en: {
     title: "Supplier Documents",
-    subtitle: "Load and track invoices, debit notes, and credit notes",
+    subtitle: "Load and track fiscal and internal documents",
     supplierLabel: "Supplier",
     newDocument: "New document",
     editDocument: "Edit document",
     documentType: "Document type",
     pointOfSale: "Point of sale",
-    documentNumber: "Number",
+    documentNumber: "Document number",
     issueDate: "Issue date",
     dueDate: "Due date",
     amount: "Amount",
@@ -107,7 +156,7 @@ const COPY = {
     save: "Save",
     edit: "Edit",
     cancel: "Cancel",
-    applyCredit: "Apply credit note",
+    applyCredit: "Apply CN",
     selectTarget: "Target document",
     applyAmount: "Apply amount",
     apply: "Apply",
@@ -118,6 +167,18 @@ const COPY = {
     dueSoon: "Due soon",
     overdue: "Overdue",
     noDocuments: "No documents loaded",
+    channel1Label: "Channel 1 – Legal / Fiscal",
+    channel2Label: "Channel 2 – Internal / Management",
+    channel1Short: "Fiscal",
+    channel2Short: "Internal",
+    activateChannel2: "Activate Internal Mode",
+    impactsStock: "Impacts stock",
+    impactsCosts: "Impacts costs",
+    channelTag: "Channel",
+    exportAccountant: "Export for accountant",
+    totalDocs: "Total documents",
+    totalAmount: "Total amount",
+    pendingBalance: "Pending balance",
     toasts: {
       loadError: "Error loading data",
       created: "Document created",
@@ -129,24 +190,37 @@ const COPY = {
       supplierRequired: "Select a supplier",
       dueDateRequired: "Due date is required",
       amountRequired: "Enter a valid amount",
+      docNumberRequired: "Document number is required",
       creditSelectionRequired: "Select a credit note and target",
     },
     types: {
-      invoice: "Invoice",
-      debit: "Debit note",
-      credit: "Credit note",
+      INVOICE: "Invoice",
+      INVOICE_A: "Invoice A",
+      INVOICE_B: "Invoice B",
+      INVOICE_C: "Invoice C",
+      DEBIT_NOTE: "Debit Note",
+      CREDIT_NOTE: "Credit Note",
+      FISCAL_DELIVERY_NOTE: "Fiscal Delivery Note",
+    },
+    statusLabels: {
+      PENDING: "Pending",
+      DUE_SOON: "Due Soon",
+      OVERDUE: "Overdue",
+      PARTIALLY_APPLIED: "Partial",
+      APPLIED: "Applied",
+      CANCELLED: "Cancelled",
     },
   },
   pt: {
     title: "Documentos do Fornecedor",
-    subtitle: "Carregue e acompanhe faturas, debitos e creditos",
+    subtitle: "Carregue e acompanhe documentos fiscais e internos",
     supplierLabel: "Fornecedor",
     newDocument: "Novo documento",
     editDocument: "Editar documento",
     documentType: "Tipo de documento",
     pointOfSale: "Ponto de venda",
-    documentNumber: "Numero",
-    issueDate: "Data de emissao",
+    documentNumber: "Número do documento",
+    issueDate: "Data de emissão",
     dueDate: "Vencimento",
     amount: "Valor",
     notes: "Notas",
@@ -154,7 +228,7 @@ const COPY = {
     save: "Salvar",
     edit: "Editar",
     cancel: "Cancelar",
-    applyCredit: "Aplicar nota de credito",
+    applyCredit: "Aplicar NC",
     selectTarget: "Documento destino",
     applyAmount: "Valor a aplicar",
     apply: "Aplicar",
@@ -165,28 +239,67 @@ const COPY = {
     dueSoon: "A vencer",
     overdue: "Vencidos",
     noDocuments: "Nenhum documento carregado",
+    channel1Label: "Canal 1 – Legal / Fiscal",
+    channel2Label: "Canal 2 – Interno / Gestão",
+    channel1Short: "Fiscal",
+    channel2Short: "Interno",
+    activateChannel2: "Ativar Modo Interno",
+    impactsStock: "Impacta estoque",
+    impactsCosts: "Impacta custos",
+    channelTag: "Canal",
+    exportAccountant: "Exportar para contador",
+    totalDocs: "Total documentos",
+    totalAmount: "Valor total",
+    pendingBalance: "Saldo pendente",
     toasts: {
       loadError: "Erro ao carregar dados",
       created: "Documento criado",
       updated: "Documento atualizado",
       cancelled: "Documento cancelado",
       uploadError: "Erro ao subir arquivo",
-      applyOk: "Nota de credito aplicada",
-      applyError: "Erro ao aplicar nota de credito",
+      applyOk: "Nota de crédito aplicada",
+      applyError: "Erro ao aplicar NC",
       supplierRequired: "Selecione um fornecedor",
-      dueDateRequired: "O vencimento e obrigatorio",
-      amountRequired: "Informe um valor valido",
-      creditSelectionRequired: "Selecione uma nota de credito e destino",
+      dueDateRequired: "O vencimento é obrigatório",
+      amountRequired: "Informe um valor válido",
+      docNumberRequired: "O número do documento é obrigatório",
+      creditSelectionRequired: "Selecione uma NC e destino",
     },
     types: {
-      invoice: "Fatura",
-      debit: "Nota debito",
-      credit: "Nota credito",
+      INVOICE: "Fatura",
+      INVOICE_A: "Fatura A",
+      INVOICE_B: "Fatura B",
+      INVOICE_C: "Fatura C",
+      DEBIT_NOTE: "Nota de Débito",
+      CREDIT_NOTE: "Nota de Crédito",
+      FISCAL_DELIVERY_NOTE: "Remessa Fiscal",
+    },
+    statusLabels: {
+      PENDING: "Pendente",
+      DUE_SOON: "A vencer",
+      OVERDUE: "Vencido",
+      PARTIALLY_APPLIED: "Parcial",
+      APPLIED: "Aplicado",
+      CANCELLED: "Cancelado",
     },
   },
 } as const;
 
-const statusClassMap: Record<SupplierDocument["status"], string> = {
+type Lang = keyof typeof COPY;
+
+/* ─── Doc type options per channel ─── */
+const CHANNEL1_DOC_TYPES: DocType[] = [
+  "INVOICE_A",
+  "INVOICE_B",
+  "INVOICE_C",
+  "DEBIT_NOTE",
+  "CREDIT_NOTE",
+  "FISCAL_DELIVERY_NOTE",
+];
+const CHANNEL2_DOC_TYPES: DocType[] = ["INVOICE", "DEBIT_NOTE", "CREDIT_NOTE"];
+
+/* ─── Status badge colors ─── */
+const statusClassMap: Record<DocStatus, string> = {
   PENDING: "bg-slate-100 text-slate-700",
   DUE_SOON: "bg-amber-100 text-amber-700",
   OVERDUE: "bg-rose-100 text-rose-700",
@@ -195,13 +308,28 @@ const statusClassMap: Record<SupplierDocument["status"], string> = {
   CANCELLED: "bg-slate-200 text-slate-500",
 };
 
+/* ══════════════════════════════════════════
+   PAGE COMPONENT
+   ══════════════════════════════════════════ */
+
 export default function SupplierDocumentsPage() {
   const router = useRouter();
   const { currentLanguage } = useGlobalLanguage();
-  const copy = COPY[currentLanguage as keyof typeof COPY] || COPY.es;
+  const copy = COPY[currentLanguage as Lang] || COPY.es;
 
+  /* ── Auth / user ── */
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  /* ── Channel 2 state ── */
+  const [channel2Active, setChannel2Active] = useState(false);
+  const [channel2Expires, setChannel2Expires] = useState<string>("");
+  const [showChannel2Modal, setShowChannel2Modal] = useState(false);
+
+  /* Active channel for viewing / creating */
+  const activeChannel: 1 | 2 = channel2Active ? 2 : 1;
+
+  /* ── Data ── */
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [supplierId, setSupplierId] = useState("");
   const [documents, setDocuments] = useState<SupplierDocument[]>([]);
@@ -210,23 +338,29 @@ export default function SupplierDocumentsPage() {
     overdue: 0,
   });
 
+  /* ── Form ── */
   const [formState, setFormState] = useState({
     documentId: "",
-    type: "INVOICE",
+    type: "INVOICE_A" as string,
     pointOfSale: "",
     documentNumber: "",
     date: "",
     dueDate: "",
     totalAmount: "",
     notes: "",
+    impactsStock: false,
+    impactsCosts: false,
   });
   const [attachments, setAttachments] = useState<Attachment[]>([]);
 
+  /* ── Apply credit modal ── */
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [selectedCreditNote, setSelectedCreditNote] =
     useState<SupplierDocument | null>(null);
   const [targetDocumentId, setTargetDocumentId] = useState("");
   const [applyAmount, setApplyAmount] = useState("");
+
+  /* ─────────────────  Init  ───────────────── */
 
   useEffect(() => {
     const userStr = localStorage.getItem("user");
@@ -240,68 +374,74 @@ export default function SupplierDocumentsPage() {
     setLoading(false);
   }, [router]);
 
+  /* When supplier or active channel changes, reload documents */
   useEffect(() => {
     if (supplierId) {
       void loadDocuments(supplierId);
     } else {
       setDocuments([]);
     }
-  }, [supplierId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supplierId, activeChannel]);
+
+  /* When switching channels, reset form to correct default type */
+  useEffect(() => {
+    resetForm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeChannel]);
+
+  /* ─────────────────  Data Loaders  ───────────────── */
 
   const loadSuppliers = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch("/api/suppliers", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
+      const res = await apiFetch("/api/suppliers");
+      const data = await res.json();
       setSuppliers(data?.suppliers || []);
-    } catch (error) {
-      console.error("Load suppliers error:", error);
+    } catch {
       toast.error(copy.toasts.loadError);
     }
   };
 
   const loadDocuments = async (id: string) => {
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch(`/api/supplier-documents?supplierId=${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
+      const channelParam = activeChannel === 2 ? "&channel=2" : "";
+      const res = await apiFetch(
+        `/api/supplier-documents?supplierId=${id}${channelParam}`,
+      );
+      const data = await res.json();
       setDocuments(data?.documents || []);
-    } catch (error) {
-      console.error("Load documents error:", error);
+    } catch {
       toast.error(copy.toasts.loadError);
     }
   };
 
   const loadAlerts = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch("/api/supplier-documents?alerts=true", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
+      const res = await apiFetch("/api/supplier-documents?alerts=true");
+      const data = await res.json();
       setAlerts({
         dueSoon: data?.alerts?.dueSoon || 0,
         overdue: data?.alerts?.overdue || 0,
       });
-    } catch (error) {
-      console.error("Load alerts error:", error);
+    } catch {
+      // silent
     }
   };
+
+  /* ─────────────────  Form Logic  ───────────────── */
 
   const resetForm = () => {
     setFormState({
       documentId: "",
-      type: "INVOICE",
+      type: activeChannel === 1 ? "INVOICE_A" : "INVOICE",
       pointOfSale: "",
       documentNumber: "",
       date: "",
       dueDate: "",
       totalAmount: "",
       notes: "",
+      impactsStock: false,
+      impactsCosts: false,
     });
     setAttachments([]);
   };
@@ -310,20 +450,14 @@ export default function SupplierDocumentsPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch("/api/supplier-documents/upload", {
+      const res = await apiFetch("/api/supplier-documents/upload", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data?.error || copy.toasts.uploadError);
-      }
-      const data = await response.json();
+      if (!res.ok) throw new Error(copy.toasts.uploadError);
+      const data = await res.json();
       setAttachments((prev) => [...prev, data]);
-    } catch (error) {
-      console.error("Attachment upload error:", error);
+    } catch {
       toast.error(copy.toasts.uploadError);
     }
   };
@@ -333,19 +467,26 @@ export default function SupplierDocumentsPage() {
       toast.error(copy.toasts.supplierRequired);
       return;
     }
-
-    if (formState.type !== "CREDIT_NOTE" && !formState.dueDate) {
+    if (!formState.documentNumber.trim()) {
+      toast.error(copy.toasts.docNumberRequired);
+      return;
+    }
+    if (
+      formState.type !== "CREDIT_NOTE" &&
+      formState.type !== "FISCAL_DELIVERY_NOTE" &&
+      !formState.dueDate
+    ) {
       toast.error(copy.toasts.dueDateRequired);
       return;
     }
-
     if (!formState.totalAmount || Number(formState.totalAmount) <= 0) {
       toast.error(copy.toasts.amountRequired);
       return;
     }
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       supplierId,
+      channel: activeChannel,
       type: formState.type,
       pointOfSale: formState.pointOfSale || undefined,
       documentNumber: formState.documentNumber,
@@ -356,36 +497,34 @@ export default function SupplierDocumentsPage() {
       attachments,
     };
 
+    if (activeChannel === 2) {
+      payload.impactsStock = formState.impactsStock;
+      payload.impactsCosts = formState.impactsCosts;
+    }
+
     try {
-      const token = localStorage.getItem("accessToken");
       if (formState.documentId) {
-        const response = await fetch(
+        const res = await apiFetch(
           `/api/supplier-documents/${formState.documentId}`,
           {
             method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ updates: payload }),
           },
         );
-        if (!response.ok) {
-          const data = await response.json();
+        if (!res.ok) {
+          const data = await res.json();
           throw new Error(data?.error || copy.toasts.loadError);
         }
         toast.success(copy.toasts.updated);
       } else {
-        const response = await fetch("/api/supplier-documents", {
+        const res = await apiFetch("/api/supplier-documents", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        if (!response.ok) {
-          const data = await response.json();
+        if (!res.ok) {
+          const data = await res.json();
           throw new Error(data?.error || copy.toasts.loadError);
         }
         toast.success(copy.toasts.created);
@@ -394,8 +533,7 @@ export default function SupplierDocumentsPage() {
       resetForm();
       await loadDocuments(supplierId);
       await loadAlerts();
-    } catch (error) {
-      console.error("Save document error:", error);
+    } catch {
       toast.error(copy.toasts.loadError);
     }
   };
@@ -410,34 +548,29 @@ export default function SupplierDocumentsPage() {
       dueDate: doc.dueDate ? doc.dueDate.slice(0, 10) : "",
       totalAmount: String(doc.totalAmount),
       notes: doc.notes || "",
+      impactsStock: doc.impactsStock ?? false,
+      impactsCosts: doc.impactsCosts ?? false,
     });
     setAttachments(doc.attachments || []);
   };
 
   const handleCancelDocument = async (doc: SupplierDocument) => {
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch(`/api/supplier-documents/${doc._id}`, {
+      const res = await apiFetch(`/api/supplier-documents/${doc._id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "cancel" }),
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data?.error || copy.toasts.loadError);
-      }
+      if (!res.ok) throw new Error(copy.toasts.loadError);
       toast.success(copy.toasts.cancelled);
       await loadDocuments(supplierId);
       await loadAlerts();
-    } catch (error) {
-      console.error("Cancel document error:", error);
+    } catch {
       toast.error(copy.toasts.loadError);
     }
   };
 
+  /* ── Apply credit ── */
   const availableTargets = useMemo(
     () =>
       documents.filter(
@@ -459,23 +592,16 @@ export default function SupplierDocumentsPage() {
       return;
     }
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch("/api/supplier-documents/apply-credit", {
+      const res = await apiFetch("/api/supplier-documents/apply-credit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           creditNoteId: selectedCreditNote._id,
           targetDocumentId,
           amount: Number(applyAmount),
         }),
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data?.error || copy.toasts.applyError);
-      }
+      if (!res.ok) throw new Error(copy.toasts.applyError);
       toast.success(copy.toasts.applyOk);
       setShowApplyModal(false);
       setSelectedCreditNote(null);
@@ -483,12 +609,66 @@ export default function SupplierDocumentsPage() {
       setApplyAmount("");
       await loadDocuments(supplierId);
       await loadAlerts();
-    } catch (error) {
-      console.error("Apply credit note error:", error);
+    } catch {
       toast.error(copy.toasts.applyError);
     }
   };
 
+  /* ── Channel 2 handling ── */
+  const handleChannel2Activated = useCallback((expiresAt: string) => {
+    setChannel2Active(true);
+    setChannel2Expires(expiresAt);
+  }, []);
+
+  const handleChannel2Deactivate = useCallback(async () => {
+    try {
+      await apiFetch("/api/channel2-auth", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: "manual" }),
+      });
+    } catch {
+      // silent
+    }
+    setChannel2Active(false);
+    setChannel2Expires("");
+  }, []);
+
+  /* ── Export Channel 1 for accountant ── */
+  const handleExportAccountant = useCallback(() => {
+    if (documents.length === 0) return;
+    const ch1Docs = documents.filter((d) => (d.channel || 1) === 1);
+    const headers = [
+      "Tipo",
+      "PV",
+      "Numero",
+      "Fecha",
+      "Vencimiento",
+      "Importe",
+      "Saldo",
+      "Estado",
+    ];
+    const rows = ch1Docs.map((d) => [
+      d.type,
+      d.pointOfSale || "",
+      d.documentNumber,
+      d.date?.slice(0, 10) || "",
+      d.dueDate?.slice(0, 10) || "",
+      String(d.totalAmount),
+      String(d.balance),
+      d.status,
+    ]);
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `supplier_docs_fiscal_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [documents]);
+
+  /* ── Helpers ── */
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("es-AR", {
       style: "currency",
@@ -496,72 +676,191 @@ export default function SupplierDocumentsPage() {
       minimumFractionDigits: 2,
     }).format(value || 0);
 
-  if (loading) {
-    return null;
-  }
+  const docTypeOptions =
+    activeChannel === 1 ? CHANNEL1_DOC_TYPES : CHANNEL2_DOC_TYPES;
 
+  /* ── Totals for summary cards ── */
+  const summary = useMemo(() => {
+    const active = documents.filter((d) => d.status !== "CANCELLED");
+    return {
+      count: active.length,
+      total: active.reduce((s, d) => s + d.totalAmount, 0),
+      pending: active.reduce((s, d) => s + d.balance, 0),
+    };
+  }, [documents]);
+
+  if (loading) return null;
+
+  /* ══════════════════════════════════════════
+     RENDER
+     ══════════════════════════════════════════ */
   return (
     <div className="vp-page">
       <Header user={user} showBackButton={true} />
 
-      <main className="vp-page-inner">
-        <div className="mb-6">
-          <h1 className="vp-section-title">{copy.title}</h1>
-          <p className="vp-section-subtitle">{copy.subtitle}</p>
-        </div>
+      {/* Channel 2 top bar indicator */}
+      {channel2Active && (
+        <Channel2Bar
+          expiresAt={channel2Expires}
+          onDeactivate={handleChannel2Deactivate}
+          language={currentLanguage}
+        />
+      )}
 
-        <div className="vp-card p-6 mb-6">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
-              <label className="block text-xs font-semibold text-[hsl(var(--vp-muted))] mb-2">
-                {copy.supplierLabel}
-              </label>
-              <select
-                value={supplierId}
-                onChange={(e) => setSupplierId(e.target.value)}
-                className="w-full text-sm"
+      <main className="vp-page-inner">
+        {/* ── Title + Channel Toggle ── */}
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="vp-section-title">{copy.title}</h1>
+            <p className="vp-section-subtitle">{copy.subtitle}</p>
+          </div>
+          <div className="flex gap-2 items-center flex-wrap">
+            {/* Channel indicator pills */}
+            <span
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
+                activeChannel === 1
+                  ? "bg-emerald-600 text-white"
+                  : "bg-slate-100 text-slate-500 cursor-pointer hover:bg-slate-200"
+              }`}
+              onClick={() => {
+                if (channel2Active) {
+                  handleChannel2Deactivate();
+                }
+              }}
+            >
+              {copy.channel1Short}
+            </span>
+            <span
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
+                activeChannel === 2
+                  ? "bg-amber-500 text-white"
+                  : "bg-slate-100 text-slate-500 cursor-pointer hover:bg-slate-200"
+              }`}
+              onClick={() => {
+                if (!channel2Active) {
+                  setShowChannel2Modal(true);
+                }
+              }}
+            >
+              {copy.channel2Short}
+            </span>
+
+            {/* Export for accountant (Channel 1 only) */}
+            {activeChannel === 1 && documents.length > 0 && (
+              <button
+                className="vp-button vp-button-ghost text-xs"
+                onClick={handleExportAccountant}
               >
-                <option value="">--</option>
-                {suppliers.map((supplier) => (
-                  <option key={supplier._id} value={supplier._id}>
-                    {supplier.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-[hsl(var(--vp-muted))] mb-2">
-                {copy.alertsTitle}
-              </label>
-              <div className="flex flex-wrap gap-3">
-                <div className="px-3 py-2 rounded-lg bg-amber-50 text-amber-700 text-sm">
-                  {copy.dueSoon}: {alerts.dueSoon}
-                </div>
-                <div className="px-3 py-2 rounded-lg bg-rose-50 text-rose-700 text-sm">
-                  {copy.overdue}: {alerts.overdue}
-                </div>
-              </div>
-            </div>
+                {copy.exportAccountant}
+              </button>
+            )}
           </div>
         </div>
 
+        {/* ── Supplier + Alerts ── */}
+        <div className="vp-card p-6 mb-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <SupplierSearch
+                suppliers={suppliers}
+                value={supplierId}
+                onChange={setSupplierId}
+                label={copy.supplierLabel}
+                placeholder={copy.supplierLabel + "..."}
+              />
+            </div>
+
+            {/* Summary cards */}
+            {supplierId && (
+              <div className="md:col-span-2 grid grid-cols-3 gap-3">
+                <div className="px-3 py-2 rounded-lg bg-slate-50 text-center">
+                  <div className="text-xs text-[hsl(var(--vp-muted))]">
+                    {copy.totalDocs}
+                  </div>
+                  <div className="text-lg font-bold text-[hsl(var(--vp-text))]">
+                    {summary.count}
+                  </div>
+                </div>
+                <div className="px-3 py-2 rounded-lg bg-slate-50 text-center">
+                  <div className="text-xs text-[hsl(var(--vp-muted))]">
+                    {copy.totalAmount}
+                  </div>
+                  <div className="text-lg font-bold text-[hsl(var(--vp-text))]">
+                    {formatCurrency(summary.total)}
+                  </div>
+                </div>
+                <div className="px-3 py-2 rounded-lg bg-slate-50 text-center">
+                  <div className="text-xs text-[hsl(var(--vp-muted))]">
+                    {copy.pendingBalance}
+                  </div>
+                  <div className="text-lg font-bold text-amber-600">
+                    {formatCurrency(summary.pending)}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Alerts (Channel 1 only) */}
+            {activeChannel === 1 && !supplierId && (
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold text-[hsl(var(--vp-muted))] mb-2">
+                  {copy.alertsTitle}
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  <div className="px-3 py-2 rounded-lg bg-amber-50 text-amber-700 text-sm">
+                    {copy.dueSoon}: {alerts.dueSoon}
+                  </div>
+                  <div className="px-3 py-2 rounded-lg bg-rose-50 text-rose-700 text-sm">
+                    {copy.overdue}: {alerts.overdue}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Form + List Grid ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* ─── Document Form ─── */}
           <div className="lg:col-span-1 vp-card p-6">
-            <h2 className="text-lg font-semibold mb-4 text-[hsl(var(--vp-text))]">
+            <h2 className="text-lg font-semibold mb-1 text-[hsl(var(--vp-text))]">
               {formState.documentId ? copy.editDocument : copy.newDocument}
             </h2>
-            <div className="space-y-3">
-              <select
-                value={formState.type}
-                onChange={(e) =>
-                  setFormState((prev) => ({ ...prev, type: e.target.value }))
-                }
-                className="w-full text-sm"
+            {/* Channel badge on form */}
+            <div className="mb-4">
+              <span
+                className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  activeChannel === 1
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}
               >
-                <option value="INVOICE">{copy.types.invoice}</option>
-                <option value="DEBIT_NOTE">{copy.types.debit}</option>
-                <option value="CREDIT_NOTE">{copy.types.credit}</option>
-              </select>
+                {activeChannel === 1 ? copy.channel1Short : copy.channel2Short}
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {/* Document type */}
+              <div>
+                <label className="block text-xs text-[hsl(var(--vp-muted))] mb-1">
+                  {copy.documentType}
+                </label>
+                <select
+                  value={formState.type}
+                  onChange={(e) =>
+                    setFormState((prev) => ({ ...prev, type: e.target.value }))
+                  }
+                  className="w-full text-sm"
+                >
+                  {docTypeOptions.map((t) => (
+                    <option key={t} value={t}>
+                      {(copy.types as Record<string, string>)[t] || t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Point of sale */}
               <input
                 className="w-full text-sm"
                 placeholder={copy.pointOfSale}
@@ -573,6 +872,8 @@ export default function SupplierDocumentsPage() {
                   }))
                 }
               />
+
+              {/* Document number */}
               <input
                 className="w-full text-sm"
                 placeholder={copy.documentNumber}
@@ -584,30 +885,50 @@ export default function SupplierDocumentsPage() {
                   }))
                 }
               />
-              <input
-                type="date"
-                className="w-full text-sm"
-                value={formState.date}
-                onChange={(e) =>
-                  setFormState((prev) => ({ ...prev, date: e.target.value }))
-                }
-              />
-              {formState.type !== "CREDIT_NOTE" && (
+
+              {/* Issue date */}
+              <div>
+                <label className="block text-xs text-[hsl(var(--vp-muted))] mb-1">
+                  {copy.issueDate}
+                </label>
                 <input
                   type="date"
                   className="w-full text-sm"
-                  value={formState.dueDate}
+                  value={formState.date}
                   onChange={(e) =>
-                    setFormState((prev) => ({
-                      ...prev,
-                      dueDate: e.target.value,
-                    }))
+                    setFormState((prev) => ({ ...prev, date: e.target.value }))
                   }
                 />
-              )}
+              </div>
+
+              {/* Due date (not for credit notes / fiscal delivery notes) */}
+              {formState.type !== "CREDIT_NOTE" &&
+                formState.type !== "FISCAL_DELIVERY_NOTE" && (
+                  <div>
+                    <label className="block text-xs text-[hsl(var(--vp-muted))] mb-1">
+                      {copy.dueDate}
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full text-sm"
+                      value={formState.dueDate}
+                      onChange={(e) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          dueDate: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                )}
+
+              {/* Amount */}
               <input
                 className="w-full text-sm"
                 placeholder={copy.amount}
+                type="number"
+                step="0.01"
+                min="0"
                 value={formState.totalAmount}
                 onChange={(e) =>
                   setFormState((prev) => ({
@@ -616,6 +937,42 @@ export default function SupplierDocumentsPage() {
                   }))
                 }
               />
+
+              {/* Channel 2: configurable impacts */}
+              {activeChannel === 2 && (
+                <div className="flex flex-col gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formState.impactsStock}
+                      onChange={(e) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          impactsStock: e.target.checked,
+                        }))
+                      }
+                      className="rounded"
+                    />
+                    {copy.impactsStock}
+                  </label>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formState.impactsCosts}
+                      onChange={(e) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          impactsCosts: e.target.checked,
+                        }))
+                      }
+                      className="rounded"
+                    />
+                    {copy.impactsCosts}
+                  </label>
+                </div>
+              )}
+
+              {/* Notes */}
               <input
                 className="w-full text-sm"
                 placeholder={copy.notes}
@@ -624,20 +981,22 @@ export default function SupplierDocumentsPage() {
                   setFormState((prev) => ({ ...prev, notes: e.target.value }))
                 }
               />
-              <label className="block text-xs text-[hsl(var(--vp-muted))]">
-                {copy.attachFile}
-              </label>
-              <input
-                type="file"
-                accept="application/pdf,image/png,image/jpeg"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    void handleUploadAttachment(file);
-                  }
-                }}
-                className="w-full text-sm"
-              />
+
+              {/* Attachment */}
+              <div>
+                <label className="block text-xs text-[hsl(var(--vp-muted))] mb-1">
+                  {copy.attachFile}
+                </label>
+                <input
+                  type="file"
+                  accept="application/pdf,image/png,image/jpeg"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void handleUploadAttachment(file);
+                  }}
+                  className="w-full text-sm"
+                />
+              </div>
               {attachments.length > 0 && (
                 <div className="text-xs text-[hsl(var(--vp-muted))]">
                   {attachments.map((file) => (
@@ -645,9 +1004,13 @@ export default function SupplierDocumentsPage() {
                   ))}
                 </div>
               )}
+
+              {/* Buttons */}
               <div className="flex gap-2">
                 <button
-                  className="flex-1 vp-button vp-button-primary"
+                  className={`flex-1 vp-button vp-button-primary ${
+                    activeChannel === 2 ? "bg-amber-600 hover:bg-amber-700" : ""
+                  }`}
                   onClick={handleSaveDocument}
                 >
                   {copy.save}
@@ -664,10 +1027,21 @@ export default function SupplierDocumentsPage() {
             </div>
           </div>
 
+          {/* ─── Document List ─── */}
           <div className="lg:col-span-2 vp-card p-6">
             <h2 className="text-lg font-semibold mb-4 text-[hsl(var(--vp-text))]">
               {copy.listTitle}
+              <span
+                className={`ml-2 inline-block text-[10px] font-bold px-2 py-0.5 rounded-full align-middle ${
+                  activeChannel === 1
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {activeChannel === 1 ? copy.channel1Label : copy.channel2Label}
+              </span>
             </h2>
+
             {documents.length === 0 ? (
               <div className="text-sm text-[hsl(var(--vp-muted))]">
                 {copy.noDocuments}
@@ -677,29 +1051,45 @@ export default function SupplierDocumentsPage() {
                 {documents.map((doc) => (
                   <div
                     key={doc._id}
-                    className="vp-panel-sm flex flex-wrap items-center justify-between gap-3"
+                    className={`vp-panel-sm flex flex-wrap items-center justify-between gap-3 ${
+                      (doc.channel || 1) === 2
+                        ? "border-l-4 border-l-amber-400"
+                        : ""
+                    }`}
                   >
-                    <div>
+                    <div className="min-w-[140px]">
                       <div className="text-sm font-semibold text-[hsl(var(--vp-text))]">
                         {doc.pointOfSale ? `${doc.pointOfSale}-` : ""}
                         {doc.documentNumber}
                       </div>
                       <div className="text-xs text-[hsl(var(--vp-muted))]">
-                        {doc.type === "INVOICE"
-                          ? copy.types.invoice
-                          : doc.type === "DEBIT_NOTE"
-                            ? copy.types.debit
-                            : copy.types.credit}
+                        {(copy.types as Record<string, string>)[doc.type] ||
+                          doc.type}
                       </div>
+                      {/* Channel 2 impact badges */}
+                      {(doc.channel || 1) === 2 && (
+                        <div className="flex gap-1 mt-1">
+                          {doc.impactsStock && (
+                            <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
+                              {copy.impactsStock}
+                            </span>
+                          )}
+                          {doc.impactsCosts && (
+                            <span className="text-[10px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded">
+                              {copy.impactsCosts}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       {doc.attachments?.length ? (
-                        <div className="mt-1 text-xs text-[hsl(var(--vp-muted))]">
+                        <div className="mt-1 text-xs">
                           {doc.attachments.map((file) => (
                             <a
                               key={file.fileUrl}
                               href={file.fileUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-[hsl(var(--vp-primary))]"
+                              className="text-[hsl(var(--vp-primary))] mr-1"
                             >
                               {file.fileName}
                             </a>
@@ -707,14 +1097,29 @@ export default function SupplierDocumentsPage() {
                         </div>
                       ) : null}
                     </div>
-                    <div className="text-sm text-[hsl(var(--vp-muted))]">
-                      {copy.balance}: {formatCurrency(doc.balance)}
+
+                    <div className="text-right">
+                      <div className="text-sm font-semibold text-[hsl(var(--vp-text))]">
+                        {formatCurrency(doc.totalAmount)}
+                      </div>
+                      <div className="text-xs text-[hsl(var(--vp-muted))]">
+                        {copy.balance}: {formatCurrency(doc.balance)}
+                      </div>
+                      {doc.date && (
+                        <div className="text-[10px] text-[hsl(var(--vp-muted))]">
+                          {doc.date.slice(0, 10)}
+                        </div>
+                      )}
                     </div>
+
                     <span
                       className={`text-xs font-semibold px-2 py-1 rounded ${statusClassMap[doc.status]}`}
                     >
-                      {doc.status}
+                      {(copy.statusLabels as Record<string, string>)[
+                        doc.status
+                      ] || doc.status}
                     </span>
+
                     <div className="flex gap-2">
                       <button
                         className="text-xs text-[hsl(var(--vp-primary))]"
@@ -749,6 +1154,7 @@ export default function SupplierDocumentsPage() {
           </div>
         </div>
 
+        {/* ── Apply Credit Modal ── */}
         {showApplyModal && selectedCreditNote && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
             <div className="vp-card p-6 w-full max-w-md">
@@ -771,6 +1177,9 @@ export default function SupplierDocumentsPage() {
                 <input
                   className="w-full text-sm"
                   placeholder={copy.applyAmount}
+                  type="number"
+                  step="0.01"
+                  min="0"
                   value={applyAmount}
                   onChange={(e) => setApplyAmount(e.target.value)}
                 />
@@ -796,6 +1205,14 @@ export default function SupplierDocumentsPage() {
           </div>
         )}
       </main>
+
+      {/* ── Channel 2 Activation Modal ── */}
+      <Channel2Modal
+        isOpen={showChannel2Modal}
+        onClose={() => setShowChannel2Modal(false)}
+        onActivated={handleChannel2Activated}
+        language={currentLanguage}
+      />
     </div>
   );
 }

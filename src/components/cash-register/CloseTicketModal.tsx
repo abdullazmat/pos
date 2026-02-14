@@ -1,8 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/lib/context/LanguageContext";
 import { printReceipt } from "@/lib/utils/printReceipt";
+import { apiFetch } from "@/lib/utils/apiFetch";
+import type { CashClosingReport as CashClosingReportType } from "@/types/cashClosing";
+import { PAYMENT_METHOD_LABELS } from "@/types/cashClosing";
 
 const CLOSE_TICKET_COPY = {
   es: {
@@ -30,7 +33,39 @@ const CLOSE_TICKET_COPY = {
     amount: "Monto",
     noMovements: "Sin movimientos registrados",
     print: "Imprimir",
+    exportPDF: "Exportar PDF",
     close: "Cerrar",
+    // Channel labels
+    channelReport: "REPORTE POR CANAL",
+    channelFiscal: "CANAL 1 – FISCAL (LEGAL)",
+    channelInternal: "CANAL 2 – INTERNO (NO FISCAL)",
+    generalTotal: "TOTAL GENERAL",
+    fiscalSales: "Ventas fiscales:",
+    invoiceCount: "Comprobantes:",
+    invoicesByType: "Por tipo:",
+    paymentMethods: "Medios de pago:",
+    creditNotesLabel: "Notas de Crédito:",
+    cnCount: "Cantidad NC:",
+    cnTotal: "Total NC:",
+    refundsByMethod: "Devoluciones por medio:",
+    netFiscalResult: "RESULTADO NETO FISCAL:",
+    internalSales: "Ventas internas:",
+    ticketCount: "Tickets internos:",
+    netInternalResult: "RESULTADO NETO INTERNO:",
+    netFiscal: "Neto fiscal:",
+    netInternal: "Neto interno:",
+    overallResult: "RESULTADO DEL PERÍODO:",
+    cashReconciliation: "ARQUEO DE CAJA",
+    expectedCash: "Efectivo esperado (sistema):",
+    openingBal: "Saldo inicial:",
+    fiscalCash: "Efectivo fiscal:",
+    internalCash: "Efectivo interno:",
+    cashIn: "Ingresos manuales:",
+    cashOut: "Retiros/Cambio:",
+    totalExpected: "Total esperado:",
+    countedCash: "Contado (real):",
+    difference: "Diferencia:",
+    count: "cant.",
   },
   en: {
     title: "Close Ticket",
@@ -57,7 +92,38 @@ const CLOSE_TICKET_COPY = {
     amount: "Amount",
     noMovements: "No movements recorded",
     print: "Print",
+    exportPDF: "Export PDF",
     close: "Close",
+    channelReport: "REPORT BY CHANNEL",
+    channelFiscal: "CHANNEL 1 – FISCAL (LEGAL)",
+    channelInternal: "CHANNEL 2 – INTERNAL (NON-FISCAL)",
+    generalTotal: "GENERAL TOTAL",
+    fiscalSales: "Fiscal sales:",
+    invoiceCount: "Invoices:",
+    invoicesByType: "By type:",
+    paymentMethods: "Payment methods:",
+    creditNotesLabel: "Credit Notes:",
+    cnCount: "CN count:",
+    cnTotal: "CN total:",
+    refundsByMethod: "Refunds by method:",
+    netFiscalResult: "NET FISCAL RESULT:",
+    internalSales: "Internal sales:",
+    ticketCount: "Internal tickets:",
+    netInternalResult: "NET INTERNAL RESULT:",
+    netFiscal: "Net fiscal:",
+    netInternal: "Net internal:",
+    overallResult: "PERIOD RESULT:",
+    cashReconciliation: "CASH RECONCILIATION",
+    expectedCash: "Expected cash (system):",
+    openingBal: "Opening balance:",
+    fiscalCash: "Fiscal cash:",
+    internalCash: "Internal cash:",
+    cashIn: "Manual cash-in:",
+    cashOut: "Withdrawals/Change:",
+    totalExpected: "Total expected:",
+    countedCash: "Counted (real):",
+    difference: "Difference:",
+    count: "qty.",
   },
   pt: {
     title: "Comprovante de Fechamento",
@@ -84,7 +150,38 @@ const CLOSE_TICKET_COPY = {
     amount: "Valor",
     noMovements: "Sem movimentos registrados",
     print: "Imprimir",
+    exportPDF: "Exportar PDF",
     close: "Fechar",
+    channelReport: "RELATÓRIO POR CANAL",
+    channelFiscal: "CANAL 1 – FISCAL (LEGAL)",
+    channelInternal: "CANAL 2 – INTERNO (NÃO FISCAL)",
+    generalTotal: "TOTAL GERAL",
+    fiscalSales: "Vendas fiscais:",
+    invoiceCount: "Comprovantes:",
+    invoicesByType: "Por tipo:",
+    paymentMethods: "Meios de pagamento:",
+    creditNotesLabel: "Notas de Crédito:",
+    cnCount: "Qtd. NC:",
+    cnTotal: "Total NC:",
+    refundsByMethod: "Devoluções por meio:",
+    netFiscalResult: "RESULTADO LÍQUIDO FISCAL:",
+    internalSales: "Vendas internas:",
+    ticketCount: "Tickets internos:",
+    netInternalResult: "RESULTADO LÍQUIDO INTERNO:",
+    netFiscal: "Líquido fiscal:",
+    netInternal: "Líquido interno:",
+    overallResult: "RESULTADO DO PERÍODO:",
+    cashReconciliation: "CONFERÊNCIA DE CAIXA",
+    expectedCash: "Dinheiro esperado (sistema):",
+    openingBal: "Saldo inicial:",
+    fiscalCash: "Dinheiro fiscal:",
+    internalCash: "Dinheiro interno:",
+    cashIn: "Entradas manuais:",
+    cashOut: "Saques/Troco:",
+    totalExpected: "Total esperado:",
+    countedCash: "Contado (real):",
+    difference: "Diferença:",
+    count: "qtd.",
   },
 };
 
@@ -124,6 +221,30 @@ export default function CloseTicketModal({
   const copy =
     CLOSE_TICKET_COPY[currentLanguage as keyof typeof CLOSE_TICKET_COPY] ||
     CLOSE_TICKET_COPY.en;
+  const pmLabels =
+    PAYMENT_METHOD_LABELS[currentLanguage] || PAYMENT_METHOD_LABELS.es;
+
+  const [channelReport, setChannelReport] =
+    useState<CashClosingReportType | null>(null);
+
+  // Fetch channel report data when modal opens
+  useEffect(() => {
+    if (!open || !data?.sessionId) return;
+    const fetchReport = async () => {
+      try {
+        const res = await apiFetch(
+          `/api/cash-closing?sessionId=${data.sessionId}`,
+        );
+        const json = await res.json();
+        if (json.success && json.data) {
+          setChannelReport(json.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch channel report:", err);
+      }
+    };
+    fetchReport();
+  }, [open, data?.sessionId]);
 
   // Early return with safety checks
   if (!open) return null;
@@ -136,6 +257,11 @@ export default function CloseTicketModal({
     printReceipt();
   };
 
+  const handleExportPDF = () => {
+    // Use browser print dialog in PDF mode
+    printReceipt();
+  };
+
   const locale = t("__locale__", "common") || "es-AR";
   const formatAmount = (value: number) =>
     new Intl.NumberFormat(String(locale), {
@@ -143,6 +269,8 @@ export default function CloseTicketModal({
       currency: "ARS",
       minimumFractionDigits: 2,
     }).format(value || 0);
+
+  const getPmLabel = (method: string) => pmLabels[method] || method;
 
   const differenceLabel =
     data.difference === 0
@@ -205,47 +333,326 @@ export default function CloseTicketModal({
 
             <div className="border border-gray-900" />
 
-            {/* Totals */}
-            <div className="grid grid-cols-2 gap-3 py-3 text-xs">
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <span>{copy.initialBalance}</span>
-                  <span>{formatAmount(data.openingBalance)}</span>
+            {/* ══════ CHANNEL REPORT ══════ */}
+            {channelReport && (
+              <>
+                <div className="text-center font-bold text-xs mt-3 mb-2 underline">
+                  {copy.channelReport}
                 </div>
-                <div className="flex justify-between">
-                  <span>{copy.sales}</span>
-                  <span>{formatAmount(data.salesTotal)}</span>
+
+                {/* ── CHANNEL 1: FISCAL ── */}
+                <div className="border border-gray-700 p-2 mb-2">
+                  <div className="font-bold text-[11px] mb-1 text-center bg-gray-200 -mx-2 -mt-2 px-2 py-1">
+                    {copy.channelFiscal}
+                  </div>
+                  <div className="space-y-0.5 text-[11px]">
+                    <div className="flex justify-between">
+                      <span>{copy.fiscalSales}</span>
+                      <span className="font-medium">
+                        {formatAmount(channelReport.fiscal.totalSales)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{copy.invoiceCount}</span>
+                      <span>{channelReport.fiscal.salesCount}</span>
+                    </div>
+                    {channelReport.fiscal.invoicesByType.length > 0 && (
+                      <div className="ml-2 border-l border-gray-400 pl-1">
+                        <span className="text-[10px] text-gray-600">
+                          {copy.invoicesByType}
+                        </span>
+                        {channelReport.fiscal.invoicesByType.map((inv) => (
+                          <div
+                            key={inv.type}
+                            className="flex justify-between text-[10px]"
+                          >
+                            <span>
+                              {inv.label} ({inv.count})
+                            </span>
+                            <span>{formatAmount(inv.total)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {channelReport.fiscal.byPaymentMethod.length > 0 && (
+                      <div className="ml-2 border-l border-gray-400 pl-1 mt-1">
+                        <span className="text-[10px] text-gray-600">
+                          {copy.paymentMethods}
+                        </span>
+                        {channelReport.fiscal.byPaymentMethod.map((pm) => (
+                          <div
+                            key={pm.method}
+                            className="flex justify-between text-[10px]"
+                          >
+                            <span>
+                              {getPmLabel(pm.method)} ({pm.count})
+                            </span>
+                            <span>{formatAmount(pm.total)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {channelReport.fiscal.creditNotes.count > 0 && (
+                      <>
+                        <div className="border-t border-gray-400 mt-1 pt-1">
+                          <span className="font-semibold text-[10px]">
+                            {copy.creditNotesLabel}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>{copy.cnCount}</span>
+                          <span>{channelReport.fiscal.creditNotes.count}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>{copy.cnTotal}</span>
+                          <span className="font-medium text-red-700">
+                            -
+                            {formatAmount(
+                              channelReport.fiscal.creditNotes.totalAmount,
+                            )}
+                          </span>
+                        </div>
+                        {channelReport.fiscal.refundsByPaymentMethod.length >
+                          0 && (
+                          <div className="ml-2 border-l border-gray-400 pl-1">
+                            <span className="text-[10px] text-gray-600">
+                              {copy.refundsByMethod}
+                            </span>
+                            {channelReport.fiscal.refundsByPaymentMethod.map(
+                              (pm) => (
+                                <div
+                                  key={pm.method}
+                                  className="flex justify-between text-[10px]"
+                                >
+                                  <span>{getPmLabel(pm.method)}</span>
+                                  <span>-{formatAmount(pm.total)}</span>
+                                </div>
+                              ),
+                            )}
+                          </div>
+                        )}
+                      </>
+                    )}
+                    <div className="border-t border-gray-900 mt-1 pt-1 flex justify-between font-bold">
+                      <span>{copy.netFiscalResult}</span>
+                      <span>
+                        {formatAmount(channelReport.fiscal.netResult)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>{copy.withdrawals}</span>
-                  <span>-{formatAmount(data.withdrawalsTotal)}</span>
+
+                {/* ── CHANNEL 2: INTERNAL ── */}
+                <div className="border border-gray-700 p-2 mb-2">
+                  <div className="font-bold text-[11px] mb-1 text-center bg-gray-200 -mx-2 -mt-2 px-2 py-1">
+                    {copy.channelInternal}
+                  </div>
+                  <div className="space-y-0.5 text-[11px]">
+                    <div className="flex justify-between">
+                      <span>{copy.internalSales}</span>
+                      <span className="font-medium">
+                        {formatAmount(channelReport.internal.totalSales)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{copy.ticketCount}</span>
+                      <span>{channelReport.internal.salesCount}</span>
+                    </div>
+                    {channelReport.internal.byPaymentMethod.length > 0 && (
+                      <div className="ml-2 border-l border-gray-400 pl-1">
+                        <span className="text-[10px] text-gray-600">
+                          {copy.paymentMethods}
+                        </span>
+                        {channelReport.internal.byPaymentMethod.map((pm) => (
+                          <div
+                            key={pm.method}
+                            className="flex justify-between text-[10px]"
+                          >
+                            <span>
+                              {getPmLabel(pm.method)} ({pm.count})
+                            </span>
+                            <span>{formatAmount(pm.total)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="border-t border-gray-900 mt-1 pt-1 flex justify-between font-bold">
+                      <span>{copy.netInternalResult}</span>
+                      <span>
+                        {formatAmount(channelReport.internal.netResult)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>{copy.creditNotes}</span>
-                  <span>-{formatAmount(data.creditNotesTotal)}</span>
+
+                {/* ── GENERAL TOTAL ── */}
+                <div className="border-2 border-gray-900 p-2 mb-2">
+                  <div className="font-bold text-[11px] mb-1 text-center">
+                    {copy.generalTotal}
+                  </div>
+                  <div className="space-y-0.5 text-[11px]">
+                    <div className="flex justify-between">
+                      <span>{copy.netFiscal}</span>
+                      <span>
+                        {formatAmount(
+                          channelReport.generalTotal.netFiscalResult,
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{copy.netInternal}</span>
+                      <span>
+                        {formatAmount(
+                          channelReport.generalTotal.netInternalResult,
+                        )}
+                      </span>
+                    </div>
+                    <div className="border-t border-gray-900 mt-1 pt-1 flex justify-between font-bold text-sm">
+                      <span>{copy.overallResult}</span>
+                      <span>
+                        {formatAmount(channelReport.generalTotal.overallResult)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>{copy.deposits}</span>
-                  <span>{formatAmount(data.depositsTotal)}</span>
+
+                {/* ── CASH RECONCILIATION ── */}
+                <div className="border border-gray-700 p-2 mb-2">
+                  <div className="font-bold text-[11px] mb-1 text-center bg-gray-200 -mx-2 -mt-2 px-2 py-1">
+                    {copy.cashReconciliation}
+                  </div>
+                  <div className="space-y-0.5 text-[11px]">
+                    <div className="flex justify-between">
+                      <span>{copy.openingBal}</span>
+                      <span>
+                        {formatAmount(
+                          channelReport.reconciliation.expectedCash
+                            .openingBalance,
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{copy.fiscalCash}</span>
+                      <span>
+                        {formatAmount(
+                          channelReport.reconciliation.expectedCash.fiscal,
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{copy.internalCash}</span>
+                      <span>
+                        {formatAmount(
+                          channelReport.reconciliation.expectedCash.internal,
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{copy.cashIn}</span>
+                      <span>
+                        {formatAmount(
+                          channelReport.reconciliation.expectedCash.cashIn,
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{copy.cashOut}</span>
+                      <span>
+                        -
+                        {formatAmount(
+                          channelReport.reconciliation.expectedCash.cashOut,
+                        )}
+                      </span>
+                    </div>
+                    <div className="border-t border-gray-900 mt-1 pt-1 flex justify-between font-bold">
+                      <span>{copy.totalExpected}</span>
+                      <span>
+                        {formatAmount(
+                          channelReport.reconciliation.expectedCash.total,
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-bold">
+                      <span>{copy.countedCash}</span>
+                      <span>
+                        {channelReport.reconciliation.countedCash !== null
+                          ? formatAmount(
+                              channelReport.reconciliation.countedCash,
+                            )
+                          : "-"}
+                      </span>
+                    </div>
+                    {channelReport.reconciliation.difference !== null && (
+                      <div
+                        className={`flex justify-between font-bold ${
+                          channelReport.reconciliation.difference === 0
+                            ? ""
+                            : channelReport.reconciliation.difference > 0
+                              ? "text-green-700"
+                              : "text-red-700"
+                        }`}
+                      >
+                        <span>{copy.difference}</span>
+                        <span>
+                          {formatAmount(
+                            channelReport.reconciliation.difference,
+                          )}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex justify-between font-semibold">
-                  <span>{copy.expected}</span>
-                  <span>{formatAmount(data.expected)}</span>
+
+                <div className="border border-gray-900" />
+              </>
+            )}
+
+            {/* ══════ LEGACY TOTALS (always shown as fallback) ══════ */}
+            {!channelReport && (
+              <>
+                {/* Totals */}
+                <div className="grid grid-cols-2 gap-3 py-3 text-xs">
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span>{copy.initialBalance}</span>
+                      <span>{formatAmount(data.openingBalance)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{copy.sales}</span>
+                      <span>{formatAmount(data.salesTotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{copy.withdrawals}</span>
+                      <span>-{formatAmount(data.withdrawalsTotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{copy.creditNotes}</span>
+                      <span>-{formatAmount(data.creditNotesTotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{copy.deposits}</span>
+                      <span>{formatAmount(data.depositsTotal)}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between font-semibold">
+                      <span>{copy.expected}</span>
+                      <span>{formatAmount(data.expected)}</span>
+                    </div>
+                    <div className="flex justify-between font-semibold">
+                      <span>{copy.counted}</span>
+                      <span>{formatAmount(data.countedAmount)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-sm">
+                      <span>{differenceLabel}:</span>
+                      <span className={differenceColor}>
+                        {formatAmount(data.difference)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between font-semibold">
-                  <span>{copy.counted}</span>
-                  <span>{formatAmount(data.countedAmount)}</span>
-                </div>
-                <div className="flex justify-between font-bold text-sm">
-                  <span>{differenceLabel}:</span>
-                  <span className={differenceColor}>
-                    {formatAmount(data.difference)}
-                  </span>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
 
             <div className="border-t border-gray-900 pt-2">
               <div className="text-center font-semibold mb-2">
@@ -319,6 +726,25 @@ export default function CloseTicketModal({
               />
             </svg>
             {copy.print}
+          </button>
+          <button
+            onClick={handleExportPDF}
+            className="flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition shadow-lg hover:shadow-xl"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            {copy.exportPDF}
           </button>
           <button
             onClick={onClose}

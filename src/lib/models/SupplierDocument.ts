@@ -1,6 +1,16 @@
 import { Schema, model, Document, models } from "mongoose";
 
-export type SupplierDocumentType = "INVOICE" | "DEBIT_NOTE" | "CREDIT_NOTE";
+export type SupplierDocumentType =
+  | "INVOICE"
+  | "INVOICE_A"
+  | "INVOICE_B"
+  | "INVOICE_C"
+  | "DEBIT_NOTE"
+  | "CREDIT_NOTE"
+  | "FISCAL_DELIVERY_NOTE";
+
+export type SupplierDocumentChannel = 1 | 2;
+
 export type SupplierDocumentStatus =
   | "PENDING"
   | "DUE_SOON"
@@ -20,6 +30,7 @@ export interface SupplierDocumentAttachment {
 export interface ISupplierDocument extends Document {
   businessId: Schema.Types.ObjectId;
   supplierId: Schema.Types.ObjectId;
+  channel: SupplierDocumentChannel;
   type: SupplierDocumentType;
   pointOfSale?: string;
   documentNumber: string;
@@ -30,11 +41,14 @@ export interface ISupplierDocument extends Document {
   appliedPaymentsTotal: number;
   appliedCreditsTotal: number;
   status: SupplierDocumentStatus;
+  impactsStock: boolean;
+  impactsCosts: boolean;
   notes?: string;
   attachments?: SupplierDocumentAttachment[];
   cancelledAt?: Date;
   cancelledBy?: Schema.Types.ObjectId;
   cancelReason?: string;
+  createdBy?: Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -51,9 +65,23 @@ const supplierDocumentSchema = new Schema<ISupplierDocument>(
       ref: "Supplier",
       required: true,
     },
+    channel: {
+      type: Number,
+      enum: [1, 2],
+      default: 1,
+      required: true,
+    },
     type: {
       type: String,
-      enum: ["INVOICE", "DEBIT_NOTE", "CREDIT_NOTE"],
+      enum: [
+        "INVOICE",
+        "INVOICE_A",
+        "INVOICE_B",
+        "INVOICE_C",
+        "DEBIT_NOTE",
+        "CREDIT_NOTE",
+        "FISCAL_DELIVERY_NOTE",
+      ],
       required: true,
     },
     pointOfSale: {
@@ -106,6 +134,14 @@ const supplierDocumentSchema = new Schema<ISupplierDocument>(
       default: "PENDING",
       required: true,
     },
+    impactsStock: {
+      type: Boolean,
+      default: true,
+    },
+    impactsCosts: {
+      type: Boolean,
+      default: true,
+    },
     notes: String,
     attachments: {
       type: [
@@ -125,6 +161,10 @@ const supplierDocumentSchema = new Schema<ISupplierDocument>(
       ref: "User",
     },
     cancelReason: String,
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   {
     timestamps: true,
@@ -134,6 +174,7 @@ const supplierDocumentSchema = new Schema<ISupplierDocument>(
 supplierDocumentSchema.index({ businessId: 1, supplierId: 1, date: -1 });
 supplierDocumentSchema.index({ businessId: 1, documentNumber: 1 });
 supplierDocumentSchema.index({ businessId: 1, status: 1, dueDate: 1 });
+supplierDocumentSchema.index({ businessId: 1, channel: 1 });
 
 export default models.SupplierDocument ||
   model<ISupplierDocument>("SupplierDocument", supplierDocumentSchema);

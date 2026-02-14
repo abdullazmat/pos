@@ -20,6 +20,7 @@ import CloseBoxModal from "@/components/cash-register/CloseBoxModal";
 import CloseTicketModal, {
   CloseTicketData,
 } from "@/components/cash-register/CloseTicketModal";
+import CashClosingReport from "@/components/cash-register/CashClosingReport";
 import { printReceipt } from "@/lib/utils/printReceipt";
 
 const CASH_COPY = {
@@ -68,6 +69,7 @@ const CASH_COPY = {
       withdrawal: "Registrar Retiro",
       creditNote: "Nota de Crédito / Devolución",
       cashIn: "Ingresar Dinero",
+      channelReport: "Reporte por Canal",
       close: "Cerrar Caja",
     },
     movements: {
@@ -150,6 +152,7 @@ const CASH_COPY = {
       withdrawal: "Log Withdrawal",
       creditNote: "Credit Note / Refund",
       cashIn: "Cash In",
+      channelReport: "Channel Report",
       close: "Close Register",
     },
     movements: {
@@ -233,6 +236,7 @@ const CASH_COPY = {
       withdrawal: "Registrar Retirada",
       creditNote: "Nota de Crédito / Devolução",
       cashIn: "Entrada de Dinheiro",
+      channelReport: "Relatório por Canal",
       close: "Fechar Caixa",
     },
     movements: {
@@ -418,6 +422,7 @@ export default function CashRegisterPage() {
   );
   const [toastOpen, setToastOpen] = useState(false);
   const [sessionData, setSessionData] = useState<any>({
+    sessionId: null,
     initialAmount: 0,
     salesTotal: 0,
     withdrawalsTotal: 0,
@@ -447,6 +452,7 @@ export default function CashRegisterPage() {
   } | null>(null);
   const [showCloseBoxModal, setShowCloseBoxModal] = useState(false);
   const [showCloseTicket, setShowCloseTicket] = useState(false);
+  const [showChannelReport, setShowChannelReport] = useState(false);
   const [closeTicketData, setCloseTicketData] =
     useState<CloseTicketData | null>(null);
   const [creditNotesTotal, setCreditNotesTotal] = useState<number>(0);
@@ -553,6 +559,7 @@ export default function CashRegisterPage() {
           setMovements(Array.isArray(data?.movements) ? data.movements : []);
           setSessions(Array.isArray(data?.sessions) ? data.sessions : []);
           setSessionData({
+            sessionId: data?.sessionId || null,
             initialAmount: data?.initialAmount || 0,
             salesTotal: data?.salesTotal || 0,
             withdrawalsTotal: data?.withdrawalsTotal || 0,
@@ -591,13 +598,14 @@ export default function CashRegisterPage() {
           const data = payload?.data ?? payload;
           setMovements(Array.isArray(data?.movements) ? data.movements : []);
           setSessions(Array.isArray(data?.sessions) ? data.sessions : []);
-          setSessionData({
+          setSessionData((prev: any) => ({
+            sessionId: data?.sessionId || prev.sessionId || null,
             initialAmount: data?.initialAmount || 0,
             salesTotal: data?.salesTotal || 0,
             withdrawalsTotal: data?.withdrawalsTotal || 0,
             depositsTotal: data?.depositsTotal || 0,
             expected: data?.expected || 0,
-          });
+          }));
           setCreditNotesTotal(data?.creditNotesTotal || 0);
         }
       } catch (e) {
@@ -743,6 +751,7 @@ export default function CashRegisterPage() {
           setMovements(Array.isArray(data3?.movements) ? data3.movements : []);
           setSessions(Array.isArray(data3?.sessions) ? data3.sessions : []);
           setSessionData({
+            sessionId: data3?.sessionId || null,
             initialAmount: data3?.initialAmount || 0,
             salesTotal: data3?.salesTotal || 0,
             withdrawalsTotal: data3?.withdrawalsTotal || 0,
@@ -837,13 +846,14 @@ export default function CashRegisterPage() {
       const payload = await response.json();
       const data = payload?.data ?? payload;
       setMovements(data?.movements || []);
-      setSessionData({
+      setSessionData((prev: any) => ({
+        sessionId: data?.sessionId || prev.sessionId || null,
         initialAmount: data?.initialAmount || 0,
         salesTotal: data?.salesTotal || 0,
         withdrawalsTotal: data?.withdrawalsTotal || 0,
         depositsTotal: data?.depositsTotal || 0,
         expected: data?.expected || 0,
-      });
+      }));
 
       setToastType("success");
       setToastMsg(copy.withdrawSuccess(formatCurrency(amount)));
@@ -905,13 +915,14 @@ export default function CashRegisterPage() {
       const data = payload?.data ?? payload;
       setMovements(data?.movements || []);
       setCreditNotesTotal(data?.creditNotesTotal || 0);
-      setSessionData({
+      setSessionData((prev: any) => ({
+        sessionId: data?.sessionId || prev.sessionId || null,
         initialAmount: data?.initialAmount || 0,
         salesTotal: data?.salesTotal || 0,
         withdrawalsTotal: data?.withdrawalsTotal || 0,
         depositsTotal: data?.depositsTotal || 0,
         expected: data?.expected || 0,
-      });
+      }));
 
       setToastType("success");
       setToastMsg(copy.creditSuccess(formatCurrency(amount)));
@@ -966,13 +977,14 @@ export default function CashRegisterPage() {
       const data = payload?.data ?? payload;
       setMovements(data?.movements || []);
       setCreditNotesTotal(data?.creditNotesTotal || 0);
-      setSessionData({
+      setSessionData((prev: any) => ({
+        sessionId: data?.sessionId || prev.sessionId || null,
         initialAmount: data?.initialAmount || 0,
         salesTotal: data?.salesTotal || 0,
         withdrawalsTotal: data?.withdrawalsTotal || 0,
         depositsTotal: data?.depositsTotal || 0,
         expected: data?.expected || 0,
-      });
+      }));
 
       setToastType("success");
       setToastMsg(copy.cashInSuccess(formatCurrency(amount)));
@@ -1435,6 +1447,26 @@ export default function CashRegisterPage() {
                   </button>
 
                   <button
+                    onClick={() => setShowChannelReport(true)}
+                    className="flex items-center justify-center gap-2 px-6 py-3 font-bold text-white transition bg-purple-600 rounded-lg shadow-lg hover:bg-purple-700 hover:shadow-xl"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    {copy.actions?.channelReport || "Reporte Canal"}
+                  </button>
+
+                  <button
                     onClick={() => setShowCloseBoxModal(true)}
                     className="flex items-center justify-center gap-2 px-6 py-3 font-bold text-white transition bg-red-600 rounded-lg shadow-lg hover:bg-red-700 hover:shadow-xl"
                   >
@@ -1837,12 +1869,39 @@ export default function CashRegisterPage() {
         withdrawalsTotal={sessionData.withdrawalsTotal}
         creditNotesTotal={creditNotesTotal}
         depositsTotal={depositsTotal}
+        sessionId={sessionData.sessionId}
       />
       <CloseTicketModal
         open={showCloseTicket}
         onClose={() => setShowCloseTicket(false)}
         data={closeTicketData}
       />
+
+      {/* ─── Channel Report Modal ──────────────────────────────── */}
+      {showChannelReport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="relative w-full max-w-4xl mx-auto bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+              <h2 className="text-slate-900 dark:text-white text-xl font-bold">
+                {copy.actions?.channelReport || "Reporte por Canal"}
+              </h2>
+              <button
+                onClick={() => setShowChannelReport(false)}
+                className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white text-2xl transition"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="overflow-y-auto p-6 flex-1">
+              <CashClosingReport
+                sessionId={sessionData.sessionId}
+                language={currentLanguage}
+                compact
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

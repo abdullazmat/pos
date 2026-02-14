@@ -202,24 +202,112 @@ export async function PUT(
     }
 
     if (action === "cancel") {
-      if (paymentOrder.status !== "PENDING") {
+      if (paymentOrder.status === "CANCELLED") {
         return NextResponse.json(
-          { error: "Payment order cannot be cancelled" },
+          { error: "Payment order is already cancelled" },
           { status: 409 },
         );
       }
 
+      const wasConfirmed = paymentOrder.status === "CONFIRMED";
+
+      // If confirmed, revert all document balances and treasury movements
+      if (wasConfirmed) {
+        // Revert documents — add back applied amounts
+        for (const doc of paymentOrder.documents) {
+          const supplierDoc = await SupplierDocument.findById(doc.documentId);
+          if (supplierDoc) {
+            supplierDoc.balance = Math.min(
+              supplierDoc.totalAmount,
+              supplierDoc.balance + doc.amount,
+            );
+            supplierDoc.appliedPaymentsTotal = Math.max(
+              0,
+              (supplierDoc.appliedPaymentsTotal || 0) - doc.amount,
+            );
+            supplierDoc.status = computeSupplierDocumentStatus(supplierDoc);
+            await supplierDoc.save();
+
+            await SupplierDocumentAudit.create({
+              businessId: decoded.businessId,
+              documentId: supplierDoc._id,
+              supplierId: supplierDoc.supplierId,
+              action: "REVERT_PAYMENT",
+              actionDescription: `Reverted payment order #${paymentOrder.orderNumber} from ${supplierDoc.documentNumber}`,
+              userId: decoded.userId,
+              userEmail: decoded.email,
+              ipAddress: req.headers.get("x-forwarded-for") || undefined,
+              metadata: {
+                paymentOrderId: paymentOrder._id,
+                amount: doc.amount,
+              },
+            });
+          }
+        }
+
+        // Revert credit notes — add back applied credit amounts
+        for (const doc of paymentOrder.creditNotes) {
+          const supplierDoc = await SupplierDocument.findById(doc.documentId);
+          if (supplierDoc) {
+            supplierDoc.balance = Math.min(
+              supplierDoc.totalAmount,
+              supplierDoc.balance + doc.amount,
+            );
+            supplierDoc.appliedCreditsTotal = Math.max(
+              0,
+              (supplierDoc.appliedCreditsTotal || 0) - doc.amount,
+            );
+            supplierDoc.status = computeSupplierDocumentStatus(supplierDoc);
+            await supplierDoc.save();
+
+            await SupplierDocumentAudit.create({
+              businessId: decoded.businessId,
+              documentId: supplierDoc._id,
+              supplierId: supplierDoc.supplierId,
+              action: "REVERT_CREDIT",
+              actionDescription: `Reverted credit from cancelled payment order #${paymentOrder.orderNumber}`,
+              userId: decoded.userId,
+              userEmail: decoded.email,
+              ipAddress: req.headers.get("x-forwarded-for") || undefined,
+              metadata: {
+                paymentOrderId: paymentOrder._id,
+                amount: doc.amount,
+              },
+            });
+          }
+        }
+
+        // Create reversal treasury movements (INGRESO to compensate EGRESO)
+        for (const payment of paymentOrder.payments) {
+          await TreasuryMovement.create({
+            businessId: decoded.businessId,
+            type: "INGRESO",
+            referenceType: "PAYMENT_ORDER",
+            referenceId: paymentOrder._id,
+            method: payment.method,
+            amount: payment.amount,
+            description: `Anulación Orden Pago #${paymentOrder.orderNumber}`,
+            createdBy: decoded.userId,
+          });
+        }
+      }
+
       paymentOrder.status = "CANCELLED";
+      paymentOrder.cancelledAt = new Date();
+      paymentOrder.cancelledBy = decoded.userId as any;
+      paymentOrder.cancelledByEmail = decoded.email;
+      paymentOrder.cancelReason = body.reason || undefined;
       await paymentOrder.save();
 
       await PaymentOrderAudit.create({
         businessId: decoded.businessId,
         paymentOrderId: paymentOrder._id,
         action: "CANCEL",
-        actionDescription: `Payment order ${paymentOrder.orderNumber} cancelled`,
+        actionDescription: `Payment order ${paymentOrder.orderNumber} cancelled${wasConfirmed ? " (balances reverted)" : ""}`,
         userId: decoded.userId,
         userEmail: decoded.email,
         ipAddress: req.headers.get("x-forwarded-for") || undefined,
+        metadata: { wasConfirmed, reason: body.reason },
       });
 
       return NextResponse.json({ paymentOrder });
