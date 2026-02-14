@@ -8,6 +8,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToastProvider } from "@/components/common/ToastProvider";
 import { GlobalErrorHandler } from "@/components/common/GlobalErrorHandler";
+import SystemAlertBanner from "@/components/common/SystemAlertBanner";
 import { LanguageProvider } from "@/lib/context/LanguageContext";
 import { ThemeProvider as CustomThemeProvider } from "@/lib/context/ThemeContext";
 
@@ -39,6 +40,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <GlobalErrorHandler />
+        <SystemAlertBanner />
         <CustomThemeProvider>
           <LanguageProvider>
             <ThemeProvider

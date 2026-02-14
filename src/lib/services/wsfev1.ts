@@ -459,17 +459,26 @@ export class WSFEv1Service {
   // ═══════════════════════════════════════════════════════════════
 
   private createLoginTicket(now: Date, expiryTime: Date): string {
-    const fmt = (d: Date) => {
+    // AFIP requires timestamps in Argentina time (UTC-3) with the -03:00 offset.
+    // We shift the UTC time by -3 hours, format it, and append -03:00.
+    // generationTime is set 10 minutes in the past to avoid clock-skew rejections.
+    const ART_OFFSET_MS = -3 * 60 * 60 * 1000;
+
+    const toArgentinaISO = (d: Date): string => {
       const pad = (n: number) => String(n).padStart(2, "0");
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      const art = new Date(d.getTime() + ART_OFFSET_MS);
+      return `${art.getUTCFullYear()}-${pad(art.getUTCMonth() + 1)}-${pad(art.getUTCDate())}T${pad(art.getUTCHours())}:${pad(art.getUTCMinutes())}:${pad(art.getUTCSeconds())}-03:00`;
     };
+
+    // Shift generationTime 10 minutes into the past to avoid clock-skew issues
+    const safeNow = new Date(now.getTime() - 10 * 60 * 1000);
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <loginTicketRequest version="1.0">
   <header>
     <uniqueId>${Math.floor(Date.now() / 1000)}</uniqueId>
-    <generationTime>${fmt(now)}</generationTime>
-    <expirationTime>${fmt(expiryTime)}</expirationTime>
+    <generationTime>${toArgentinaISO(safeNow)}</generationTime>
+    <expirationTime>${toArgentinaISO(expiryTime)}</expirationTime>
   </header>
   <service>wsfe</service>
 </loginTicketRequest>`;

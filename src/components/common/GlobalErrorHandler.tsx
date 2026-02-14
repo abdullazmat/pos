@@ -2,6 +2,9 @@
 
 import { useEffect } from "react";
 import { toast } from "react-toastify";
+import { classifyIssue } from "@/lib/autoRecovery/issueClassifier";
+import { emitSystemAlert } from "@/lib/autoRecovery/systemAlerts";
+import { isFeatureEnabled } from "@/lib/autoRecovery/featureFlags";
 
 // Known non-critical error patterns that should be suppressed silently
 const SUPPRESSED_PATTERNS = [
@@ -76,6 +79,28 @@ export function GlobalErrorHandler() {
         return true;
       }
 
+      // Classify the error using auto-recovery system
+      if (isFeatureEnabled("auto_correct_minor")) {
+        try {
+          const issue = classifyIssue(event.error || errorMessage, {
+            module: "System",
+          });
+
+          if (issue.severity === "minor" && issue.autoRecoverable) {
+            // Minor issue → suppress silently, already logged by classifier
+            event.preventDefault();
+            return true;
+          }
+
+          // Major issue → emit system alert banner
+          if (isFeatureEnabled("system_alerts_enabled")) {
+            emitSystemAlert(issue);
+          }
+        } catch {
+          // Fallback to toast if classifier fails
+        }
+      }
+
       // Show toast for genuine errors
       showErrorToast(errorMessage);
       return false;
@@ -88,6 +113,28 @@ export function GlobalErrorHandler() {
       if (isSuppressed(errorMessage, SUPPRESSED_PATTERNS)) {
         event.preventDefault();
         return true;
+      }
+
+      // Classify the rejection using auto-recovery system
+      if (isFeatureEnabled("auto_correct_minor")) {
+        try {
+          const issue = classifyIssue(event.reason || errorMessage, {
+            module: "System",
+          });
+
+          if (issue.severity === "minor" && issue.autoRecoverable) {
+            // Minor issue → suppress silently
+            event.preventDefault();
+            return true;
+          }
+
+          // Major issue → emit system alert banner
+          if (isFeatureEnabled("system_alerts_enabled")) {
+            emitSystemAlert(issue);
+          }
+        } catch {
+          // Fallback to toast
+        }
       }
 
       // Show toast for genuine unhandled rejections
