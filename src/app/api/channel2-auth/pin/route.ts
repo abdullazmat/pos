@@ -95,8 +95,10 @@ export async function PUT(req: NextRequest) {
 
     // Hash and store PIN
     const hashedPin = await bcrypt.hash(pin, 10);
-    user.internalPin = hashedPin;
-    await user.save();
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { internalPin: hashedPin } },
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

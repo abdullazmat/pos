@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import { useSubscription } from "@/lib/hooks/useSubscription";
 import Header from "@/components/layout/Header";
-import { UserCog, Edit, Trash2, X } from "lucide-react";
+import { UserCog, Edit, Trash2, X, KeyRound } from "lucide-react";
 import { toast } from "react-toastify";
 import { useBusinessDateTime } from "@/lib/hooks/useBusinessDateTime";
 import {
@@ -31,6 +31,7 @@ interface SystemUser {
   isActive: boolean;
   createdAt: string;
   discountLimit?: number | null;
+  hasPin?: boolean;
 }
 
 const ADMIN_COPY = {
@@ -70,6 +71,13 @@ const ADMIN_COPY = {
       discountLimit: "Límite de Descuento (%)",
       password: "Contraseña",
       passwordOptional: "Contraseña (dejar en blanco para no cambiar)",
+      internalPin: "PIN Interno (Canal 2)",
+      pinPlaceholder: "Nuevo PIN (4-8 dígitos)",
+      pinStatus: "Estado PIN",
+      pinConfigured: "PIN configurado",
+      pinNotConfigured: "Sin PIN",
+      clearPin: "Eliminar PIN",
+      setPin: "Establecer PIN",
       phone: "Teléfono",
       role: "Rol",
       required: "*",
@@ -107,6 +115,9 @@ const ADMIN_COPY = {
       deleteError: "Error al eliminar usuario",
       discountLimitClamped: "El limite maximo de descuento es 5%",
       mustHaveAdmin: "Debe existir al menos un administrador.",
+      pinSet: "PIN interno establecido correctamente",
+      pinCleared: "PIN interno eliminado",
+      pinTooShort: "El PIN debe tener entre 4 y 8 dígitos",
       userLimitReached:
         "El límite de usuarios en el plan gratuito es 2/2. Actualiza tu plan para agregar más usuarios.",
       cannotDelete: "No puedes eliminar tu propio usuario.",
@@ -157,6 +168,13 @@ const ADMIN_COPY = {
       discountLimit: "Discount Limit (%)",
       password: "Password",
       passwordOptional: "Password (leave blank to keep current)",
+      internalPin: "Internal PIN (Channel 2)",
+      pinPlaceholder: "New PIN (4-8 digits)",
+      pinStatus: "PIN Status",
+      pinConfigured: "PIN configured",
+      pinNotConfigured: "No PIN",
+      clearPin: "Clear PIN",
+      setPin: "Set PIN",
       phone: "Phone",
       role: "Role",
       required: "*",
@@ -194,6 +212,9 @@ const ADMIN_COPY = {
       deleteError: "Error deleting user",
       discountLimitClamped: "The maximum discount limit is 5%",
       mustHaveAdmin: "At least one administrator is required.",
+      pinSet: "Internal PIN set successfully",
+      pinCleared: "Internal PIN cleared",
+      pinTooShort: "PIN must be 4-8 digits",
       userLimitReached:
         "The free plan user limit is 2/2. Upgrade your plan to add more users.",
       cannotDelete: "You cannot delete your own user.",
@@ -245,6 +266,13 @@ const ADMIN_COPY = {
       discountLimit: "Limite de Desconto (%)",
       password: "Senha",
       passwordOptional: "Senha (deixar em branco para manter atual)",
+      internalPin: "PIN Interno (Canal 2)",
+      pinPlaceholder: "Novo PIN (4-8 dígitos)",
+      pinStatus: "Status PIN",
+      pinConfigured: "PIN configurado",
+      pinNotConfigured: "Sem PIN",
+      clearPin: "Remover PIN",
+      setPin: "Definir PIN",
       phone: "Telefone",
       role: "Função",
       required: "*",
@@ -281,6 +309,9 @@ const ADMIN_COPY = {
       deleteSuccess: "Usuário deletado com sucesso",
       deleteError: "Erro ao deletar usuário",
       discountLimitClamped: "O limite maximo de desconto e 5%",
+      pinSet: "PIN interno definido com sucesso",
+      pinCleared: "PIN interno removido",
+      pinTooShort: "O PIN deve ter entre 4 e 8 dígitos",
       userLimitReached:
         "O limite de usuários no plano gratuito é 2/2. Atualize seu plano para adicionar mais usuários.",
       cannotDelete: "Você não pode excluir seu próprio usuário.",
@@ -333,6 +364,8 @@ export default function AdminPage() {
     phone: "",
     discountLimit: "",
     role: "cashier" as "admin" | "supervisor" | "cashier",
+    internalPin: "",
+    clearPin: false,
   });
 
   const planId = (subscription?.planId || "BASIC").toUpperCase();
@@ -533,6 +566,8 @@ export default function AdminPage() {
           ? ""
           : String(systemUser.discountLimit),
       role: systemUser.role,
+      internalPin: "",
+      clearPin: false,
     });
     setShowEditModal(true);
   };
@@ -562,6 +597,19 @@ export default function AdminPage() {
       ) {
         toast.info(copy.toasts.discountLimitClamped);
       }
+
+      // Validate PIN if provided
+      if (
+        editFormData.internalPin &&
+        !editFormData.clearPin &&
+        (editFormData.internalPin.length < 4 ||
+          editFormData.internalPin.length > 8)
+      ) {
+        toast.error(copy.toasts.pinTooShort);
+        setIsSubmitting(false);
+        return;
+      }
+
       const response = await fetch("/api/users", {
         method: "PATCH",
         headers: {
@@ -570,11 +618,21 @@ export default function AdminPage() {
         },
         body: JSON.stringify({
           userId: userToEdit._id,
-          ...editFormData,
+          fullName: editFormData.fullName,
+          username: editFormData.username,
+          email: editFormData.email,
+          password: editFormData.password,
+          phone: editFormData.phone,
+          role: editFormData.role,
           discountLimit:
             rawDiscountLimit === null
               ? null
               : clampDiscountLimit(rawDiscountLimit),
+          ...(editFormData.clearPin
+            ? { clearPin: true }
+            : editFormData.internalPin
+              ? { internalPin: editFormData.internalPin }
+              : {}),
         }),
       });
 
@@ -582,6 +640,11 @@ export default function AdminPage() {
 
       if (response.ok) {
         toast.success(copy.toasts.updateSuccess);
+        if (editFormData.clearPin) {
+          toast.info(copy.toasts.pinCleared);
+        } else if (editFormData.internalPin) {
+          toast.success(copy.toasts.pinSet);
+        }
         setShowEditModal(false);
         setUserToEdit(null);
         setEditFormData({
@@ -592,6 +655,8 @@ export default function AdminPage() {
           phone: "",
           discountLimit: "",
           role: "cashier",
+          internalPin: "",
+          clearPin: false,
         });
         fetchUsers();
       } else if (response.status === 401) {
@@ -1241,6 +1306,83 @@ export default function AdminPage() {
                     </option>
                     <option value="admin">{copy.roleOptions.admin}</option>
                   </select>
+                </div>
+
+                {/* Internal PIN (Channel 2) */}
+                <div>
+                  <label className="block mb-1 text-sm font-medium text-slate-900 dark:text-slate-300">
+                    {copy.modal.internalPin}
+                  </label>
+                  {/* PIN status indicator */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full ${
+                        userToEdit?.hasPin && !editFormData.clearPin
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/50"
+                          : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700"
+                      }`}
+                    >
+                      <KeyRound size={12} />
+                      {userToEdit?.hasPin && !editFormData.clearPin
+                        ? copy.modal.pinConfigured
+                        : copy.modal.pinNotConfigured}
+                    </span>
+                    {userToEdit?.hasPin && !editFormData.clearPin && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditFormData({
+                            ...editFormData,
+                            clearPin: true,
+                            internalPin: "",
+                          })
+                        }
+                        className="text-xs text-red-500 hover:text-red-400 underline"
+                      >
+                        {copy.modal.clearPin}
+                      </button>
+                    )}
+                    {editFormData.clearPin && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditFormData({
+                            ...editFormData,
+                            clearPin: false,
+                          })
+                        }
+                        className="text-xs text-blue-500 hover:text-blue-400 underline"
+                      >
+                        {copy.modal.buttons.cancel}
+                      </button>
+                    )}
+                  </div>
+                  {editFormData.clearPin ? (
+                    <p className="text-xs text-red-500 dark:text-red-400">
+                      {currentLanguage === "es"
+                        ? "El PIN será eliminado al guardar"
+                        : currentLanguage === "pt"
+                          ? "O PIN será removido ao salvar"
+                          : "PIN will be removed on save"}
+                    </p>
+                  ) : (
+                    <input
+                      type="password"
+                      value={editFormData.internalPin}
+                      onChange={(e) =>
+                        setEditFormData({
+                          ...editFormData,
+                          internalPin: e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 8),
+                        })
+                      }
+                      className="w-full px-3 py-2 bg-white border rounded-lg border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                      placeholder={copy.modal.pinPlaceholder}
+                      inputMode="numeric"
+                      maxLength={8}
+                    />
+                  )}
                 </div>
 
                 <div className="flex gap-3 pt-4">

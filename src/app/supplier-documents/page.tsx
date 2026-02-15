@@ -390,6 +390,34 @@ export default function SupplierDocumentsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeChannel]);
 
+  /* ══════════  F2 Key Handler  ══════════ */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input/textarea/select
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+      if (e.key === "F2") {
+        e.preventDefault();
+        if (channel2Active) {
+          // Deactivate channel 2
+          setChannel2Active(false);
+          setChannel2Expires("");
+          apiFetch("/api/channel2-auth", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reason: "manual" }),
+          }).catch(() => {});
+        } else {
+          // Open activation modal
+          setShowChannel2Modal(true);
+        }
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [channel2Active]);
+
   /* ─────────────────  Data Loaders  ───────────────── */
 
   const loadSuppliers = async () => {
@@ -504,12 +532,27 @@ export default function SupplierDocumentsPage() {
 
     try {
       if (formState.documentId) {
+        // For PUT, only send editable fields (exclude immutable supplierId/channel)
+        const updatePayload: Record<string, unknown> = {
+          type: formState.type,
+          pointOfSale: formState.pointOfSale || undefined,
+          documentNumber: formState.documentNumber,
+          date: formState.date || undefined,
+          dueDate: formState.dueDate || undefined,
+          totalAmount: Number(formState.totalAmount || 0),
+          notes: formState.notes || undefined,
+          attachments,
+        };
+        if (activeChannel === 2) {
+          updatePayload.impactsStock = formState.impactsStock;
+          updatePayload.impactsCosts = formState.impactsCosts;
+        }
         const res = await apiFetch(
           `/api/supplier-documents/${formState.documentId}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ updates: payload }),
+            body: JSON.stringify({ updates: updatePayload }),
           },
         );
         if (!res.ok) {
@@ -533,8 +576,8 @@ export default function SupplierDocumentsPage() {
       resetForm();
       await loadDocuments(supplierId);
       await loadAlerts();
-    } catch {
-      toast.error(copy.toasts.loadError);
+    } catch (err: any) {
+      toast.error(err?.message || copy.toasts.loadError);
     }
   };
 
@@ -742,7 +785,7 @@ export default function SupplierDocumentsPage() {
                 }
               }}
             >
-              {copy.channel2Short}
+              {copy.channel2Short} (F2)
             </span>
 
             {/* Export for accountant (Channel 1 only) */}
@@ -1121,12 +1164,15 @@ export default function SupplierDocumentsPage() {
                     </span>
 
                     <div className="flex gap-2">
-                      <button
-                        className="text-xs text-[hsl(var(--vp-primary))]"
-                        onClick={() => handleEditDocument(doc)}
-                      >
-                        {copy.edit}
-                      </button>
+                      {doc.status !== "CANCELLED" &&
+                        doc.status !== "APPLIED" && (
+                          <button
+                            className="text-xs text-[hsl(var(--vp-primary))]"
+                            onClick={() => handleEditDocument(doc)}
+                          >
+                            {copy.edit}
+                          </button>
+                        )}
                       {doc.status !== "CANCELLED" && doc.balance > 0 && (
                         <button
                           className="text-xs text-rose-600"

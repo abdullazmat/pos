@@ -6,6 +6,7 @@ import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
 import Header from "@/components/layout/Header";
 import { toast } from "react-toastify";
 import { useBusinessDateTime } from "@/lib/hooks/useBusinessDateTime";
+import { Receipt, X, CheckCircle } from "lucide-react";
 
 export default function PurchasesPage() {
   const { formatDate } = useBusinessDateTime();
@@ -24,6 +25,13 @@ export default function PurchasesPage() {
     invoiceNumber: "",
     notes: "",
   });
+
+  // Expense-from-purchase modal state
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [lastPurchase, setLastPurchase] = useState<any>(null);
+  const [expenseCategory, setExpenseCategory] = useState("Compras");
+  const [expensePaymentMethod, setExpensePaymentMethod] = useState("cash");
+  const [creatingExpense, setCreatingExpense] = useState(false);
 
   useEffect(() => {
     const userStr = localStorage.getItem("user");
@@ -87,6 +95,7 @@ export default function PurchasesPage() {
         return;
       }
 
+      const result = await response.json();
       toast.success(t("purchaseRegisteredSuccess", "errors"));
       setFormData({
         productId: "",
@@ -98,9 +107,50 @@ export default function PurchasesPage() {
       });
       setShowForm(false);
       loadPurchases();
+
+      // Offer to create expense from this purchase
+      if (result.data?.purchase) {
+        setLastPurchase(result.data.purchase);
+        setExpenseCategory("Compras");
+        setExpensePaymentMethod("cash");
+        setShowExpenseModal(true);
+      }
     } catch (error) {
       console.error("Create purchase error:", error);
       toast.error(t("errorRegisteringPurchase", "errors"));
+    }
+  };
+
+  const handleCreateExpenseFromPurchase = async () => {
+    if (!lastPurchase) return;
+    setCreatingExpense(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch("/api/expenses/from-purchase", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          purchaseId: lastPurchase._id,
+          category: expenseCategory,
+          paymentMethod: expensePaymentMethod,
+        }),
+      });
+      if (response.ok) {
+        toast.success("Gasto registrado desde la compra");
+      } else {
+        const err = await response.json();
+        toast.error(err.error || "Error al crear gasto");
+      }
+    } catch (error) {
+      console.error("Error creating expense from purchase:", error);
+      toast.error("Error al crear gasto");
+    } finally {
+      setCreatingExpense(false);
+      setShowExpenseModal(false);
+      setLastPurchase(null);
     }
   };
 
@@ -201,6 +251,91 @@ export default function PurchasesPage() {
                 Registrar Compra
               </button>
             </form>
+          </div>
+        )}
+
+        {/* ─── Expense-from-Purchase Modal ─────────────────── */}
+        {showExpenseModal && lastPurchase && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Receipt className="w-5 h-5 text-emerald-600" />
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                    ¿Registrar como gasto?
+                  </h3>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowExpenseModal(false);
+                    setLastPurchase(null);
+                  }}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                Se detectó una salida de dinero por{" "}
+                <strong className="text-slate-900 dark:text-white">
+                  ${lastPurchase.totalCost?.toFixed(2)}
+                </strong>
+                .{" "}
+                {lastPurchase.supplier
+                  ? `Proveedor: ${lastPurchase.supplier}.`
+                  : ""}
+              </p>
+
+              <div className="space-y-3 mb-5">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Categoría
+                  </label>
+                  <input
+                    type="text"
+                    value={expenseCategory}
+                    onChange={(e) => setExpenseCategory(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Método de pago
+                  </label>
+                  <select
+                    value={expensePaymentMethod}
+                    onChange={(e) => setExpensePaymentMethod(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+                  >
+                    <option value="cash">Efectivo</option>
+                    <option value="card">Tarjeta</option>
+                    <option value="transfer">Transferencia</option>
+                    <option value="check">Cheque</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => {
+                    setShowExpenseModal(false);
+                    setLastPurchase(null);
+                  }}
+                  className="px-4 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  No, gracias
+                </button>
+                <button
+                  onClick={handleCreateExpenseFromPurchase}
+                  disabled={creatingExpense}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-colors disabled:opacity-50"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  {creatingExpense ? "Registrando..." : "Sí, registrar gasto"}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

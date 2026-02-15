@@ -158,9 +158,30 @@ export async function PUT(
       updates.balance = updates.totalAmount;
     }
 
+    // Sanitize: only allow safe fields to be updated
+    const allowedFields = [
+      "type",
+      "pointOfSale",
+      "documentNumber",
+      "date",
+      "dueDate",
+      "totalAmount",
+      "balance",
+      "notes",
+      "attachments",
+      "impactsStock",
+      "impactsCosts",
+    ];
+    const sanitizedUpdates: Record<string, unknown> = {};
+    for (const key of allowedFields) {
+      if (key in updates) {
+        sanitizedUpdates[key] = updates[key];
+      }
+    }
+
     const updatedDocument = await SupplierDocument.findOneAndUpdate(
       { _id: params.id, businessId: decoded.businessId },
-      updates,
+      sanitizedUpdates,
       { new: true },
     );
 

@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (type !== "CREDIT_NOTE" && !dueDate) {
+    if (type !== "CREDIT_NOTE" && type !== "FISCAL_DELIVERY_NOTE" && !dueDate) {
       return NextResponse.json(
         { error: "Due date is required for invoice/debit note" },
         { status: 400 },

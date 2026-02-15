@@ -12,7 +12,6 @@ import {
   CreditCard,
   DollarSign,
   FileText,
-  Keyboard,
   LogOut,
   Moon,
   Package,
@@ -22,6 +21,7 @@ import {
   Store,
   Sun,
   Tag,
+  TrendingUp,
   Truck,
   User,
   UserCog,
@@ -72,6 +72,7 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
   const adminOnlyRoutes = [
     "/clients",
     "/expenses",
+    "/expense-analytics",
     "/reports",
     "/reportes-fiscales",
     "/admin",
@@ -111,17 +112,17 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
       label: t("nav.paymentOrders", "pos"),
       icon: Receipt,
     },
-    {
-      href: "/keyboard-config",
-      label: t("nav.keyboardConfig", "pos"),
-      icon: Keyboard,
-    },
   ];
 
   const adminNavItems = [
     ...supervisorNavItems,
     { href: "/clients", label: t("nav.clients", "pos"), icon: Users },
     { href: "/expenses", label: t("nav.expenses", "pos"), icon: Receipt },
+    {
+      href: "/expense-analytics",
+      label: t("nav.expenseAnalytics", "pos"),
+      icon: TrendingUp,
+    },
     { href: "/reports", label: t("nav.reports", "pos"), icon: BarChart3 },
     {
       href: "/reportes-fiscales",

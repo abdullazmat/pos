@@ -177,12 +177,12 @@ export function Channel2Modal({
         body: JSON.stringify({ pin }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || copy.activateError);
       toast.success(copy.activated);
       onActivated(data.expiresAt);
       onClose();
-    } catch {
-      toast.error(copy.activateError);
+    } catch (err: any) {
+      toast.error(err?.message || copy.activateError);
     } finally {
       setLoading(false);
     }
@@ -209,14 +209,14 @@ export function Channel2Modal({
         body: JSON.stringify({ pin: newPin, currentPassword }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || copy.pinError);
       toast.success(copy.pinSaved);
       setHasPin(true);
       setNewPin("");
       setConfirmPin("");
       setCurrentPassword("");
-    } catch {
-      toast.error(copy.pinError);
+    } catch (err: any) {
+      toast.error(err?.message || copy.pinError);
     } finally {
       setLoading(false);
     }

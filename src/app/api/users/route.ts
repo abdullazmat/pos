@@ -36,11 +36,17 @@ export async function GET(req: NextRequest) {
     await dbConnect();
 
     const users = await User.find({ businessId, isActive: true })
-      .select("-password")
+      .select("-password +internalPin")
       .sort({ createdAt: -1 })
       .lean();
 
-    return generateSuccessResponse({ users });
+    // Map users to include hasPin flag instead of raw internalPin
+    const sanitizedUsers = users.map(({ internalPin, ...rest }: any) => ({
+      ...rest,
+      hasPin: !!internalPin,
+    }));
+
+    return generateSuccessResponse({ users: sanitizedUsers });
   } catch (error) {
     console.error("Get users error:", error);
     return generateErrorResponse("Internal server error", 500);
@@ -293,6 +299,8 @@ export async function PATCH(req: NextRequest) {
       role: userRole,
       password,
       discountLimit,
+      internalPin,
+      clearPin,
     } = body;
 
     const discountLimitProvided = Object.prototype.hasOwnProperty.call(
@@ -394,7 +402,31 @@ export async function PATCH(req: NextRequest) {
       userToUpdate.password = await bcrypt.hash(password, 10);
     }
 
+    // Handle PIN management by admin
+    if (clearPin) {
+      await User.updateOne(
+        { _id: userToUpdate._id },
+        { $unset: { internalPin: 1 } },
+      );
+    } else if (
+      internalPin &&
+      typeof internalPin === "string" &&
+      internalPin.length >= 4 &&
+      internalPin.length <= 8
+    ) {
+      const hashedPin = await bcrypt.hash(internalPin, 10);
+      await User.updateOne(
+        { _id: userToUpdate._id },
+        { $set: { internalPin: hashedPin } },
+      );
+    }
+
     await userToUpdate.save();
+
+    // Re-fetch to check hasPin status
+    const updatedUser = (await User.findById(userToUpdate._id)
+      .select("+internalPin")
+      .lean()) as any;
 
     const userResponse = {
       _id: userToUpdate._id,
@@ -406,6 +438,7 @@ export async function PATCH(req: NextRequest) {
       discountLimit: userToUpdate.discountLimit,
       isActive: userToUpdate.isActive,
       createdAt: userToUpdate.createdAt,
+      hasPin: !!updatedUser?.internalPin,
     };
 
     return generateSuccessResponse({ user: userResponse });
