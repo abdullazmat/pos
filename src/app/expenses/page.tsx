@@ -156,6 +156,101 @@ interface CategorySuggestion {
   source: "rule" | "history";
 }
 
+// ─── Default rule translations per language ──────────────────────────
+const DEFAULT_CATEGORY_NAMES: Record<string, Record<string, string>> = {
+  es: {
+    Utilities: "Servicios",
+    Payroll: "Nómina",
+    Rent: "Alquiler",
+    Materials: "Materiales",
+    Infrastructure: "Infraestructura",
+  },
+  en: {
+    Utilities: "Utilities",
+    Payroll: "Payroll",
+    Rent: "Rent",
+    Materials: "Materials",
+    Infrastructure: "Infrastructure",
+  },
+  pt: {
+    Utilities: "Serviços",
+    Payroll: "Folha de Pagamento",
+    Rent: "Aluguel",
+    Materials: "Materiais",
+    Infrastructure: "Infraestrutura",
+  },
+};
+
+const DEFAULT_KEYWORDS_BY_LANG: Record<string, Record<string, string[]>> = {
+  es: {
+    Utilities: [
+      "electricidad",
+      "energía",
+      "luz",
+      "agua",
+      "plomería",
+      "internet",
+      "teléfono",
+      "cable",
+      "gas",
+    ],
+    Payroll: [
+      "salario",
+      "sueldo",
+      "nómina",
+      "nomina",
+      "empleado",
+      "pago empleado",
+      "honorarios",
+    ],
+    Rent: ["alquiler", "arrendamiento", "local"],
+    Materials: [
+      "materiales",
+      "materia prima",
+      "insumo",
+      "insumos",
+      "suministro",
+    ],
+    Infrastructure: ["mantenimiento", "reparación", "reparacion", "arreglo"],
+  },
+  en: {
+    Utilities: [
+      "electricity",
+      "energy",
+      "electric",
+      "power",
+      "water",
+      "plumbing",
+      "internet",
+      "wifi",
+      "phone",
+      "telephone",
+      "cable",
+      "gas",
+    ],
+    Payroll: ["salary", "wage", "employee payment", "payroll"],
+    Rent: ["rent", "lease"],
+    Materials: ["supply", "material", "raw material", "supplies"],
+    Infrastructure: ["maintenance", "repair", "fix"],
+  },
+  pt: {
+    Utilities: [
+      "energia",
+      "luz",
+      "água",
+      "encanamento",
+      "internet",
+      "telefone",
+      "cabo",
+      "gás",
+    ],
+    Payroll: ["salário", "folha", "pagamento funcionário", "honorário"],
+    Rent: ["aluguel", "locação", "local"],
+    Materials: ["materiais", "matéria prima", "insumos"],
+    Infrastructure: ["manutenção", "reparo", "conserto"],
+  },
+};
+
 // ─── i18n Copy ───────────────────────────────────────────────────────
 const EXPENSE_COPY = {
   es: {
@@ -4229,31 +4324,42 @@ export default function ExpensesPage() {
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {categoryRules
                     .filter((r) => r.isDefault)
-                    .map((rule) => (
-                      <div
-                        key={rule._id}
-                        className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-4 opacity-80"
-                      >
-                        <span className="font-semibold text-slate-700 dark:text-slate-300 text-sm block mb-2">
-                          {rule.category}
-                        </span>
-                        <div className="flex flex-wrap gap-1">
-                          {rule.keywords.slice(0, 8).map((kw, i) => (
-                            <span
-                              key={i}
-                              className="px-2 py-0.5 text-xs rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                            >
-                              {kw}
-                            </span>
-                          ))}
-                          {rule.keywords.length > 8 && (
-                            <span className="px-2 py-0.5 text-xs text-slate-400 dark:text-slate-500">
-                              +{rule.keywords.length - 8}
-                            </span>
-                          )}
+                    .map((rule) => {
+                      const lang = currentLanguage || "es";
+                      const catNames =
+                        DEFAULT_CATEGORY_NAMES[lang] ||
+                        DEFAULT_CATEGORY_NAMES.en;
+                      const langKeywords = (DEFAULT_KEYWORDS_BY_LANG[lang] ||
+                        DEFAULT_KEYWORDS_BY_LANG.en)[rule.category];
+                      const displayName =
+                        catNames[rule.category] || rule.category;
+                      const displayKeywords = langKeywords || rule.keywords;
+                      return (
+                        <div
+                          key={rule._id}
+                          className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-4 opacity-80"
+                        >
+                          <span className="font-semibold text-slate-700 dark:text-slate-300 text-sm block mb-2">
+                            {displayName}
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {displayKeywords.slice(0, 8).map((kw, i) => (
+                              <span
+                                key={i}
+                                className="px-2 py-0.5 text-xs rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                              >
+                                {kw}
+                              </span>
+                            ))}
+                            {displayKeywords.length > 8 && (
+                              <span className="px-2 py-0.5 text-xs text-slate-400 dark:text-slate-500">
+                                +{displayKeywords.length - 8}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               </div>
             )}

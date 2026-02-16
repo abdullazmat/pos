@@ -658,9 +658,29 @@ export default function SupplierDocumentsPage() {
   };
 
   /* ── Channel 2 handling ── */
+
+  // Restore Channel 2 session from sessionStorage on mount
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem("channel2Session");
+      if (stored) {
+        const { expiresAt } = JSON.parse(stored);
+        if (expiresAt && new Date(expiresAt) > new Date()) {
+          setChannel2Active(true);
+          setChannel2Expires(expiresAt);
+        } else {
+          sessionStorage.removeItem("channel2Session");
+        }
+      }
+    } catch {}
+  }, []);
+
   const handleChannel2Activated = useCallback((expiresAt: string) => {
     setChannel2Active(true);
     setChannel2Expires(expiresAt);
+    try {
+      sessionStorage.setItem("channel2Session", JSON.stringify({ expiresAt }));
+    } catch {}
   }, []);
 
   const handleChannel2Deactivate = useCallback(async () => {
@@ -675,6 +695,9 @@ export default function SupplierDocumentsPage() {
     }
     setChannel2Active(false);
     setChannel2Expires("");
+    try {
+      sessionStorage.removeItem("channel2Session");
+    } catch {}
   }, []);
 
   /* ── Export Channel 1 for accountant ── */
@@ -816,7 +839,7 @@ export default function SupplierDocumentsPage() {
             {/* Summary cards */}
             {supplierId && (
               <div className="md:col-span-2 grid grid-cols-3 gap-3">
-                <div className="px-3 py-2 rounded-lg bg-slate-50 text-center">
+                <div className="px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-center">
                   <div className="text-xs text-[hsl(var(--vp-muted))]">
                     {copy.totalDocs}
                   </div>
@@ -824,7 +847,7 @@ export default function SupplierDocumentsPage() {
                     {summary.count}
                   </div>
                 </div>
-                <div className="px-3 py-2 rounded-lg bg-slate-50 text-center">
+                <div className="px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-center">
                   <div className="text-xs text-[hsl(var(--vp-muted))]">
                     {copy.totalAmount}
                   </div>
@@ -832,11 +855,11 @@ export default function SupplierDocumentsPage() {
                     {formatCurrency(summary.total)}
                   </div>
                 </div>
-                <div className="px-3 py-2 rounded-lg bg-slate-50 text-center">
+                <div className="px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-center">
                   <div className="text-xs text-[hsl(var(--vp-muted))]">
                     {copy.pendingBalance}
                   </div>
-                  <div className="text-lg font-bold text-amber-600">
+                  <div className="text-lg font-bold text-amber-600 dark:text-amber-400">
                     {formatCurrency(summary.pending)}
                   </div>
                 </div>
@@ -850,10 +873,10 @@ export default function SupplierDocumentsPage() {
                   {copy.alertsTitle}
                 </label>
                 <div className="flex flex-wrap gap-3">
-                  <div className="px-3 py-2 rounded-lg bg-amber-50 text-amber-700 text-sm">
+                  <div className="px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-sm">
                     {copy.dueSoon}: {alerts.dueSoon}
                   </div>
-                  <div className="px-3 py-2 rounded-lg bg-rose-50 text-rose-700 text-sm">
+                  <div className="px-3 py-2 rounded-lg bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 text-sm">
                     {copy.overdue}: {alerts.overdue}
                   </div>
                 </div>

@@ -133,6 +133,21 @@ const COPY = {
     filters: "Filtros",
     dateFrom: "Desde",
     dateTo: "Hasta",
+    monthFilter: "Mes",
+    months: [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
+    ],
     statusFilter: "Estado",
     all: "Todos",
     notes: "Observaciones",
@@ -233,6 +248,21 @@ const COPY = {
     filters: "Filters",
     dateFrom: "From",
     dateTo: "To",
+    monthFilter: "Month",
+    months: [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ],
     statusFilter: "Status",
     all: "All",
     notes: "Notes",
@@ -333,6 +363,21 @@ const COPY = {
     filters: "Filtros",
     dateFrom: "De",
     dateTo: "Até",
+    monthFilter: "Mês",
+    months: [
+      "Janeiro",
+      "Fevereiro",
+      "Março",
+      "Abril",
+      "Maio",
+      "Junho",
+      "Julho",
+      "Agosto",
+      "Setembro",
+      "Outubro",
+      "Novembro",
+      "Dezembro",
+    ],
     statusFilter: "Estado",
     all: "Todos",
     notes: "Observações",
@@ -465,6 +510,36 @@ export default function PaymentOrdersPage() {
   const [filterStatus, setFilterStatus] = useState("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterMonth, setFilterMonth] = useState("");
+
+  const handleMonthChange = useCallback(
+    (monthName: string) => {
+      setFilterMonth(monthName);
+      if (!monthName) {
+        setFilterDateFrom("");
+        setFilterDateTo("");
+        return;
+      }
+      const allMonths = (COPY[currentLanguage as keyof typeof COPY] || COPY.es)
+        .months as readonly string[];
+      const m = allMonths.findIndex(
+        (n) => n.toLowerCase() === monthName.toLowerCase(),
+      );
+      if (m < 0) return;
+      const now = new Date();
+      const year = now.getFullYear();
+      const from = new Date(year, m, 1);
+      const to = new Date(year, m + 1, 0); // last day of month
+      const pad = (n: number) => String(n).padStart(2, "0");
+      setFilterDateFrom(
+        `${from.getFullYear()}-${pad(from.getMonth() + 1)}-${pad(from.getDate())}`,
+      );
+      setFilterDateTo(
+        `${to.getFullYear()}-${pad(to.getMonth() + 1)}-${pad(to.getDate())}`,
+      );
+    },
+    [currentLanguage],
+  );
 
   /* ── Create form ── */
   const [applyAmounts, setApplyAmounts] = useState<Record<string, string>>({});
@@ -543,7 +618,7 @@ export default function PaymentOrdersPage() {
     try {
       const res = await apiFetch("/api/suppliers");
       const data = await res.json();
-      setSuppliers(data?.data?.suppliers || []);
+      setSuppliers(data?.suppliers || []);
     } catch {
       toast.error(copy.toasts.loadError);
     } finally {
@@ -587,9 +662,28 @@ export default function PaymentOrdersPage() {
 
   /* ══════════  Channel 2  ══════════ */
 
+  // Restore Channel 2 session from sessionStorage on mount
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem("channel2Session");
+      if (stored) {
+        const { expiresAt } = JSON.parse(stored);
+        if (expiresAt && new Date(expiresAt) > new Date()) {
+          setChannel2Active(true);
+          setChannel2Expires(expiresAt);
+        } else {
+          sessionStorage.removeItem("channel2Session");
+        }
+      }
+    } catch {}
+  }, []);
+
   const handleChannel2Activated = useCallback((expiresAt: string) => {
     setChannel2Active(true);
     setChannel2Expires(expiresAt);
+    try {
+      sessionStorage.setItem("channel2Session", JSON.stringify({ expiresAt }));
+    } catch {}
   }, []);
 
   const handleChannel2Deactivate = useCallback(async () => {
@@ -602,6 +696,9 @@ export default function PaymentOrdersPage() {
     } catch {}
     setChannel2Active(false);
     setChannel2Expires("");
+    try {
+      sessionStorage.removeItem("channel2Session");
+    } catch {}
   }, []);
 
   /* ══════════  Totals  ══════════ */
@@ -1318,7 +1415,7 @@ export default function PaymentOrdersPage() {
 
         {/* Filters row */}
         <div className="p-4 mb-4 vp-card">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-6">
             <div>
               <SupplierSearch
                 suppliers={suppliers}
@@ -1353,7 +1450,10 @@ export default function PaymentOrdersPage() {
                 type="date"
                 className="w-full text-sm border rounded px-2 py-1.5"
                 value={filterDateFrom}
-                onChange={(e) => setFilterDateFrom(e.target.value)}
+                onChange={(e) => {
+                  setFilterDateFrom(e.target.value);
+                  setFilterMonth("");
+                }}
               />
             </div>
             <div>
@@ -1364,8 +1464,30 @@ export default function PaymentOrdersPage() {
                 type="date"
                 className="w-full text-sm border rounded px-2 py-1.5"
                 value={filterDateTo}
-                onChange={(e) => setFilterDateTo(e.target.value)}
+                onChange={(e) => {
+                  setFilterDateTo(e.target.value);
+                  setFilterMonth("");
+                }}
               />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-[hsl(var(--vp-muted))] mb-1">
+                {copy.monthFilter}
+              </label>
+              <input
+                type="text"
+                list="month-list"
+                autoComplete="off"
+                value={filterMonth}
+                onChange={(e) => handleMonthChange(e.target.value)}
+                placeholder={copy.monthFilter + "..."}
+                className="w-full text-sm border rounded px-2 py-1.5"
+              />
+              <datalist id="month-list">
+                {copy.months.map((name: string, idx: number) => (
+                  <option key={idx} value={name} />
+                ))}
+              </datalist>
             </div>
             <div className="flex items-end">
               {supplierId && (
