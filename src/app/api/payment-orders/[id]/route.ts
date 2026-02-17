@@ -334,8 +334,28 @@ export async function PUT(
     );
 
     return NextResponse.json({ paymentOrder: updatedOrder });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Update payment order error:", error);
+
+    // Handle Mongoose validation errors as 400
+    if (error?.name === "ValidationError") {
+      const messages = Object.values(error.errors || {})
+        .map((e: any) => e.message)
+        .join(", ");
+      return NextResponse.json(
+        { error: `Validation error: ${messages}` },
+        { status: 400 },
+      );
+    }
+
+    // Handle duplicate key errors
+    if (error?.code === 11000) {
+      return NextResponse.json(
+        { error: "Duplicate key conflict. Please try again." },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json(
       {
         error:

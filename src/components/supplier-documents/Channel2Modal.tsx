@@ -42,6 +42,12 @@ const COPY = {
     deactivated: "Modo Interno desactivado",
     timeoutWarning: "La sesión interna expirará pronto",
     expired: "La sesión interna ha expirado",
+    forgotPin: "¿Olvidaste tu PIN?",
+    resetPinTitle: "Restablecer PIN",
+    resetPinSubtitle: "Ingresa tu contraseña de cuenta y un nuevo PIN",
+    resetPin: "Restablecer PIN",
+    pinResetSuccess: "PIN restablecido correctamente",
+    backToLogin: "Volver al ingreso de PIN",
   },
   en: {
     activateTitle: "Activate Internal Mode",
@@ -69,6 +75,12 @@ const COPY = {
     deactivated: "Internal Mode deactivated",
     timeoutWarning: "Internal session expiring soon",
     expired: "Internal session has expired",
+    forgotPin: "Forgot your PIN?",
+    resetPinTitle: "Reset PIN",
+    resetPinSubtitle: "Enter your account password and a new PIN",
+    resetPin: "Reset PIN",
+    pinResetSuccess: "PIN reset successfully",
+    backToLogin: "Back to PIN entry",
   },
   pt: {
     activateTitle: "Ativar Modo Interno",
@@ -97,6 +109,12 @@ const COPY = {
     deactivated: "Modo Interno desativado",
     timeoutWarning: "A sessão interna expirará em breve",
     expired: "A sessão interna expirou",
+    forgotPin: "Esqueceu seu PIN?",
+    resetPinTitle: "Redefinir PIN",
+    resetPinSubtitle: "Digite sua senha da conta e um novo PIN",
+    resetPin: "Redefinir PIN",
+    pinResetSuccess: "PIN redefinido com sucesso",
+    backToLogin: "Voltar para entrada do PIN",
   },
 } as const;
 
@@ -136,6 +154,7 @@ export function Channel2Modal({
   const [confirmPin, setConfirmPin] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotPinMode, setForgotPinMode] = useState(false);
 
   const pinInputRef = useRef<HTMLInputElement>(null);
 
@@ -147,6 +166,7 @@ export function Channel2Modal({
     setConfirmPin("");
     setCurrentPassword("");
     setHasPin(null);
+    setForgotPinMode(false);
 
     const checkPin = async () => {
       try {
@@ -162,10 +182,10 @@ export function Channel2Modal({
 
   // Auto-focus PIN input
   useEffect(() => {
-    if (isOpen && hasPin && pinInputRef.current) {
+    if (isOpen && hasPin && !forgotPinMode && pinInputRef.current) {
       setTimeout(() => pinInputRef.current?.focus(), 100);
     }
-  }, [isOpen, hasPin]);
+  }, [isOpen, hasPin, forgotPinMode]);
 
   const handleActivate = async () => {
     if (pin.length < 4) return;
@@ -210,8 +230,9 @@ export function Channel2Modal({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || copy.pinError);
-      toast.success(copy.pinSaved);
+      toast.success(forgotPinMode ? copy.pinResetSuccess : copy.pinSaved);
       setHasPin(true);
+      setForgotPinMode(false);
       setNewPin("");
       setConfirmPin("");
       setCurrentPassword("");
@@ -239,7 +260,7 @@ export function Channel2Modal({
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin h-8 w-8 border-2 border-amber-500 border-t-transparent rounded-full" />
           </div>
-        ) : hasPin ? (
+        ) : hasPin && !forgotPinMode ? (
           /* PIN Entry */
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -279,6 +300,20 @@ export function Channel2Modal({
               </button>
             </div>
 
+            <button
+              type="button"
+              className="text-xs text-amber-600 hover:text-amber-700 hover:underline mb-4 block"
+              onClick={() => {
+                setForgotPinMode(true);
+                setPin("");
+                setNewPin("");
+                setConfirmPin("");
+                setCurrentPassword("");
+              }}
+            >
+              {copy.forgotPin}
+            </button>
+
             <div className="flex gap-2">
               <button
                 className="flex-1 vp-button vp-button-primary bg-amber-600 hover:bg-amber-700"
@@ -296,18 +331,24 @@ export function Channel2Modal({
             </div>
           </div>
         ) : (
-          /* PIN Setup */
+          /* PIN Setup / Reset */
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <Settings className="text-blue-600" size={20} />
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${forgotPinMode ? "bg-amber-100" : "bg-blue-100"}`}
+              >
+                {forgotPinMode ? (
+                  <KeyRound className="text-amber-600" size={20} />
+                ) : (
+                  <Settings className="text-blue-600" size={20} />
+                )}
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-[hsl(var(--vp-text))]">
-                  {copy.setupTitle}
+                  {forgotPinMode ? copy.resetPinTitle : copy.setupTitle}
                 </h3>
                 <p className="text-xs text-[hsl(var(--vp-muted))]">
-                  {copy.setupSubtitle}
+                  {forgotPinMode ? copy.resetPinSubtitle : copy.setupSubtitle}
                 </p>
               </div>
             </div>
@@ -355,17 +396,26 @@ export function Channel2Modal({
 
             <div className="flex gap-2 mt-4">
               <button
-                className="flex-1 vp-button vp-button-primary"
+                className={`flex-1 vp-button vp-button-primary ${forgotPinMode ? "bg-amber-600 hover:bg-amber-700" : ""}`}
                 onClick={handleSetupPin}
                 disabled={loading}
               >
-                {loading ? "..." : copy.savePin}
+                {loading ? "..." : forgotPinMode ? copy.resetPin : copy.savePin}
               </button>
               <button
                 className="flex-1 vp-button vp-button-ghost"
-                onClick={onClose}
+                onClick={() => {
+                  if (forgotPinMode) {
+                    setForgotPinMode(false);
+                    setNewPin("");
+                    setConfirmPin("");
+                    setCurrentPassword("");
+                  } else {
+                    onClose();
+                  }
+                }}
               >
-                {copy.cancel}
+                {forgotPinMode ? copy.backToLogin : copy.cancel}
               </button>
             </div>
           </div>

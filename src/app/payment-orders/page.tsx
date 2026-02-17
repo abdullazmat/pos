@@ -769,8 +769,14 @@ export default function PaymentOrdersPage() {
         }),
       });
       if (!res.ok) {
-        const data = await res.json();
-        toast.error(data?.error || copy.toasts.orderError);
+        let errorMsg = copy.toasts.orderError;
+        try {
+          const data = await res.json();
+          if (data?.error) errorMsg = data.error;
+        } catch {
+          // Response wasn't JSON
+        }
+        toast.error(errorMsg);
         return;
       }
       toast.success(copy.toasts.orderCreated);
@@ -792,8 +798,14 @@ export default function PaymentOrdersPage() {
         body: JSON.stringify({ action: "confirm" }),
       });
       if (!res.ok) {
-        const data = await res.json();
-        toast.error(data?.error || copy.toasts.confirmError);
+        let errorMsg = copy.toasts.confirmError;
+        try {
+          const data = await res.json();
+          if (data?.error) errorMsg = data.error;
+        } catch {
+          // Response wasn't JSON
+        }
+        toast.error(errorMsg);
         return;
       }
       toast.success(copy.toasts.confirmOk);
@@ -812,8 +824,14 @@ export default function PaymentOrdersPage() {
         body: JSON.stringify({ action: "cancel" }),
       });
       if (!res.ok) {
-        const data = await res.json();
-        toast.error(data?.error || copy.toasts.cancelError);
+        let errorMsg = copy.toasts.cancelError;
+        try {
+          const data = await res.json();
+          if (data?.error) errorMsg = data.error;
+        } catch {
+          // Response wasn't JSON
+        }
+        toast.error(errorMsg);
         return;
       }
       toast.success(copy.toasts.cancelOk);
@@ -826,7 +844,7 @@ export default function PaymentOrdersPage() {
 
   const handlePrint = (id: string, format: "a4" | "ticket") => {
     const token = localStorage.getItem("accessToken");
-    const url = `/api/payment-orders/${id}/print?format=${format}&channel=${detailChannel}`;
+    const url = `/api/payment-orders/${id}/print?format=${format}&channel=${detailChannel}&lang=${currentLanguage}`;
     const win = window.open("", "_blank");
     if (!win) return;
     apiFetch(url)

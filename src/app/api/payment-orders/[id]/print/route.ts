@@ -18,35 +18,199 @@ const fmtDate = (d: string | Date) =>
     year: "numeric",
   });
 
-const TYPE_LABELS: Record<string, string> = {
-  INVOICE: "Factura",
-  INVOICE_A: "Factura A",
-  INVOICE_B: "Factura B",
-  INVOICE_C: "Factura C",
-  DEBIT_NOTE: "Nota de Débito",
-  CREDIT_NOTE: "Nota de Crédito",
-  FISCAL_DELIVERY_NOTE: "Remito Fiscal",
-};
+/* ─── i18n labels ─── */
+type Lang = "es" | "en" | "pt";
 
-const METHOD_LABELS: Record<string, string> = {
-  cash: "Efectivo",
-  transfer: "Transferencia",
-  mercadopago: "Mercado Pago",
-  check: "Cheque",
-  card: "Tarjeta",
-};
+const I18N = {
+  es: {
+    type: {
+      INVOICE: "Factura",
+      INVOICE_A: "Factura A",
+      INVOICE_B: "Factura B",
+      INVOICE_C: "Factura C",
+      DEBIT_NOTE: "Nota de Débito",
+      CREDIT_NOTE: "Nota de Crédito",
+      FISCAL_DELIVERY_NOTE: "Remito Fiscal",
+    },
+    method: {
+      cash: "Efectivo",
+      transfer: "Transferencia",
+      mercadopago: "Mercado Pago",
+      check: "Cheque",
+      card: "Tarjeta",
+    },
+    status: {
+      PENDING: "Pendiente",
+      CONFIRMED: "Confirmada",
+      CANCELLED: "Anulada",
+    },
+    paymentOrder: "ORDEN DE PAGO",
+    internalOP: "OP INTERNA",
+    date: "Fecha",
+    channel: "Canal: Fiscal",
+    supplier: "Proveedor",
+    address: "Dirección",
+    phone: "Tel",
+    appliedDocs: "Comprobantes Aplicados",
+    colType: "Tipo",
+    colNumber: "Número",
+    colDate: "Fecha",
+    colBalBefore: "Saldo Ant.",
+    colApplied: "Aplicado",
+    colBalAfter: "Saldo Post.",
+    creditNotesApplied: "Notas de Crédito Aplicadas",
+    paymentMethods: "Medios de Pago",
+    colMethod: "Medio",
+    colRef: "Referencia",
+    colAmount: "Monto",
+    totalDocs: "Total Comprobantes",
+    totalCN: "Total NC",
+    totalPaid: "Total Pagado",
+    notes: "Observaciones",
+    issuedBy: "Emitió",
+    signatureConfirm: "Firma Conforme",
+    createdBy: "Creado por",
+    confirmedBy: "Confirmado por",
+    printed: "Impreso",
+    vouchers: "COMPROBANTES",
+    creditNotes: "NOTAS CRÉDITO",
+    paymentMethodsTicket: "MEDIOS DE PAGO",
+    obs: "Obs",
+    created: "Creado",
+    confirmed: "Confirmado",
+    total: "Total",
+    receipt: "Comprobante",
+  },
+  en: {
+    type: {
+      INVOICE: "Invoice",
+      INVOICE_A: "Invoice A",
+      INVOICE_B: "Invoice B",
+      INVOICE_C: "Invoice C",
+      DEBIT_NOTE: "Debit Note",
+      CREDIT_NOTE: "Credit Note",
+      FISCAL_DELIVERY_NOTE: "Fiscal Delivery Note",
+    },
+    method: {
+      cash: "Cash",
+      transfer: "Transfer",
+      mercadopago: "Mercado Pago",
+      check: "Check",
+      card: "Card",
+    },
+    status: {
+      PENDING: "Pending",
+      CONFIRMED: "Confirmed",
+      CANCELLED: "Cancelled",
+    },
+    paymentOrder: "PAYMENT ORDER",
+    internalOP: "INTERNAL PO",
+    date: "Date",
+    channel: "Channel: Fiscal",
+    supplier: "Supplier",
+    address: "Address",
+    phone: "Phone",
+    appliedDocs: "Applied Documents",
+    colType: "Type",
+    colNumber: "Number",
+    colDate: "Date",
+    colBalBefore: "Prev. Balance",
+    colApplied: "Applied",
+    colBalAfter: "Post Balance",
+    creditNotesApplied: "Applied Credit Notes",
+    paymentMethods: "Payment Methods",
+    colMethod: "Method",
+    colRef: "Reference",
+    colAmount: "Amount",
+    totalDocs: "Total Documents",
+    totalCN: "Total CN",
+    totalPaid: "Total Paid",
+    notes: "Notes",
+    issuedBy: "Issued by",
+    signatureConfirm: "Authorized Signature",
+    createdBy: "Created by",
+    confirmedBy: "Confirmed by",
+    printed: "Printed",
+    vouchers: "DOCUMENTS",
+    creditNotes: "CREDIT NOTES",
+    paymentMethodsTicket: "PAYMENT METHODS",
+    obs: "Notes",
+    created: "Created",
+    confirmed: "Confirmed",
+    total: "Total",
+    receipt: "Document",
+  },
+  pt: {
+    type: {
+      INVOICE: "Fatura",
+      INVOICE_A: "Fatura A",
+      INVOICE_B: "Fatura B",
+      INVOICE_C: "Fatura C",
+      DEBIT_NOTE: "Nota de Débito",
+      CREDIT_NOTE: "Nota de Crédito",
+      FISCAL_DELIVERY_NOTE: "Remessa Fiscal",
+    },
+    method: {
+      cash: "Dinheiro",
+      transfer: "Transferência",
+      mercadopago: "Mercado Pago",
+      check: "Cheque",
+      card: "Cartão",
+    },
+    status: {
+      PENDING: "Pendente",
+      CONFIRMED: "Confirmada",
+      CANCELLED: "Cancelada",
+    },
+    paymentOrder: "ORDEM DE PAGAMENTO",
+    internalOP: "OP INTERNA",
+    date: "Data",
+    channel: "Canal: Fiscal",
+    supplier: "Fornecedor",
+    address: "Endereço",
+    phone: "Tel",
+    appliedDocs: "Documentos Aplicados",
+    colType: "Tipo",
+    colNumber: "Número",
+    colDate: "Data",
+    colBalBefore: "Saldo Ant.",
+    colApplied: "Aplicado",
+    colBalAfter: "Saldo Post.",
+    creditNotesApplied: "Notas de Crédito Aplicadas",
+    paymentMethods: "Meios de Pagamento",
+    colMethod: "Meio",
+    colRef: "Referência",
+    colAmount: "Valor",
+    totalDocs: "Total Documentos",
+    totalCN: "Total NC",
+    totalPaid: "Total Pago",
+    notes: "Observações",
+    issuedBy: "Emitido por",
+    signatureConfirm: "Assinatura Conforme",
+    createdBy: "Criado por",
+    confirmedBy: "Confirmado por",
+    printed: "Impresso",
+    vouchers: "DOCUMENTOS",
+    creditNotes: "NOTAS CRÉDITO",
+    paymentMethodsTicket: "MEIOS DE PAGAMENTO",
+    obs: "Obs",
+    created: "Criado",
+    confirmed: "Confirmado",
+    total: "Total",
+    receipt: "Documento",
+  },
+} as const;
 
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: "Pendiente",
-  CONFIRMED: "Confirmada",
-  CANCELLED: "Anulada",
-};
+function getL(lang?: string) {
+  return I18N[lang as Lang] || I18N.es;
+}
 
 /* ─── Channel 1: Full A4 Template ─── */
-function renderA4Channel1(order: any, supplier: any): string {
+function renderA4Channel1(order: any, supplier: any, lang?: string): string {
+  const L = getL(lang);
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"/>
-<title>Orden de Pago #${order.orderNumber}</title>
+<title>${L.paymentOrder} #${order.orderNumber}</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Segoe UI',system-ui,sans-serif;font-size:12px;color:#1e293b;padding:24px;max-width:800px;margin:0 auto}
@@ -69,41 +233,45 @@ function renderA4Channel1(order: any, supplier: any): string {
   .totals-table .total-row{font-weight:700;font-size:14px;border-top:2px solid #334155}
   .footer{margin-top:32px;display:flex;justify-content:space-between;font-size:10px;color:#94a3b8}
   .notes{background:#f8fafc;border:1px solid #e2e8f0;padding:8px;border-radius:4px;margin-top:8px;font-size:11px}
+  .signatures{margin-top:40px;padding-top:20px;display:flex;justify-content:space-between;gap:48px}
+  .signature-box{flex:1;max-width:300px;text-align:center}
+  .signature-line{height:48px;border-bottom:1px solid #1e293b}
+  .signature-label{margin-top:6px;font-size:11px;color:#475569;font-weight:600}
   @media print{body{padding:0}@page{margin:15mm 10mm}}
 </style></head><body>
 <div class="header">
   <div>
-    <h1>ORDEN DE PAGO #${String(order.orderNumber).padStart(4, "0")}</h1>
-    <p style="color:#64748b">Fecha: ${fmtDate(order.date)}</p>
+    <h1>${L.paymentOrder} #${String(order.orderNumber).padStart(4, "0")}</h1>
+    <p style="color:#64748b">${L.date}: ${fmtDate(order.date)}</p>
   </div>
   <div class="header-right">
-    <span class="badge badge-${order.status.toLowerCase()}">${STATUS_LABELS[order.status]}</span>
-    <p style="margin-top:4px;font-size:11px;color:#64748b">Canal: Fiscal</p>
+    <span class="badge badge-${order.status.toLowerCase()}">${L.status[order.status as keyof typeof L.status] || order.status}</span>
+    <p style="margin-top:4px;font-size:11px;color:#64748b">${L.channel}</p>
   </div>
 </div>
 
 <div class="section">
-  <div class="section-title">Proveedor</div>
+  <div class="section-title">${L.supplier}</div>
   <p><strong>${supplier.name}</strong></p>
   ${supplier.document ? `<p>CUIT: ${supplier.document}</p>` : ""}
-  ${supplier.address ? `<p>Dirección: ${supplier.address}</p>` : ""}
-  ${supplier.phone ? `<p>Tel: ${supplier.phone}</p>` : ""}
+  ${supplier.address ? `<p>${L.address}: ${supplier.address}</p>` : ""}
+  ${supplier.phone ? `<p>${L.phone}: ${supplier.phone}</p>` : ""}
 </div>
 
 <div class="section">
-  <div class="section-title">Comprobantes Aplicados</div>
+  <div class="section-title">${L.appliedDocs}</div>
   <table>
     <thead><tr>
-      <th>Tipo</th><th>Número</th><th>Fecha</th>
-      <th class="text-right">Saldo Ant.</th>
-      <th class="text-right">Aplicado</th>
-      <th class="text-right">Saldo Post.</th>
+      <th>${L.colType}</th><th>${L.colNumber}</th><th>${L.colDate}</th>
+      <th class="text-right">${L.colBalBefore}</th>
+      <th class="text-right">${L.colApplied}</th>
+      <th class="text-right">${L.colBalAfter}</th>
     </tr></thead>
     <tbody>
       ${order.documents
         .map(
           (d: any) => `<tr>
-        <td>${TYPE_LABELS[d.documentType] || d.documentType}</td>
+        <td>${L.type[d.documentType as keyof typeof L.type] || d.documentType}</td>
         <td>${d.documentNumber}</td>
         <td>${fmtDate(d.date)}</td>
         <td class="text-right">${fmt(d.balanceBefore)}</td>
@@ -119,13 +287,13 @@ function renderA4Channel1(order: any, supplier: any): string {
 ${
   order.creditNotes?.length > 0
     ? `<div class="section">
-  <div class="section-title">Notas de Crédito Aplicadas</div>
+  <div class="section-title">${L.creditNotesApplied}</div>
   <table>
     <thead><tr>
-      <th>Número</th><th>Fecha</th>
-      <th class="text-right">Saldo Ant.</th>
-      <th class="text-right">Aplicado</th>
-      <th class="text-right">Saldo Post.</th>
+      <th>${L.colNumber}</th><th>${L.colDate}</th>
+      <th class="text-right">${L.colBalBefore}</th>
+      <th class="text-right">${L.colApplied}</th>
+      <th class="text-right">${L.colBalAfter}</th>
     </tr></thead>
     <tbody>
       ${order.creditNotes
@@ -146,14 +314,14 @@ ${
 }
 
 <div class="section">
-  <div class="section-title">Medios de Pago</div>
+  <div class="section-title">${L.paymentMethods}</div>
   <table>
-    <thead><tr><th>Medio</th><th>Referencia</th><th class="text-right">Monto</th></tr></thead>
+    <thead><tr><th>${L.colMethod}</th><th>${L.colRef}</th><th class="text-right">${L.colAmount}</th></tr></thead>
     <tbody>
       ${order.payments
         .map(
           (p: any) => `<tr>
-        <td>${METHOD_LABELS[p.method] || p.method}</td>
+        <td>${L.method[p.method as keyof typeof L.method] || p.method}</td>
         <td>${p.reference || "-"}</td>
         <td class="text-right">${fmt(p.amount)}</td>
       </tr>`,
@@ -165,30 +333,43 @@ ${
 
 <div class="totals">
   <table class="totals-table">
-    <tr><td>Total Comprobantes:</td><td class="text-right">${fmt(order.documentsTotal)}</td></tr>
-    ${order.creditNotesTotal > 0 ? `<tr><td>Total NC:</td><td class="text-right">-${fmt(order.creditNotesTotal)}</td></tr>` : ""}
-    <tr class="total-row"><td>Total Pagado:</td><td class="text-right">${fmt(order.netPayable)}</td></tr>
+    <tr><td>${L.totalDocs}:</td><td class="text-right">${fmt(order.documentsTotal)}</td></tr>
+    ${order.creditNotesTotal > 0 ? `<tr><td>${L.totalCN}:</td><td class="text-right">-${fmt(order.creditNotesTotal)}</td></tr>` : ""}
+    <tr class="total-row"><td>${L.totalPaid}:</td><td class="text-right">${fmt(order.netPayable)}</td></tr>
   </table>
 </div>
 
-${order.notes ? `<div class="notes"><strong>Observaciones:</strong> ${order.notes}</div>` : ""}
+${order.notes ? `<div class="notes"><strong>${L.notes}:</strong> ${order.notes}</div>` : ""}
+
+<div class="signatures">
+  <div class="signature-box">
+    <div class="signature-line"></div>
+    <div class="signature-label">${L.issuedBy} ${order.createdByEmail || "-"}</div>
+  </div>
+  <div class="signature-box">
+    <div class="signature-line"></div>
+    <div class="signature-label">${L.signatureConfirm}</div>
+  </div>
+</div>
 
 <div class="footer">
-  <span>Creado por: ${order.createdByEmail || "-"}</span>
-  ${order.approvedByEmail ? `<span>Confirmado por: ${order.approvedByEmail}</span>` : ""}
-  <span>Impreso: ${new Date().toLocaleString("es-AR")}</span>
+  <span>${L.createdBy}: ${order.createdByEmail || "-"}</span>
+  ${order.approvedByEmail ? `<span>${L.confirmedBy}: ${order.approvedByEmail}</span>` : ""}
+  <span>${L.printed}: ${new Date().toLocaleString("es-AR")}</span>
 </div>
 </body></html>`;
 }
 
 /* ─── Channel 2: Simplified A4 Template ─── */
-function renderA4Channel2(order: any, supplier: any): string {
+function renderA4Channel2(order: any, supplier: any, lang?: string): string {
+  const L = getL(lang);
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"/>
-<title>OP Interna #${order.orderNumber}</title>
+<title>${L.internalOP} #${order.orderNumber}</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Segoe UI',system-ui,sans-serif;font-size:12px;color:#1e293b;padding:24px;max-width:800px;margin:0 auto}
+  .page{min-height:240mm;display:flex;flex-direction:column}
   h1{font-size:18px;margin-bottom:4px}
   .header{border-bottom:2px solid #d97706;padding-bottom:12px;margin-bottom:16px}
   .badge{display:inline-block;padding:2px 10px;border-radius:4px;font-size:11px;font-weight:600;background:#fef3c7;color:#92400e}
@@ -197,16 +378,21 @@ function renderA4Channel2(order: any, supplier: any): string {
   td{padding:6px 8px;border:1px solid #fde68a}
   .text-right{text-align:right}
   .total{margin-top:16px;text-align:right;font-size:16px;font-weight:700}
+  .signatures{margin-top:40px;padding-top:30px;display:flex;justify-content:space-between;gap:48px}
+  .signature-box{flex:1;max-width:300px;text-align:center}
+  .signature-line{height:48px;border-bottom:1px solid #1e293b}
+  .signature-label{margin-top:6px;font-size:11px;color:#475569;font-weight:600}
   @media print{body{padding:0}@page{margin:15mm 10mm}}
 </style></head><body>
+<div class="page">
 <div class="header">
-  <h1>OP INTERNA #${String(order.orderNumber).padStart(4, "0")}</h1>
-  <p>Fecha: ${fmtDate(order.date)} · Proveedor: <strong>${supplier.name}</strong></p>
-  <span class="badge">${STATUS_LABELS[order.status]}</span>
+  <h1>${L.internalOP} #${String(order.orderNumber).padStart(4, "0")}</h1>
+  <p>${L.date}: ${fmtDate(order.date)} · ${L.supplier}: <strong>${supplier.name}</strong></p>
+  <span class="badge">${L.status[order.status as keyof typeof L.status] || order.status}</span>
 </div>
 
 <table>
-  <thead><tr><th>Comprobante</th><th class="text-right">Aplicado</th></tr></thead>
+  <thead><tr><th>${L.receipt}</th><th class="text-right">${L.colApplied}</th></tr></thead>
   <tbody>
     ${order.documents
       .map(
@@ -226,26 +412,43 @@ function renderA4Channel2(order: any, supplier: any): string {
 </table>
 
 <table style="margin-top:12px">
-  <thead><tr><th>Medio</th><th class="text-right">Monto</th></tr></thead>
+  <thead><tr><th>${L.colMethod}</th><th class="text-right">${L.colAmount}</th></tr></thead>
   <tbody>
     ${order.payments
       .map(
         (p: any) =>
-          `<tr><td>${METHOD_LABELS[p.method] || p.method}</td><td class="text-right">${fmt(p.amount)}</td></tr>`,
+          `<tr><td>${L.method[p.method as keyof typeof L.method] || p.method}</td><td class="text-right">${fmt(p.amount)}</td></tr>`,
       )
       .join("")}
   </tbody>
 </table>
 
-<div class="total">Total: ${fmt(order.netPayable)}</div>
+<div class="total">${L.total}: ${fmt(order.netPayable)}</div>
+
+<div class="signatures">
+  <div class="signature-box">
+    <div class="signature-line"></div>
+    <div class="signature-label">${L.issuedBy} ${order.createdByEmail || "-"}</div>
+  </div>
+  <div class="signature-box">
+    <div class="signature-line"></div>
+    <div class="signature-label">${L.signatureConfirm}</div>
+  </div>
+</div>
+</div>
 </body></html>`;
 }
 
 /* ─── Channel 1: Ticket Template (58/80mm) ─── */
-function renderTicketChannel1(order: any, supplier: any): string {
+function renderTicketChannel1(
+  order: any,
+  supplier: any,
+  lang?: string,
+): string {
+  const L = getL(lang);
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"/>
-<title>Ticket OP #${order.orderNumber}</title>
+<title>${L.paymentOrder} #${order.orderNumber}</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Courier New',monospace;font-size:10px;width:58mm;padding:3mm;color:#000}
@@ -256,15 +459,15 @@ function renderTicketChannel1(order: any, supplier: any): string {
   .row{display:flex;justify-content:space-between}
   @media print{@page{size:58mm auto;margin:0}}
 </style></head><body>
-<div class="center bold" style="font-size:12px">ORDEN DE PAGO</div>
+<div class="center bold" style="font-size:12px">${L.paymentOrder}</div>
 <div class="center">#${String(order.orderNumber).padStart(4, "0")}</div>
 <div class="center">${fmtDate(order.date)}</div>
-<div class="center">${STATUS_LABELS[order.status]}</div>
+<div class="center">${L.status[order.status as keyof typeof L.status] || order.status}</div>
 <div class="line"></div>
 <div class="bold">${supplier.name}</div>
 ${supplier.document ? `<div>CUIT: ${supplier.document}</div>` : ""}
 <div class="line"></div>
-<div class="bold">COMPROBANTES:</div>
+<div class="bold">${L.vouchers}:</div>
 ${order.documents
   .map(
     (d: any) =>
@@ -273,36 +476,52 @@ ${order.documents
   .join("")}
 ${
   order.creditNotes?.length > 0
-    ? `<div class="line"></div><div class="bold">NOTAS CRÉDITO:</div>
+    ? `<div class="line"></div><div class="bold">${L.creditNotes}:</div>
 ${order.creditNotes.map((d: any) => `<div class="row"><span>${d.documentNumber}</span><span>-${fmt(d.amount)}</span></div>`).join("")}`
     : ""
 }
 <div class="line"></div>
-<div class="bold">MEDIOS DE PAGO:</div>
+<div class="bold">${L.paymentMethodsTicket}:</div>
 ${order.payments
   .map(
     (p: any) =>
-      `<div class="row"><span>${METHOD_LABELS[p.method] || p.method}</span><span>${fmt(p.amount)}</span></div>`,
+      `<div class="row"><span>${L.method[p.method as keyof typeof L.method] || p.method}</span><span>${fmt(p.amount)}</span></div>`,
   )
   .join("")}
 <div class="line"></div>
-<div class="row"><span>Comprobantes:</span><span>${fmt(order.documentsTotal)}</span></div>
-${order.creditNotesTotal > 0 ? `<div class="row"><span>NC:</span><span>-${fmt(order.creditNotesTotal)}</span></div>` : ""}
+<div class="row"><span>${L.totalDocs}:</span><span>${fmt(order.documentsTotal)}</span></div>
+${order.creditNotesTotal > 0 ? `<div class="row"><span>${L.totalCN}:</span><span>-${fmt(order.creditNotesTotal)}</span></div>` : ""}
 <div class="row bold" style="font-size:12px"><span>TOTAL:</span><span>${fmt(order.netPayable)}</span></div>
-${order.notes ? `<div class="line"></div><div>Obs: ${order.notes}</div>` : ""}
+${order.notes ? `<div class="line"></div><div>${L.obs}: ${order.notes}</div>` : ""}
+<div class="line"></div>
+<div style="margin-top:8px;display:flex;justify-content:space-between;gap:4mm">
+  <div style="flex:1;text-align:center">
+    <div style="height:30px;border-bottom:1px solid #000"></div>
+    <div style="font-size:7px;margin-top:2px">${L.issuedBy} ${order.createdByEmail || "-"}</div>
+  </div>
+  <div style="flex:1;text-align:center">
+    <div style="height:30px;border-bottom:1px solid #000"></div>
+    <div style="font-size:7px;margin-top:2px">${L.signatureConfirm}</div>
+  </div>
+</div>
 <div class="line"></div>
 <div style="font-size:8px;color:#666">
-  <div>Creado: ${order.createdByEmail || "-"}</div>
-  ${order.approvedByEmail ? `<div>Confirmado: ${order.approvedByEmail}</div>` : ""}
+  <div>${L.created}: ${order.createdByEmail || "-"}</div>
+  ${order.approvedByEmail ? `<div>${L.confirmed}: ${order.approvedByEmail}</div>` : ""}
 </div>
 </body></html>`;
 }
 
 /* ─── Channel 2: Ticket Simplified ─── */
-function renderTicketChannel2(order: any, supplier: any): string {
+function renderTicketChannel2(
+  order: any,
+  supplier: any,
+  lang?: string,
+): string {
+  const L = getL(lang);
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"/>
-<title>Ticket OP Interna #${order.orderNumber}</title>
+<title>${L.internalOP} #${order.orderNumber}</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Courier New',monospace;font-size:10px;width:58mm;padding:3mm;color:#000}
@@ -312,7 +531,7 @@ function renderTicketChannel2(order: any, supplier: any): string {
   .row{display:flex;justify-content:space-between}
   @media print{@page{size:58mm auto;margin:0}}
 </style></head><body>
-<div class="center bold">OP INTERNA #${String(order.orderNumber).padStart(4, "0")}</div>
+<div class="center bold">${L.internalOP} #${String(order.orderNumber).padStart(4, "0")}</div>
 <div class="center">${fmtDate(order.date)}</div>
 <div class="line"></div>
 <div class="bold">${supplier.name}</div>
@@ -320,9 +539,20 @@ function renderTicketChannel2(order: any, supplier: any): string {
 ${order.documents.map((d: any) => `<div class="row"><span>${d.documentNumber}</span><span>${fmt(d.amount)}</span></div>`).join("")}
 ${order.creditNotes?.map((d: any) => `<div class="row"><span>NC ${d.documentNumber}</span><span>-${fmt(d.amount)}</span></div>`).join("") || ""}
 <div class="line"></div>
-${order.payments.map((p: any) => `<div class="row"><span>${METHOD_LABELS[p.method] || p.method}</span><span>${fmt(p.amount)}</span></div>`).join("")}
+${order.payments.map((p: any) => `<div class="row"><span>${L.method[p.method as keyof typeof L.method] || p.method}</span><span>${fmt(p.amount)}</span></div>`).join("")}
 <div class="line"></div>
 <div class="row bold" style="font-size:12px"><span>TOTAL:</span><span>${fmt(order.netPayable)}</span></div>
+<div class="line"></div>
+<div style="margin-top:8px;display:flex;justify-content:space-between;gap:4mm">
+  <div style="flex:1;text-align:center">
+    <div style="height:30px;border-bottom:1px solid #000"></div>
+    <div style="font-size:7px;margin-top:2px">${L.issuedBy} ${order.createdByEmail || "-"}</div>
+  </div>
+  <div style="flex:1;text-align:center">
+    <div style="height:30px;border-bottom:1px solid #000"></div>
+    <div style="font-size:7px;margin-top:2px">${L.signatureConfirm}</div>
+  </div>
+</div>
 </body></html>`;
 }
 
@@ -342,6 +572,7 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const format = searchParams.get("format") || "a4"; // a4 | ticket
     const channel = Number(searchParams.get("channel") || "1");
+    const lang = searchParams.get("lang") || "es";
 
     await dbConnect();
 
@@ -371,13 +602,13 @@ export async function GET(
     if (format === "ticket") {
       html =
         effectiveChannel === 2
-          ? renderTicketChannel2(paymentOrder, supplier)
-          : renderTicketChannel1(paymentOrder, supplier);
+          ? renderTicketChannel2(paymentOrder, supplier, lang)
+          : renderTicketChannel1(paymentOrder, supplier, lang);
     } else {
       html =
         effectiveChannel === 2
-          ? renderA4Channel2(paymentOrder, supplier)
-          : renderA4Channel1(paymentOrder, supplier);
+          ? renderA4Channel2(paymentOrder, supplier, lang)
+          : renderA4Channel1(paymentOrder, supplier, lang);
     }
 
     return new NextResponse(html, {

@@ -176,5 +176,12 @@ supplierDocumentSchema.index({ businessId: 1, documentNumber: 1 });
 supplierDocumentSchema.index({ businessId: 1, status: 1, dueDate: 1 });
 supplierDocumentSchema.index({ businessId: 1, channel: 1 });
 
-export default models.SupplierDocument ||
-  model<ISupplierDocument>("SupplierDocument", supplierDocumentSchema);
+// Delete cached model to prevent stale schema enum issues during hot reload
+if (models.SupplierDocument) {
+  delete (models as any).SupplierDocument;
+}
+
+export default model<ISupplierDocument>(
+  "SupplierDocument",
+  supplierDocumentSchema,
+);

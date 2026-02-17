@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
-import PaymentOrder from "@/lib/models/PaymentOrder";
+import PaymentOrder, {
+  PAYMENT_ORDER_DOCUMENT_TYPES,
+} from "@/lib/models/PaymentOrder";
 import SupplierDocument from "@/lib/models/SupplierDocument";
 import Supplier from "@/lib/models/Supplier";
 import PaymentOrderAudit from "@/lib/models/PaymentOrderAudit";
@@ -151,55 +153,94 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const documentsEntries = supplierDocs.map((doc) => {
+    // Validate and build document entries
+    const documentsEntries = [];
+    for (const doc of supplierDocs) {
       const input = documents.find(
         (d: PaymentOrderItemInput) => d.documentId === String(doc._id),
       );
       const applyAmount = Number(input?.applyAmount || 0);
       if (doc.type === "CREDIT_NOTE") {
-        throw new Error("Credit notes must be applied in creditNotes list");
+        return NextResponse.json(
+          {
+            error: `Document ${doc.documentNumber} is a credit note and must be applied in the credit notes section`,
+          },
+          { status: 400 },
+        );
       }
       if (doc.status === "CANCELLED" || doc.balance <= 0) {
-        throw new Error("Document is not available");
+        return NextResponse.json(
+          {
+            error: `Document ${doc.documentNumber} is not available (cancelled or zero balance)`,
+          },
+          { status: 400 },
+        );
       }
-      if (applyAmount <= 0 || applyAmount > doc.balance) {
-        throw new Error("Invalid document amount");
+      if (applyAmount <= 0 || applyAmount > doc.balance + 0.01) {
+        return NextResponse.json(
+          {
+            error: `Invalid amount for document ${doc.documentNumber}. Amount must be between 0 and ${doc.balance}`,
+          },
+          { status: 400 },
+        );
       }
-      return {
+      // Normalize document type — ensure it's a valid PaymentOrder document type
+      const docType = (PAYMENT_ORDER_DOCUMENT_TYPES as string[]).includes(
+        doc.type,
+      )
+        ? doc.type
+        : "INVOICE"; // Fallback for legacy/unrecognized types
+
+      documentsEntries.push({
         documentId: doc._id,
-        documentType: doc.type,
+        documentType: docType,
         documentNumber: doc.documentNumber,
         date: doc.date,
-        amount: applyAmount,
+        amount: Math.min(applyAmount, doc.balance),
         balanceBefore: doc.balance,
         balanceAfter: Math.max(0, doc.balance - applyAmount),
-      };
-    });
+      });
+    }
 
-    const creditNoteEntries = supplierCreditNotes.map((doc) => {
+    // Validate and build credit note entries
+    const creditNoteEntries = [];
+    for (const doc of supplierCreditNotes) {
       const input = creditNotes.find(
         (d: PaymentOrderItemInput) => d.documentId === String(doc._id),
       );
       const applyAmount = Number(input?.applyAmount || 0);
       if (doc.type !== "CREDIT_NOTE") {
-        throw new Error("Only credit notes can be applied as compensation");
+        return NextResponse.json(
+          { error: `Document ${doc.documentNumber} is not a credit note` },
+          { status: 400 },
+        );
       }
       if (doc.status === "CANCELLED" || doc.balance <= 0) {
-        throw new Error("Credit note is not available");
+        return NextResponse.json(
+          {
+            error: `Credit note ${doc.documentNumber} is not available (cancelled or zero balance)`,
+          },
+          { status: 400 },
+        );
       }
-      if (applyAmount <= 0 || applyAmount > doc.balance) {
-        throw new Error("Invalid credit note amount");
+      if (applyAmount <= 0 || applyAmount > doc.balance + 0.01) {
+        return NextResponse.json(
+          {
+            error: `Invalid amount for credit note ${doc.documentNumber}. Amount must be between 0 and ${doc.balance}`,
+          },
+          { status: 400 },
+        );
       }
-      return {
+      creditNoteEntries.push({
         documentId: doc._id,
         documentType: doc.type,
         documentNumber: doc.documentNumber,
         date: doc.date,
-        amount: applyAmount,
+        amount: Math.min(applyAmount, doc.balance),
         balanceBefore: doc.balance,
         balanceAfter: Math.max(0, doc.balance - applyAmount),
-      };
-    });
+      });
+    }
 
     const documentsTotal = documentsEntries.reduce(
       (sum, d) => sum + d.amount,
@@ -221,9 +262,28 @@ export async function POST(req: NextRequest) {
 
     if (Math.abs(netPayable - paymentsTotal) > 0.01) {
       return NextResponse.json(
-        { error: "Payments total must match documents minus credit notes" },
+        {
+          error: `Payments total ($${paymentsTotal.toFixed(2)}) must match net payable ($${netPayable.toFixed(2)})`,
+        },
         { status: 400 },
       );
+    }
+
+    // Validate payment methods
+    const validMethods = ["cash", "transfer", "mercadopago", "check", "card"];
+    for (const p of payments) {
+      if (!validMethods.includes(p.method)) {
+        return NextResponse.json(
+          { error: `Invalid payment method: ${p.method}` },
+          { status: 400 },
+        );
+      }
+      if (!p.amount || Number(p.amount) <= 0) {
+        return NextResponse.json(
+          { error: "All payment methods must have an amount greater than 0" },
+          { status: 400 },
+        );
+      }
     }
 
     const lastOrder = await PaymentOrder.findOne({
@@ -236,6 +296,13 @@ export async function POST(req: NextRequest) {
       ? lastOrder.orderNumber + 1
       : 1;
 
+    // Sanitize payments (ensure correct types)
+    const sanitizedPayments = payments.map((p: PaymentOrderPaymentInput) => ({
+      method: p.method,
+      reference: p.reference || undefined,
+      amount: Math.round(Number(p.amount) * 100) / 100,
+    }));
+
     const paymentOrder = await PaymentOrder.create({
       businessId: decoded.businessId,
       orderNumber: nextOrderNumber,
@@ -244,11 +311,11 @@ export async function POST(req: NextRequest) {
       status: "PENDING",
       documents: documentsEntries,
       creditNotes: creditNoteEntries,
-      payments,
-      documentsTotal,
-      creditNotesTotal,
-      paymentsTotal,
-      netPayable,
+      payments: sanitizedPayments,
+      documentsTotal: Math.round(documentsTotal * 100) / 100,
+      creditNotesTotal: Math.round(creditNotesTotal * 100) / 100,
+      paymentsTotal: Math.round(paymentsTotal * 100) / 100,
+      netPayable: Math.round(netPayable * 100) / 100,
       notes,
       createdBy: decoded.userId,
       createdByEmail: decoded.email,
@@ -271,8 +338,28 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ paymentOrder }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Create payment order error:", error);
+
+    // Handle Mongoose validation errors as 400
+    if (error?.name === "ValidationError") {
+      const messages = Object.values(error.errors || {})
+        .map((e: any) => e.message)
+        .join(", ");
+      return NextResponse.json(
+        { error: `Validation error: ${messages}` },
+        { status: 400 },
+      );
+    }
+
+    // Handle duplicate key errors
+    if (error?.code === 11000) {
+      return NextResponse.json(
+        { error: "Duplicate payment order number. Please try again." },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json(
       {
         error:
