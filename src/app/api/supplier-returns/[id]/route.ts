@@ -90,10 +90,14 @@ export async function PUT(
           await StockHistory.create({
             businessId,
             productId: item.productId,
-            type: "adjustment",
+            type: "supplier_return",
             quantity: item.quantity,
             reference: supplierReturn._id,
             referenceModel: "SupplierReturn",
+            referenceDocumentNumber: supplierReturn.creditNoteNumber || `RET-${supplierReturn._id.toString().slice(-8).toUpperCase()}`,
+            supplierId: supplierReturn.supplierId,
+            userId,
+            unitCost: item.unitCost,
             notes: `Supplier return - ${supplierReturn.reason}`,
           });
         }
@@ -181,6 +185,8 @@ export async function PUT(
             quantity: item.quantity,
             reference: supplierReturn._id,
             referenceModel: "SupplierReturn",
+            supplierId: supplierReturn.supplierId,
+            userId,
             notes: `Reversal: cancelled supplier return`,
           });
         }

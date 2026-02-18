@@ -105,10 +105,14 @@ export async function PUT(
         await StockHistory.create({
           businessId,
           productId: item.productId,
-          type: "purchase",
+          type: "supplier_receipt",
           quantity: item.quantity,
           reference: receipt._id,
           referenceModel: "GoodsReceipt",
+          referenceDocumentNumber: receipt.documentNumber,
+          supplierId: receipt.supplierId,
+          userId,
+          unitCost: item.unitCost,
           notes: `Goods receipt #${receipt.documentNumber} from supplier`,
         });
       }
@@ -182,6 +186,9 @@ export async function PUT(
             quantity: item.quantity,
             reference: receipt._id,
             referenceModel: "GoodsReceipt",
+            referenceDocumentNumber: receipt.documentNumber,
+            supplierId: receipt.supplierId,
+            userId,
             notes: `Reversal: cancelled goods receipt #${receipt.documentNumber}`,
           });
         }

@@ -9,6 +9,7 @@ import BrandLogo from "@/components/BrandLogo";
 import {
   BarChart3,
   CheckCircle2,
+  ClipboardList,
   CreditCard,
   DollarSign,
   FileText,
@@ -102,6 +103,11 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
     { href: "/categories", label: t("nav.categories", "pos"), icon: Tag },
     { href: "/stock", label: t("nav.stock", "pos"), icon: Package },
     { href: "/suppliers", label: t("nav.suppliers", "pos"), icon: Truck },
+    {
+      href: "/goods-receipts",
+      label: t("nav.goodsReceipts", "pos"),
+      icon: ClipboardList,
+    },
     {
       href: "/supplier-returns",
       label: t("nav.supplierReturns", "pos"),

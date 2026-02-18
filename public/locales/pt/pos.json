@@ -86,5 +86,6 @@
     "print": "Imprimir",
     "close": "Fechar"
   },
+  "nav.goodsReceipts": "Recebimento de Mercadoria",
   "nav.supplierReturns": "Devoluções ao Fornecedor"
 }

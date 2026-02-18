@@ -36,6 +36,7 @@ export interface ISupplierReturn extends Document {
   creditNoteId?: Schema.Types.ObjectId;
   creditNoteNumber?: string;
   creditNoteDate?: Date;
+  documentNumber: string;
   items: ISupplierReturnItem[];
   totalAmount: number;
   totalItems: number;
@@ -139,6 +140,11 @@ const supplierReturnSchema = new Schema<ISupplierReturn>(
     },
     creditNoteNumber: String,
     creditNoteDate: Date,
+    documentNumber: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     items: {
       type: [supplierReturnItemSchema],
       required: true,
@@ -189,5 +195,19 @@ supplierReturnSchema.index({ businessId: 1, supplierId: 1 });
 supplierReturnSchema.index({ businessId: 1, receiptId: 1 });
 supplierReturnSchema.index({ businessId: 1, status: 1 });
 
-export default models.SupplierReturn ||
+supplierReturnSchema.pre("validate", function (next) {
+  if (!this.documentNumber) {
+    // Generate a temporary document number if not provided
+    // This can be replaced by a more formal sequence later
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const random = Math.random().toString(36).substring(2, 5).toUpperCase();
+    this.documentNumber = `RET-${timestamp}-${random}`;
+  }
+  next();
+});
+
+export const SupplierReturn =
+  models.SupplierReturn ||
   model<ISupplierReturn>("SupplierReturn", supplierReturnSchema);
+
+export default SupplierReturn;

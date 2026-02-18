@@ -14,6 +14,9 @@ import {
   Ban,
   Check,
   X,
+  ToggleLeft,
+  ToggleRight,
+  Link2,
 } from "lucide-react";
 
 // ...define interfaces for Supplier, Product, ReturnItem, SupplierReturn...
@@ -33,6 +36,7 @@ const COPY = {
       supplier: "Fornecedor",
       document: "Documento",
       type: "Tipo",
+      reason: "Motivo",
       items: "Itens",
       total: "Total",
       status: "Status",
@@ -49,11 +53,32 @@ const COPY = {
       selectSupplier: "Selecionar fornecedor...",
       date: "Data",
       reason: "Motivo *",
+      selectReason: "Selecionar motivo...",
+      returnType: "Tipo de Devolução",
       notes: "Notas",
       notesPlaceholder: "Observações opcionais...",
-      physicalExit: "Saída física de estoque?",
+      physicalExit: "Saída física de estoque",
+      physicalExitYes: "Sim – produto sai do depósito",
+      physicalExitNo: "Não – apenas ajuste econômico",
       referenceReceipt: "Referência de Recebimento",
+      selectReceipt: "Nenhum (opcional)",
       referenceBill: "Referência de Fatura",
+      creditNoteNumber: "Nº Nota de Crédito",
+      creditNoteDate: "Data Nota de Crédito",
+    },
+    reasons: {
+      EXPIRED: "Vencido",
+      DAMAGED: "Danificado",
+      WRONG_DELIVERY: "Entrega errada",
+      QUALITY_ISSUE: "Problema de qualidade",
+      EXCESS_STOCK: "Estoque excedente",
+      BONUS_DISCOUNT: "Bonificação/Desconto",
+      PRICE_ADJUSTMENT: "Ajuste de preço",
+      OTHER: "Outro",
+    },
+    returnTypes: {
+      PHYSICAL_RETURN: "Devolução Física",
+      ECONOMIC_ADJUSTMENT: "Ajuste Econômico",
     },
     items: {
       title: "Produtos",
@@ -110,6 +135,7 @@ const COPY = {
       supplier: "Proveedor",
       document: "Documento",
       type: "Tipo",
+      reason: "Motivo",
       items: "Ítems",
       total: "Total",
       status: "Estado",
@@ -126,11 +152,32 @@ const COPY = {
       selectSupplier: "Seleccionar proveedor...",
       date: "Fecha",
       reason: "Motivo *",
+      selectReason: "Seleccionar motivo...",
+      returnType: "Tipo de Devolución",
       notes: "Notas",
       notesPlaceholder: "Observaciones opcionales...",
-      physicalExit: "¿Salida física de stock?",
+      physicalExit: "Salida física de stock",
+      physicalExitYes: "Sí – el producto sale del depósito",
+      physicalExitNo: "No – solo ajuste económico",
       referenceReceipt: "Referencia de Recepción",
+      selectReceipt: "Ninguno (opcional)",
       referenceBill: "Referencia de Factura",
+      creditNoteNumber: "Nº Nota de Crédito",
+      creditNoteDate: "Fecha Nota de Crédito",
+    },
+    reasons: {
+      EXPIRED: "Vencido",
+      DAMAGED: "Dañado",
+      WRONG_DELIVERY: "Entrega equivocada",
+      QUALITY_ISSUE: "Problema de calidad",
+      EXCESS_STOCK: "Excedente de stock",
+      BONUS_DISCOUNT: "Bonificación/Descuento",
+      PRICE_ADJUSTMENT: "Ajuste de precio",
+      OTHER: "Otro",
+    },
+    returnTypes: {
+      PHYSICAL_RETURN: "Devolución Física",
+      ECONOMIC_ADJUSTMENT: "Ajuste Económico",
     },
     items: {
       title: "Productos",
@@ -189,6 +236,7 @@ const COPY = {
       supplier: "Supplier",
       document: "Document",
       type: "Type",
+      reason: "Reason",
       items: "Items",
       total: "Total",
       status: "Status",
@@ -205,11 +253,32 @@ const COPY = {
       selectSupplier: "Select supplier...",
       date: "Date",
       reason: "Reason *",
+      selectReason: "Select reason...",
+      returnType: "Return Type",
       notes: "Notes",
       notesPlaceholder: "Optional notes...",
-      physicalExit: "Physical stock exit?",
+      physicalExit: "Physical stock exit",
+      physicalExitYes: "Yes – product leaves warehouse",
+      physicalExitNo: "No – economic adjustment only",
       referenceReceipt: "Receipt Reference",
+      selectReceipt: "None (optional)",
       referenceBill: "Bill Reference",
+      creditNoteNumber: "Credit Note #",
+      creditNoteDate: "Credit Note Date",
+    },
+    reasons: {
+      EXPIRED: "Expired",
+      DAMAGED: "Damaged",
+      WRONG_DELIVERY: "Wrong Delivery",
+      QUALITY_ISSUE: "Quality Issue",
+      EXCESS_STOCK: "Excess Stock",
+      BONUS_DISCOUNT: "Bonus / Discount",
+      PRICE_ADJUSTMENT: "Price Adjustment",
+      OTHER: "Other",
+    },
+    returnTypes: {
+      PHYSICAL_RETURN: "Physical Return",
+      ECONOMIC_ADJUSTMENT: "Economic Adjustment",
     },
     items: {
       title: "Products",
@@ -285,12 +354,24 @@ interface SupplierReturn {
   supplierId: { _id: string; name: string; document?: string } | string;
   documentNumber: string;
   returnDate: string;
+  returnType?: string;
+  reason?: string;
+  physicalStockExit?: boolean;
+  receiptId?: { _id: string; documentNumber: string; documentType: string } | string;
+  creditNoteNumber?: string;
+  creditNoteDate?: string;
   notes?: string;
   items: ReturnItem[];
   totalAmount: number;
   totalItems: number;
   status: string;
   createdAt: string;
+}
+interface GoodsReceiptRef {
+  _id: string;
+  documentNumber: string;
+  documentType: string;
+  status: string;
 }
 
 export default function SupplierReturnsPage() {
@@ -324,6 +405,12 @@ export default function SupplierReturnsPage() {
     new Date().toISOString().split("T")[0],
   );
   const [notes, setNotes] = useState("");
+  const [reason, setReason] = useState("");
+  const [physicalStockExit, setPhysicalStockExit] = useState(true);
+  const [receiptId, setReceiptId] = useState("");
+  const [creditNoteNumber, setCreditNoteNumber] = useState("");
+  const [creditNoteDate, setCreditNoteDate] = useState("");
+  const [receipts, setReceipts] = useState<GoodsReceiptRef[]>([]);
 
   // Item input
   const [items, setItems] = useState<ReturnItem[]>([]);
@@ -448,7 +535,45 @@ export default function SupplierReturnsPage() {
       console.error("Error fetching products:", error);
     }
   };
+  const fetchReceipts = async (suppId?: string) => {
+    const sid = suppId || selectedSupplierId;
+    if (!sid) {
+      setReceipts([]);
+      return;
+    }
+    try {
+      const token = localStorage.getItem("accessToken");
+      const res = await fetch(
+        `/api/goods-receipts?supplierId=${sid}&limit=200`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const all = data.data?.receipts || [];
+        // Only show confirmed/billed receipts as linkable references
+        setReceipts(
+          all.filter(
+            (r: GoodsReceiptRef) =>
+              r.status === "CONFIRMED" ||
+              r.status === "PENDING_BILLING" ||
+              r.status === "BILLED",
+          ),
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching receipts:", error);
+    }
+  };
 
+  // Refetch receipts when supplier changes
+  useEffect(() => {
+    if (selectedSupplierId) {
+      fetchReceipts(selectedSupplierId);
+    } else {
+      setReceipts([]);
+      setReceiptId("");
+    }
+  }, [selectedSupplierId]);
   const handleSelectProduct = (product: Product) => {
     setSelectedProduct(product);
     setScanQuery(product.name);
@@ -520,12 +645,18 @@ export default function SupplierReturnsPage() {
     setDocumentNumber("");
     setReturnDate(new Date().toISOString().split("T")[0]);
     setNotes("");
+    setReason("");
+    setPhysicalStockExit(true);
+    setReceiptId("");
+    setCreditNoteNumber("");
+    setCreditNoteDate("");
+    setReceipts([]);
     setItems([]);
     setSelectedProduct(null);
     setScanQuery("");
   };
   const handleSaveDraft = async () => {
-    if (!selectedSupplierId || !documentNumber) {
+    if (!selectedSupplierId || !reason) {
       toast.error(copy.toasts.missingFields);
       return;
     }
@@ -543,11 +674,20 @@ export default function SupplierReturnsPage() {
         },
         body: JSON.stringify({
           supplierId: selectedSupplierId,
-          documentNumber,
-          returnDate,
+          date: returnDate,
+          returnType: physicalStockExit
+            ? "PHYSICAL_RETURN"
+            : "ECONOMIC_ADJUSTMENT",
+          reason,
+          physicalStockExit,
           notes,
+          receiptId: receiptId || undefined,
+          creditNoteNumber: creditNoteNumber || undefined,
+          creditNoteDate: creditNoteDate || undefined,
           items: items.map((i) => ({
             productId: i.productId,
+            productName: i.productName,
+            productCode: i.productCode,
             quantity: i.quantity,
             unitCost: i.unitCost,
           })),
@@ -692,18 +832,23 @@ export default function SupplierReturnsPage() {
                   ))}
                 </select>
               </div>
-              {/* Document Number */}
+              {/* Reason */}
               <div>
                 <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {copy.table.document}
+                  {copy.form.reason}
                 </label>
-                <input
-                  type="text"
-                  value={documentNumber}
-                  onChange={(e) => setDocumentNumber(e.target.value)}
+                <select
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
                   className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
-                  placeholder="0001-00000001"
-                />
+                >
+                  <option value="">{copy.form.selectReason}</option>
+                  {Object.entries(copy.reasons).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
               </div>
               {/* Return Date */}
               <div>
@@ -718,6 +863,91 @@ export default function SupplierReturnsPage() {
                 />
               </div>
             </div>
+
+            {/* Physical Stock Exit Toggle */}
+            <div className="mt-4">
+              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                {copy.form.physicalExit}
+              </label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPhysicalStockExit(true)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition ${
+                    physicalStockExit
+                      ? "bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:border-blue-400 dark:text-blue-300"
+                      : "bg-white border-gray-300 text-gray-600 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  }`}
+                >
+                  <ToggleRight className="w-4 h-4" />
+                  {copy.form.physicalExitYes}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPhysicalStockExit(false)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition ${
+                    !physicalStockExit
+                      ? "bg-amber-50 border-amber-500 text-amber-700 dark:bg-amber-900/30 dark:border-amber-400 dark:text-amber-300"
+                      : "bg-white border-gray-300 text-gray-600 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  }`}
+                >
+                  <ToggleLeft className="w-4 h-4" />
+                  {copy.form.physicalExitNo}
+                </button>
+              </div>
+            </div>
+
+            {/* Receipt Reference + Credit Note Row */}
+            <div className="grid grid-cols-1 gap-4 mt-4 md:grid-cols-2 lg:grid-cols-3">
+              {/* Receipt Reference */}
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span className="flex items-center gap-1">
+                    <Link2 className="w-3.5 h-3.5" />
+                    {copy.form.referenceReceipt}
+                  </span>
+                </label>
+                <select
+                  value={receiptId}
+                  onChange={(e) => setReceiptId(e.target.value)}
+                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  disabled={!selectedSupplierId}
+                >
+                  <option value="">{copy.form.selectReceipt}</option>
+                  {receipts.map((r) => (
+                    <option key={r._id} value={r._id}>
+                      {r.documentType} — {r.documentNumber}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* Credit Note Number */}
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {copy.form.creditNoteNumber}
+                </label>
+                <input
+                  type="text"
+                  value={creditNoteNumber}
+                  onChange={(e) => setCreditNoteNumber(e.target.value)}
+                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  placeholder="NC-0001-00000001"
+                />
+              </div>
+              {/* Credit Note Date */}
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {copy.form.creditNoteDate}
+                </label>
+                <input
+                  type="date"
+                  value={creditNoteDate}
+                  onChange={(e) => setCreditNoteDate(e.target.value)}
+                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
             {/* Notes */}
             <div className="mt-4">
               <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -994,6 +1224,44 @@ export default function SupplierReturnsPage() {
                   {formatDate(r.returnDate)}
                 </p>
               </div>
+              {r.reason && (
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {copy.form.reason}
+                  </p>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    {copy.reasons[r.reason as keyof typeof copy.reasons] || r.reason}
+                  </p>
+                </div>
+              )}
+              {r.returnType && (
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {copy.form.returnType}
+                  </p>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    {copy.returnTypes[r.returnType as keyof typeof copy.returnTypes] || r.returnType}
+                  </p>
+                </div>
+              )}
+              <div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {copy.form.physicalExit}
+                </p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {r.physicalStockExit ? copy.form.physicalExitYes : copy.form.physicalExitNo}
+                </p>
+              </div>
+              {r.creditNoteNumber && (
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {copy.form.creditNoteNumber}
+                  </p>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    {r.creditNoteNumber}
+                  </p>
+                </div>
+              )}
               {r.notes && (
                 <div className="col-span-2">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -1192,6 +1460,9 @@ export default function SupplierReturnsPage() {
                     <th className="px-4 py-3 font-medium text-left text-gray-600 dark:text-gray-400">
                       {copy.table.document}
                     </th>
+                    <th className="px-4 py-3 font-medium text-left text-gray-600 dark:text-gray-400">
+                      {copy.table.reason}
+                    </th>
                     <th className="px-4 py-3 font-medium text-center text-gray-600 dark:text-gray-400">
                       {copy.table.items}
                     </th>
@@ -1227,6 +1498,9 @@ export default function SupplierReturnsPage() {
                         </td>
                         <td className="px-4 py-3 font-mono text-xs text-gray-900 dark:text-white">
                           {r.documentNumber}
+                        </td>
+                        <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                          {copy.reasons[r.reason as keyof typeof copy.reasons] || r.reason}
                         </td>
                         <td className="px-4 py-3 text-center text-gray-900 dark:text-white">
                           {r.totalItems}
