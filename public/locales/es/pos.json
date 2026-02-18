@@ -85,5 +85,6 @@
     "paymentMethod": "Método de Pago:",
     "print": "Imprimir",
     "close": "Cerrar"
-  }
+  },
+  "nav.supplierReturns": "Devoluciones a Proveedor"
 }

@@ -103,6 +103,11 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
     { href: "/stock", label: t("nav.stock", "pos"), icon: Package },
     { href: "/suppliers", label: t("nav.suppliers", "pos"), icon: Truck },
     {
+      href: "/supplier-returns",
+      label: t("nav.supplierReturns", "pos"),
+      icon: Truck,
+    },
+    {
       href: "/supplier-documents",
       label: t("nav.supplierDocuments", "pos"),
       icon: FileText,

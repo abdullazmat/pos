@@ -85,5 +85,6 @@
     "paymentMethod": "Payment Method:",
     "print": "Print",
     "close": "Close"
-  }
+  },
+  "nav.supplierReturns": "Supplier Returns"
 }
