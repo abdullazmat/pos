@@ -264,8 +264,8 @@ export function Channel2Modal({
           /* PIN Entry */
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                <Lock className="text-amber-600" size={20} />
+              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                <Lock className="text-amber-600 dark:text-amber-400" size={20} />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-[hsl(var(--vp-text))]">
@@ -335,12 +335,12 @@ export function Channel2Modal({
           <div>
             <div className="flex items-center gap-3 mb-4">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center ${forgotPinMode ? "bg-amber-100" : "bg-blue-100"}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${forgotPinMode ? "bg-amber-100 dark:bg-amber-900/40" : "bg-blue-100 dark:bg-blue-900/40"}`}
               >
                 {forgotPinMode ? (
-                  <KeyRound className="text-amber-600" size={20} />
+                  <KeyRound className="text-amber-600 dark:text-amber-400" size={20} />
                 ) : (
-                  <Settings className="text-blue-600" size={20} />
+                  <Settings className="text-blue-600 dark:text-blue-400" size={20} />
                 )}
               </div>
               <div>

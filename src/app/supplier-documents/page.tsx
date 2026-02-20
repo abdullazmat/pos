@@ -300,12 +300,12 @@ const CHANNEL2_DOC_TYPES: DocType[] = ["INVOICE", "DEBIT_NOTE", "CREDIT_NOTE"];
 
 /* ─── Status badge colors ─── */
 const statusClassMap: Record<DocStatus, string> = {
-  PENDING: "bg-slate-100 text-slate-700",
-  DUE_SOON: "bg-amber-100 text-amber-700",
-  OVERDUE: "bg-rose-100 text-rose-700",
-  PARTIALLY_APPLIED: "bg-blue-100 text-blue-700",
-  APPLIED: "bg-emerald-100 text-emerald-700",
-  CANCELLED: "bg-slate-200 text-slate-500",
+  PENDING: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+  DUE_SOON: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  OVERDUE: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+  PARTIALLY_APPLIED: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  APPLIED: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  CANCELLED: "bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400",
 };
 
 /* ══════════════════════════════════════════
@@ -786,7 +786,7 @@ export default function SupplierDocumentsPage() {
               className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
                 activeChannel === 1
                   ? "bg-emerald-600 text-white"
-                  : "bg-slate-100 text-slate-500 cursor-pointer hover:bg-slate-200"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700"
               }`}
               onClick={() => {
                 if (channel2Active) {
@@ -800,7 +800,7 @@ export default function SupplierDocumentsPage() {
               className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
                 activeChannel === 2
                   ? "bg-amber-500 text-white"
-                  : "bg-slate-100 text-slate-500 cursor-pointer hover:bg-slate-200"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700"
               }`}
               onClick={() => {
                 if (!channel2Active) {
@@ -1006,7 +1006,7 @@ export default function SupplierDocumentsPage() {
 
               {/* Channel 2: configurable impacts */}
               {activeChannel === 2 && (
-                <div className="flex flex-col gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                <div className="flex flex-col gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 text-amber-900 dark:text-amber-200">
                   <label className="flex items-center gap-2 text-sm cursor-pointer">
                     <input
                       type="checkbox"
@@ -1136,12 +1136,12 @@ export default function SupplierDocumentsPage() {
                       {(doc.channel || 1) === 2 && (
                         <div className="flex gap-1 mt-1">
                           {doc.impactsStock && (
-                            <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded">
                               {copy.impactsStock}
                             </span>
                           )}
                           {doc.impactsCosts && (
-                            <span className="text-[10px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded">
                               {copy.impactsCosts}
                             </span>
                           )}

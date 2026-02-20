@@ -353,7 +353,7 @@ interface SupplierReturn {
   _id: string;
   supplierId: { _id: string; name: string; document?: string } | string;
   documentNumber: string;
-  returnDate: string;
+  date: string;
   returnType?: string;
   reason?: string;
   physicalStockExit?: boolean;
@@ -771,13 +771,13 @@ export default function SupplierReturnsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "DRAFT":
-        return "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300";
+        return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
       case "CONFIRMED":
-        return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
+        return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
       case "CANCELLED":
-        return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
+        return "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400";
       default:
-        return "bg-gray-100 text-gray-700";
+        return "bg-slate-100 text-slate-700";
     }
   };
   const formatCurrency = (amount: number) =>
@@ -794,8 +794,8 @@ export default function SupplierReturnsPage() {
   // ── Form View ──────────────────────────────────
   if (showForm) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Header user={user} />
+      <div className="vp-page">
+        <Header user={user} showBackButton={true} />
         <main className="max-w-6xl px-4 py-6 mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -812,11 +812,11 @@ export default function SupplierReturnsPage() {
             </button>
           </div>
           {/* Return Header Fields */}
-          <div className="p-6 mb-6 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+          <div className="vp-card p-6 mb-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {/* Supplier */}
               <div>
-                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="vp-label">
                   {copy.form.supplier}
                 </label>
                 <select
@@ -834,7 +834,7 @@ export default function SupplierReturnsPage() {
               </div>
               {/* Reason */}
               <div>
-                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="vp-label">
                   {copy.form.reason}
                 </label>
                 <select
@@ -852,14 +852,14 @@ export default function SupplierReturnsPage() {
               </div>
               {/* Return Date */}
               <div>
-                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="vp-label">
                   {copy.form.date}
                 </label>
                 <input
                   type="date"
                   value={returnDate}
                   onChange={(e) => setReturnDate(e.target.value)}
-                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="vp-input"
                 />
               </div>
             </div>
@@ -963,7 +963,7 @@ export default function SupplierReturnsPage() {
             </div>
           </div>
           {/* Product Entry Section */}
-          <div className="p-6 mb-6 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+          <div className="vp-card p-6 mb-6">
             <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
               {copy.items.title}
             </h2>
@@ -981,7 +981,7 @@ export default function SupplierReturnsPage() {
                     value={scanQuery}
                     onChange={(e) => setScanQuery(e.target.value)}
                     onKeyDown={handleScanKeyDown}
-                    className="w-full py-2 pl-10 pr-3 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    className="vp-input pl-10"
                     placeholder={copy.searchPlaceholder}
                   />
                 </div>
@@ -1078,7 +1078,7 @@ export default function SupplierReturnsPage() {
                     {items.map((item, idx) => (
                       <tr
                         key={idx}
-                        className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750"
+                        className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                       >
                         <td className="px-3 py-2">
                           <div className="font-medium text-gray-900 dark:text-white">
@@ -1152,9 +1152,9 @@ export default function SupplierReturnsPage() {
     const supplierName =
       typeof r.supplierId === "object" ? r.supplierId.name : "—";
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Header user={user} />
-        <main className="max-w-5xl px-4 py-6 mx-auto">
+      <div className="vp-page">
+        <Header user={user} showBackButton={true} />
+        <main className="vp-page-inner">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -1195,7 +1195,7 @@ export default function SupplierReturnsPage() {
             </div>
           </div>
           {/* Return Info */}
-          <div className="p-6 mb-6 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+          <div className="vp-card p-6 mb-6">
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -1221,7 +1221,7 @@ export default function SupplierReturnsPage() {
                   {copy.form.date}
                 </p>
                 <p className="font-medium text-gray-900 dark:text-white">
-                  {formatDate(r.returnDate)}
+                  {formatDate(r.date)}
                 </p>
               </div>
               {r.reason && (
@@ -1273,26 +1273,18 @@ export default function SupplierReturnsPage() {
             </div>
           </div>
           {/* Items */}
-          <div className="p-6 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+          <div className="vp-card p-6">
             <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
               {copy.items.title} ({r.totalItems})
             </h2>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="vp-table">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="px-3 py-2 font-medium text-left text-gray-600 dark:text-gray-400">
-                      {copy.items.product}
-                    </th>
-                    <th className="px-3 py-2 font-medium text-right text-gray-600 dark:text-gray-400">
-                      {copy.items.quantity}
-                    </th>
-                    <th className="px-3 py-2 font-medium text-right text-gray-600 dark:text-gray-400">
-                      {copy.items.unitCost}
-                    </th>
-                    <th className="px-3 py-2 font-medium text-right text-gray-600 dark:text-gray-400">
-                      {copy.items.subtotal}
-                    </th>
+                  <tr>
+                    <th>{copy.items.product}</th>
+                    <th className="text-right">{copy.items.quantity}</th>
+                    <th className="text-right">{copy.items.unitCost}</th>
+                    <th className="text-right">{copy.items.subtotal}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1384,9 +1376,9 @@ export default function SupplierReturnsPage() {
 
   // ── List View ──────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header user={user} />
-      <main className="px-4 py-8 mx-auto max-w-7xl">
+    <div className="vp-page">
+      <Header user={user} showBackButton={true} />
+      <main className="vp-page-inner">
         {/* Page Header */}
         <div className="flex flex-col items-start justify-between gap-4 mb-6 sm:flex-row sm:items-center">
           <div>
@@ -1400,9 +1392,9 @@ export default function SupplierReturnsPage() {
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2 shadow-sm"
+            className="vp-button vp-button-primary px-5"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5 mr-1" />
             {copy.newReturn}
           </button>
         </div>
@@ -1414,7 +1406,7 @@ export default function SupplierReturnsPage() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full py-2 pl-10 pr-3 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              className="vp-input pl-10"
               placeholder={copy.searchPlaceholder}
             />
           </div>
@@ -1428,7 +1420,7 @@ export default function SupplierReturnsPage() {
               <button
                 key={f.value}
                 onClick={() => setStatusFilter(f.value)}
-                className={`px-3 py-1.5 text-sm rounded-lg transition ${statusFilter === f.value ? "bg-blue-600 text-white" : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-750"}`}
+                className={`px-3 py-1.5 text-sm rounded-lg transition ${statusFilter === f.value ? "bg-blue-600 text-white" : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"}`}
               >
                 {f.label}
               </button>
@@ -1446,35 +1438,19 @@ export default function SupplierReturnsPage() {
             <p className="text-lg">{copy.empty}</p>
           </div>
         ) : (
-          <div className="overflow-hidden bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+          <div className="vp-card overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="vp-table">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 dark:bg-gray-750 dark:border-gray-700">
-                    <th className="px-4 py-3 font-medium text-left text-gray-600 dark:text-gray-400">
-                      {copy.table.date}
-                    </th>
-                    <th className="px-4 py-3 font-medium text-left text-gray-600 dark:text-gray-400">
-                      {copy.table.supplier}
-                    </th>
-                    <th className="px-4 py-3 font-medium text-left text-gray-600 dark:text-gray-400">
-                      {copy.table.document}
-                    </th>
-                    <th className="px-4 py-3 font-medium text-left text-gray-600 dark:text-gray-400">
-                      {copy.table.reason}
-                    </th>
-                    <th className="px-4 py-3 font-medium text-center text-gray-600 dark:text-gray-400">
-                      {copy.table.items}
-                    </th>
-                    <th className="px-4 py-3 font-medium text-right text-gray-600 dark:text-gray-400">
-                      {copy.table.total}
-                    </th>
-                    <th className="px-4 py-3 font-medium text-center text-gray-600 dark:text-gray-400">
-                      {copy.table.status}
-                    </th>
-                    <th className="px-4 py-3 font-medium text-center text-gray-600 dark:text-gray-400">
-                      {copy.table.actions}
-                    </th>
+                  <tr>
+                    <th>{copy.table.date}</th>
+                    <th>{copy.table.supplier}</th>
+                    <th>{copy.table.document}</th>
+                    <th>{copy.table.reason}</th>
+                    <th className="text-center">{copy.table.items}</th>
+                    <th className="text-right">{copy.table.total}</th>
+                    <th className="text-center">{copy.table.status}</th>
+                    <th className="text-center">{copy.table.actions}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1484,12 +1460,9 @@ export default function SupplierReturnsPage() {
                         ? r.supplierId.name
                         : "—";
                     return (
-                      <tr
-                        key={r._id}
-                        className="transition-colors border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750"
-                      >
+                      <tr key={r._id}>
                         <td className="px-4 py-3 text-gray-900 dark:text-white">
-                          {formatDate(r.returnDate)}
+                          {formatDate(r.date)}
                         </td>
                         <td className="px-4 py-3">
                           <span className="font-medium text-gray-900 dark:text-white">

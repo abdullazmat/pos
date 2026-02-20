@@ -781,17 +781,17 @@ export default function GoodsReceiptPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "DRAFT":
-        return "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300";
+        return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
       case "CONFIRMED":
-        return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
+        return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
       case "PENDING_BILLING":
-        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
+        return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
       case "BILLED":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
       case "CANCELLED":
-        return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
+        return "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400";
       default:
-        return "bg-gray-100 text-gray-700";
+        return "bg-slate-100 text-slate-700";
     }
   };
 
@@ -814,9 +814,9 @@ export default function GoodsReceiptPage() {
   // ── Form View ──────────────────────────────────
   if (showForm) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Header user={user} />
-        <main className="max-w-6xl mx-auto px-4 py-6">
+      <div className="vp-page">
+        <Header user={user} showBackButton={true} />
+        <main className="vp-page-inner">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -836,11 +836,11 @@ export default function GoodsReceiptPage() {
           </div>
 
           {/* Receipt Header Fields */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+          <div className="vp-card p-6 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Supplier */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="vp-label">
                   {copy.form.supplier}
                 </label>
                 <select
@@ -912,7 +912,7 @@ export default function GoodsReceiptPage() {
                   type="date"
                   value={receiptDate}
                   onChange={(e) => setReceiptDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="vp-input"
                 />
               </div>
 
@@ -939,14 +939,14 @@ export default function GoodsReceiptPage() {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="vp-input min-h-[80px]"
                 placeholder={copy.form.notesPlaceholder}
               />
             </div>
           </div>
 
           {/* Product Entry Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+          <div className="vp-card p-6 mb-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {copy.items.title}
             </h2>
@@ -965,7 +965,7 @@ export default function GoodsReceiptPage() {
                     value={scanQuery}
                     onChange={(e) => setScanQuery(e.target.value)}
                     onKeyDown={handleScanKeyDown}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    className="vp-input pl-10"
                     placeholder={copy.items.scanPlaceholder}
                   />
                 </div>
@@ -990,7 +990,7 @@ export default function GoodsReceiptPage() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="vp-label">
                   {copy.items.quantity}
                 </label>
                 <input
@@ -1003,12 +1003,12 @@ export default function GoodsReceiptPage() {
                     setItemQuantity(parseFloat(e.target.value) || 0)
                   }
                   onKeyDown={handleItemQuantityKeyDown}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="vp-input"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="vp-label">
                   {copy.items.unitCost}
                 </label>
                 <input
@@ -1020,7 +1020,7 @@ export default function GoodsReceiptPage() {
                     setItemUnitCost(parseFloat(e.target.value) || 0)
                   }
                   onKeyDown={handleItemQuantityKeyDown}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="vp-input"
                 />
               </div>
 
@@ -1040,7 +1040,7 @@ export default function GoodsReceiptPage() {
                 <button
                   onClick={addItem}
                   disabled={!selectedProduct || itemQuantity <= 0}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+                  className="vp-button vp-button-primary w-full"
                 >
                   <Plus className="w-4 h-4" />
                   {copy.items.addItem}
@@ -1081,7 +1081,7 @@ export default function GoodsReceiptPage() {
                     {items.map((item, idx) => (
                       <tr
                         key={idx}
-                        className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750"
+                        className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                       >
                         <td className="py-2 px-3">
                           <div className="font-medium text-gray-900 dark:text-white">
@@ -1137,13 +1137,13 @@ export default function GoodsReceiptPage() {
           <div className="flex justify-end gap-3">
             <button
               onClick={resetForm}
-              className="px-6 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+              className="vp-button-ghost px-6 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
             >
               {copy.actions.cancel}
             </button>
             <button
               onClick={handleSaveDraft}
-              className="px-6 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+              className="vp-button vp-button-primary px-8"
             >
               {copy.actions.save}
             </button>
@@ -1187,9 +1187,9 @@ export default function GoodsReceiptPage() {
     const supplierName =
       typeof r.supplierId === "object" ? r.supplierId.name : "—";
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Header user={user} />
-        <main className="max-w-5xl mx-auto px-4 py-6">
+      <div className="vp-page">
+        <Header user={user} showBackButton={true} />
+        <main className="vp-page-inner">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -1233,7 +1233,7 @@ export default function GoodsReceiptPage() {
           </div>
 
           {/* Receipt Info */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+          <div className="vp-card p-6 mb-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -1290,37 +1290,24 @@ export default function GoodsReceiptPage() {
           </div>
 
           {/* Items */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="vp-card p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {copy.items.title} ({r.totalItems})
             </h2>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="vp-table">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="text-left py-2 px-3 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.items.product}
-                    </th>
-                    <th className="text-right py-2 px-3 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.items.quantity}
-                    </th>
-                    <th className="text-right py-2 px-3 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.items.unitCost}
-                    </th>
-                    <th className="text-right py-2 px-3 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.items.subtotal}
-                    </th>
-                    <th className="text-center py-2 px-3 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.items.lot}
-                    </th>
+                  <tr>
+                    <th>{copy.items.product}</th>
+                    <th className="text-right">{copy.items.quantity}</th>
+                    <th className="text-right">{copy.items.unitCost}</th>
+                    <th className="text-right">{copy.items.subtotal}</th>
+                    <th className="text-center">{copy.items.lot}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {r.items.map((item, idx) => (
-                    <tr
-                      key={idx}
-                      className="border-b border-gray-100 dark:border-gray-700"
-                    >
+                    <tr key={idx}>
                       <td className="py-2 px-3">
                         <span className="font-medium text-gray-900 dark:text-white">
                           {item.productName}
@@ -1408,9 +1395,9 @@ export default function GoodsReceiptPage() {
 
   // ── List View ──────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header user={user} />
-      <main className="max-w-7xl mx-auto px-4 py-8">
+    <div className="vp-page">
+      <Header user={user} showBackButton={true} />
+      <main className="vp-page-inner">
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
           <div>
@@ -1424,9 +1411,9 @@ export default function GoodsReceiptPage() {
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2 shadow-sm"
+            className="vp-button vp-button-primary px-5"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5 mr-1" />
             {copy.newReceipt}
           </button>
         </div>
@@ -1458,7 +1445,7 @@ export default function GoodsReceiptPage() {
                 className={`px-3 py-1.5 text-sm rounded-lg transition ${
                   statusFilter === f.value
                     ? "bg-blue-600 text-white"
-                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-750"
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                 }`}
               >
                 {f.label}
@@ -1478,35 +1465,19 @@ export default function GoodsReceiptPage() {
             <p className="text-lg">{copy.empty}</p>
           </div>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="vp-card overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="vp-table">
                 <thead>
-                  <tr className="bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700">
-                    <th className="text-left py-3 px-4 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.table.date}
-                    </th>
-                    <th className="text-left py-3 px-4 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.table.supplier}
-                    </th>
-                    <th className="text-left py-3 px-4 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.table.document}
-                    </th>
-                    <th className="text-left py-3 px-4 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.table.type}
-                    </th>
-                    <th className="text-center py-3 px-4 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.table.items}
-                    </th>
-                    <th className="text-right py-3 px-4 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.table.total}
-                    </th>
-                    <th className="text-center py-3 px-4 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.table.status}
-                    </th>
-                    <th className="text-center py-3 px-4 text-gray-600 dark:text-gray-400 font-medium">
-                      {copy.table.actions}
-                    </th>
+                  <tr>
+                    <th>{copy.table.date}</th>
+                    <th>{copy.table.supplier}</th>
+                    <th>{copy.table.document}</th>
+                    <th>{copy.table.type}</th>
+                    <th className="text-center">{copy.table.items}</th>
+                    <th className="text-right">{copy.table.total}</th>
+                    <th className="text-center">{copy.table.status}</th>
+                    <th className="text-center">{copy.table.actions}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1516,10 +1487,7 @@ export default function GoodsReceiptPage() {
                         ? r.supplierId.name
                         : "—";
                     return (
-                      <tr
-                        key={r._id}
-                        className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
-                      >
+                      <tr key={r._id}>
                         <td className="py-3 px-4 text-gray-900 dark:text-white">
                           {formatDate(r.receiptDate)}
                         </td>
@@ -1596,7 +1564,7 @@ export default function GoodsReceiptPage() {
       {/* Cancel Modal */}
       {showCancelModal && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
+          <div className="vp-card max-w-md w-full p-6 shadow-xl relative animate-in fade-in zoom-in duration-200">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
               {copy.cancelConfirm.title}
             </h3>
@@ -1610,7 +1578,7 @@ export default function GoodsReceiptPage() {
               type="text"
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4"
+              className="vp-input mb-4"
             />
             <div className="flex justify-end gap-3">
               <button
