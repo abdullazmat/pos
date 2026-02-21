@@ -1,45 +1,54 @@
 "use client";
 
-// components/CTASection.tsx
 import Link from "next/link";
 import { useLanguage } from "@/lib/context/LanguageContext";
+import { RocketIcon, ArrowRightIcon } from "lucide-react";
 
 export default function CTASection() {
   const { t } = useLanguage();
-  const promo = t("promoCta", "landing") as {
-    eyebrow: string;
+  const cta = t("finalCta", "landing") as {
     title: string;
-    subtitle: string;
+    description: string;
     primaryCta: string;
+    secondaryCta: string;
   };
+
   return (
-    <section id="cta" className="vp-reveal py-16 sm:py-20">
+    <section id="cta" className="vp-reveal py-32 sm:py-48">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="relative overflow-hidden rounded-[28px] border border-[hsl(var(--vp-border))] bg-gradient-to-r from-[hsl(var(--vp-primary))]/35 via-[hsl(var(--vp-primary))]/25 to-[hsl(var(--vp-warning))]/20 px-6 py-10 text-center shadow-[0_30px_70px_-45px_rgba(15,23,42,0.7)]">
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute -left-24 -top-16 h-40 w-40 rounded-full bg-[hsl(var(--vp-primary))]/35" />
-            <div className="absolute right-[-10%] bottom-[-40%] h-56 w-56 rounded-full bg-[hsl(var(--vp-warning))]/40" />
+        <div className="relative overflow-hidden rounded-[4rem] border-2 border-[hsl(var(--vp-border))] px-8 py-20 sm:p-24 text-center shadow-[0_50px_100px_-20px_rgba(34,197,94,0.15)] bg-[hsl(var(--vp-bg))] group">
+          {/* animated background ornaments */}
+          <div className="absolute inset-0 -z-10 group-hover:scale-110 transition-transform duration-[3s]">
+            <div className="absolute top-0 right-0 -mr-40 -mt-40 w-[30rem] h-[30rem] bg-gradient-to-br from-[hsl(var(--vp-primary))/0.1] to-transparent rounded-full blur-[120px]" />
+            <div className="absolute bottom-0 left-0 -ml-40 -mb-40 w-[30rem] h-[30rem] bg-gradient-to-tr from-[hsl(var(--vp-accent))/0.08] to-transparent rounded-full blur-[120px]" />
           </div>
-          <div className="relative">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[hsl(var(--vp-text))]">
-              {promo?.eyebrow}
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold text-[hsl(var(--vp-text))] sm:text-3xl">
-              {promo?.title}
+          
+          <div className="relative z-10 max-w-3xl mx-auto">
+            <div className="w-20 h-20 rounded-3xl mx-auto mb-10 flex items-center justify-center bg-[hsl(var(--vp-primary))] text-white shadow-2xl shadow-[hsl(var(--vp-primary)/0.4)] rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                <RocketIcon className="w-10 h-10" />
+            </div>
+
+            <h2 className="text-4xl sm:text-6xl font-black text-[hsl(var(--vp-text))] mb-8 tracking-tight leading-[1.05] text-balance">
+              {cta?.title}
             </h2>
-            <p className="mt-3 text-sm text-[hsl(var(--vp-muted))] sm:text-base">
-              {promo?.subtitle}
+            <p className="text-xl sm:text-2xl text-[hsl(var(--vp-muted))] mb-12 font-medium leading-relaxed max-w-2xl mx-auto text-balance">
+              {cta?.description}
             </p>
-            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <Link
                 href="/auth/register"
-                className="inline-flex vp-button vp-button-primary px-6"
+                className="w-full sm:w-auto inline-flex items-center justify-center h-16 vp-button vp-button-primary px-12 text-xl font-black rounded-2xl shadow-2xl hover:shadow-[hsl(var(--vp-primary)/0.4)] hover:scale-105 transition-all"
               >
-                {promo?.primaryCta}
+                {cta?.primaryCta}
+                <ArrowRightIcon className="w-6 h-6 ml-2" />
               </Link>
-              <span className="text-sm text-[hsl(var(--vp-muted))]">
-                {String(t("cta.noCard", "landing"))}
-              </span>
+              <Link
+                href="/features"
+                className="w-full sm:w-auto inline-flex items-center justify-center h-16 vp-button px-12 text-xl font-black rounded-2xl border-2 border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-bg-soft))] backdrop-blur-sm hover:bg-[hsl(var(--vp-bg))] hover:border-[hsl(var(--vp-primary)/0.3)] transition-all text-[hsl(var(--vp-text))]"
+              >
+                {cta?.secondaryCta}
+              </Link>
             </div>
           </div>
         </div>

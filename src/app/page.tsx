@@ -5,16 +5,13 @@ import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Hero from "@/components/hero";
 import PosPreview from "@/components/PosPreview";
-import FeaturesSection from "@/components/FeaturesSection";
-import HowItWorksSection from "@/components/HowItWorksSection";
-import CheckoutWorkflowSection from "@/components/CheckoutWorkflowSection";
+import FeatureModule from "@/components/FeatureModule";
 import PricingSection from "@/components/PricingSection";
 import CTASection from "@/components/CTASection";
 import SupportSection from "@/components/SupportSection";
 import TestimonialSection from "@/components/TestimonialSection";
 import Footer from "@/components/Footer";
 import TrustedDemoSection from "@/components/TrustedDemoSection";
-import BusinessInsightsSection from "@/components/BusinessInsightsSection";
 import { useLanguage } from "@/lib/context/LanguageContext";
 
 export default function Home() {
@@ -68,11 +65,7 @@ export default function Home() {
         <div className="text-center vp-fade-in">
           <div className="w-12 h-12 mx-auto mb-4 border-b-2 border-[hsl(var(--vp-primary))] rounded-full animate-spin"></div>
           <p className="text-lg text-[hsl(var(--vp-muted))]">
-            {String(
-              require("@/lib/context/LanguageContext")
-                .useLanguage()
-                .t("loading", "common"),
-            )}
+            {currentLanguage === 'es' ? 'Cargando...' : 'Loading...'}
           </p>
         </div>
       </div>
@@ -103,18 +96,28 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        <TrustedDemoSection />
+        
+        <div className="space-y-0">
+          <FeatureModule moduleKey="module1" index={0} />
+          <div className="bg-[hsl(var(--vp-bg-section))]">
+            <FeatureModule moduleKey="module2" index={1} />
+          </div>
+          <FeatureModule moduleKey="module3" index={2} />
+          <div className="bg-[hsl(var(--vp-bg-section))]">
+            <FeatureModule moduleKey="module4" index={3} />
+          </div>
+        </div>
+
+        <PricingSection />
+        <CTASection />
+        <SupportSection />
+        <TestimonialSection />
       </main>
 
-      <TrustedDemoSection />
-      <FeaturesSection />
-      <HowItWorksSection />
-      <BusinessInsightsSection />
-      <CheckoutWorkflowSection />
-      <PricingSection />
-      <CTASection />
-      <SupportSection />
-      <TestimonialSection />
       <Footer />
     </>
   );
 }
+

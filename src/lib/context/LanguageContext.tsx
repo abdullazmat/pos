@@ -133,73 +133,71 @@ const translationsEs = {
   },
   landing: {
     hero: {
-      badge: "⭐ POS para kioscos y mostrador",
-      titleMain: "Cobrá rápido",
-      titleHighlight: "sin vueltas",
+      badge: "⭐ El sistema que tu kiosco necesita",
+      titleMain: "La base tecnológica para hacer",
+      titleHighlight: "crecer tu kiosco",
       titleLines: [
-        "Tenemos todo",
-        "lo que necesitás",
-        "para organizar",
-        "tu negocio",
+        "La base tecnológica",
+        "para hacer crecer",
+        "tu kiosco",
       ],
-      titleHighlightIndex: 0,
+      titleHighlightIndex: 1,
       description:
-        "VentaPlus es el POS para kioscos y comercios de mostrador: menos pasos para cobrar, pantallas claras para el personal y una operación estable todo el día.",
-      startFree: "Empezar Gratis →",
-      viewFeatures: "Ver Características",
+        "Ventas rápidas en mostrador, control de ganancias diarias y facturación electrónica ARCA integrada. Diseñado para profesionalizar tu negocio y prepararlo para escalar.",
+      primaryCta: "Ver el sistema en acción",
+      secondaryCta: "Empezar gratis",
     },
-    stats: {
-      cloud: "Cobro en pocos pasos",
-      initialPlan: "Pantallas claras",
-      available: "Operación estable",
+    modules: {
+      module1: {
+        title: "Cobrá rápido. Como en un supermercado.",
+        description: "El punto de venta está optimizado para teclado y escáner de códigos de barras, permitiendo ventas rápidas en horas pico sin depender del mouse.",
+        image: "/images/sections/es/pos-page.png",
+        features: [
+          "Flujo de ventas optimizado para mostrador",
+          "Compatible con teclado numérico",
+          "Integración con escáner de códigos",
+          "Interfaz limpia y organizada para el personal"
+        ]
+      },
+      module2: {
+        title: "Saber exactamente cuánto ganás cada día",
+        description: "Ventas, gastos y márgenes en tiempo real para tomar decisiones claras y hacer crecer tu negocio con confianza.",
+        image: "/images/sections/es/reports-page.png",
+        features: [
+          "Resumen diario de ventas automático",
+          "Seguimiento y monitoreo de gastos",
+          "Control de caja por turnos",
+          "Reportes simples y fáciles de entender"
+        ]
+      },
+      module3: {
+        title: "Organizá todo tu negocio en un solo sistema",
+        description: "Ventas, inventario, proveedores y gastos conectados en una plataforma simple diseñada para crecer con tu kiosco.",
+        image: "/images/sections/es/product-management.png",
+        features: [
+          "Punto de Venta — Cobro rápido y control automático",
+          "Gestión de Inventario — Stock en tiempo real y alertas",
+          "Proveedores y Compras — Registros y pagos organizados",
+          "Reportes Claros — Información simple para decidir"
+        ]
+      },
+      module4: {
+        title: "Cumplí con ARCA sin procesos complejos",
+        description: "Emití documentos fiscales directamente desde el sistema manteniendo el control total de tu negocio.",
+        image: "/images/sections/es/fiscal-reports.png",
+        features: [
+          "Facturas A, B y C",
+          "Notas de Crédito",
+          "Reportes fiscales listos para tu contador",
+          "Integración directa sin plataformas externas"
+        ]
+      }
     },
-    features: [
-      {
-        title: "Cobro rápido en mostrador",
-        description:
-          "Flujo corto para escanear, totalizar y cobrar sin demoras.",
-      },
-      {
-        title: "Pantallas claras para el equipo",
-        description:
-          "Opciones concretas por pantalla para reducir errores y capacitación.",
-      },
-      {
-        title: "Caja y turnos confiables",
-        description:
-          "Aperturas, cierres y movimientos consistentes para cada cajero.",
-      },
-      {
-        title: "Stock actualizado por venta",
-        description: "Descuenta automáticamente y avisa cuando falta.",
-      },
-      {
-        title: "Reportes operativos claros",
-        description: "Ventas por turno y productos clave sin ruido.",
-      },
-      {
-        title: "Permisos simples",
-        description: "Roles básicos para operar seguro sin complejidad.",
-      },
-    ],
-    howItWorks: {
-      badge: "Cómo funciona",
-      title: "Configura y vendé en mostrador",
-      subtitle: "Catálogo, precios y caja listos en minutos.",
-      steps: [
-        {
-          title: "Cargá tu catálogo",
-          description: "Importá productos y códigos para empezar a vender.",
-        },
-        {
-          title: "Cobrá en segundos",
-          description: "Escaneá, confirmá el total y emití el comprobante.",
-        },
-        {
-          title: "Cerrá caja con claridad",
-          description: "Arqueo y stock sincronizados al final del turno.",
-        },
-      ],
+    finalCta: {
+      title: "Prepará tu kiosco para crecer",
+      description: "Un sistema simple y listo para facturación fiscal, diseñado para el ritmo real del comercio minorista argentino.",
+      primaryCta: "Crear cuenta gratis",
+      secondaryCta: "Ver el sistema en acción"
     },
     cta: {
       title: "Listo para operar en mostrador",
@@ -1240,6 +1238,464 @@ const translationsEs = {
       close: "Cerrar",
     },
   },
+  featuresPage: {
+    hero: {
+      eyebrow: "Funcionalidades",
+      title: "Todo lo que necesitas para tu comercio",
+      subtitle: "Un sistema potente y fácil de usar, diseñado específicamente para el ritmo del retail argentino.",
+    },
+    sections: [
+      {
+        id: "pos",
+        title: "Punto de Venta (POS)",
+        description: "Optimizado para la velocidad en el mostrador. Vendé en segundos sin errores.",
+        image: "/images/sections/es/pos-page.png",
+        items: [
+          "Búsqueda ultra-rápida por código de barras o teclado.",
+          "Cierre de caja automático con reportes de turnos.",
+          "Múltiples medios de pago y descuentos al instante.",
+          "Compatibilidad total con teclados programables."
+        ]
+      },
+      {
+        id: "stock",
+        title: "Gestión de Inventario",
+        description: "Controlá tu stock en tiempo real y evitá quedarte sin mercadería.",
+        image: "/images/sections/es/product-management.png",
+        items: [
+          "Alertas automáticas de stock bajo.",
+          "Carga masiva de productos mediante Excel.",
+          "Control de costos y márgenes de ganancia.",
+          "Organización por categorías y marcas."
+        ]
+      },
+      {
+        id: "fiscal",
+        title: "Facturación Electrónica ARCA",
+        description: "Cumplí con todas las normativas fiscales de Argentina de forma automática.",
+        image: "/images/sections/es/fiscal-reports.png",
+        items: [
+          "Emisión de Facturas A, B y C integradas.",
+          "Envío automático de comprobantes al cliente.",
+          "Generación de reportes de IVA para tu contador.",
+          "Sincronización directa con los servicios de ARCA."
+        ]
+      },
+      {
+        id: "reports",
+        title: "Reportes y Estadísticas",
+        description: "Tomá decisiones basadas en datos reales de tu negocio.",
+        image: "/images/sections/es/reports-page.png",
+        items: [
+          "Gráficos de ventas por día, mes y año.",
+          "Ranking de productos más vendidos.",
+          "Control de gastos operativos y caja.",
+          "Exportación de datos a PDF y CSV."
+        ]
+      }
+    ],
+    otherFeatures: {
+      title: "Más herramientas para tu crecimiento",
+      items: [
+        { title: "Gestión de Proveedores", description: "Historial de compras y cuentas corrientes.", icon: "truck" },
+        { title: "Base de Clientes", description: "Conocé a tus clientes y fidelizalos.", icon: "users" },
+        { title: "Control de Gastos", description: "No pierdas de vista los costos operativos.", icon: "trending-down" },
+        { title: "Multi-usuario", description: "Permisos personalizados para tu equipo.", icon: "lock" }
+      ]
+    }
+  },
+  integrationsPage: {
+    hero: {
+      eyebrow: "Integraciones",
+      title: "Conectado con el ecosistema de tu negocio",
+      subtitle: "VentaPlus se integra con las herramientas que ya usas para automatizar procesos fiscales, pagos y gestión.",
+    },
+    arcaSection: {
+      title: "ARCA / AFIP",
+      badge: "Integración Activa",
+      description: "Conexión directa con el fisco argentino para emisión de facturas electrónicas y cumplimiento legal automático.",
+      features: [
+        "Solicitud y asignación de CAE automática",
+        "Facturas A, B y C integradas",
+        "Notas de crédito y débito fiscales",
+        "Gestión de certificados digitales",
+        "Sincronización en tiempo real con ARCA",
+        "Libro de IVA Digital integrado",
+      ],
+      cta: "Ver Tutoriales ARCA",
+      visual: {
+        authorized: "Autorizado",
+        amount: "Importe",
+        iva: "IVA (21%)",
+        cae: "CAE",
+      }
+    },
+    otherIntegrations: {
+      title: "Más integraciones para potenciarte",
+      comingSoon: "Próximamente",
+      suggestTitle: "¿Necesitas otra integración?",
+      suggestDesc: "Estamos trabajando para agregar nuevas herramientas. Si usas algo específico, cuéntanos.",
+      suggestCta: "Sugerir Integración",
+      categories: {
+        payments: "Pagos",
+        logistics: "Logística",
+        marketing: "Marketing",
+      },
+      items: [
+        {
+          name: "Mercado Pago",
+          category: "payments",
+          description: "Cobros con QR y link de pago sincronizados automáticamente con tu caja.",
+          status: "active"
+        },
+        {
+          name: "MODO",
+          category: "payments",
+          description: "Acepta pagos de todas las billeteras bancarias con una sola integración.",
+          status: "coming_soon"
+        },
+        {
+          name: "Andreani",
+          category: "logistics",
+          description: "Generación de etiquetas y seguimiento de envíos directo desde el pedido.",
+          status: "coming_soon"
+        },
+        {
+          name: "WhatsApp",
+          category: "marketing",
+          description: "Envío automático de comprobantes y notificaciones de stock por chat.",
+          status: "active"
+        }
+      ]
+    }
+  },
+  helpPage: {
+    hero: {
+      title: "¿Cómo podemos ayudarte?",
+      subtitle: "Buscá guías, tutoriales y respuestas a tus preguntas sobre VentaPlus.",
+      searchPlaceholder: "Buscar ayuda...",
+    },
+    categories: {
+      title: "Explorar por categoría",
+      items: [
+        { id: "getting-started", title: "Primeros Pasos", desc: "Primeros pasos para configurar tu cuenta y empezar a vender.", icon: "rocket", count: 5 },
+        { id: "arca-invoicing", title: "Facturación ARCA", desc: "Facturación electrónica con cumplimiento ARCA/AFIP.", icon: "file-text", count: 8 },
+        { id: "pos", title: "Punto de Venta / Caja", desc: "Domina la interfaz de venta y la gestión de caja.", icon: "monitor", count: 12 },
+        { id: "inventory", title: "Gestión de Inventario", desc: "Control de stock, categorías y gestión de productos.", icon: "package", count: 10 },
+        { id: "subscriptions", title: "Suscripciones", desc: "Gestiona tu suscripción a VentaPlus y facturación.", icon: "credit-card", count: 4 },
+        { id: "payment-orders", title: "Órdenes de Pago", desc: "Crea y gestiona órdenes de pago para proveedores.", icon: "banknote", count: 6 },
+        { id: "suppliers", title: "Proveedores", desc: "Gestión de proveedores, compras y devoluciones.", icon: "truck", count: 7 },
+        { id: "customers", title: "Clientes", desc: "Base de datos de clientes, ventas a cuenta corriente.", icon: "users", count: 5 },
+        { id: "expenses", title: "Gastos", desc: "Seguimiento y gestión de gastos del negocio.", icon: "percent", count: 4 },
+        { id: "fiscal-reports", title: "Reportes Fiscales", desc: "Genera y comprende reportes fiscales e impositivos.", icon: "bar-chart", count: 9 },
+        { id: "initial-config", title: "Configuración Inicial", desc: "Configuración del negocio, impuestos y preferencias.", icon: "settings", count: 6 }
+      ]
+    },
+    popular: {
+      title: "Artículos populares",
+      items: [
+        { title: "Cómo configurar mi primer producto", link: "#" },
+        { title: "Atajos de teclado en el POS", link: "#" },
+        { title: "Conexión con ARCA (Paso a paso)", link: "#" },
+        { title: "Realizar un arqueo de caja", link: "#" },
+        { title: "Importar stock desde Excel", link: "#" },
+      ]
+    },
+    cta: {
+      title: "¿No encontrás lo que buscás?",
+      subtitle: "Nuestro equipo de soporte está listo para darte una mano.",
+      button: "Contactar Soporte",
+    }
+  },
+  documentationPage: {
+    sidebar: {
+      basics: "Conceptos Básicos",
+      intro: "Introducción",
+      auth: "Autenticación",
+      architecture: "Arquitectura",
+      api: "Referencia de API",
+      products: "Productos",
+      sales: "Ventas",
+      inventory: "Inventario",
+      webhooks: "Webhooks",
+      security: "Seguridad y Privacidad",
+    },
+    hero: {
+      badge: "Documentación Técnica",
+      title: "Construí con la API de VentaPlus",
+      subtitle: "Nuestra plataforma está diseñada para ser extendida. Integrá tu negocio con bibliotecas modernas y una API REST robusta.",
+    }
+  },
+  statusPage: {
+    title: "Estado del Sistema",
+    subtitle: "Monitoreo en tiempo real de nuestros servicios principales y conectividad fiscal.",
+    summary: {
+      operational: "Todos los sistemas operativos",
+      maintenance: "Mantenimiento programado",
+      partial: "Interrupción parcial",
+      outage: "Interrupción mayor"
+    },
+    components: {
+      api: "API de Producción",
+      dashboard: "Panel Web",
+      pos: "Terminal Punto de Venta",
+      arca: "Integración ARCA/AFIP",
+      database: "Base de Datos Principal"
+    },
+    uptime: "Uptime (últimos 90 días)",
+    history: "Historial de Incidentes",
+    noIncidents: "No se registraron incidentes en este periodo.",
+    lastUpdate: "Última actualización",
+    live: "Estado en Vivo",
+    ninetyDaysAgo: "Hace 90 días",
+    today: "Hoy",
+    cta: {
+      title: "¿Sigues teniendo problemas?",
+      description: "Nuestro equipo de ingeniería de emergencia está disponible 24/7 para suscriptores del plan Pro.",
+      button: "Contactar Soporte"
+    }
+  },
+  securityPage: {
+    hero: {
+      badge: "Seguridad",
+      title: "Tus datos son nuestra máxima prioridad",
+      description: "VentaPlus está construido con seguridad de nivel empresarial desde cero. Protegemos tus datos comerciales con prácticas de cifrado, autenticación e infraestructura líderes en la industria."
+    },
+    features: {
+      encryption: {
+        title: "Cifrado de Datos",
+        description: "Todos los datos se cifran en tránsito (TLS 1.3) y en reposo (AES-256). Tu información comercial siempre está protegida."
+      },
+      auth: {
+        title: "Autenticación Segura",
+        description: "Autenticación estándar de la industria con hashing de contraseñas seguro (bcrypt) y gestión de sesiones avanzada."
+      },
+      infrastructure: {
+        title: "Infraestructura Cloud",
+        description: "Alojado en infraestructura de nube de nivel empresarial con escalado automático, redundancia y SLA de tiempo de actividad del 99.9%."
+      },
+      backups: {
+        title: "Copias de Seguridad",
+        description: "Tus datos se respaldan automáticamente de forma continua. La recuperación en un punto en el tiempo garantiza que nada se pierda."
+      },
+      access: {
+        title: "Control de Acceso",
+        description: "Controles de permisos detallados para garantizar que el equipo solo acceda a lo necesario. Roles de dueño, admin y cajero."
+      },
+      audit: {
+        title: "Registros de Auditoría",
+        description: "Rastro de auditoría completo de todas las operaciones del sistema. Rastrea quién hizo qué y cuándo para una total transparencia."
+      }
+    },
+    compliance: {
+      title: "Cumplimiento Normativo",
+      description: "VentaPlus cumple plenamente con las regulaciones fiscales argentinas y los estándares de protección de datos.",
+      arcaTitle: "ARCA / AFIP",
+      arcaDesc: "Cumplimiento total con las regulaciones de facturación electrónica argentina y requisitos fiscales.",
+      pdTitle: "Protección de Datos",
+      pdDesc: "Los datos de clientes y del negocio se manejan según las leyes de protección de datos personales de Argentina (Ley 25.326)."
+    },
+  },
+  tutorialsPage: {
+    hero: {
+      breadcrumbHome: "Inicio",
+      breadcrumbTutorials: "Tutoriales",
+      badge: "Aprendé VentaPlus",
+      title: "Tutoriales y Guías",
+      subtitle: "Todo lo que necesitás para dominar las operaciones de tu negocio. Buscá respuestas y tutoriales paso a paso.",
+      searchPlaceholder: "Buscar tutoriales..."
+    },
+    noResults: {
+      title: "No se encontraron tutoriales",
+      subtitle: "Intentá con otro término de búsqueda"
+    },
+    cta: {
+      title: "¿No encontrás lo que buscás?",
+      subtitle: "Nuestro equipo de soporte está disponible por chat y email para ayudarte con cualquier duda específica.",
+      button: "Contactar Soporte"
+    }
+  },
+  contactPage: {
+      hero: {
+        eyebrow: "Contacto",
+        title: "Estamos acá para impulsarte",
+        subtitle: "Hablá con nuestro equipo de expertos sobre cómo VentaPlus puede transformar la gestión de tu comercio.",
+        badges: {
+          response: "Respuesta en 24h",
+          secure: "Datos seguros",
+          argentina: "Equipo argentino"
+        }
+      },
+      form: {
+        title: "Envianos un mensaje",
+        subtitle: "Te responderemos a la brevedad",
+        name: "Nombre completo",
+        namePlaceholder: "Ingresá tu nombre",
+        email: "Correo electrónico",
+        emailPlaceholder: "tu@ejemplo.com",
+        phone: "Teléfono (opcional)",
+        phonePlaceholder: "+54 9 11 ...",
+        subject: "Asunto",
+        subjectPlaceholder: "Seleccioná un tema",
+        message: "Mensaje",
+        messagePlaceholder: "¿En qué podemos ayudarte?",
+        submit: "Enviar mensaje",
+        sending: "Enviando...",
+        successTitle: "¡Mensaje enviado!",
+        successMessage: "Gracias por contactarnos. Un miembro de nuestro equipo te responderá pronto.",
+        sendAnother: "Enviar otro mensaje",
+        errors: {
+          required: "Requerido",
+          invalidEmail: "Email inválido"
+        },
+        subjectOptions: [
+          "Ventas / Nuevos Planes",
+          "Soporte Técnico",
+          "Facturación / Pagos",
+          "Prensa / Partners",
+          "Otro"
+        ]
+      },
+      info: {
+        title: "Información de contacto",
+        items: [
+          { icon: "mail", title: "Email", description: "Soporte general", value: "soporte@ventaplus.com" },
+          { icon: "phone", title: "Teléfono", description: "Lunes a Viernes 9-18h", value: "+54 11 5555-0123" },
+          { icon: "location", title: "Oficinas", description: "Nuestro centro técnico", value: "Palermo, CABA, Argentina" }
+        ]
+      },
+      demo: {
+        title: "¿Preferís una demo en vivo?",
+        subtitle: "Agendá una sesión de 20 minutos con nuestro equipo.",
+        button: "Agendar demo"
+      },
+      ready: {
+        title: "¿Listo para empezar?",
+        subtitle: "Creá tu cuenta gratis y empezá a vender en minutos.",
+        primaryCta: "Crear cuenta gratis",
+        secondaryCta: "Ver funcionalidades"
+      },
+      faq: {
+        title: "Preguntas Frecuentes",
+        subtitle: "Respuestas rápidas a las consultas más comunes.",
+        items: [
+          { question: "¿Tienen costo por mantenimiento?", answer: "No, nuestros planes tienen un precio fijo mensual sin cargos ocultos." },
+          { question: "¿Es compatible con cualquier impresora?", answer: "VentaPlus es compatible con la mayoría de las impresoras térmicas EPSON y compatibles vía USB o Red." },
+          { question: "¿Cómo se integra con ARCA/AFIP?", answer: "La integración es nativa. Solo necesitás cargar tu certificado digital y punto de venta fiscal en la configuración." }
+        ]
+      }
+    },
+  pricingPage: {
+    hero: {
+      title: "Planes que crecen con vos",
+      subtitle: "Elegí la base tecnológica perfecta para profesionalizar tu kiosco o comercio. Sin contratos, cancelá cuando quieras."
+    },
+    billing: {
+      monthly: "mes",
+      yearly: "año"
+    },
+    faq: {
+      title: "Preguntas Frecuentes",
+      items: [
+        { question: "¿Puedo cambiar de plan?", answer: "Sí, podés subir de plan en cualquier momento. La diferencia se prorrateará en tu próximo ciclo de facturación." },
+        { question: "¿Qué métodos de pago aceptan?", answer: "Aceptamos todas las tarjetas de crédito y débito a través de Stripe y Mercado Pago." },
+        { question: "¿Cómo funciona el período de prueba?", answer: "Ofrecemos un plan gratuito forever para que pruebes las funciones básicas sin límite de tiempo." }
+      ]
+    }
+  },
+  aboutPage: {
+    hero: {
+      eyebrow: "Sobre Nosotros",
+      title: "Impulsando el comercio argentino",
+      subtitle: "VentaPlus es un sistema de punto de venta moderno en la nube, diseñado específicamente para kioscos, almacenes y comercios de cercanía en toda Argentina."
+    },
+    stats: [
+      { value: "1.000+", label: "Comercios Activos" },
+      { value: "50K+", label: "Transacciones Mensuales" },
+      { value: "99,9%", label: "Uptime" },
+      { value: "24/7", label: "Soporte Disponible" }
+    ],
+    mission: {
+      eyebrow: "Nuestra Misión",
+      title: "Hacer el comercio accesible para cada negocio",
+      p1: "Creemos que cada comercio, kiosco y puesto merece acceso a herramientas profesionales que lo ayuden a crecer. VentaPlus nació de la frustración de ver a dueños de pequeños negocios luchar con sistemas POS obsoletos, caros y complicados.",
+      p2: "Nuestra plataforma ofrece funciones de nivel empresarial como seguimiento de stock en tiempo real, cumplimiento fiscal con ARCA/AFIP y analíticas de ventas potentes — todo en un paquete simple de usar desde el primer día."
+    },
+    values: {
+      simplicity: {
+        title: "Simplicidad",
+        description: "Creamos herramientas intuitivas y fáciles de usar. Sin complejidad, sin confusiones."
+      },
+      reliability: {
+        title: "Confiabilidad",
+        description: "Tu negocio depende de nosotros. Priorizamos la seguridad de los datos y el rendimiento constante."
+      },
+      customerFirst: {
+        title: "El Cliente es lo Primero",
+        description: "Cada función que creamos nace de una necesidad real. Tu opinión define nuestro camino."
+      },
+      localFocus: {
+        title: "Enfoque Local",
+        description: "Hecho en Argentina, para argentinos. Entendemos las normativas y desafíos locales."
+      }
+    },
+    cta: {
+      title: "¿Listo para empezar?",
+      subtitle: "Sumate a los miles de comercios argentinos que ya usan VentaPlus para optimizar sus ventas.",
+      button: "Empezar Ahora",
+      secondary: "Hablar con Ventas"
+    }
+  },
+  careersPage: {
+    hero: {
+      badge: "Carreras",
+      title: "Construí el futuro del comercio en Argentina",
+      subtitle: "Sumate a nosotros para hacer que las herramientas POS profesionales sean accesibles para cada negocio. Somos un equipo pequeño y apasionado construyendo algo que importa."
+    },
+    whyJoin: {
+      title: "¿Por qué unirse a VentaPlus?",
+      perks: [
+        { icon: "🏠", title: "Remote-First", description: "Trabajá desde cualquier lugar de Argentina o más allá." },
+        { icon: "📈", title: "Crecimiento", description: "Unite a una startup en etapa temprana con impacto real." },
+        { icon: "💻", title: "Stack Moderno", description: "Next.js, TypeScript, Supabase y más." },
+        { icon: "🗓️", title: "Flexibilidad", description: "Horarios flexibles que se adaptan a tu vida." },
+        { icon: "🎯", title: "Propiedad", description: "Tomá la propiedad de las funcionalidades de punta a punta." },
+        { icon: "🤝", title: "Equipo", description: "Equipo pequeño y colaborativo que valora la calidad." }
+      ]
+    },
+    openPositions: {
+      title: "Posiciones Abiertas",
+      subtitle: "No tenemos posiciones abiertas en este momento, pero siempre buscamos personas con talento.",
+      spontaneous: {
+        title: "Candidaturas Espontáneas",
+        description: "¿Crees que serías compatible? Envianos tu CV y contanos por qué te gustaría unirte a VentaPlus.",
+        button: "Enviar tu CV"
+      }
+    }
+  },
+  pressPage: {
+    hero: {
+      badge: "Prensa",
+      title: "Prensa y Medios",
+      subtitle: "Recursos e información para periodistas y profesionales de medios que cubren VentaPlus."
+    },
+    assets: {
+      title: "Recursos de Marca",
+      description: "Descargá nuestros logos oficiales, colores de marca y kit de medios para usar en publicaciones de prensa.",
+      logoLabel: "Logo Oficial",
+      primaryBlue: "Azul Principal",
+      darkBackground: "Fondo Oscuro"
+    },
+    inquiries: {
+      title: "Consultas de Prensa",
+      description: "Para consultas de medios, entrevistas o discusiones sobre alianzas, por favor contactate con nuestro equipo.",
+      location: "Buenos Aires, Argentina"
+    },
+    about: {
+      title: "Sobre VentaPlus",
+      content: "VentaPlus es un sistema POS en la nube diseñado para comercios argentinos. Fundado con la misión de hacer que las herramientas comerciales profesionales sean accesibles para cada kiosco, tienda y comercio minorista, VentaPlus ofrece ventas integradas, inventario, cumplimiento fiscal (ARCA/AFIP) y analíticas de negocio — todo en una plataforma moderna."
+    }
+  }
 };
 
 const translationsEn = {
@@ -1337,79 +1793,78 @@ const translationsEn = {
   },
   landing: {
     hero: {
-      badge: "⭐ POS for kiosks and counter sales",
-      titleMain: "Fast checkout",
-      titleHighlight: "for daily sales",
+      badge: "⭐ The foundation your kiosk needs",
+      titleMain: "The technological foundation to",
+      titleHighlight: "grow your kiosk",
       titleLines: [
-        "We have everything",
-        "you need to",
-        "organize your",
-        "business",
+        "The technological",
+        "foundation to grow",
+        "your kiosk",
       ],
-      titleHighlightIndex: 0,
+      titleHighlightIndex: 1,
       description:
-        "VentaPlus is the POS for kiosks, small retail, and counter service: fewer steps to charge, clear screens for staff, and stable operation during daily rushes.",
-      startFree: "Start Free →",
-      viewFeatures: "View Features",
+        "Fast counter sales, daily profit control, and integrated ARCA electronic invoicing. Designed to professionalize your business and prepare it to scale.",
+      primaryCta: "See the system in action",
+      secondaryCta: "Start for free",
     },
-    stats: {
-      cloud: "Short checkout flow",
-      initialPlan: "Clear screens for staff",
-      available: "Stable daily operation",
+    modules: {
+      module1: {
+        title: "Get Paid Fast. Like in a Supermarket.",
+        description: "The point of sale is optimized for keyboard and barcode scanner use, enabling fast sales during peak hours without relying on a mouse.",
+        image: "/images/sections/en/pos-page.png",
+        features: [
+          "Optimized counter sales workflow",
+          "Numeric keypad compatible",
+          "Barcode scanner integration",
+          "Clean and organized interface for staff"
+        ]
+      },
+      module2: {
+        title: "Know Exactly How Much You Earn Every Day",
+        description: "Sales, expenses, and margins in real time so you can make clear decisions and grow your business confidently.",
+        image: "/images/sections/en/reports-page.png",
+        features: [
+          "Automatic daily sales summary",
+          "Expense tracking and monitoring",
+          "Shift-based cash control",
+          "Simple and easy-to-understand reports"
+        ]
+      },
+      module3: {
+        title: "Organize Your Entire Business in One System",
+        description: "Sales, inventory, suppliers, and expenses connected in one simple platform designed to grow with your kiosk.",
+        image: "/images/sections/en/product-management.png",
+        features: [
+          "Point of Sale — Fast checkout and automatic control",
+          "Inventory Management — Real-time stock and alerts",
+          "Suppliers and Purchases — Organized records and payments",
+          "Clear Reports — Simple information for decision-making"
+        ]
+      },
+      module4: {
+        title: "Stay Compliant with ARCA Without Complex Processes",
+        description: "Issue fiscal documents directly from the system while maintaining full control of your business.",
+        image: "/images/sections/en/fiscal-reports.png",
+        features: [
+          "Invoice A, B, and C",
+          "Credit Notes",
+          "Fiscal reports ready for your accountant",
+          "Direct integration without external platforms"
+        ]
+      }
     },
-    features: [
-      {
-        title: "Fast counter checkout",
-        description: "Short flow to scan, total, and take payment.",
-      },
-      {
-        title: "Clear screens for staff",
-        description:
-          "Focused options per step to reduce mistakes and training time.",
-      },
-      {
-        title: "Reliable cash shifts",
-        description: "Open, close, and track cash with consistent results.",
-      },
-      {
-        title: "Stock updated per sale",
-        description: "Auto-adjusts inventory and flags low stock.",
-      },
-      {
-        title: "Operational reports",
-        description: "Sales by shift and top items without noise.",
-      },
-      {
-        title: "Simple permissions",
-        description: "Basic roles and discounts without complexity.",
-      },
-    ],
-    howItWorks: {
-      badge: "How it works",
-      title: "Set up and sell at the counter",
-      subtitle: "Catalog, prices, and cash ready in minutes.",
-      steps: [
-        {
-          title: "Load your catalog",
-          description: "Import products and barcodes to start selling.",
-        },
-        {
-          title: "Charge in seconds",
-          description: "Scan, confirm total, and issue the receipt.",
-        },
-        {
-          title: "Close out with clarity",
-          description:
-            "Cash count and stock stay aligned at the end of each shift.",
-        },
-      ],
+    finalCta: {
+      title: "Prepare Your Kiosk to Grow",
+      description: "A simple, fiscal-ready system designed for the real pace of Argentine retail.",
+      primaryCta: "Create free account",
+      secondaryCta: "See the system in action"
     },
     cta: {
-      title: "Ready for counter operations",
+      title: "Ready to operate at the counter",
       subtitle:
-        "Built for kiosks, small retail, and counter service where speed matters.",
+        "Designed for kiosks, small retail and counter service where speed matters.",
       startFreeNow: "Start Free Now →",
-      noCard: "No credit card • Setup in 2 minutes",
+      noCard: "No credit card required • 2-minute setup",
     },
     promoCta: {
       eyebrow: "Prices frozen",
@@ -2428,6 +2883,464 @@ const translationsEn = {
       close: "Close",
     },
   },
+  featuresPage: {
+    hero: {
+      eyebrow: "Features",
+      title: "Everything your business needs",
+      subtitle: "A powerful and easy-to-use system, specifically designed for the pace of Argentine retail.",
+    },
+    sections: [
+      {
+        id: "pos",
+        title: "Point of Sale (POS)",
+        description: "Optimized for counter speed. Sell in seconds without errors.",
+        image: "/images/sections/en/pos-page.png",
+        items: [
+          "Ultra-fast search by barcode or keyboard.",
+          "Automatic cash closing with shift reports.",
+          "Multiple payment methods and instant discounts.",
+          "Total compatibility with programmable keyboards."
+        ]
+      },
+      {
+        id: "stock",
+        title: "Inventory Management",
+        description: "Control your stock in real-time and avoid running out of goods.",
+        image: "/images/sections/en/product-management.png",
+        items: [
+          "Automatic low stock alerts.",
+          "Bulk product upload via Excel.",
+          "Cost and profit margin control.",
+          "Organization by categories and brands."
+        ]
+      },
+      {
+        id: "fiscal",
+        title: "ARCA Electronic Invoicing",
+        description: "Comply with all Argentine tax regulations automatically.",
+        image: "/images/sections/en/fiscal-reports.png",
+        items: [
+          "Integrated A, B, and C Invoice issuance.",
+          "Automatic sending of receipts to the customer.",
+          "VAT reports generation for your accountant.",
+          "Direct synchronization with ARCA services."
+        ]
+      },
+      {
+        id: "reports",
+        title: "Reports and Statistics",
+        description: "Make decisions based on real data from your business.",
+        image: "/images/sections/en/reports-page.png",
+        items: [
+          "Sales charts by day, month, and year.",
+          "Ranking of top-selling products.",
+          "Operational expense and cash control.",
+          "Data export to PDF and CSV."
+        ]
+      }
+    ],
+    otherFeatures: {
+      title: "More tools for your growth",
+      items: [
+        { title: "Supplier Management", description: "Purchase history and current accounts.", icon: "truck" },
+        { title: "Customer Database", description: "Know your customers and build loyalty.", icon: "users" },
+        { title: "Expense Tracking", description: "Don't lose sight of operational costs.", icon: "trending-down" },
+        { title: "Multi-user", description: "Customized permissions for your team.", icon: "lock" }
+      ]
+    }
+  },
+  integrationsPage: {
+    hero: {
+      eyebrow: "Integrations",
+      title: "Connected to your business ecosystem",
+      subtitle: "VentaPlus integrates with the tools you already use to automate fiscal processes, payments, and management.",
+    },
+    arcaSection: {
+      title: "ARCA / AFIP",
+      badge: "Active Integration",
+      description: "Direct connection with the Argentine tax authority for electronic invoice issuance and automatic legal compliance.",
+      features: [
+        "Automatic CAE request and assignment",
+        "Factura A, B, and C integrated",
+        "Fiscal credit and debit notes",
+        "Digital certificates management",
+        "Real-time sync with ARCA",
+        "Integrated Digital VAT Book",
+      ],
+      cta: "View ARCA Tutorials",
+      visual: {
+        authorized: "Authorized",
+        amount: "Amount",
+        iva: "VAT (21%)",
+        cae: "CAE",
+      }
+    },
+    otherIntegrations: {
+      title: "More integrations to empower you",
+      comingSoon: "Coming Soon",
+      suggestTitle: "Need another integration?",
+      suggestDesc: "We're working to add new tools. If you use something specific, let us know.",
+      suggestCta: "Suggest Integration",
+      categories: {
+        payments: "Payments",
+        logistics: "Logistics",
+        marketing: "Marketing",
+      },
+      items: [
+        {
+          name: "Mercado Pago",
+          category: "payments",
+          description: "QR and payment link charges synchronized automatically with your cash register.",
+          status: "active"
+        },
+        {
+          name: "MODO",
+          category: "payments",
+          description: "Accept payments from all bank wallets with a single integration.",
+          status: "coming_soon"
+        },
+        {
+          name: "Andreani",
+          category: "logistics",
+          description: "Label generation and shipment tracking directly from the order.",
+          status: "coming_soon"
+        },
+        {
+          name: "WhatsApp",
+          category: "marketing",
+          description: "Automatic sending of receipts and stock notifications via chat.",
+          status: "active"
+        }
+      ]
+    }
+  },
+  helpPage: {
+    hero: {
+      title: "How can we help you?",
+      subtitle: "Search for guides, tutorials, and answers to your questions about VentaPlus.",
+      searchPlaceholder: "Search for help...",
+    },
+    categories: {
+      title: "Explore by category",
+      items: [
+        { id: "getting-started", title: "Getting Started", desc: "First steps to set up your VentaPlus account and start selling.", icon: "rocket", count: 5 },
+        { id: "arca-invoicing", title: "ARCA Invoicing", desc: "Electronic invoicing with ARCA/AFIP compliance.", icon: "file-text", count: 8 },
+        { id: "pos", title: "POS / Cash Register", desc: "Master the point of sale interface and cash management.", icon: "monitor", count: 12 },
+        { id: "inventory", title: "Inventory Management", desc: "Stock control, categories, and product management.", icon: "package", count: 10 },
+        { id: "subscriptions", title: "Subscriptions", desc: "Manage your VentaPlus subscription and billing.", icon: "credit-card", count: 4 },
+        { id: "payment-orders", title: "Payment Orders", desc: "Create and manage payment orders for suppliers.", icon: "banknote", count: 6 },
+        { id: "suppliers", title: "Suppliers", desc: "Supplier management, purchases, and returns.", icon: "truck", count: 7 },
+        { id: "customers", title: "Customers", desc: "Customer database, credit sales, and accounts.", icon: "users", count: 5 },
+        { id: "expenses", title: "Expenses", desc: "Track and manage business expenses.", icon: "percent", count: 4 },
+        { id: "fiscal-reports", title: "Fiscal Reports", desc: "Generate and understand fiscal and tax reports.", icon: "bar-chart", count: 9 },
+        { id: "initial-config", title: "Initial Configuration", desc: "Business setup, tax settings, and system preferences.", icon: "settings", count: 6 }
+      ]
+    },
+    popular: {
+      title: "Popular articles",
+      items: [
+        { title: "How to set up my first product", link: "#" },
+        { title: "Keyboard shortcuts in the POS", link: "#" },
+        { title: "ARCA connection (Step by step)", link: "#" },
+        { title: "Performing a cash out", link: "#" },
+        { title: "Importing stock from Excel", link: "#" },
+      ]
+    },
+    cta: {
+      title: "Can't find what you're looking for?",
+      subtitle: "Our support team is ready to lend a hand.",
+      button: "Contact Support",
+    }
+  },
+  documentationPage: {
+    sidebar: {
+      basics: "Basics",
+      intro: "Introduction",
+      auth: "Authentication",
+      architecture: "Architecture",
+      api: "API Reference",
+      products: "Products",
+      sales: "Sales",
+      inventory: "Inventory",
+      webhooks: "Webhooks",
+      security: "Security & Privacy",
+    },
+    hero: {
+      badge: "Technical Documentation",
+      title: "Build with VentaPlus API",
+      subtitle: "Our platform is designed to be extended. Integrate your business with modern libraries and a robust REST API.",
+    }
+  },
+  statusPage: {
+    title: "System Status",
+    subtitle: "Real-time monitoring of our core services and fiscal connectivity.",
+    summary: {
+      operational: "All Systems Operational",
+      maintenance: "Scheduled Maintenance",
+      partial: "Partial Interruption",
+      outage: "Major Outage"
+    },
+    components: {
+      api: "Production API",
+      dashboard: "Web Dashboard",
+      pos: "POS Terminal",
+      arca: "ARCA/AFIP Integration",
+      database: "Primary Database"
+    },
+    uptime: "Uptime (last 90 days)",
+    history: "Incident History",
+    noIncidents: "No incidents reported in this period.",
+    lastUpdate: "Last updated",
+    live: "Live Status",
+    ninetyDaysAgo: "90 days ago",
+    today: "Today",
+    cta: {
+      title: "Still experiencing issues?",
+      description: "Our emergency engineering team is available 24/7 for Pro plan subscribers.",
+      button: "Contact Support"
+    }
+  },
+  securityPage: {
+    hero: {
+      badge: "Security",
+      title: "Your data is our top priority",
+      description: "VentaPlus is built with enterprise-grade security from the ground up. We protect your business data with industry-leading encryption, authentication, and infrastructure practices."
+    },
+    features: {
+      encryption: {
+        title: "Data Encryption",
+        description: "All data is encrypted in transit (TLS 1.3) and at rest (AES-256). Your business data is always protected."
+      },
+      auth: {
+        title: "Secure Authentication",
+        description: "Industry-standard authentication with secure password hashing (bcrypt) and session management."
+      },
+      infrastructure: {
+        title: "Cloud Infrastructure",
+        description: "Hosted on enterprise-grade cloud infrastructure with automatic scaling, redundancy, and 99.9% uptime SLA."
+      },
+      backups: {
+        title: "Automated Backups",
+        description: "Your data is automatically backed up continuously. Point-in-time recovery ensures nothing is ever lost."
+      },
+      access: {
+        title: "Role-Based Access",
+        description: "Fine-grained permission controls ensure team members only access what they need. Owner, admin, and cashier roles."
+      },
+      audit: {
+        title: "Audit Logging",
+        description: "Complete audit trail of all system operations. Track who did what and when for full accountability."
+      }
+    },
+    compliance: {
+      title: "Regulatory Compliance",
+      description: "VentaPlus is fully compliant with Argentine fiscal regulations and data protection standards.",
+      arcaTitle: "ARCA / AFIP",
+      arcaDesc: "Full compliance with Argentine electronic invoicing regulations and fiscal requirements.",
+      pdTitle: "Data Protection",
+      pdDesc: "Customer and business data handled according to Argentine data protection laws (Law 25.326)."
+    },
+  },
+  tutorialsPage: {
+    hero: {
+        breadcrumbHome: "Home",
+        breadcrumbTutorials: "Tutorials",
+        badge: "Learn VentaPlus",
+        title: "Tutorials & Guides",
+        subtitle: "Everything you need to master your business operations. Find answers and step-by-step tutorials.",
+        searchPlaceholder: "Search tutorials..."
+      },
+      noResults: {
+        title: "No tutorials found",
+        subtitle: "Try a different search term"
+      },
+      cta: {
+        title: "Can't find what you're looking for?",
+        subtitle: "Our support team is available via chat and email to help you with any specific question.",
+        button: "Contact Support"
+      }
+    },
+    contactPage: {
+      hero: {
+        eyebrow: "Contact",
+        title: "We're here to power your growth",
+        subtitle: "Talk to our team of experts about how VentaPlus can transform your business management.",
+        badges: {
+          response: "24h response",
+          secure: "Data secure",
+          argentina: "Argentina-based team"
+        }
+      },
+      form: {
+        title: "Send us a message",
+        subtitle: "We'll get back to you as soon as possible",
+        name: "Full Name",
+        namePlaceholder: "Enter your name",
+        email: "Email address",
+        emailPlaceholder: "you@example.com",
+        phone: "Phone (optional)",
+        phonePlaceholder: "+54 9 11 ...",
+        subject: "Subject",
+        subjectPlaceholder: "Select a topic",
+        message: "Message",
+        messagePlaceholder: "How can we help you?",
+        submit: "Send message",
+        sending: "Sending...",
+        successTitle: "Message sent!",
+        successMessage: "Thank you for reaching out. A member of our team will respond shortly.",
+        sendAnother: "Send another message",
+        errors: {
+          required: "Required",
+          invalidEmail: "Invalid email"
+        },
+        subjectOptions: [
+          "Sales / New Plans",
+          "Technical Support",
+          "Billing / Payments",
+          "Press / Partners",
+          "Other"
+        ]
+      },
+      info: {
+        title: "Contact Information",
+        items: [
+          { icon: "mail", title: "Email", description: "General support", value: "support@ventaplus.com" },
+          { icon: "phone", title: "Phone", description: "Mon-Fri 9am-6pm", value: "+54 11 5555-0123" },
+          { icon: "location", title: "Offices", description: "Technical center", value: "Palermo, CABA, Argentina" }
+        ]
+      },
+      demo: {
+        title: "Prefer a live demo?",
+        subtitle: "Schedule a 20-minute session with our team.",
+        button: "Schedule demo"
+      },
+      ready: {
+        title: "Ready to get started?",
+        subtitle: "Create your free account and start selling in minutes.",
+        primaryCta: "Create free account",
+        secondaryCta: "View features"
+      },
+      faq: {
+        title: "Frequently Asked Questions",
+        subtitle: "Quick answers to common inquiries.",
+        items: [
+          { question: "Is there a maintenance fee?", answer: "No, our plans have a fixed monthly price with no hidden charges." },
+          { question: "Is it compatible with any printer?", answer: "VentaPlus is compatible with most USB or Network EPSON and generic thermal printers." },
+          { question: "How does it integrate with AFIP?", answer: "Integration is native. You just need to upload your digital certificate and fiscal POS in settings." }
+        ]
+      }
+    },
+  pricingPage: {
+    hero: {
+      title: "Plans that grow with you",
+      subtitle: "Choose the perfect technological foundation to professionalize your business. No contracts, cancel anytime."
+    },
+    billing: {
+      monthly: "month",
+      yearly: "year"
+    },
+    faq: {
+      title: "Frequently Asked Questions",
+      items: [
+        { question: "Can I change my plan?", answer: "Yes, you can upgrade your plan at any time. The difference will be prorated in your next billing cycle." },
+        { question: "What payment methods do you accept?", answer: "We accept all credit and debit cards through Stripe and Mercado Pago." },
+        { question: "How does the trial period work?", answer: "We offer a forever free plan so you can test basic functions without time limits." }
+      ]
+    }
+  },
+  aboutPage: {
+    hero: {
+      eyebrow: "About Us",
+      title: "Powering Argentine commerce",
+      subtitle: "VentaPlus is a modern cloud-based point of sale system, designed specifically for kiosks, retail shops, and local businesses across Argentina."
+    },
+    stats: [
+      { value: "1,000+", label: "Active Businesses" },
+      { value: "50K+", label: "Monthly Transactions" },
+      { value: "99.9%", label: "Uptime" },
+      { value: "24/7", label: "Support Available" }
+    ],
+    mission: {
+      eyebrow: "Our Mission",
+      title: "Making commerce accessible to every business",
+      p1: "We believe every store, kiosk, and market stand deserves access to professional tools that help them grow. VentaPlus was born from the frustration of seeing small business owners struggle with outdated, expensive, and complicated POS systems.",
+      p2: "Our platform brings enterprise-level features like real-time inventory tracking, fiscal compliance with ARCA/AFIP, and powerful sales analytics — all in a package that's simple enough for anyone to use from day one."
+    },
+    values: {
+      simplicity: {
+        title: "Simplicity",
+        description: "We build tools that are intuitive and easy to use. No complexity, no confusion."
+      },
+      reliability: {
+        title: "Reliability",
+        description: "Your business depends on us. We prioritize uptime, data safety, and consistent performance."
+      },
+      customerFirst: {
+        title: "Customer-First",
+        description: "Every feature we build starts with a real need from our users. Your feedback shapes our roadmap."
+      },
+      localFocus: {
+        title: "Local Focus",
+        description: "Built in Argentina, for Argentine businesses. We understand local regulations and challenges."
+      }
+    },
+    cta: {
+      title: "Ready to get started?",
+      subtitle: "Join thousands of Argentine businesses already using VentaPlus to streamline their operations.",
+      button: "Start Now",
+      secondary: "Contact Sales"
+    }
+  },
+  careersPage: {
+    hero: {
+      badge: "Careers",
+      title: "Build the future of commerce in Argentina",
+      subtitle: "Join us in making professional POS tools accessible to every business. We're a small, passionate team building something that matters."
+    },
+    whyJoin: {
+      title: "Why join VentaPlus?",
+      perks: [
+        { icon: "🏠", title: "Remote-First", description: "Work from anywhere in Argentina or beyond." },
+        { icon: "📈", title: "Growth", description: "Join an early-stage startup with real impact." },
+        { icon: "💻", title: "Modern Stack", description: "Next.js, TypeScript, Supabase, and more." },
+        { icon: "🗓️", title: "Flexibility", description: "Flexible hours that fit your life." },
+        { icon: "🎯", title: "Ownership", description: "Take ownership of features end to end." },
+        { icon: "🤝", title: "Team", description: "Small, collaborative team that values quality." }
+      ]
+    },
+    openPositions: {
+      title: "Open Positions",
+      subtitle: "We don't have open positions right now, but we're always looking for talented people.",
+      spontaneous: {
+        title: "Spontaneous Applications",
+        description: "Think you'd be a great fit? Send us your CV and tell us why you'd like to join VentaPlus.",
+        button: "Send Your CV"
+      }
+    }
+  },
+  pressPage: {
+    hero: {
+      badge: "Press",
+      title: "Press & Media",
+      subtitle: "Resources and information for journalists and media professionals covering VentaPlus."
+    },
+    assets: {
+      title: "Brand Assets",
+      description: "Download our official logos, brand colors, and media kit for use in press publications.",
+      logoLabel: "Official Logo",
+      primaryBlue: "Primary Blue",
+      darkBackground: "Dark Background"
+    },
+    inquiries: {
+      title: "Press Inquiries",
+      description: "For media inquiries, interviews, or partnership discussions, please reach out to our team.",
+      location: "Buenos Aires, Argentina"
+    },
+    about: {
+      title: "About VentaPlus",
+      content: "VentaPlus is a cloud-based POS system built for Argentine businesses. Founded with the mission of making professional commerce tools accessible to every kiosk, shop, and retail business, VentaPlus offers integrated sales, inventory, fiscal compliance (ARCA/AFIP), and business analytics — all in one modern platform."
+    }
+  }
 };
 
 const translationsPt = {
@@ -2524,77 +3437,77 @@ const translationsPt = {
   },
   landing: {
     hero: {
-      badge: "⭐ POS para quiosques e balcão",
-      titleMain: "Cobrança rápida",
-      titleHighlight: "no balcão",
+      badge: "⭐ O sistema que seu quiosque precisa",
+      titleMain: "A base tecnológica para fazer",
+      titleHighlight: "crescer seu quiosque",
       titleLines: [
-        "Temos tudo",
-        "o que você precisa",
-        "para organizar",
-        "seu negócio",
+        "A base tecnológica",
+        "para fazer crescer",
+        "seu quiosque",
       ],
-      titleHighlightIndex: 0,
+      titleHighlightIndex: 1,
       description:
-        "VentaPlus é o POS para quiosques, varejo pequeno e atendimento no balcão: menos etapas para cobrar, telas claras para a equipe e operação estável o dia todo.",
-      startFree: "Começar Gratuitamente →",
-      viewFeatures: "Ver Recursos",
+        "Vendas rápidas no balcão, controle de lucros diários e faturamento eletrônico ARCA integrado. Projetado para profissionalizar seu negócio e prepará-lo para escalar.",
+      primaryCta: "Veja o sistema em ação",
+      secondaryCta: "Começar grátis",
     },
-    stats: {
-      cloud: "Fluxo curto de venda",
-      initialPlan: "Telas claras para equipe",
-      available: "Operação estável",
+    modules: {
+      module1: {
+        title: "Receba Rápido. Como em um Supermercado.",
+        description: "O ponto de venda é otimizado para uso de teclado e scanner de código de barras, permitindo vendas rápidas em horários de pico sem depender do mouse.",
+        image: "/images/sections/pt/pos-page.png",
+        features: [
+          "Fluxo de vendas otimizado para balcão",
+          "Compatível com teclado numérico",
+          "Integração com scanner de código",
+          "Interface limpa e organizada para a equipe"
+        ]
+      },
+      module2: {
+        title: "Saiba Exatamente Quanto Você Ganha Todo Dia",
+        description: "Vendas, despesas e margens em tempo real para que você possa tomar decisões claras e fazer seu negócio crescer com confiança.",
+        image: "/images/sections/pt/reports-page.png",
+        features: [
+          "Resumo diário de vendas automático",
+          "Acompanhamento e monitoramento de despesas",
+          "Controle de caixa por turnos",
+          "Relatórios simples e fáceis de entender"
+        ]
+      },
+      module3: {
+        title: "Organize Todo Seu Negócio em um Único Sistema",
+        description: "Vendas, estoque, fornecedores e despesas conectados em uma plataforma simples projetada para crescer com seu quiosque.",
+        image: "/images/sections/pt/product-management.png",
+        features: [
+          "Ponto de Venda — Checkout rápido e controle automático",
+          "Gestão de Estoque — Estoque em tempo real e alertas",
+          "Fornecedores e Compras — Registros e pagamentos organizados",
+          "Relatórios Claros — Informações simples para decisão"
+        ]
+      },
+      module4: {
+        title: "Fique em Conformidade com a ARCA sem Processos Complexos",
+        description: "Emita documentos fiscais diretamente do sistema enquanto mantém o controle total do seu negócio.",
+        image: "/images/sections/pt/fiscal-reports.png",
+        features: [
+          "Faturas A, B e C",
+          "Notas de Crédito",
+          "Relatórios fiscais prontos para seu contador",
+          "Integração direta sem plataformas externas"
+        ]
+      }
     },
-    features: [
-      {
-        title: "Cobrança rápida no balcão",
-        description: "Fluxo curto para escanear, totalizar e receber.",
-      },
-      {
-        title: "Telas claras para a equipe",
-        description:
-          "Opções objetivas por etapa para reduzir erros e treinamento.",
-      },
-      {
-        title: "Caixa e turnos confiáveis",
-        description: "Abertura, fechamento e movimentos consistentes.",
-      },
-      {
-        title: "Estoque atualizado por venda",
-        description: "Ajuste automático e aviso de baixo estoque.",
-      },
-      {
-        title: "Relatórios operacionais claros",
-        description: "Vendas por turno e itens principais sem ruído.",
-      },
-      {
-        title: "Permissões simples",
-        description: "Papéis básicos para operar com segurança.",
-      },
-    ],
-    howItWorks: {
-      badge: "Como funciona",
-      title: "Configure e venda no balcão",
-      subtitle: "Catálogo, preços e caixa prontos em minutos.",
-      steps: [
-        {
-          title: "Carregue seu catálogo",
-          description: "Importe produtos e códigos de barras para começar.",
-        },
-        {
-          title: "Cobre em segundos",
-          description: "Escaneie, confirme o total e emita o comprovante.",
-        },
-        {
-          title: "Feche o caixa com clareza",
-          description: "Conferência e estoque alinhados ao final do turno.",
-        },
-      ],
+    finalCta: {
+      title: "Prepare Seu Quiosque para Crescer",
+      description: "Um sistema simples, pronto para faturamento fiscal e projetado para o ritmo real do varejo argentino.",
+      primaryCta: "Criar conta grátis",
+      secondaryCta: "Veja o sistema em ação"
     },
     cta: {
       title: "Pronto para operar no balcão",
       subtitle:
-        "Feito para quiosques, varejo pequeno e atendimento em caixa onde velocidade importa.",
-      startFreeNow: "Começar Gratuitamente Agora →",
+        "Feito para quiosques, varejo pequeno e atendimento onde a velocidade importa.",
+      startFreeNow: "Começar Grátis Agora →",
       noCard: "Sem cartão de crédito • Configuração em 2 minutos",
     },
     promoCta: {
@@ -3624,6 +4537,426 @@ const translationsPt = {
       close: "Fechar",
     },
   },
+  featuresPage: {
+    hero: {
+      eyebrow: "Funcionalidades",
+      title: "Tudo o que seu negócio precisa",
+      subtitle: "Um sistema potente e fácil de usar, projetado especificamente para o ritmo do varejo argentino.",
+    },
+    sections: [
+      {
+        id: "pos",
+        title: "Ponto de Venda (POS)",
+        description: "Otimizado para a velocidade no balcão. Venda em segundos sem erros.",
+        image: "/images/sections/pt/pos-page.png",
+        items: [
+          "Busca ultra-rápida por código de barras ou teclado.",
+          "Fechamento de caixa automático com relatórios de turnos.",
+          "Múltiplos meios de pagamento e descontos instantâneos.",
+          "Compatibilidade total com teclados programáveis."
+        ]
+      },
+      {
+        id: "stock",
+        title: "Gestão de Inventário",
+        description: "Controle seu estoque em tempo real e evite que a mercadoria acabe.",
+        image: "/images/sections/pt/product-management.png",
+        items: [
+          "Alertas automáticos de estoque baixo.",
+          "Carga massiva de produtos via Excel.",
+          "Controle de custos e margens de lucro.",
+          "Organização por categorias e marcas."
+        ]
+      },
+      {
+        id: "fiscal",
+        title: "Faturamento Eletrônico ARCA",
+        description: "Cumpra todas as normas fiscais da Argentina de forma automática.",
+        image: "/images/sections/pt/fiscal-reports.png",
+        items: [
+          "Emissão de Faturas A, B e C integradas.",
+          "Envio automático de comprovantes ao cliente.",
+          "Geração de relatórios de IVA para seu contador.",
+          "Sincronização direta com os serviços da ARCA."
+        ]
+      },
+      {
+        id: "reports",
+        title: "Relatórios e Estatísticas",
+        description: "Tome decisões baseadas em dados reais do seu negócio.",
+        image: "/images/sections/pt/reports-page.png",
+        items: [
+          "Gráficos de vendas por dia, mes e ano.",
+          "Ranking de produtos mais vendidos.",
+          "Controle de despesas operacionais e caixa.",
+          "Exportação de datos para PDF e CSV."
+        ]
+      }
+    ],
+    otherFeatures: {
+      title: "Mais ferramentas para o seu crescimento",
+      items: [
+        { title: "Gestão de Fornecedores", description: "Histórico de compras e contas correntes.", icon: "truck" },
+        { title: "Base de Clientes", description: "Conheça seus clientes e fidelize-os.", icon: "users" },
+        { title: "Controle de Despesas", description: "Não perca de vista os custos operacionais.", icon: "trending-down" },
+        { title: "Multi-usuário", description: "Permissões personalizadas para sua equipe.", icon: "lock" }
+      ]
+    }
+  },
+  integrationsPage: {
+    hero: {
+      eyebrow: "Integrações",
+      title: "Conectado ao ecossistema do seu negócio",
+      subtitle: "O VentaPlus se integra às ferramentas que você já usa para automatizar processos fiscais, pagamentos e gestão.",
+    },
+    arcaSection: {
+      title: "ARCA / AFIP",
+      badge: "Integração Activa",
+      description: "Conexão directa com o fisco argentino para emissão de faturas eletrônicas e conformidade legal automática.",
+      features: [
+        "Solicitação e atribuição de CAE automática",
+        "Faturas A, B e C integradas",
+        "Notas de crédito e débito fiscais",
+        "Gestão de certificados digitais",
+        "Sincronização em tempo real com a ARCA",
+        "Livro de IVA Digital integrado",
+      ],
+      cta: "Ver Tutoriais ARCA",
+      visual: {
+        authorized: "Autorizado",
+        amount: "Valor",
+        iva: "IVA (21%)",
+        cae: "CAE",
+      }
+    },
+    otherIntegrations: {
+      title: "Mais integrações para te potenciar",
+      comingSoon: "Em breve",
+      suggestTitle: "Precisa de outra integração?",
+      suggestDesc: "Estamos trabalhando para adicionar novas ferramentas. Se você usa algo específico, conte-nos.",
+      suggestCta: "Sugerir Integração",
+      categories: {
+        payments: "Pagamentos",
+        logistics: "Logística",
+        marketing: "Marketing",
+      },
+      items: [
+        {
+          name: "Mercado Pago",
+          category: "payments",
+          description: "Pagamentos com QR e link de pagamento sincronizados automaticamente com seu caixa.",
+          status: "active"
+        },
+        {
+          name: "MODO",
+          category: "payments",
+          description: "Aceite pagamentos de todas as carteiras bancárias com uma única integração.",
+          status: "coming_soon"
+        },
+        {
+          name: "Andreani",
+          category: "logistics",
+          description: "Geração de etiquetas e rastreamento de envios direto do pedido.",
+          status: "coming_soon"
+        },
+        {
+          name: "WhatsApp",
+          category: "marketing",
+          description: "Envio automático de comprovantes e notificações de estoque via chat.",
+          status: "active"
+        }
+      ]
+    }
+  },
+  documentationPage: {
+    sidebar: {
+      basics: "Conceitos Básicos",
+      intro: "Introdução",
+      auth: "Autenticação",
+      architecture: "Arquitetura",
+      api: "Referência de API",
+      products: "Produtos",
+      sales: "Vendas",
+      inventory: "Inventário",
+      webhooks: "Webhooks",
+      security: "Segurança e Privacidade",
+    },
+    hero: {
+      badge: "Documentação Técnica",
+      title: "Construa com a API VentaPlus",
+      subtitle: "Nossa plataforma foi projetada para ser estendida. Integre seu negócio com bibliotecas modernas e uma robusta API REST.",
+    }
+  },
+  statusPage: {
+    title: "Status do Sistema",
+    subtitle: "Monitoramento em tempo real de nossos serviços principais e conectividade fiscal.",
+    summary: {
+      operational: "Todos os sistemas operacionais",
+      maintenance: "Manutenção programada",
+      partial: "Interrupção parcial",
+      outage: "Interrupção maior"
+    },
+    components: {
+      api: "API de Produção",
+      dashboard: "Painel Web",
+      pos: "Terminal Ponto de Venda",
+      arca: "Integração ARCA/AFIP",
+      database: "Base de Dados Principal"
+    },
+    uptime: "Uptime (últimos 90 dias)",
+    history: "Histórico de Incidentes",
+    noIncidents: "Nenhum incidente registrado neste período.",
+    lastUpdate: "Última atualização",
+    live: "Status ao Vivo",
+    ninetyDaysAgo: "90 dias atrás",
+    today: "Hoje",
+    cta: {
+      title: "Ainda está com problemas?",
+      description: "Nossa equipe de engenharia de emergência está disponível 24 horas por dia, 7 dias por semana para assinantes do plano Pro.",
+      button: "Contatar Suporte"
+    }
+  },
+  securityPage: {
+    hero: {
+      badge: "Segurança",
+      title: "Seus dados são nossa prioridade máxima",
+      description: "O VentaPlus é construído com segurança de nível empresarial desde o início. Protegemos seus dados comerciais com práticas de criptografia, autenticação e infraestrutura líderes do setor."
+    },
+    features: {
+      encryption: {
+        title: "Criptografia de Dados",
+        description: "Todos os dados são criptografados em trânsito (TLS 1.3) e em repouso (AES-256). Seus dados comerciais estão sempre protegidos."
+      },
+      auth: {
+        title: "Autenticação Segura",
+        description: "Autenticação padrão do setor com hashing de senha seguro (bcrypt) e gerenciamento de sessão."
+      },
+      infrastructure: {
+        title: "Infraestrutura Cloud",
+        description: "Hospedado em infraestrutura de nuvem de nível empresarial com escalonamento automático, redundância e SLA de 99,9% de disponibilidade."
+      },
+      backups: {
+        title: "Backups Automáticos",
+        description: "Seus dados são copiados automaticamente de forma contínua. A recuperação pontual garante que nada seja perdido."
+      },
+      access: {
+        title: "Acesso por Funções",
+        description: "Controles de permissão detalhados garantem que os membros da equipe acessem apenas o necessário. Funções de dono, admin e caixa."
+      },
+      audit: {
+        title: "Logs de Auditoria",
+        description: "Trilha de auditoria completa de todas as operações do sistema. Rastreie quem fez o quê e quando para total responsabilidade."
+      }
+    },
+    compliance: {
+      title: "Conformidade Regulatória",
+      description: "O VentaPlus está em total conformidade com as regulamentações fiscais argentinas e os padrões de proteção de dados.",
+      arcaTitle: "ARCA / AFIP",
+      arcaDesc: "Total conformidade com as regulamentações argentinas de faturamento eletrônico e requisitos fiscais.",
+      pdTitle: "Proteção de Dados",
+      pdDesc: "Dados de clientes e negócios manipulados de acordo com as leis argentinas de proteção de dados (Lei 25.326)."
+    },
+  },
+  tutorialsPage: {
+    hero: {
+        breadcrumbHome: "Início",
+        breadcrumbTutorials: "Tutoriais",
+        badge: "Aprenda VentaPlus",
+        title: "Tutoriais e Guias",
+        subtitle: "Tudo o que você precisa para dominar as operações do seu negócio. Encontre respostas e tutoriais passo a passo.",
+        searchPlaceholder: "Buscar tutoriais..."
+      },
+      noResults: {
+        title: "Nenhum tutorial encontrado",
+        subtitle: "Tente um termo de busca diferente"
+      },
+      cta: {
+        title: "Não encontra o que procura?",
+        subtitle: "Nossa equipe de suporte está disponível por chat e e-mail para ajudá-lo com qualquer dúvida específica.",
+        button: "Contatar Suporte"
+      }
+    },
+    contactPage: {
+      hero: {
+        eyebrow: "Contato",
+        title: "Estamos aqui para impulsionar seu crescimento",
+        subtitle: "Fale com nossa equipe de especialistas sobre como o VentaPlus pode transformar a gestão do seu comércio.",
+        badges: {
+          response: "Resposta em 24h",
+          secure: "Dados seguros",
+          argentina: "Equipe argentina"
+        }
+      },
+      form: {
+        title: "Envie-nos uma mensagem",
+        subtitle: "Responderemos o mais breve possível",
+        name: "Nome completo",
+        namePlaceholder: "Insira seu nome",
+        email: "E-mail",
+        emailPlaceholder: "voce@exemplo.com",
+        phone: "Telefone (opcional)",
+        phonePlaceholder: "+54 9 11 ...",
+        subject: "Assunto",
+        subjectPlaceholder: "Selecione um tema",
+        message: "Mensagem",
+        messagePlaceholder: "Como podemos ajudar você?",
+        submit: "Enviar mensagem",
+        sending: "Enviando...",
+        successTitle: "Mensagem enviada!",
+        successMessage: "Obrigado por entrar em contato. Um membro da nossa equipe responderá em breve.",
+        sendAnother: "Enviar outra mensagem",
+        errors: {
+          required: "Obrigatório",
+          invalidEmail: "E-mail inválido"
+        },
+        subjectOptions: [
+          "Vendas / Novos Planos",
+          "Suporte Técnico",
+          "Faturamento / Pagamentos",
+          "Imprensa / Parceiros",
+          "Outro"
+        ]
+      },
+      info: {
+        title: "Informações de contato",
+        items: [
+          { icon: "mail", title: "E-mail", description: "Suporte geral", value: "suporte@ventaplus.com" },
+          { icon: "phone", title: "Telefone", description: "Seg-Sex 9h-18h", value: "+54 11 5555-0123" },
+          { icon: "location", title: "Escritórios", description: "Centro técnico", value: "Palermo, CABA, Argentina" }
+        ]
+      },
+      demo: {
+        title: "Prefere uma demo ao vivo?",
+        subtitle: "Agende uma sessão de 20 minutos com nossa equipe.",
+        button: "Agendar demo"
+      },
+      ready: {
+        title: "Pronto para começar?",
+        subtitle: "Crie sua conta grátis e comece a vender em minutos.",
+        primaryCta: "Criar conta grátis",
+        secondaryCta: "Ver funcionalidades"
+      },
+      faq: {
+        title: "Perguntas Frequentes",
+        subtitle: "Respostas rápidas às consultas mais comunes.",
+        items: [
+          { question: "Existe taxa de manutenção?", answer: "Não, nossos planos têm um preço mensal fixo, sem taxas ocultas." },
+          { question: "É compatível com qualquer impressora?", answer: "O VentaPlus é compatível com a maioria das impressoras térmicas USB ou de rede (EPSON e compatíveis)." },
+          { question: "Como se integra ao AFIP?", answer: "A integração é nativa. Você só precisa carregar seu certificado digital e o PDV fiscal nas configurações." }
+        ]
+      }
+    },
+  pricingPage: {
+    hero: {
+      title: "Planos que crescem com você",
+      subtitle: "Escolha a base tecnológica perfeita para profissionalizar seu negócio. Sem contratos, cancele quando quiser."
+    },
+    billing: {
+      monthly: "mês",
+      yearly: "ano"
+    },
+    faq: {
+      title: "Perguntas Frequentes",
+      items: [
+        { question: "Posso mudar de plano?", answer: "Sim, você pode fazer o upgrade de seu plano a qualquer momento. A diferença será rateada em seu próximo ciclo de faturamento." },
+        { question: "Quais métodos de pagamento vocês aceitam?", answer: "Aceitamos todos os cartões de crédito e débito através do Stripe e Mercado Pago." },
+        { question: "Como funciona o período de teste?", answer: "Oferecemos um plano gratuito forever para que você possa testar as funções básicas sem limites de tempo." }
+      ]
+    }
+  },
+  aboutPage: {
+    hero: {
+      eyebrow: "Sobre Nós",
+      title: "Impulsionando o comércio argentino",
+      subtitle: "VentaPlus é um sistema de ponto de venda moderno na nuvem, projetado especificamente para quiosques, lojas e comércios locais em toda a Argentina."
+    },
+    stats: [
+      { value: "1.000+", label: "Negócios Ativos" },
+      { value: "50K+", label: "Transações Mensais" },
+      { value: "99,9%", label: "Uptime" },
+      { value: "24/7", label: "Suporte Disponível" }
+    ],
+    mission: {
+      eyebrow: "Nossa Missão",
+      title: "Tornar o comércio acessível para todos os negócios",
+      p1: "Acreditamos que cada loja, quiosque e banca merece acesso a ferramentas profissionais que os ajudem a crescer. O VentaPlus nasceu da frustração de ver pequenos empresários lutarem com sistemas de PDV obsoletos, caros e complicados.",
+      p2: "Nossa plataforma oferece recursos de nível empresarial, como rastreamento de estoque em tempo real, conformidade fiscal com ARCA/AFIP e análises de vendas poderosas — tudo em um pacote simples de usar desde o primeiro dia."
+    },
+    values: {
+      simplicity: {
+        title: "Simplicidade",
+        description: "Criamos ferramentas intuitivas e fáceis de usar. Sem complexidade, sem confusão."
+      },
+      reliability: {
+        title: "Confiabilidade",
+        description: "Seu negócio depende de nós. Priorizamos a segurança dos dados e o desempenho consistente."
+      },
+      customerFirst: {
+        title: "O Cliente em Primeiro Lugar",
+        description: "Cada recurso que criamos nasce de uma necessidade real. Sua opinião define nosso caminho."
+      },
+      localFocus: {
+        title: "Foco Local",
+        description: "Feito na Argentina, para argentinos. Entendemos as regulamentações e desafios locais."
+      }
+    },
+    cta: {
+      title: "Pronto para começar?",
+      subtitle: "Junte-se aos milhares de negócios argentinos que já usam o VentaPlus para otimizar suas vendas.",
+      button: "Começar Agora",
+      secondary: "Falar com Vendas"
+    }
+  },
+  careersPage: {
+    hero: {
+      badge: "Carreiras",
+      title: "Construa o futuro do comércio na Argentina",
+      subtitle: "Junte-se a nós para tornar as ferramentas POS profissionais acessíveis a todos os negócios. Somos uma equipe pequena e apaixonada construindo algo que importa."
+    },
+    whyJoin: {
+      title: "Por que se juntar à VentaPlus?",
+      perks: [
+        { icon: "🏠", title: "Remote-First", description: "Trabalhe de qualquer lugar na Argentina ou além." },
+        { icon: "📈", title: "Crescimento", description: "Junte-se a uma startup em estágio inicial com impacto real." },
+        { icon: "💻", title: "Stack Moderno", description: "Next.js, TypeScript, Supabase e muito mais." },
+        { icon: "🗓️", title: "Flexibilidade", description: "Horários flexíveis que se adaptam à sua vida." },
+        { icon: "🎯", title: "Propriedade", description: "Assuma a propriedade das funcionalidades de ponta a ponta." },
+        { icon: "🤝", title: "Equipe", description: "Equipe pequena e colaborativa que valoriza a qualidade." }
+      ]
+    },
+    openPositions: {
+      title: "Vagas Abertas",
+      subtitle: "Não temos vagas abertas no momento, mas estamos sempre em busca de pessoas talentosas.",
+      spontaneous: {
+        title: "Candidaturas Espontâneas",
+        description: "Acha que seria um bom ajuste? Envie-nos seu currículo e conte-nos por que você gostaria de se juntar à VentaPlus.",
+        button: "Enviar seu currículo"
+      }
+    }
+  },
+  pressPage: {
+    hero: {
+      badge: "Imprensa",
+      title: "Imprensa e Mídia",
+      subtitle: "Recursos e informações para jornalistas e profissionais de mídia cobrindo a VentaPlus."
+    },
+    assets: {
+      title: "Recursos de Marca",
+      description: "Baixe nossos logotipos oficiais, cores de marca e kit de mídia para uso em publicações de imprensa.",
+      logoLabel: "Logotipo Oficial",
+      primaryBlue: "Azul Principal",
+      darkBackground: "Fundo Escuro"
+    },
+    inquiries: {
+      title: "Consultas de Imprensa",
+      description: "Para consultas de mídia, entrevistas ou discussões sobre parcerias, entre em contato com nossa equipe.",
+      location: "Buenos Aires, Argentina"
+    },
+    about: {
+      title: "Sobre a VentaPlus",
+      content: "VentaPlus é um sistema POS em nuvem projetado para empresas argentinas. Fundada com a missão de tornar as ferramentas comerciais profissionais acessíveis a todos os quiosques, lojas e varejistas, a VentaPlus oferece vendas integradas, estoque, conformidade fiscal (ARCA/AFIP) e análises de negócios — tudo em uma plataforma moderna."
+    }
+  }
 };
 
 const translations: Record<Language, Record<string, any>> = {

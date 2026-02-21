@@ -15,6 +15,7 @@ import {
   RocketIcon,
   MonitorIcon,
   PackageIcon,
+  FileTextIcon as FileIcon,
   CreditCardIcon,
   BanknoteIcon,
   TruckIcon,
@@ -31,20 +32,20 @@ function CategoryIcon({ name, className }: { name: string; className?: string })
     case "getting-started": return <RocketIcon className={className} />;
     case "pos":             return <MonitorIcon className={className} />;
     case "inventory":       return <PackageIcon className={className} />;
-    case "arca-invoicing":  return <FileTextIcon className={className} />;
+    case "arca-invoicing": return <FileIcon className={className} />;
     case "subscriptions":   return <CreditCardIcon className={className} />;
-    case "payment-orders":  return <BanknoteIcon className={className} />;
-    case "suppliers":       return <TruckIcon className={className} />;
-    case "customers":       return <UsersIcon className={className} />;
-    case "expenses":        return <PercentIcon className={className} />;
-    case "fiscal-reports":  return <BarChart3Icon className={className} />;
-    case "initial-config":  return <SettingsIcon className={className} />;
+    case "payment-orders": return <BanknoteIcon className={className} />;
+    case "suppliers":      return <TruckIcon className={className} />;
+    case "customers":      return <UsersIcon className={className} />;
+    case "expenses":       return <PercentIcon className={className} />;
+    case "fiscal-reports": return <BarChart3Icon className={className} />;
+    case "initial-config": return <SettingsIcon className={className} />;
     default:                return <SparklesIcon className={className} />;
   }
 }
 
-export default function TutorialCategoryPage() {
-  const { category: id } = useParams();
+export default function HelpCategoryPage() {
+  const { id } = useParams();
   const { currentLanguage, t } = useLanguage();
 
   const categories = t("categories", "helpPage") as any;
@@ -53,12 +54,11 @@ export default function TutorialCategoryPage() {
   const categoryInfo = useMemo(() => {
     return categories?.items?.find((cat: any) => cat.id === id) || {
       title: id,
-      desc: "Articles for " + id,
-      icon: "rocket"
+      desc: "Articles for " + id
     };
   }, [id, categories]);
 
-  /* Articles for this category - Localized */
+  /* Articles for this category */
   const categoryArticles = useMemo(() => {
     const data: Record<string, any[]> = {
       es: [
@@ -79,6 +79,10 @@ export default function TutorialCategoryPage() {
         { id: "mejorar-plan", cat: "subscriptions", title: "Cómo mejorar tu Plan", time: "3 min", level: "Principiante" },
         { id: "historial-facturacion", cat: "subscriptions", title: "Historial de Facturación", time: "3 min", level: "Principiante" },
         { id: "cancelar-suscripcion", cat: "subscriptions", title: "Cancelar Suscripción", time: "4 min", level: "Principiante" },
+
+        /* Customers */
+        { id: "crear-cliente", cat: "customers", title: "Cómo crear un nuevo cliente", time: "2 min", level: "Principiante" },
+        { id: "cuenta-corriente", cat: "customers", title: "Gestión de cuenta corriente", time: "8 min", level: "Intermedio" },
       ],
       en: [
         /* Getting Started */
@@ -105,6 +109,11 @@ export default function TutorialCategoryPage() {
         { id: "primeira-venda", cat: "getting-started", title: "Faça sua primeira venda", time: "5 min", level: "Iniciante" },
         { id: "adicionar-produtos", cat: "getting-started", title: "Adicione seus primeiros produtos", time: "7 min", level: "Iniciante" },
         { id: "convidar-equipe", cat: "getting-started", title: "Convide os membros da sua equipe", time: "4 min", level: "Iniciante" },
+
+        /* ARCA Invoicing */
+        { id: "config-arca", cat: "arca-invoicing", title: "Configurar integração ARCA/AFIP", time: "10 min", level: "Intermediário" },
+        { id: "emitir-fatura-a", cat: "arca-invoicing", title: "Emitir Fatura A", time: "5 min", level: "Iniciante" },
+        { id: "emitir-fatura-b", cat: "arca-invoicing", title: "Emitir Fatura B", time: "5 min", level: "Iniciante" },
       ]
     };
     const langData = data[currentLanguage as keyof typeof data] || data.es;
@@ -116,7 +125,7 @@ export default function TutorialCategoryPage() {
       <Header />
       <main className="min-h-screen bg-[hsl(var(--vp-bg-page))] pt-32 pb-24">
         
-        {/* Ambient background */}
+        {/* Background Ambient Orbs */}
         <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
           <div className="absolute top-[10%] left-[-5%] w-[40%] h-[40%] rounded-full blur-[120px]"
             style={{ background: "hsl(var(--vp-primary) / 0.05)" }} />
@@ -126,9 +135,9 @@ export default function TutorialCategoryPage() {
           
           {/* Breadcrumbs */}
           <nav className="flex items-center gap-2 text-sm text-[hsl(var(--vp-muted))] mb-12">
-            <Link href="/" className="hover:text-[hsl(var(--vp-primary))] transition-colors">Home</Link>
-            <ChevronRightIcon className="w-3 h-3" />
-            <Link href="/support/tutorials" className="hover:text-[hsl(var(--vp-primary))] transition-colors">Tutorials</Link>
+            <Link href="/help" className="hover:text-[hsl(var(--vp-primary))] transition-colors">
+              {currentLanguage === "pt" ? "Central de Ajuda" : currentLanguage === "en" ? "Help Center" : "Centro de Ayuda"}
+            </Link>
             <ChevronRightIcon className="w-3 h-3" />
             <span className="text-[hsl(var(--vp-text))] font-bold">{categoryInfo.title}</span>
           </nav>
@@ -136,67 +145,78 @@ export default function TutorialCategoryPage() {
           {/* Header */}
           <header className="mb-16">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8">
-              <div className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-xl border border-[hsl(var(--vp-primary)/0.2)] bg-[hsl(var(--vp-surface))] text-[hsl(var(--vp-primary))]">
+              <div className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-xl border border-[hsl(var(--vp-primary)/0.2)] bg-[hsl(var(--vp-surface))]"
+                style={{ color: "hsl(var(--vp-primary))" }}>
                 <CategoryIcon name={id as string} className="w-10 h-10" />
               </div>
               <div>
                 <h1 className="text-4xl font-extrabold text-[hsl(var(--vp-text))] mb-2 leading-tight">
                   {categoryInfo.title}
                 </h1>
-                <p className="text-lg text-[hsl(var(--vp-muted))] max-w-2xl leading-relaxed">
+                <p className="text-lg text-[hsl(var(--vp-muted))] max-w-2xl">
                   {categoryInfo.desc}
                 </p>
-                <div className="flex items-center gap-2 text-sm font-bold text-[hsl(var(--vp-primary))] mt-4">
-                  <FileTextIcon className="w-4 h-4" />
-                  <span>{categoryArticles.length} {currentLanguage === "en" ? "articles" : "artículos"}</span>
-                </div>
+                <p className="text-sm font-medium text-[hsl(var(--vp-primary))] mt-4">
+                  {categoryArticles.length} {currentLanguage === "en" ? "articles" : "artículos"}
+                </p>
               </div>
+            </div>
+            
+            {/* Search within category */}
+            <div className="relative max-w-md">
+              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--vp-muted))]" />
+              <input 
+                type="text" 
+                placeholder={currentLanguage === "pt" ? "Buscar nesta categoria..." : currentLanguage === "en" ? "Search in this category..." : "Buscar en esta categoría..."}
+                className="w-full h-12 pl-12 pr-4 bg-[hsl(var(--vp-bg-soft))] border border-[hsl(var(--vp-border))] rounded-xl focus:border-[hsl(var(--vp-primary))] focus:ring-4 focus:ring-[hsl(var(--vp-primary)/0.1)] outline-none transition-all" 
+              />
             </div>
           </header>
 
           {/* Articles List */}
-          <div className="grid gap-4">
+          <div className="space-y-4">
             {categoryArticles.length > 0 ? (
               categoryArticles.map((art, i) => (
                 <Link 
                   key={art.id} 
-                  href={`/support/tutorials/${id}/${art.id}`}
-                  className="group vp-card p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between hover:border-[hsl(var(--vp-primary)/0.5)] hover:-translate-y-1 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 gap-6"
-                  style={{ animationDelay: `${i * 50}ms` }}
+                  href={`/help/article/${art.id}`}
+                  className="vp-card p-6 flex flex-col sm:flex-row sm:items-center justify-between group hover:border-[hsl(var(--vp-primary)/0.5)] transition-all animate-in fade-in slide-in-from-bottom-2 duration-300 gap-4"
+                  style={{ animationDelay: `${i * 80}ms` }}
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2 flex-wrap">
-                      <h3 className="text-xl font-extrabold text-[hsl(var(--vp-text))] group-hover:text-[hsl(var(--vp-primary))] transition-colors">
-                        {art.title}
-                      </h3>
-                      <span className="px-2 py-0.5 rounded-md bg-[hsl(var(--vp-accent)/0.1)] text-[hsl(var(--vp-accent))] text-[10px] font-bold uppercase tracking-widest border border-[hsl(var(--vp-accent)/0.2)]">
-                        {art.level}
-                      </span>
+                  <div className="flex items-center gap-6">
+                    <div className="hidden sm:flex w-12 h-12 rounded-xl bg-[hsl(var(--vp-bg-soft))] items-center justify-center text-[hsl(var(--vp-muted))] group-hover:text-[hsl(var(--vp-primary))] group-hover:bg-[hsl(var(--vp-primary)/0.1)] transition-all">
+                      <FileTextIcon className="w-5 h-5" />
                     </div>
-                    <p className="text-[hsl(var(--vp-muted))] leading-relaxed">
-                      {currentLanguage === "en" ? "Learn how to " : "Aprendé cómo "} {art.title.toLowerCase()} {currentLanguage === "en" ? "properly." : "correctamente."}
-                    </p>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-xl font-bold text-[hsl(var(--vp-text))] group-hover:translate-x-1 transition-transform">{art.title}</h3>
+                        <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-[hsl(var(--vp-accent)/0.1)] text-[hsl(var(--vp-accent))]">
+                          {art.level}
+                        </span>
+                      </div>
+                      <p className="text-sm text-[hsl(var(--vp-muted))]">
+                        {currentLanguage === "en" ? "Detailed tutorial for " : "Tutorial detallado para "} {art.title.toLowerCase()}
+                      </p>
+                    </div>
                   </div>
                   
                   <div className="flex items-center gap-6 self-end sm:self-center">
-                    <div className="flex items-center gap-2 text-[hsl(var(--vp-muted))] text-sm font-medium">
-                      <ClockIcon className="w-4 h-4" />
+                    <div className="flex items-center gap-1.5 text-[hsl(var(--vp-muted))] text-sm">
+                      <ClockIcon className="w-3.5 h-3.5" />
                       <span>{art.time}</span>
                     </div>
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[hsl(var(--vp-bg-soft))] group-hover:bg-[hsl(var(--vp-primary)/0.1)] group-hover:text-[hsl(var(--vp-primary))] transition-all">
-                      <ChevronRightIcon className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                    </div>
+                    <ChevronRightIcon className="w-5 h-5 text-[hsl(var(--vp-border))] group-hover:text-[hsl(var(--vp-primary))] group-hover:translate-x-1 transition-all" />
                   </div>
                 </Link>
               ))
             ) : (
               <div className="vp-card p-20 text-center">
-                <SparklesIcon className="w-16 h-16 mx-auto mb-6 text-[hsl(var(--vp-muted))] opacity-20" />
+                <SparklesIcon className="w-12 h-12 mx-auto mb-6 text-[hsl(var(--vp-muted))]" />
                 <h3 className="text-2xl font-bold text-[hsl(var(--vp-text))] mb-2">
-                  {currentLanguage === "en" ? "Draft Stage" : "En Borrador"}
+                  {currentLanguage === "en" ? "Coming soon" : "Próximamente"}
                 </h3>
-                <p className="text-[hsl(var(--vp-muted))] max-w-md mx-auto">
-                  {currentLanguage === "en" ? "We are finalizing the content for this section. Check back very soon!" : "Estamos finalizando el contenido para esta sección. ¡Vuelve pronto!"}
+                <p className="text-[hsl(var(--vp-muted))]">
+                  {currentLanguage === "en" ? "We are working on articles for this category." : "Estamos trabajando en artículos para esta categoría."}
                 </p>
               </div>
             )}
@@ -204,11 +224,11 @@ export default function TutorialCategoryPage() {
 
           <div className="mt-16 text-center">
             <Link 
-              href="/support/tutorials"
-              className="vp-button h-12 px-8 inline-flex items-center gap-2 text-sm font-bold"
+              href="/help"
+              className="inline-flex items-center gap-2 text-[hsl(var(--vp-primary))] font-bold text-sm hover:underline"
             >
               <ArrowLeftIcon className="w-4 h-4" />
-              {currentLanguage === "en" ? "Back to All Tutorials" : "Volver a todos los Tutoriales"}
+              {currentLanguage === "pt" ? "Ver todas as categorias" : currentLanguage === "en" ? "View all categories" : "Ver todas las categorías"}
             </Link>
           </div>
 
