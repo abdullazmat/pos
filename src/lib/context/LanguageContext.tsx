@@ -133,69 +133,69 @@ const translationsEs = {
   },
   landing: {
     hero: {
-      badge: "⭐ El sistema que tu kiosco necesita",
-      titleMain: "La base tecnológica para hacer",
-      titleHighlight: "crecer tu kiosco",
+      badge: "⭐ El sistema que tu negocio necesita",
+      titleMain: "La base tecnológica para profesionalizar",
+      titleHighlight: "tu negocio retail",
       titleLines: [
         "La base tecnológica",
-        "para hacer crecer",
-        "tu kiosco",
+        "para profesionalizar",
+        "tu negocio retail",
       ],
-      titleHighlightIndex: 1,
+      titleHighlightIndex: 2,
       description:
-        "Ventas rápidas en mostrador, control de ganancias diarias y facturación electrónica ARCA integrada. Diseñado para profesionalizar tu negocio y prepararlo para escalar.",
+        "Ventas rápidas en mostrador, control de ganancias diarias y facturación electrónica ARCA integrada. Diseñado para preparar tu empresa para crecer.",
       primaryCta: "Ver el sistema en acción",
       secondaryCta: "Empezar gratis",
     },
     modules: {
       module1: {
-        title: "Cobrá rápido. Como en un supermercado.",
-        description: "El punto de venta está optimizado para teclado y escáner de códigos de barras, permitiendo ventas rápidas en horas pico sin depender del mouse.",
-        image: "/images/sections/es/pos-page.png",
+        title: "Punto de Venta Optimizado para Mostrador",
+        description: "Ventas rápidas, flujo ágil, diseñado para trabajar con teclado y escáner de códigos de barras.",
+        image: "/images/new-features/new images/spanish/spanish POS page.png",
         features: [
-          "Flujo de ventas optimizado para mostrador",
           "Compatible con teclado numérico",
-          "Integración con escáner de códigos",
-          "Interfaz limpia y organizada para el personal"
+          "Integración con escáner de códigos de barras",
+          "Ideal para horas pico",
+          "Interfaz clara y organizada"
         ]
       },
       module2: {
-        title: "Saber exactamente cuánto ganás cada día",
-        description: "Ventas, gastos y márgenes en tiempo real para tomar decisiones claras y hacer crecer tu negocio con confianza.",
-        image: "/images/sections/es/reports-page.png",
+        title: "Control Diario de Ventas y Márgenes",
+        description: "Visualizá ingresos, gastos y ganancias en tiempo real con reportes automáticos.",
+        image: "/images/new-features/new images/spanish/spanish Reports Page.png",
         features: [
-          "Resumen diario de ventas automático",
-          "Seguimiento y monitoreo de gastos",
-          "Control de caja por turnos",
-          "Reportes simples y fáciles de entender"
+          "Resumen diario automático",
+          "Control de caja integral",
+          "Reportes simples para contabilidad",
+          "Información clara para decidir"
         ]
       },
       module3: {
-        title: "Organizá todo tu negocio en un solo sistema",
-        description: "Ventas, inventario, proveedores y gastos conectados en una plataforma simple diseñada para crecer con tu kiosco.",
-        image: "/images/sections/es/product-management.png",
+        title: "Inventario Actualizado Automáticamente",
+        description: "Cada venta impacta en el stock sin procesos manuales ni pasos extra.",
+        image: "/images/new-features/new images/spanish/spanish Product Management.png",
         features: [
-          "Punto de Venta — Cobro rápido y control automático",
-          "Gestión de Inventario — Stock en tiempo real y alertas",
-          "Proveedores y Compras — Registros y pagos organizados",
-          "Reportes Claros — Información simple para decidir"
+          "Alertas de stock bajo instantáneas",
+          "Movimientos registrados con detalle",
+          "Control total a nivel de producto",
+          "Historial completo de trazabilidad"
         ]
       },
       module4: {
-        title: "Cumplí con ARCA sin procesos complejos",
-        description: "Emití documentos fiscales directamente desde el sistema manteniendo el control total de tu negocio.",
-        image: "/images/sections/es/fiscal-reports.png",
+        title: "Facturación Electrónica ARCA Integrada",
+        description: "Emití documentos fiscales directamente desde el sistema con sincronización total.",
+        image: "/images/new-features/new images/spanish/spanish Fiscal Reports - VAT.png",
         features: [
-          "Facturas A, B y C",
-          "Notas de Crédito",
-          "Reportes fiscales listos para tu contador",
-          "Integración directa sin plataformas externas"
+          "Factura A, B y C integradas",
+          "Notas de crédito automáticas",
+          "Reportes impositivos para tu contador",
+          "Sincronización directa y segura"
         ]
       }
     },
     finalCta: {
-      title: "Prepará tu kiosco para crecer",
-      description: "Un sistema simple y listo para facturación fiscal, diseñado para el ritmo real del comercio minorista argentino.",
+      title: "Prepará tu negocio para crecer",
+      description: "Un sistema simple y listo para facturación fiscal, diseñado para el ritmo real del comercio minorista.",
       primaryCta: "Crear cuenta gratis",
       secondaryCta: "Ver el sistema en acción"
     },
@@ -1241,66 +1241,79 @@ const translationsEs = {
   featuresPage: {
     hero: {
       eyebrow: "Funcionalidades",
-      title: "Todo lo que necesitas para tu comercio",
-      subtitle: "Un sistema potente y fácil de usar, diseñado específicamente para el ritmo del retail argentino.",
+      title: "Todo lo que necesitas para profesionalizar tu retail",
+      subtitle: "Una plataforma simple, lista para facturación fiscal y diseñada para crecer junto a tu empresa.",
+      primaryCta: "Empezar ahora",
+      secondaryCta: "Ver precios"
     },
     sections: [
       {
         id: "pos",
-        title: "Punto de Venta (POS)",
-        description: "Optimizado para la velocidad en el mostrador. Vendé en segundos sin errores.",
-        image: "/images/sections/es/pos-page.png",
+        title: "Punto de Venta Optimizado para Venta en Mostrador",
+        description: "Ventas rápidas, flujo ágil, diseñado para trabajar con teclado y escáner de códigos de barras.",
+        image: "/images/new-features/new images/spanish/spanish POS page.png",
         items: [
-          "Búsqueda ultra-rápida por código de barras o teclado.",
-          "Cierre de caja automático con reportes de turnos.",
-          "Múltiples medios de pago y descuentos al instante.",
-          "Compatibilidad total con teclados programables."
-        ]
-      },
-      {
-        id: "stock",
-        title: "Gestión de Inventario",
-        description: "Controlá tu stock en tiempo real y evitá quedarte sin mercadería.",
-        image: "/images/sections/es/product-management.png",
-        items: [
-          "Alertas automáticas de stock bajo.",
-          "Carga masiva de productos mediante Excel.",
-          "Control de costos y márgenes de ganancia.",
-          "Organización por categorías y marcas."
-        ]
-      },
-      {
-        id: "fiscal",
-        title: "Facturación Electrónica ARCA",
-        description: "Cumplí con todas las normativas fiscales de Argentina de forma automática.",
-        image: "/images/sections/es/fiscal-reports.png",
-        items: [
-          "Emisión de Facturas A, B y C integradas.",
-          "Envío automático de comprobantes al cliente.",
-          "Generación de reportes de IVA para tu contador.",
-          "Sincronización directa con los servicios de ARCA."
+          "Compatible con teclado numérico",
+          "Integración con escáner de códigos de barras",
+          "Ideal para horas pico",
+          "Interfaz clara y organizada"
         ]
       },
       {
         id: "reports",
-        title: "Reportes y Estadísticas",
-        description: "Tomá decisiones basadas en datos reales de tu negocio.",
-        image: "/images/sections/es/reports-page.png",
+        title: "Control Diario de Ventas y Márgenes",
+        description: "Visualizá ingresos, gastos y ganancias en tiempo real con reportes automáticos.",
+        image: "/images/new-features/new images/spanish/spanish Reports Page.png",
         items: [
-          "Gráficos de ventas por día, mes y año.",
-          "Ranking de productos más vendidos.",
-          "Control de gastos operativos y caja.",
-          "Exportación de datos a PDF y CSV."
+          "Resumen diario automático",
+          "Control de caja integral",
+          "Reportes simples para contabilidad",
+          "Información clara para decidir"
+        ]
+      },
+      {
+        id: "inventory",
+        title: "Inventario Actualizado Automáticamente",
+        description: "Cada venta impacta en el stock sin procesos manuales pesados.",
+        image: "/images/new-features/new images/spanish/spanish Product Management.png",
+        items: [
+          "Alertas de stock bajo instantáneas",
+          "Movimientos registrados con detalle",
+          "Control total a nivel de producto",
+          "Historial completo de trazabilidad"
+        ]
+      },
+      {
+        id: "fiscal",
+        title: "Facturación Electrónica ARCA Integrada",
+        description: "Emití facturas legales y cumplí con ARCA sin aplicaciones externas.",
+        image: "/images/new-features/new images/spanish/spanish Fiscal Reports - VAT.png",
+        items: [
+          "Factura A, B y C integradas",
+          "Notas de crédito automáticas",
+          "Reportes impositivos para tu contador",
+          "Sincronización directa y segura"
         ]
       }
     ],
     otherFeatures: {
       title: "Más herramientas para tu crecimiento",
       items: [
-        { title: "Gestión de Proveedores", description: "Historial de compras y cuentas corrientes.", icon: "truck" },
-        { title: "Base de Clientes", description: "Conocé a tus clientes y fidelizalos.", icon: "users" },
-        { title: "Control de Gastos", description: "No pierdas de vista los costos operativos.", icon: "trending-down" },
-        { title: "Multi-usuario", description: "Permisos personalizados para tu equipo.", icon: "lock" }
+        { 
+          title: "Proveedores y Mercadería", 
+          description: "Registros de compras, seguimiento de pagos e historial completo de proveedores.", 
+          icon: "truck" 
+        },
+        { 
+          title: "Control de Gastos Integrado", 
+          description: "Registro simple, categorización clara e impacto directo en tus reportes de utilidad.", 
+          icon: "trending-down" 
+        },
+        { 
+          title: "Control de Usuarios y Acceso", 
+          description: "Roles y permisos detallados, protección de datos y actualizaciones automáticas.", 
+          icon: "lock" 
+        }
       ]
     }
   },
@@ -1793,71 +1806,71 @@ const translationsEn = {
   },
   landing: {
     hero: {
-      badge: "⭐ The foundation your kiosk needs",
+      badge: "⭐ The system your business needs",
       titleMain: "The technological foundation to",
-      titleHighlight: "grow your kiosk",
+      titleHighlight: "grow your retail business",
       titleLines: [
         "The technological",
         "foundation to grow",
-        "your kiosk",
+        "your retail business",
       ],
-      titleHighlightIndex: 1,
+      titleHighlightIndex: 2,
       description:
-        "Fast counter sales, daily profit control, and integrated ARCA electronic invoicing. Designed to professionalize your business and prepare it to scale.",
+        "Fast counter sales, daily profit control, and integrated ARCA electronic invoicing. Designed to professionalize your business and prepare it for scaling.",
       primaryCta: "See the system in action",
       secondaryCta: "Start for free",
     },
     modules: {
       module1: {
-        title: "Get Paid Fast. Like in a Supermarket.",
-        description: "The point of sale is optimized for keyboard and barcode scanner use, enabling fast sales during peak hours without relying on a mouse.",
-        image: "/images/sections/en/pos-page.png",
+        title: "Point of Sale Optimized for Counter Sales",
+        description: "Fast sales, agile workflow, designed to work with keyboard and barcode scanner.",
+        image: "/images/new-features/new images/eng/eng POS page.png",
         features: [
-          "Optimized counter sales workflow",
           "Numeric keypad compatible",
           "Barcode scanner integration",
-          "Clean and organized interface for staff"
+          "Ideal for peak hours",
+          "Clear and organized interface"
         ]
       },
       module2: {
-        title: "Know Exactly How Much You Earn Every Day",
-        description: "Sales, expenses, and margins in real time so you can make clear decisions and grow your business confidently.",
-        image: "/images/sections/en/reports-page.png",
+        title: "Daily Sales and Margin Control",
+        description: "View revenue, expenses, and profits in real-time with automated summaries.",
+        image: "/images/new-features/new images/eng/eng Reports Page.png",
         features: [
-          "Automatic daily sales summary",
-          "Expense tracking and monitoring",
-          "Shift-based cash control",
-          "Simple and easy-to-understand reports"
+          "Automatic daily summary",
+          "Cash register control",
+          "Simple reports for accounting",
+          "Clear information for decision-making"
         ]
       },
       module3: {
-        title: "Organize Your Entire Business in One System",
-        description: "Sales, inventory, suppliers, and expenses connected in one simple platform designed to grow with your kiosk.",
-        image: "/images/sections/en/product-management.png",
+        title: "Automatically Updated Inventory",
+        description: "Every sale impacts inventory without manual processes or extra steps.",
+        image: "/images/new-features/new images/eng/eng Product Management.png",
         features: [
-          "Point of Sale — Fast checkout and automatic control",
-          "Inventory Management — Real-time stock and alerts",
-          "Suppliers and Purchases — Organized records and payments",
-          "Clear Reports — Simple information for decision-making"
+          "Real-time low stock alerts",
+          "Recorded stock movements",
+          "Product-level precision control",
+          "Complete inventory history"
         ]
       },
       module4: {
-        title: "Stay Compliant with ARCA Without Complex Processes",
-        description: "Issue fiscal documents directly from the system while maintaining full control of your business.",
-        image: "/images/sections/en/fiscal-reports.png",
+        title: "Integrated ARCA Electronic Invoicing",
+        description: "Issue fiscal documents and comply with regulations directly from the POS.",
+        image: "/images/new-features/new images/eng/eng Fiscal Reports - VAT.png",
         features: [
-          "Invoice A, B, and C",
-          "Credit Notes",
-          "Fiscal reports ready for your accountant",
-          "Direct integration without external platforms"
+          "Invoice A, B, and C support",
+          "Integrated Credit Notes",
+          "Fiscal reports for your accountant",
+          "Ready for professional accounting"
         ]
       }
     },
     finalCta: {
-      title: "Prepare Your Kiosk to Grow",
-      description: "A simple, fiscal-ready system designed for the real pace of Argentine retail.",
+      title: "Prepare Your Business to Grow",
+      description: "A simple, fiscal-ready system designed for the real pace of retail.",
       primaryCta: "Create free account",
-      secondaryCta: "See the system in action"
+      secondaryCta: "See it in action"
     },
     cta: {
       title: "Ready to operate at the counter",
@@ -2886,66 +2899,79 @@ const translationsEn = {
   featuresPage: {
     hero: {
       eyebrow: "Features",
-      title: "Everything your business needs",
-      subtitle: "A powerful and easy-to-use system, specifically designed for the pace of Argentine retail.",
+      title: "Everything you need to professionalize your retail business",
+      subtitle: "A simple, fiscal-ready platform designed to grow with your company.",
+      primaryCta: "Start now",
+      secondaryCta: "View pricing"
     },
     sections: [
       {
         id: "pos",
-        title: "Point of Sale (POS)",
-        description: "Optimized for counter speed. Sell in seconds without errors.",
-        image: "/images/sections/en/pos-page.png",
+        title: "Point of Sale Optimized for Counter Sales",
+        description: "Fast sales, agile workflow, designed to work with keyboard and barcode scanner.",
+        image: "/images/new-features/new images/eng/eng POS page.png",
         items: [
-          "Ultra-fast search by barcode or keyboard.",
-          "Automatic cash closing with shift reports.",
-          "Multiple payment methods and instant discounts.",
-          "Total compatibility with programmable keyboards."
-        ]
-      },
-      {
-        id: "stock",
-        title: "Inventory Management",
-        description: "Control your stock in real-time and avoid running out of goods.",
-        image: "/images/sections/en/product-management.png",
-        items: [
-          "Automatic low stock alerts.",
-          "Bulk product upload via Excel.",
-          "Cost and profit margin control.",
-          "Organization by categories and brands."
-        ]
-      },
-      {
-        id: "fiscal",
-        title: "ARCA Electronic Invoicing",
-        description: "Comply with all Argentine tax regulations automatically.",
-        image: "/images/sections/en/fiscal-reports.png",
-        items: [
-          "Integrated A, B, and C Invoice issuance.",
-          "Automatic sending of receipts to the customer.",
-          "VAT reports generation for your accountant.",
-          "Direct synchronization with ARCA services."
+          "Numeric keypad compatible",
+          "Barcode scanner integration",
+          "Ideal for peak hours",
+          "Clear and organized interface"
         ]
       },
       {
         id: "reports",
-        title: "Reports and Statistics",
-        description: "Make decisions based on real data from your business.",
-        image: "/images/sections/en/reports-page.png",
+        title: "Daily Sales and Margin Control",
+        description: "View revenue, expenses, and profits in real-time with automated summaries.",
+        image: "/images/new-features/new images/eng/eng Reports Page.png",
         items: [
-          "Sales charts by day, month, and year.",
-          "Ranking of top-selling products.",
-          "Operational expense and cash control.",
-          "Data export to PDF and CSV."
+          "Automatic daily summary",
+          "Cash register control",
+          "Simple reports for accounting",
+          "Clear information for decision-making"
+        ]
+      },
+      {
+        id: "inventory",
+        title: "Automatically Updated Inventory",
+        description: "Every sale impacts inventory without manual processes or extra steps.",
+        image: "/images/new-features/new images/eng/eng Product Management.png",
+        items: [
+          "Real-time low stock alerts",
+          "Recorded stock movements",
+          "Product-level precision control",
+          "Complete inventory history"
+        ]
+      },
+      {
+        id: "fiscal",
+        title: "Integrated ARCA Electronic Invoicing",
+        description: "Issue fiscal documents and comply with regulations directly from the POS.",
+        image: "/images/new-features/new images/eng/eng Fiscal Reports - VAT.png",
+        items: [
+          "Invoice A, B, and C support",
+          "Integrated Credit Notes",
+          "Fiscal reports for your accountant",
+          "Ready for professional accounting"
         ]
       }
     ],
     otherFeatures: {
       title: "More tools for your growth",
       items: [
-        { title: "Supplier Management", description: "Purchase history and current accounts.", icon: "truck" },
-        { title: "Customer Database", description: "Know your customers and build loyalty.", icon: "users" },
-        { title: "Expense Tracking", description: "Don't lose sight of operational costs.", icon: "trending-down" },
-        { title: "Multi-user", description: "Customized permissions for your team.", icon: "lock" }
+        { 
+          title: "Supplier & Merchandise Organization", 
+          description: "Purchase records, payment tracking, and detailed supplier history.", 
+          icon: "truck" 
+        },
+        { 
+          title: "Integrated Expense Control", 
+          description: "Simple registration, clear categorization, and direct impact on profit reports.", 
+          icon: "trending-down" 
+        },
+        { 
+          title: "User Control & Secure Access", 
+          description: "Roles and permissions, data protection, and automatic system updates.", 
+          icon: "lock" 
+        }
       ]
     }
   },
@@ -3437,69 +3463,69 @@ const translationsPt = {
   },
   landing: {
     hero: {
-      badge: "⭐ O sistema que seu quiosque precisa",
-      titleMain: "A base tecnológica para fazer",
-      titleHighlight: "crescer seu quiosque",
+      badge: "⭐ O sistema que seu negócio precisa",
+      titleMain: "A base tecnológica para profissionalizar",
+      titleHighlight: "seu negócio retail",
       titleLines: [
         "A base tecnológica",
-        "para fazer crescer",
-        "seu quiosque",
+        "para profissionalizar",
+        "seu negócio retail",
       ],
-      titleHighlightIndex: 1,
+      titleHighlightIndex: 2,
       description:
-        "Vendas rápidas no balcão, controle de lucros diários e faturamento eletrônico ARCA integrado. Projetado para profissionalizar seu negócio e prepará-lo para escalar.",
+        "Vendas rápidas no balcão, controle de lucros diários e faturamento eletrônico ARCA integrado. Projetado para preparar sua empresa para crescer.",
       primaryCta: "Veja o sistema em ação",
       secondaryCta: "Começar grátis",
     },
     modules: {
       module1: {
-        title: "Receba Rápido. Como em um Supermercado.",
-        description: "O ponto de venda é otimizado para uso de teclado e scanner de código de barras, permitindo vendas rápidas em horários de pico sem depender do mouse.",
-        image: "/images/sections/pt/pos-page.png",
+        title: "Ponto de Venda Otimizado para Vendas de Balcão",
+        description: "Vendas rápidas, fluxo ágil, projetado para trabalhar com teclado e leitor de código de barras.",
+        image: "/images/new-features/new images/portugese/portguese POS page.png",
         features: [
-          "Fluxo de vendas otimizado para balcão",
           "Compatível com teclado numérico",
-          "Integração com scanner de código",
-          "Interface limpa e organizada para a equipe"
+          "Integração com leitor de código de barras",
+          "Ideal para horários de pico",
+          "Interface clara e organizada"
         ]
       },
       module2: {
-        title: "Saiba Exatamente Quanto Você Ganha Todo Dia",
-        description: "Vendas, despesas e margens em tempo real para que você possa tomar decisões claras e fazer seu negócio crescer com confiança.",
-        image: "/images/sections/pt/reports-page.png",
+        title: "Controle Diário de Vendas e Margens",
+        description: "Visualize receitas, despesas e lucros em tempo real com resumos automatizados.",
+        image: "/images/new-features/new images/portugese/portguese Reports Page.png",
         features: [
-          "Resumo diário de vendas automático",
-          "Acompanhamento e monitoramento de despesas",
-          "Controle de caixa por turnos",
-          "Relatórios simples e fáceis de entender"
+          "Resumo diário automático",
+          "Controle de caixa integral",
+          "Relatórios simples para contabilidade",
+          "Informações claras para tomada de decisão"
         ]
       },
       module3: {
-        title: "Organize Todo Seu Negócio em um Único Sistema",
-        description: "Vendas, estoque, fornecedores e despesas conectados em uma plataforma simples projetada para crescer com seu quiosque.",
-        image: "/images/sections/pt/product-management.png",
+        title: "Inventário Atualizado Automaticamente",
+        description: "Cada venda impacta o estoque sem processos manuais ou etapas extras.",
+        image: "/images/new-features/new images/portugese/portguese Product Management.png",
         features: [
-          "Ponto de Venda — Checkout rápido e controle automático",
-          "Gestão de Estoque — Estoque em tempo real e alertas",
-          "Fornecedores e Compras — Registros e pagamentos organizados",
-          "Relatórios Claros — Informações simples para decisão"
+          "Alertas de estoque baixo em tempo real",
+          "Movimentos de estoque registrados",
+          "Controle de precisão no nível do produto",
+          "Histórico completo de inventário"
         ]
       },
       module4: {
-        title: "Fique em Conformidade com a ARCA sem Processos Complexos",
-        description: "Emita documentos fiscais diretamente do sistema enquanto mantém o controle total do seu negócio.",
-        image: "/images/sections/pt/fiscal-reports.png",
+        title: "Faturamento Eletrônico ARCA Integrado",
+        description: "Emita documentos fiscais e cumpra as regulamentações diretamente do PDV.",
+        image: "/images/new-features/new images/portugese/portugal Fiscal Reports - VAT.png",
         features: [
-          "Faturas A, B e C",
-          "Notas de Crédito",
-          "Relatórios fiscais prontos para seu contador",
-          "Integração direta sem plataformas externas"
+          "Suporte para Faturas A, B e C",
+          "Notas de Crédito integradas",
+          "Relatórios fiscais para seu contador",
+          "Pronto para faturamento profissional"
         ]
       }
     },
     finalCta: {
-      title: "Prepare Seu Quiosque para Crescer",
-      description: "Um sistema simples, pronto para faturamento fiscal e projetado para o ritmo real do varejo argentino.",
+      title: "Prepare Seu Negócio para Crescer",
+      description: "Um sistema simples, pronto para faturamento fiscal e projetado para o ritmo real do varejo.",
       primaryCta: "Criar conta grátis",
       secondaryCta: "Veja o sistema em ação"
     },
@@ -4540,66 +4566,79 @@ const translationsPt = {
   featuresPage: {
     hero: {
       eyebrow: "Funcionalidades",
-      title: "Tudo o que seu negócio precisa",
-      subtitle: "Um sistema potente e fácil de usar, projetado especificamente para o ritmo do varejo argentino.",
+      title: "Tudo o que você precisa para profissionalizar seu varejo",
+      subtitle: "Uma plataforma simples, pronta para faturamento fiscal e projetada para crescer com sua empresa.",
+      primaryCta: "Começar agora",
+      secondaryCta: "Ver preços"
     },
     sections: [
       {
         id: "pos",
-        title: "Ponto de Venda (POS)",
-        description: "Otimizado para a velocidade no balcão. Venda em segundos sem erros.",
-        image: "/images/sections/pt/pos-page.png",
+        title: "Punto de Venta Otimizado para Vendas de Balcão",
+        description: "Vendas rápidas, fluxo ágil, projetado para trabalhar com teclado e leitor de código de barras.",
+        image: "/images/new-features/new images/portugese/portguese POS page.png",
         items: [
-          "Busca ultra-rápida por código de barras ou teclado.",
-          "Fechamento de caixa automático com relatórios de turnos.",
-          "Múltiplos meios de pagamento e descontos instantâneos.",
-          "Compatibilidade total com teclados programáveis."
-        ]
-      },
-      {
-        id: "stock",
-        title: "Gestão de Inventário",
-        description: "Controle seu estoque em tempo real e evite que a mercadoria acabe.",
-        image: "/images/sections/pt/product-management.png",
-        items: [
-          "Alertas automáticos de estoque baixo.",
-          "Carga massiva de produtos via Excel.",
-          "Controle de custos e margens de lucro.",
-          "Organização por categorias e marcas."
-        ]
-      },
-      {
-        id: "fiscal",
-        title: "Faturamento Eletrônico ARCA",
-        description: "Cumpra todas as normas fiscais da Argentina de forma automática.",
-        image: "/images/sections/pt/fiscal-reports.png",
-        items: [
-          "Emissão de Faturas A, B e C integradas.",
-          "Envio automático de comprovantes ao cliente.",
-          "Geração de relatórios de IVA para seu contador.",
-          "Sincronização direta com os serviços da ARCA."
+          "Compatível com teclado numérico",
+          "Integração com leitor de código de barras",
+          "Ideal para horários de pico",
+          "Interface clara e organizada"
         ]
       },
       {
         id: "reports",
-        title: "Relatórios e Estatísticas",
-        description: "Tome decisões baseadas em dados reais do seu negócio.",
-        image: "/images/sections/pt/reports-page.png",
+        title: "Controle Diário de Vendas e Margens",
+        description: "Visualize receitas, despesas e lucros em tempo real com resumos automatizados.",
+        image: "/images/new-features/new images/portugese/portguese Reports Page.png",
         items: [
-          "Gráficos de vendas por dia, mes e ano.",
-          "Ranking de produtos mais vendidos.",
-          "Controle de despesas operacionais e caixa.",
-          "Exportação de datos para PDF e CSV."
+          "Resumo diário automático",
+          "Controle de caixa integral",
+          "Relatórios simples para contabilidade",
+          "Informações claras para tomada de decisão"
+        ]
+      },
+      {
+        id: "inventory",
+        title: "Inventário Atualizado Automaticamente",
+        description: "Cada venda impacta o estoque sem processos manuais ou etapas extras.",
+        image: "/images/new-features/new images/portugese/portguese Product Management.png",
+        items: [
+          "Alertas de estoque baixo em tempo real",
+          "Movimentos de estoque registrados",
+          "Controle de precisão no nível do produto",
+          "Histórico completo de inventário"
+        ]
+      },
+      {
+        id: "fiscal",
+        title: "Faturamento Eletrônico ARCA Integrado",
+        description: "Emita documentos fiscais e cumpra as regulamentações diretamente do PDV.",
+        image: "/images/new-features/new images/portugese/portugal Fiscal Reports - VAT.png",
+        items: [
+          "Suporte para Faturas A, B e C",
+          "Notas de Crédito integradas",
+          "Relatórios fiscais para seu contador",
+          "Pronto para faturamento profissional"
         ]
       }
     ],
     otherFeatures: {
       title: "Mais ferramentas para o seu crescimento",
       items: [
-        { title: "Gestão de Fornecedores", description: "Histórico de compras e contas correntes.", icon: "truck" },
-        { title: "Base de Clientes", description: "Conheça seus clientes e fidelize-os.", icon: "users" },
-        { title: "Controle de Despesas", description: "Não perca de vista os custos operacionais.", icon: "trending-down" },
-        { title: "Multi-usuário", description: "Permissões personalizadas para sua equipe.", icon: "lock" }
+        { 
+          title: "Organização de Fornecedores", 
+          description: "Registros de compras, acompanhamento de pagamentos e histórico detalhado.", 
+          icon: "truck" 
+        },
+        { 
+          title: "Controle de Despesas Integrado", 
+          description: "Registro simples, categorização clara e impacto direto nos relatórios de lucro.", 
+          icon: "trending-down" 
+        },
+        { 
+          title: "Controle de Usuários e Acesso", 
+          description: "Funções e permissões, proteção de dados e atualizações automáticas do sistema.", 
+          icon: "lock" 
+        }
       ]
     }
   },

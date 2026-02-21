@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CTASection from "@/components/CTASection";
@@ -77,6 +78,21 @@ export default function FeaturesPage() {
           <p className="vp-hero-subtitle text-xl max-w-2xl mx-auto text-balance">
             {hero?.subtitle}
           </p>
+
+          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6 vp-fade-in">
+            <Link
+              href="/auth/register"
+              className="w-full sm:w-auto inline-flex items-center justify-center h-16 vp-button vp-button-primary px-12 text-xl font-black rounded-2xl shadow-2xl hover:shadow-[hsl(var(--vp-primary)/0.4)] hover:scale-105 transition-all"
+            >
+              {hero?.primaryCta}
+            </Link>
+            <Link
+              href="/pricing"
+              className="w-full sm:w-auto inline-flex items-center justify-center h-16 vp-button px-12 text-xl font-black rounded-2xl border-2 border-[hsl(var(--vp-border))] bg-white/50 backdrop-blur-sm hover:bg-white hover:border-[hsl(var(--vp-primary)/0.3)] transition-all text-[hsl(var(--vp-text))]"
+            >
+              {hero?.secondaryCta}
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -137,14 +153,14 @@ export default function FeaturesPage() {
           <div className="text-center mb-16 sm:mb-24">
             <h2 className="vp-section-title">{otherFeatures?.title}</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {otherFeatures?.items.map((item: any, i: number) => (
-              <div key={i} className="vp-card p-8 group hover:border-[hsl(var(--vp-primary))/0.4] transition-all duration-300">
-                <div className="w-12 h-12 rounded-xl bg-[hsl(var(--vp-primary))/0.1] border border-[hsl(var(--vp-primary))/0.2] flex items-center justify-center text-[hsl(var(--vp-primary))] mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div key={i} className="vp-card p-10 group hover:border-[hsl(var(--vp-primary))/0.4] transition-all duration-300 text-center flex flex-col items-center">
+                <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--vp-primary))/0.1] border border-[hsl(var(--vp-primary))/0.2] flex items-center justify-center text-[hsl(var(--vp-primary))] mb-8 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                   {getIcon(item.icon)}
                 </div>
-                <h3 className="text-xl font-bold mb-3">{item.title}</h3>
-                <p className="text-[hsl(var(--vp-muted))] leading-relaxed">{item.description}</p>
+                <h3 className="text-2xl font-bold mb-4 text-[hsl(var(--vp-text))]">{item.title}</h3>
+                <p className="text-[hsl(var(--vp-muted))] leading-relaxed text-lg">{item.description}</p>
               </div>
             ))}
           </div>
