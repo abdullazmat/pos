@@ -32,10 +32,10 @@ export const PLAN_FEATURES: Record<
   BASIC: {
     name: "Free",
     maxProducts: 100,
-    maxCategories: 20,
-    maxClients: 0,
+    maxCategories: 10,
+    maxClients: 10,
     maxSuppliers: 5,
-    maxUsers: 2,
+    maxUsers: 1,
     features: {
       advancedReports: false,
       stockManagement: true,
@@ -48,13 +48,32 @@ export const PLAN_FEATURES: Record<
       customReceipts: false,
     },
   },
-  PROFESSIONAL: {
+  ESENCIAL: {
+    name: "Esencial",
+    maxProducts: 500,
+    maxCategories: 100,
+    maxClients: 500,
+    maxSuppliers: 20,
+    maxUsers: 1,
+    features: {
+      advancedReports: false,
+      stockManagement: true,
+      multipleLocations: false,
+      apiAccess: false,
+      customBranding: false,
+      arcaInvoicing: false,
+      mercadoPago: true,
+      bulkOperations: true,
+      customReceipts: true,
+    },
+  },
+  PROFESIONAL: {
     name: "Profesional",
-    maxProducts: 99999,
-    maxCategories: 99999,
-    maxClients: 99999,
-    maxSuppliers: 99999,
-    maxUsers: 99999,
+    maxProducts: 3000,
+    maxCategories: 9999,
+    maxClients: 3000,
+    maxSuppliers: 100,
+    maxUsers: 3,
     features: {
       advancedReports: true,
       stockManagement: true,
@@ -67,13 +86,13 @@ export const PLAN_FEATURES: Record<
       customReceipts: true,
     },
   },
-  ENTERPRISE: {
-    name: "Empresarial",
-    maxProducts: 99999,
+  CRECIMIENTO: {
+    name: "Crecimiento",
+    maxProducts: 10000,
     maxCategories: 99999,
-    maxClients: 99999,
+    maxClients: 10000,
     maxSuppliers: 99999,
-    maxUsers: 99999,
+    maxUsers: 10,
     features: {
       advancedReports: true,
       stockManagement: true,
@@ -107,7 +126,7 @@ export const PLAN_FEATURES: Record<
   },
 };
 
-export type PlanType = "BASIC" | "PROFESSIONAL" | "ENTERPRISE" | "free";
+export type PlanType = "BASIC" | "ESENCIAL" | "PROFESIONAL" | "CRECIMIENTO" | "free";
 
 /**
  * Check if a feature is available in a plan
@@ -159,7 +178,7 @@ export function needsUpgrade(
   currentPlan: PlanType,
   requiredFeature: string,
 ): boolean {
-  if (currentPlan === "ENTERPRISE") return false;
+  if (currentPlan === "CRECIMIENTO") return false;
   return !hasFeature(currentPlan, requiredFeature);
 }
 

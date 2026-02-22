@@ -10,75 +10,96 @@ import { Check, CreditCard, TrendingUp, Shield, Users } from "lucide-react";
 
 const UPGRADE_COPY = {
   es: {
-    title: "Actualizar a Plan Pro",
+    title: "Actualizá tu Plan",
     subtitle:
-      "Desbloquea funciones ilimitadas y lleva tu negocio al siguiente nivel",
+      "Desbloqueá funciones avanzadas y llevá tu negocio al siguiente nivel",
     payment: {
       canceled: "Pago Cancelado",
       canceledDesc:
-        "Tu pago fue cancelado. Intenta de nuevo cuando estés listo para actualizar tu plan.",
-      retryWhenReady: "Intenta de nuevo cuando estés listo.",
+        "Tu pago fue cancelado. Intentá de nuevo cuando estés listo para actualizar tu plan.",
+      retryWhenReady: "Intentá de nuevo cuando estés listo.",
     },
     plans: {
-      free: {
-        title: "Plan Gratuito",
-        current: "Tu plan actual",
+      basic: {
+        title: "Plan Básico",
         price: "$0",
+        billing: "/mes",
         features: [
           "Hasta 100 productos",
-          "Seguimiento básico de inventario",
-          "Reportes de ventas diarios",
-          "1 cuenta de usuario",
-          "Soporte comunitario",
+          "Control manual",
+          "1 usuario",
         ],
         button: "Plan Actual",
       },
-      pro: {
-        title: "Plan Pro",
-        subtitle: "Todo lo que necesitas para crecer",
-        recommended: "RECOMENDADO",
-        price: "AR$24.990",
+      esencial: {
+        id: "ESENCIAL",
+        title: "Plan Esencial",
+        subtitle: "Ideal para Kioscos",
+        price: "AR$14.999",
         billing: "/mes",
-        paymentMethods: "Paga en ARS con Mercado Pago",
         features: [
-          "Productos ilimitados",
-          "Gestión avanzada de inventario",
-          "Análisis y reportes en tiempo real",
-          "Cuentas de usuario ilimitadas",
-          "Soporte prioritario",
-          "Integraciones personalizadas",
-          "Reportes avanzados",
+          "Hasta 500 productos",
+          "1 usuario",
+          "Gestión de stock",
+          "Sin facturación ARCA",
         ],
-        buttons: {
-          mercadoPago: "Pagar con Mercado Pago",
-          processing: "Procesando...",
-          opening: "Abriendo Mercado Pago...",
-        },
-        note: "El plan Pro se activa automáticamente cuando el pago se confirma.",
+        button: "Elegir Esencial",
       },
+      profesional: {
+        id: "PROFESIONAL",
+        title: "Plan Profesional",
+        subtitle: "El más recomendado",
+        recommended: "RECOMENDADO",
+        price: "AR$29.999",
+        billing: "/mes",
+        features: [
+          "Hasta 3.000 productos",
+          "Hasta 3 usuarios",
+          "Facturación ARCA Inc.",
+          "Notas de Crédito",
+          "Proveedores",
+        ],
+        button: "Elegir Profesional",
+      },
+      crecimiento: {
+        id: "CRECIMIENTO",
+        title: "Plan Crecimiento",
+        subtitle: "Escalamiento total",
+        price: "AR$54.999",
+        billing: "/mes",
+        features: [
+          "Hasta 10.000 productos",
+          "Hasta 10 usuarios",
+          "Reportes avanzados",
+          "Soporte Prioritario",
+        ],
+        button: "Elegir Crecimiento",
+      },
+    },
+    common: {
+      opening: "Abriendo Mercado Pago...",
+      security: "Pagos seguros con Mercado Pago",
+      success: "Mercado Pago listo. El plan se activa al confirmar el pago.",
     },
     highlights: {
       scale: {
-        title: "Escala Tu Negocio",
-        desc: "Sin límites en productos, ventas o usuarios. Crece sin restricciones.",
+        title: "Escalá Tu Negocio",
+        desc: "Sin límites en productos, ventas o usuarios. Crecé sin restricciones.",
       },
       support: {
         title: "Soporte Prioritario",
-        desc: "Obtén ayuda cuando la necesites con nuestro equipo de soporte dedicado.",
+        desc: "Ayuda directa cuando la necesites por WhatsApp y Email.",
       },
       team: {
         title: "Gestión de Equipo",
-        desc: "Añade miembros ilimitados con permisos basados en roles.",
+        desc: "Añadí cajeros y administradores con permisos detallados.",
       },
     },
-    security: "Pagos seguros con Mercado Pago",
-    successMessage:
-      "Mercado Pago listo. El plan se activa al confirmar el pago.",
   },
   en: {
-    title: "Upgrade to Pro Plan",
+    title: "Upgrade Your Plan",
     subtitle:
-      "Unlock unlimited features and take your business to the next level",
+      "Unlock advanced features and take your business to the next level",
     payment: {
       canceled: "Payment Canceled",
       canceledDesc:
@@ -86,42 +107,66 @@ const UPGRADE_COPY = {
       retryWhenReady: "Try again when you're ready.",
     },
     plans: {
-      free: {
-        title: "Free Plan",
-        current: "Your current plan",
+      basic: {
+        title: "Basic Plan",
         price: "$0",
+        billing: "/month",
         features: [
           "Up to 100 products",
-          "Basic inventory tracking",
-          "Daily sales reports",
-          "1 user account",
-          "Community support",
+          "Manual control",
+          "1 user",
         ],
         button: "Current Plan",
       },
-      pro: {
-        title: "Pro Plan",
-        subtitle: "Everything you need to grow",
-        recommended: "RECOMMENDED",
-        price: "AR$24.990",
+      esencial: {
+        id: "ESENCIAL",
+        title: "Essential Plan",
+        subtitle: "Ideal for Kiosks",
+        price: "AR$14,999",
         billing: "/month",
-        paymentMethods: "Pay in ARS with Mercado Pago",
         features: [
-          "Unlimited products",
-          "Advanced inventory management",
-          "Real-time analytics and reports",
-          "Unlimited user accounts",
-          "Priority support",
-          "Custom integrations",
-          "Advanced reports",
+          "Up to 500 products",
+          "1 user",
+          "Stock management",
+          "No ARCA invoicing",
         ],
-        buttons: {
-          mercadoPago: "Pay with Mercado Pago",
-          processing: "Processing...",
-          opening: "Opening Mercado Pago...",
-        },
-        note: "Pro plan activates automatically when payment is confirmed.",
+        button: "Choose Essential",
       },
+      profesional: {
+        id: "PROFESIONAL",
+        title: "Professional Plan",
+        subtitle: "Most recommended",
+        recommended: "RECOMMENDED",
+        price: "AR$29,999",
+        billing: "/month",
+        features: [
+          "Up to 3,000 products",
+          "Up to 3 users",
+          "ARCA invoicing Inc.",
+          "Credit Notes",
+          "Suppliers",
+        ],
+        button: "Choose Professional",
+      },
+      crecimiento: {
+        id: "CRECIMIENTO",
+        title: "Growth Plan",
+        subtitle: "Total scaling",
+        price: "AR$54,999",
+        billing: "/month",
+        features: [
+          "Up to 10,000 products",
+          "Up to 10 users",
+          "Advanced reports",
+          "Priority Support",
+        ],
+        button: "Choose Growth",
+      },
+    },
+    common: {
+      opening: "Opening Mercado Pago...",
+      security: "Secure payments with Mercado Pago",
+      success: "Mercado Pago ready. Plan activates upon confirmation.",
     },
     highlights: {
       scale: {
@@ -130,21 +175,18 @@ const UPGRADE_COPY = {
       },
       support: {
         title: "Priority Support",
-        desc: "Get help when you need it with our dedicated support team.",
+        desc: "Get help when you need it via WhatsApp and Email.",
       },
       team: {
         title: "Team Management",
-        desc: "Add unlimited team members with role-based permissions.",
+        desc: "Add cashiers and admins with detailed permissions.",
       },
     },
-    security: "Secure payments with Mercado Pago",
-    successMessage:
-      "Mercado Pago ready. Plan activates when you confirm payment.",
   },
   pt: {
-    title: "Atualizar para Plano Pro",
+    title: "Atualize seu Plano",
     subtitle:
-      "Desbloqueie recursos ilimitados e leve seu negócio para o próximo nível",
+      "Desbloqueie recursos avançados e leve seu negócio para o próximo nível",
     payment: {
       canceled: "Pagamento Cancelado",
       canceledDesc:
@@ -152,60 +194,81 @@ const UPGRADE_COPY = {
       retryWhenReady: "Tente novamente quando estiver pronto.",
     },
     plans: {
-      free: {
-        title: "Plano Gratuito",
-        current: "Seu plano atual",
+      basic: {
+        title: "Plano Básico",
         price: "$0",
+        billing: "/mês",
         features: [
           "Até 100 produtos",
-          "Rastreamento básico de inventário",
-          "Relatórios de vendas diários",
-          "1 conta de usuário",
-          "Suporte comunitário",
+          "Controle manual",
+          "1 usuário",
         ],
         button: "Plano Atual",
       },
-      pro: {
-        title: "Plano Pro",
-        subtitle: "Tudo o que você precisa para crescer",
-        recommended: "RECOMENDADO",
-        price: "AR$24.990",
+      esencial: {
+        id: "ESENCIAL",
+        title: "Plano Essencial",
+        subtitle: "Ideal para Quiosques",
+        price: "AR$14.999",
         billing: "/mês",
-        paymentMethods: "Pague em ARS com Mercado Pago",
         features: [
-          "Produtos ilimitados",
-          "Gerenciamento avançado de inventário",
-          "Análises e relatórios em tempo real",
-          "Contas de usuário ilimitadas",
-          "Suporte prioritário",
-          "Integrações personalizadas",
-          "Relatórios avançados",
+          "Até 500 produtos",
+          "1 usuário",
+          "Gestão de estoque",
+          "Sem fatura ARCA",
         ],
-        buttons: {
-          mercadoPago: "Pagar com Mercado Pago",
-          processing: "Processando...",
-          opening: "Abrindo Mercado Pago...",
-        },
-        note: "O plano Pro é ativado automaticamente quando o pagamento é confirmado.",
+        button: "Escolher Essencial",
       },
+      profesional: {
+        id: "PROFESIONAL",
+        title: "Plano Profissional",
+        subtitle: "O mais recomendado",
+        recommended: "RECOMENDADO",
+        price: "AR$29.999",
+        billing: "/mês",
+        features: [
+          "Até 3.000 produtos",
+          "Até 3 usuários",
+          "Fatura ARCA Inc.",
+          "Notas de Crédito",
+          "Fornecedores",
+        ],
+        button: "Escolher Profissional",
+      },
+      crecimiento: {
+        id: "CRECIMIENTO",
+        title: "Plano Crescimento",
+        subtitle: "Escalamento total",
+        price: "AR$54.999",
+        billing: "/mês",
+        features: [
+          "Até 10.000 produtos",
+          "Até 10 usuários",
+          "Relatórios avançados",
+          "Suporte Prioritário",
+        ],
+        button: "Escolher Crescimento",
+      },
+    },
+    common: {
+      opening: "Abrindo Mercado Pago...",
+      security: "Pagamentos seguros com Mercado Pago",
+      success: "Mercado Pago pronto. Plano é ativado ao confirmar pagamento.",
     },
     highlights: {
       scale: {
-        title: "Dimensione Seu Negócio",
+        title: "Escala Seu Negócio",
         desc: "Sem limites em produtos, vendas ou usuários. Cresça sem restrições.",
       },
       support: {
         title: "Suporte Prioritário",
-        desc: "Obtenha ajuda quando precisar com nossa equipe de suporte dedicada.",
+        desc: "Ajuda direta pelo WhatsApp e Email quando precisar.",
       },
       team: {
-        title: "Gerenciamento de Equipe",
-        desc: "Adicione membros ilimitados com permissões baseadas em funções.",
+        title: "Gestão de Equipe",
+        desc: "Adicione caixas e admins com permissões detalhadas.",
       },
     },
-    security: "Pagamentos seguros com Mercado Pago",
-    successMessage:
-      "Mercado Pago pronto. O plano é ativado quando você confirma o pagamento.",
   },
 } as const;
 
@@ -232,7 +295,7 @@ export default function UpgradePage() {
     setLoading(false);
   }, [router]);
 
-  const handleUpgradeMercadoPago = async () => {
+  const handleUpgradeMercadoPago = async (targetPlanId: string) => {
     setMpUpgrading(true);
     try {
       const token = localStorage.getItem("accessToken");
@@ -243,7 +306,7 @@ export default function UpgradePage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          planId: "PROFESSIONAL",
+          planId: targetPlanId,
           email: user?.email,
           businessName: user?.businessName || user?.fullName || "Mi Negocio",
         }),
@@ -257,7 +320,7 @@ export default function UpgradePage() {
 
       if (data.payment?.preferenceLink) {
         window.open(data.payment.preferenceLink, "_blank");
-        toast.success(copy.successMessage);
+        toast.success(copy.common.success);
       } else {
         throw new Error("No se recibió el enlace de pago");
       }
@@ -265,7 +328,7 @@ export default function UpgradePage() {
       console.error("Upgrade Mercado Pago error:", error);
       const msg = getPaymentErrorMessage(
         error instanceof Error ? error.message : String(error),
-        currentLanguage,
+        currentLanguage as any,
       );
       toast.error(msg);
     } finally {
@@ -352,103 +415,95 @@ export default function UpgradePage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          {/* Free Plan */}
-          <div className="bg-white/90 dark:bg-slate-900/80 rounded-2xl shadow-2xl p-8 border-2 border-slate-300 dark:border-slate-700 backdrop-blur">
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-                {copy.plans.free.title}
-              </h3>
-              <p className="text-slate-600 dark:text-slate-300">
-                {copy.plans.free.current}
-              </p>
-              <div className="mt-4">
-                <span className="text-5xl font-bold text-slate-900 dark:text-white">
-                  {copy.plans.free.price}
-                </span>
-                <span className="text-slate-600 dark:text-slate-300">
-                  /{copy.plans.free.price === "$0" ? "mes" : "mês"}
-                </span>
-              </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {/* Basic Plan */}
+          <div className="bg-white/80 dark:bg-slate-900/60 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col">
+            <h3 className="text-lg font-bold mb-1">{copy.plans.basic.title}</h3>
+            <div className="text-3xl font-black mb-4">
+               {copy.plans.basic.price} <span className="text-xs font-normal text-slate-500">{copy.plans.basic.billing}</span>
             </div>
-
-            <ul className="space-y-4">
-              {copy.plans.free.features.map((feature, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-700 dark:text-slate-200">
-                    {feature}
-                  </span>
+            <ul className="space-y-3 mb-8 flex-grow">
+              {copy.plans.basic.features.map((f, i) => (
+                <li key={i} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                  <Check className="w-4 h-4 text-green-500" /> {f}
                 </li>
               ))}
             </ul>
-
-            <div className="mt-8">
-              <button
-                disabled
-                className="w-full py-3 bg-slate-300 text-slate-500 dark:bg-slate-800 dark:text-slate-500 rounded-lg font-semibold cursor-not-allowed"
-              >
-                {copy.plans.free.button}
-              </button>
-            </div>
+            <button disabled className="w-full py-2 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-lg text-xs font-bold">
+               {copy.plans.basic.button}
+            </button>
           </div>
 
-          {/* Pro Plan */}
-          <div className="bg-gradient-to-br from-blue-700 via-indigo-700 to-purple-700 rounded-2xl shadow-2xl p-8 border-2 border-purple-400 relative overflow-hidden">
-            <div className="absolute top-4 right-4">
-              <span className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold">
-                {copy.plans.pro.recommended}
-              </span>
+          {/* Esencial Plan */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col shadow-lg">
+            <h3 className="text-lg font-bold mb-1">{copy.plans.esencial.title}</h3>
+            <p className="text-[10px] text-blue-500 font-bold uppercase mb-2">{copy.plans.esencial.subtitle}</p>
+            <div className="text-3xl font-black mb-4">
+               {copy.plans.esencial.price} <span className="text-xs font-normal text-slate-500">{copy.plans.esencial.billing}</span>
             </div>
-
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-white mb-2">
-                {copy.plans.pro.title}
-              </h3>
-              <p className="text-blue-100">{copy.plans.pro.subtitle}</p>
-              <div className="mt-4">
-                <span className="text-5xl font-bold text-white">
-                  {copy.plans.pro.price}
-                </span>
-                <span className="text-blue-100">{copy.plans.pro.billing}</span>
-                <p className="text-blue-100 text-sm mt-1">
-                  {copy.plans.pro.paymentMethods}
-                </p>
-              </div>
-            </div>
-
-            <ul className="space-y-4 mb-8">
-              {copy.plans.pro.features.map((feature, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-                  <span className="text-white font-medium">{feature}</span>
+            <ul className="space-y-3 mb-8 flex-grow">
+              {copy.plans.esencial.features.map((f, i) => (
+                <li key={i} className="flex items-center gap-2 text-sm">
+                  <Check className="w-4 h-4 text-blue-500" /> {f}
                 </li>
               ))}
             </ul>
+            <button 
+              onClick={() => handleUpgradeMercadoPago(copy.plans.esencial.id)}
+              disabled={mpUpgrading}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black transition-all"
+            >
+               {mpUpgrading ? copy.common.opening : copy.plans.esencial.button}
+            </button>
+          </div>
 
-            <div className="space-y-3">
-              <button
-                onClick={handleUpgradeMercadoPago}
-                disabled={mpUpgrading}
-                className="w-full py-3 bg-[#00a650] text-white rounded-lg font-bold hover:bg-[#009444] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {mpUpgrading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>{copy.plans.pro.buttons.opening}</span>
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5" />
-                    <span>{copy.plans.pro.buttons.mercadoPago}</span>
-                  </>
-                )}
-              </button>
-
-              <p className="text-center text-xs text-blue-100">
-                {copy.plans.pro.note}
-              </p>
+          {/* Profesional Plan */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border-2 border-purple-500 flex flex-col shadow-2xl relative overflow-hidden transform hover:scale-[1.02] transition-all">
+            <div className="absolute top-0 right-0 bg-purple-500 text-white text-[8px] font-black px-3 py-1 rounded-bl-lg uppercase">
+               {copy.plans.profesional.recommended}
             </div>
+            <h3 className="text-lg font-bold mb-1">{copy.plans.profesional.title}</h3>
+            <p className="text-[10px] text-purple-500 font-bold uppercase mb-2">{copy.plans.profesional.subtitle}</p>
+            <div className="text-3xl font-black mb-4">
+               {copy.plans.profesional.price} <span className="text-xs font-normal text-slate-500">{copy.plans.profesional.billing}</span>
+            </div>
+            <ul className="space-y-3 mb-8 flex-grow">
+              {copy.plans.profesional.features.map((f, i) => (
+                <li key={i} className="flex items-center gap-2 text-sm font-medium">
+                  <Check className="w-4 h-4 text-purple-500" /> {f}
+                </li>
+              ))}
+            </ul>
+            <button 
+              onClick={() => handleUpgradeMercadoPago(copy.plans.profesional.id)}
+              disabled={mpUpgrading}
+              className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-black shadow-lg shadow-purple-500/25 transition-all"
+            >
+               {mpUpgrading ? copy.common.opening : copy.plans.profesional.button}
+            </button>
+          </div>
+
+          {/* Crecimiento Plan */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col shadow-lg">
+            <h3 className="text-lg font-bold mb-1">{copy.plans.crecimiento.title}</h3>
+            <p className="text-[10px] text-yellow-600 font-bold uppercase mb-2">{copy.plans.crecimiento.subtitle}</p>
+            <div className="text-3xl font-black mb-4">
+               {copy.plans.crecimiento.price} <span className="text-xs font-normal text-slate-500">{copy.plans.crecimiento.billing}</span>
+            </div>
+            <ul className="space-y-3 mb-8 flex-grow">
+              {copy.plans.crecimiento.features.map((f, i) => (
+                <li key={i} className="flex items-center gap-2 text-sm">
+                  <Check className="w-4 h-4 text-yellow-500" /> {f}
+                </li>
+              ))}
+            </ul>
+            <button 
+              onClick={() => handleUpgradeMercadoPago(copy.plans.crecimiento.id)}
+              disabled={mpUpgrading}
+              className="w-full py-3 bg-slate-900 dark:bg-white dark:text-slate-900 text-white hover:opacity-90 rounded-xl text-xs font-black transition-all"
+            >
+               {mpUpgrading ? copy.common.opening : copy.plans.crecimiento.button}
+            </button>
           </div>
         </div>
 
@@ -493,9 +548,9 @@ export default function UpgradePage() {
 
         {/* Payment Security */}
         <div className="mt-12 text-center">
-          <div className="inline-flex items-center gap-2 text-slate-700 dark:text-slate-200 bg-white/90 dark:bg-slate-900/80 px-6 py-3 rounded-full shadow border border-slate-300 dark:border-slate-800">
-            <CreditCard className="w-5 h-5" />
-            <span className="text-sm font-medium">{copy.security}</span>
+          <div className="inline-flex items-center gap-2 text-slate-700 dark:text-slate-200 bg-white/90 dark:bg-slate-900/80 px-6 py-3 rounded-full shadow border border-slate-200 dark:border-slate-800">
+            <CreditCard className="w-4 h-4" />
+            <span className="text-xs font-bold uppercase tracking-widest">{copy.common.security}</span>
           </div>
         </div>
       </main>

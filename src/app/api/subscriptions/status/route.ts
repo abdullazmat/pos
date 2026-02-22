@@ -27,15 +27,16 @@ export async function GET(request: NextRequest) {
     });
 
     if (!subscription) {
+      const basicPlan = getPlanConfig("BASIC");
       return NextResponse.json(
         {
           planId: "BASIC",
           status: "active",
-          features: {
+          features: basicPlan?.features || {
             maxProducts: 100,
-            maxUsers: 2,
-            maxCategories: 20,
-            maxClients: 0,
+            maxUsers: 1,
+            maxCategories: 10,
+            maxClients: 10,
             maxSuppliers: 5,
             arcaIntegration: false,
             advancedReporting: false,
@@ -44,6 +45,7 @@ export async function GET(request: NextRequest) {
           },
           currentPeriodStart: new Date(),
           currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          isPremium: false,
         },
         { status: 200 },
       );

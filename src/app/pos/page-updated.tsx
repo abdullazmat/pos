@@ -208,14 +208,13 @@ export default function POSPage() {
     }
   };
 
-  const currentPlan: "BASIC" | "PROFESSIONAL" | "ENTERPRISE" =
-    subscription?.planId?.toUpperCase() === "PROFESSIONAL"
-      ? "PROFESSIONAL"
-      : subscription?.planId?.toUpperCase() === "ENTERPRISE"
-        ? "ENTERPRISE"
-        : "BASIC";
-  const canUseMercadoPago = currentPlan === "PROFESSIONAL";
-  const canUseArcaInvoicing = currentPlan === "PROFESSIONAL";
+  const canUseMercadoPago = subscription?.features?.mercadoPago || 
+                             subscription?.planId === "ESENCIAL" || 
+                             subscription?.planId === "PROFESIONAL" || 
+                             subscription?.planId === "CRECIMIENTO";
+  const canUseArcaInvoicing = subscription?.features?.arcaIntegration || 
+                               subscription?.planId === "PROFESIONAL" || 
+                               subscription?.planId === "CRECIMIENTO";
 
   const handleAddToCart = (productId: string, name: string, price: number) => {
     setCartItems((prev) => {

@@ -4,6 +4,7 @@ import User from "@/lib/models/User";
 import Business from "@/lib/models/Business";
 import Plan from "@/lib/models/Plan";
 import Subscription from "@/lib/models/Subscription";
+import { getPlanConfig } from "@/lib/services/subscriptions/PlanConfig";
 import { hashPassword } from "@/lib/utils/password";
 import { createAccessToken, createRefreshToken } from "@/lib/utils/jwt";
 import {
@@ -86,9 +87,14 @@ export async function POST(req: NextRequest) {
 
     newUser.businessId = business._id;
 
+    // Verify plan exists or fallback to BASIC
+    const requestedPlanId = (plan || "BASIC").toUpperCase();
+    const planExists = !!getPlanConfig(requestedPlanId);
+    const finalPlanId = planExists ? requestedPlanId : "BASIC";
+
     const subscription = new Subscription({
       businessId: business._id,
-      planId: "BASIC", // Use enum value instead of Plan._id
+      planId: finalPlanId,
       status: "active",
       currentPeriodStart: new Date(),
       currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),

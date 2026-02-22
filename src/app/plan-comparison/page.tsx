@@ -95,14 +95,17 @@ const PLAN_COMPARISON_COPY = {
       subscribe: "Click para suscribirse →",
     },
     planNames: {
-      free: "Gratuito",
-      pro: "Pro",
+      free: "Básico",
+      esencial: "Esencial",
+      profesional: "Profesional",
+      crecimiento: "Crecimiento",
     },
     billing: {
       perMonth: "/mes",
     },
     labels: {
       popular: "Popular",
+      bestValue: "Mejor Valor",
     },
   },
   en: {
@@ -173,14 +176,17 @@ const PLAN_COMPARISON_COPY = {
       subscribe: "Subscribe now →",
     },
     planNames: {
-      free: "Free",
-      pro: "Pro",
+      free: "Basic",
+      esencial: "Essential",
+      profesional: "Professional",
+      crecimiento: "Growth",
     },
     billing: {
       perMonth: "/month",
     },
     labels: {
       popular: "Popular",
+      bestValue: "Best Value",
     },
   },
   pt: {
@@ -251,14 +257,17 @@ const PLAN_COMPARISON_COPY = {
       subscribe: "Clique para assinar →",
     },
     planNames: {
-      free: "Gratuito",
-      pro: "Pro",
+      free: "Básico",
+      esencial: "Essencial",
+      profesional: "Profissional",
+      crecimiento: "Crescimento",
     },
     billing: {
       perMonth: "/mês",
     },
     labels: {
       popular: "Popular",
+      bestValue: "Melhor Valor",
     },
   },
 };
@@ -279,8 +288,10 @@ export default function PlanComparisonPage() {
     const normalized = (planId || "").toUpperCase();
 
     if (normalized === "FREE") return "BASIC";
-    if (normalized === "PRO") return "PROFESSIONAL";
-    if (normalized === "PREMIUM") return "ENTERPRISE";
+    if (normalized === "PRO") return "PROFESIONAL";
+    if (normalized === "PREMIUM") return "CRECIMIENTO";
+    if (normalized === "PROFESSIONAL") return "PROFESIONAL";
+    if (normalized === "ENTERPRISE") return "CRECIMIENTO";
 
     return normalized;
   };
@@ -346,10 +357,12 @@ export default function PlanComparisonPage() {
     const plan = plans.find(
       (p) => normalizePlanId(p.id) === normalizedCurrentPlan,
     );
-    return (
-      plan?.name ||
-      (normalizedCurrentPlan === "PROFESSIONAL" ? "Pro" : copy.free)
-    );
+    if (plan) return plan.name;
+    
+    if (normalizedCurrentPlan === "PROFESIONAL" || normalizedCurrentPlan === "PROFESSIONAL") return copy.planNames.profesional;
+    if (normalizedCurrentPlan === "ESENCIAL") return copy.planNames.esencial;
+    if (normalizedCurrentPlan === "CRECIMIENTO") return copy.planNames.crecimiento;
+    return copy.planNames.free;
   })();
 
   if (loading) {
@@ -363,58 +376,55 @@ export default function PlanComparisonPage() {
   }
 
   // Comparison data based on screenshot
-  const limitsRows: { label: string; free: string; pro: string }[] = [
-    { label: copy.limits.products, free: "100", pro: copy.unlimited },
-    { label: copy.limits.users, free: "2", pro: copy.unlimited },
-    { label: copy.limits.categories, free: "20", pro: copy.unlimited },
-    {
-      label: copy.limits.clients,
-      free: copy.notAvailable,
-      pro: copy.unlimited,
-    },
-    { label: copy.limits.suppliers, free: "5", pro: copy.unlimited },
-    { label: copy.limits.paymentMethods, free: "2", pro: copy.unlimited },
-    { label: copy.limits.maxDiscount, free: copy.notAvailable, pro: "100%" },
+  const limitsRows = [
+    { label: copy.limits.products, free: "100", esencial: "500", profesional: "3.000", crecimiento: "10.000" },
+    { label: copy.limits.users, free: "1", esencial: "1", profesional: "3", crecimiento: "10" },
+    { label: copy.limits.categories, free: "10", esencial: "100", profesional: "9.999", crecimiento: copy.unlimited },
+    { label: copy.limits.clients, free: "10", esencial: "500", profesional: "3.000", crecimiento: copy.unlimited },
+    { label: copy.limits.suppliers, free: "5", esencial: "20", profesional: "100", crecimiento: copy.unlimited },
+    { label: copy.limits.paymentMethods, free: "2", esencial: "5", profesional: copy.unlimited, crecimiento: copy.unlimited },
+    { label: copy.limits.maxDiscount, free: copy.notAvailable, esencial: "15%", profesional: "100%", crecimiento: "100%" },
   ];
 
-  const checkRowsPOS: { label: string; free: boolean; pro: boolean }[] = [
-    { label: copy.features.pos, free: true, pro: true },
-    { label: copy.codeScan, free: true, pro: true },
-    { label: copy.features.weightProducts, free: true, pro: true },
-    { label: copy.features.discounts, free: false, pro: true },
-    { label: copy.multiPaymentMethods, free: false, pro: true },
-    { label: copy.creditSales, free: false, pro: true },
-    { label: copy.features.productNotes, free: false, pro: true },
+  const checkRowsPOS = [
+    { label: copy.features.pos, free: true, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.codeScan, free: true, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.features.weightProducts, free: true, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.features.discounts, free: false, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.multiPaymentMethods, free: false, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.creditSales, free: false, esencial: false, profesional: true, crecimiento: true },
+    { label: copy.features.productNotes, free: false, esencial: true, profesional: true, crecimiento: true },
   ];
 
-  const checkRowsCaja: { label: string; free: boolean; pro: boolean }[] = [
-    { label: copy.basicCashControl, free: true, pro: true },
-    { label: copy.cashWithdrawals, free: false, pro: true },
-    { label: copy.cashAudit, free: false, pro: true },
-    { label: copy.returns, free: true, pro: true },
+  const checkRowsCaja = [
+    { label: copy.basicCashControl, free: true, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.cashWithdrawals, free: false, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.cashAudit, free: false, esencial: false, profesional: true, crecimiento: true },
+    { label: copy.returns, free: true, esencial: true, profesional: true, crecimiento: true },
   ];
 
-  const checkRowsGestion: { label: string; free: boolean; pro: boolean }[] = [
-    { label: copy.stockManagement, free: true, pro: true },
-    { label: copy.features.clients, free: false, pro: true },
-    { label: copy.features.suppliers, free: true, pro: true },
-    { label: copy.features.expenses, free: false, pro: true },
-    { label: copy.userManagement, free: true, pro: true },
-    { label: copy.excelImport, free: false, pro: true },
+  const checkRowsGestion = [
+    { label: copy.stockManagement, free: true, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.features.clients, free: true, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.features.suppliers, free: true, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.features.expenses, free: false, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.userManagement, free: true, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.excelImport, free: false, esencial: true, profesional: true, crecimiento: true },
   ];
 
-  const checkRowsReportes: { label: string; free: boolean; pro: boolean }[] = [
-    { label: copy.basicReports, free: true, pro: true },
-    { label: copy.advancedReports, free: false, pro: true },
-    { label: copy.chartsGraphs, free: false, pro: true },
-    { label: copy.exportReports, free: false, pro: true },
+  const checkRowsReportes = [
+    { label: copy.basicReports, free: true, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.advancedReports, free: false, esencial: false, profesional: true, crecimiento: true },
+    { label: copy.chartsGraphs, free: false, esencial: false, profesional: true, crecimiento: true },
+    { label: copy.exportReports, free: false, esencial: true, profesional: true, crecimiento: true },
   ];
 
-  const checkRowsConfig: { label: string; free: boolean; pro: boolean }[] = [
-    { label: copy.features.customKeyboard, free: true, pro: true },
-    { label: copy.businessConfig, free: true, pro: true },
-    { label: copy.customTickets, free: false, pro: true },
-    { label: copy.customBranding, free: false, pro: true },
+  const checkRowsConfig = [
+    { label: copy.features.customKeyboard, free: true, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.businessConfig, free: true, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.customTickets, free: false, esencial: false, profesional: true, crecimiento: true },
+    { label: copy.customBranding, free: false, esencial: false, profesional: true, crecimiento: true },
+    { label: copy.features.mercadoPago, free: false, esencial: true, profesional: true, crecimiento: true },
   ];
 
   const Section = ({
@@ -437,63 +447,79 @@ export default function PlanComparisonPage() {
   const RowLimits = ({
     label,
     free,
-    pro,
+    esencial,
+    profesional,
+    crecimiento,
   }: {
     label: string;
     free: string;
-    pro: string;
+    esencial: string;
+    profesional: string;
+    crecimiento: string;
   }) => (
-    <div className="grid grid-cols-3 px-4 py-3 text-sm border-t border-slate-200 dark:border-slate-800/60">
-      <div className="text-slate-700 dark:text-slate-300">{label}</div>
-      <div className="text-center text-slate-900 dark:text-slate-200">
-        {free}
-      </div>
-      <div className="text-center text-slate-900 dark:text-slate-200">
-        {pro}
-      </div>
+    <div className="grid grid-cols-5 px-4 py-3 text-[10px] md:text-sm border-t border-slate-200 dark:border-slate-800/60">
+      <div className="text-slate-700 dark:text-slate-300 font-medium">{label}</div>
+      <div className="text-center text-slate-800 dark:text-slate-200">{free}</div>
+      <div className="text-center text-slate-800 dark:text-slate-200">{esencial}</div>
+      <div className="text-center text-slate-800 dark:text-slate-200">{profesional}</div>
+      <div className="text-center text-slate-800 dark:text-slate-200">{crecimiento}</div>
     </div>
   );
 
   const RowCheck = ({
     label,
     free,
-    pro,
+    esencial,
+    profesional,
+    crecimiento,
   }: {
     label: string;
     free: boolean;
-    pro: boolean;
+    esencial: boolean;
+    profesional: boolean;
+    crecimiento: boolean;
   }) => (
-    <div className="grid grid-cols-3 px-4 py-3 text-sm border-t border-slate-200 dark:border-slate-800/60">
-      <div className="text-slate-700 dark:text-slate-300">{label}</div>
+    <div className="grid grid-cols-5 px-4 py-3 text-[10px] md:text-sm border-t border-slate-200 dark:border-slate-800/60">
+      <div className="text-slate-700 dark:text-slate-300 font-medium">{label}</div>
       <div className="text-center">
-        {free ? (
-          <span className="text-green-600 dark:text-green-400">✓</span>
-        ) : (
-          <span className="text-slate-600 dark:text-slate-500">✕</span>
-        )}
+        {free ? <span className="text-green-500 font-bold">✓</span> : <span className="text-slate-400">✕</span>}
       </div>
       <div className="text-center">
-        {pro ? (
-          <span className="text-green-600 dark:text-green-400">✓</span>
-        ) : (
-          <span className="text-slate-600 dark:text-slate-500">✕</span>
-        )}
+        {esencial ? <span className="text-green-500 font-bold">✓</span> : <span className="text-slate-400">✕</span>}
+      </div>
+      <div className="text-center">
+        {profesional ? <span className="text-green-500 font-bold">✓</span> : <span className="text-slate-400">✕</span>}
+      </div>
+      <div className="text-center">
+        {crecimiento ? <span className="text-green-500 font-bold">✓</span> : <span className="text-slate-400">✕</span>}
       </div>
     </div>
   );
 
-  const freePlan = plans.find((p) => p.id === "FREE") || {
-    id: "FREE",
+  const basicPlan = plans.find((p) => p.id === "BASIC" || p.id === "FREE") || {
+    id: "BASIC",
     name: copy.planNames.free,
     price: 0,
     billing: copy.billing.perMonth,
   };
-  const proPlan = plans.find((p) => p.id === "PRO") || {
-    id: "PRO",
-    name: copy.planNames.pro,
-    price: 24990,
+  const esencialPlan = plans.find((p) => p.id === "ESENCIAL") || {
+    id: "ESENCIAL",
+    name: copy.planNames.esencial,
+    price: 14999,
+    billing: copy.billing.perMonth,
+  };
+  const profesionalPlan = plans.find((p) => p.id === "PROFESIONAL") || {
+    id: "PROFESIONAL",
+    name: copy.planNames.profesional,
+    price: 29999,
     billing: copy.billing.perMonth,
     popular: true,
+  };
+  const crecimientoPlan = plans.find((p) => p.id === "CRECIMIENTO") || {
+    id: "CRECIMIENTO",
+    name: copy.planNames.crecimiento,
+    price: 54999,
+    billing: copy.billing.perMonth,
   };
 
   return (
@@ -513,62 +539,55 @@ export default function PlanComparisonPage() {
           </p>
         </div>
 
-        {/* Plans header */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-          {/* Free */}
-          <div
-            className={`rounded-xl border ${isCurrentPlan("FREE") ? "border-purple-600" : "border-slate-300 dark:border-slate-800"} bg-white dark:bg-slate-900 p-5`}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2 py-0.5 text-xs font-semibold bg-slate-200 border border-slate-300 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 rounded">
-                FREE
-              </span>
-            </div>
-            <div className="text-slate-900 dark:text-white font-semibold">
-              {freePlan.name}
-            </div>
-            <div className="mt-1 text-slate-700 dark:text-slate-300 text-sm">
-              $ {freePlan.price}
-              {copy.billing.perMonth}
-            </div>
-            <div className="mt-4">
-              <button
-                className={`w-full py-2 rounded-lg text-sm font-semibold ${isCurrentPlan("FREE") ? "bg-purple-700 text-white" : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300"}`}
-              >
-                {isCurrentPlan("FREE")
-                  ? copy.buttons.current
-                  : copy.buttons.select}
-              </button>
-            </div>
+        {/* Plans cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {/* Basic */}
+          <div className={`rounded-xl border ${isCurrentPlan(basicPlan.id) ? "border-purple-500 bg-purple-50/10" : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"} p-4 flex flex-col`}>
+             <div className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Plan Trial</div>
+             <div className="text-lg font-bold dark:text-white">{basicPlan.name}</div>
+             <div className="text-2xl font-black mt-2">$0 <span className="text-xs font-normal text-slate-500">{copy.billing.perMonth}</span></div>
+             <div className="mt-auto pt-4">
+                <button disabled className="w-full py-2 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-400">
+                  {isCurrentPlan(basicPlan.id) ? copy.buttons.current : copy.buttons.select}
+                </button>
+             </div>
           </div>
 
-          {/* Pro */}
-          <div
-            className={`rounded-xl border ${isCurrentPlan("PRO") ? "border-purple-600" : "border-slate-300 dark:border-slate-800"} bg-white dark:bg-slate-900 p-5`}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Star className="w-4 h-4 text-yellow-500 dark:text-yellow-300" />
-              <span className="px-2 py-0.5 text-xs font-semibold text-yellow-700 bg-yellow-100 border border-yellow-300 dark:text-yellow-300 dark:bg-yellow-900/40 dark:border-yellow-700/50 rounded">
-                {copy.labels.popular}
-              </span>
-            </div>
-            <div className="text-slate-900 dark:text-white font-semibold">
-              {proPlan.name}
-            </div>
-            <div className="mt-1 text-slate-700 dark:text-slate-300 text-sm">
-              $ {proPlan.price.toLocaleString()}
-              {copy.billing.perMonth}
-            </div>
-            <div className="mt-4">
-              <Link
-                href="/business-config"
-                className={`block w-full py-2 rounded-lg text-sm font-semibold ${isCurrentPlan("PRO") ? "bg-purple-700 text-white" : "bg-purple-600 hover:bg-purple-500 text-white"}`}
-              >
-                {isCurrentPlan("PRO")
-                  ? copy.buttons.current
-                  : copy.buttons.subscribe}
-              </Link>
-            </div>
+          {/* Esencial */}
+          <div className={`rounded-xl border ${isCurrentPlan(esencialPlan.id) ? "border-purple-500 bg-purple-50/10" : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"} p-4 flex flex-col relative`}>
+             <div className="text-[10px] font-bold text-blue-500 mb-1 uppercase tracking-wider">Ideal Kioscos</div>
+             <div className="text-lg font-bold dark:text-white">{esencialPlan.name}</div>
+             <div className="text-2xl font-black mt-2">AR$14.999 <span className="text-xs font-normal text-slate-500">{copy.billing.perMonth}</span></div>
+             <div className="mt-auto pt-4">
+                <Link href="/business-config" className={`block w-full py-2 rounded-lg text-xs font-bold text-center transition-colors ${isCurrentPlan(esencialPlan.id) ? "bg-purple-600 text-white" : "bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/40 dark:text-purple-300"}`}>
+                  {isCurrentPlan(esencialPlan.id) ? copy.buttons.current : copy.buttons.subscribe}
+                </Link>
+             </div>
+          </div>
+
+          {/* Profesional */}
+          <div className={`rounded-xl border ${isCurrentPlan(profesionalPlan.id) ? "border-purple-500 bg-purple-50/10" : "border-blue-400 bg-blue-50/5 dark:bg-blue-900/5"} p-4 flex flex-col relative overflow-hidden`}>
+             <div className="absolute top-0 right-0 bg-blue-500 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg uppercase">{copy.labels.popular}</div>
+             <div className="text-[10px] font-bold text-purple-500 mb-1 uppercase tracking-wider">RECOMENDADO</div>
+             <div className="text-lg font-bold dark:text-white">{profesionalPlan.name}</div>
+             <div className="text-2xl font-black mt-2">AR$29.999 <span className="text-xs font-normal text-slate-500">{copy.billing.perMonth}</span></div>
+             <div className="mt-auto pt-4">
+                <Link href="/business-config" className={`block w-full py-2 rounded-lg text-xs font-bold text-center transition-colors ${isCurrentPlan(profesionalPlan.id) ? "bg-purple-600 text-white" : "bg-purple-600 text-white hover:bg-purple-700 shadow-lg shadow-purple-500/20"}`}>
+                  {isCurrentPlan(profesionalPlan.id) ? copy.buttons.current : copy.buttons.subscribe}
+                </Link>
+             </div>
+          </div>
+
+          {/* Crecimiento */}
+          <div className={`rounded-xl border ${isCurrentPlan(crecimientoPlan.id) ? "border-purple-500 bg-purple-50/10" : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"} p-4 flex flex-col`}>
+             <div className="text-[10px] font-bold text-yellow-600 mb-1 uppercase tracking-wider">SIN LÍMITES</div>
+             <div className="text-lg font-bold dark:text-white">{crecimientoPlan.name}</div>
+             <div className="text-2xl font-black mt-2">AR$54.999 <span className="text-xs font-normal text-slate-500">{copy.billing.perMonth}</span></div>
+             <div className="mt-auto pt-4">
+                <Link href="/business-config" className={`block w-full py-2 rounded-lg text-xs font-bold text-center transition-colors ${isCurrentPlan(crecimientoPlan.id) ? "bg-purple-600 text-white" : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"}`}>
+                  {isCurrentPlan(crecimientoPlan.id) ? copy.buttons.current : copy.buttons.subscribe}
+                </Link>
+             </div>
           </div>
         </div>
 
@@ -579,10 +598,12 @@ export default function PlanComparisonPage() {
 
         {/* Limits */}
         <Section title={copy.limitsSection}>
-          <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300">
+          <div className="grid grid-cols-5 px-4 py-2 text-[8px] md:text-[10px] bg-slate-100 dark:bg-slate-900/40 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
             <div></div>
-            <div className="text-center">{copy.freeHeader}</div>
-            <div className="text-center">{copy.proHeader}</div>
+            <div className="text-center">{copy.planNames.free}</div>
+            <div className="text-center">{copy.planNames.esencial}</div>
+            <div className="text-center">{copy.planNames.profesional}</div>
+            <div className="text-center">{copy.planNames.crecimiento}</div>
           </div>
           {limitsRows.map((r) => (
             <RowLimits key={r.label} {...r} />
@@ -592,10 +613,12 @@ export default function PlanComparisonPage() {
         {/* POS */}
         <div className="mt-6">
           <Section title={copy.posSection}>
-            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300">
+            <div className="grid grid-cols-5 px-4 py-2 text-[8px] md:text-[10px] bg-slate-100 dark:bg-slate-900/40 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
               <div></div>
-              <div className="text-center">{copy.freeHeader}</div>
-              <div className="text-center">{copy.proHeader}</div>
+              <div className="text-center">{copy.planNames.free}</div>
+              <div className="text-center">{copy.planNames.esencial}</div>
+              <div className="text-center">{copy.planNames.profesional}</div>
+              <div className="text-center">{copy.planNames.crecimiento}</div>
             </div>
             {checkRowsPOS.map((r) => (
               <RowCheck key={r.label} {...r} />
@@ -606,10 +629,12 @@ export default function PlanComparisonPage() {
         {/* Control de Caja */}
         <div className="mt-6">
           <Section title={copy.cashBoxSection}>
-            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300">
+            <div className="grid grid-cols-5 px-4 py-2 text-[8px] md:text-[10px] bg-slate-100 dark:bg-slate-900/40 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
               <div></div>
-              <div className="text-center">{copy.freeHeader}</div>
-              <div className="text-center">{copy.proHeader}</div>
+              <div className="text-center">{copy.planNames.free}</div>
+              <div className="text-center">{copy.planNames.esencial}</div>
+              <div className="text-center">{copy.planNames.profesional}</div>
+              <div className="text-center">{copy.planNames.crecimiento}</div>
             </div>
             {checkRowsCaja.map((r) => (
               <RowCheck key={r.label} {...r} />
@@ -620,10 +645,12 @@ export default function PlanComparisonPage() {
         {/* Gestión */}
         <div className="mt-6">
           <Section title={copy.managementSection}>
-            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300">
+            <div className="grid grid-cols-5 px-4 py-2 text-[8px] md:text-[10px] bg-slate-100 dark:bg-slate-900/40 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
               <div></div>
-              <div className="text-center">{copy.freeHeader}</div>
-              <div className="text-center">{copy.proHeader}</div>
+              <div className="text-center">{copy.planNames.free}</div>
+              <div className="text-center">{copy.planNames.esencial}</div>
+              <div className="text-center">{copy.planNames.profesional}</div>
+              <div className="text-center">{copy.planNames.crecimiento}</div>
             </div>
             {checkRowsGestion.map((r) => (
               <RowCheck key={r.label} {...r} />
@@ -634,10 +661,12 @@ export default function PlanComparisonPage() {
         {/* Reportes */}
         <div className="mt-6">
           <Section title={copy.reportsSection}>
-            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300">
+            <div className="grid grid-cols-5 px-4 py-2 text-[8px] md:text-[10px] bg-slate-100 dark:bg-slate-900/40 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
               <div></div>
-              <div className="text-center">{copy.freeHeader}</div>
-              <div className="text-center">{copy.proHeader}</div>
+              <div className="text-center">{copy.planNames.free}</div>
+              <div className="text-center">{copy.planNames.esencial}</div>
+              <div className="text-center">{copy.planNames.profesional}</div>
+              <div className="text-center">{copy.planNames.crecimiento}</div>
             </div>
             {checkRowsReportes.map((r) => (
               <RowCheck key={r.label} {...r} />
@@ -648,10 +677,12 @@ export default function PlanComparisonPage() {
         {/* Configuración */}
         <div className="mt-6">
           <Section title={copy.configSection}>
-            <div className="grid grid-cols-3 px-4 py-2 text-xs bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300">
+            <div className="grid grid-cols-5 px-4 py-2 text-[8px] md:text-[10px] bg-slate-100 dark:bg-slate-900/40 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
               <div></div>
-              <div className="text-center">{copy.freeHeader}</div>
-              <div className="text-center">{copy.proHeader}</div>
+              <div className="text-center">{copy.planNames.free}</div>
+              <div className="text-center">{copy.planNames.esencial}</div>
+              <div className="text-center">{copy.planNames.profesional}</div>
+              <div className="text-center">{copy.planNames.crecimiento}</div>
             </div>
             {checkRowsConfig.map((r) => (
               <RowCheck key={r.label} {...r} />

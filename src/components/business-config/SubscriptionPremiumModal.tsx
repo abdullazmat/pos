@@ -71,15 +71,14 @@ export default function SubscriptionPremiumModal({
 
   if (!isOpen) return null;
 
-  const productCount = Object.values(plan.features).some((v) => v === true)
-    ? "∞"
-    : plan.features.products || "∞";
-  const userCount = Object.values(plan.features).some((v) => v === true)
-    ? "∞"
-    : plan.features.users || "∞";
-  const clientCount = Object.values(plan.features).some((v) => v === true)
-    ? "∞"
-    : plan.features.clients || "∞";
+  const productLimit = plan.features.maxProducts;
+  const userLimit = plan.features.maxUsers;
+  const clientLimit = plan.features.maxClients || 10000;
+  
+  const productCount = productLimit && productLimit > 9999 ? "∞" : productLimit || "∞";
+  const userCount = userLimit && userLimit > 99 ? "∞" : userLimit || "∞";
+  const clientCount = clientLimit && clientLimit > 9999 ? "∞" : clientLimit || "∞";
+  
   const discount = plan.features.discount
     ? `${Math.round(plan.features.discount * 100)}%`
     : "0%";
@@ -116,7 +115,7 @@ export default function SubscriptionPremiumModal({
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                  <span>⭐</span> {plan.name}
+                  {plan.name}
                 </h3>
                 <p className="text-sm text-gray-300 mt-1">{plan.description}</p>
               </div>

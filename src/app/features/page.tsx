@@ -12,7 +12,10 @@ import {
   UsersIcon, 
   TrendingDownIcon, 
   LockIcon,
-  PackageIcon
+  PackageIcon,
+  PhoneIcon,
+  CloudIcon,
+  ActivityIcon
 } from "lucide-react";
 import { useLanguage } from "@/lib/context/LanguageContext";
 
@@ -50,6 +53,9 @@ export default function FeaturesPage() {
       case "users": return <UsersIcon className="w-6 h-6" />;
       case "trending-down": return <TrendingDownIcon className="w-6 h-6" />;
       case "lock": return <LockIcon className="w-6 h-6" />;
+      case "phone": return <PhoneIcon className="w-6 h-6" />;
+      case "cloud": return <CloudIcon className="w-6 h-6" />;
+      case "activity": return <ActivityIcon className="w-6 h-6" />;
       default: return <PackageIcon className="w-6 h-6" />;
     }
   };
@@ -127,15 +133,16 @@ export default function FeaturesPage() {
                 </div>
 
                 <div className={`${index % 2 !== 0 ? 'lg:order-1' : ''} lg:col-span-3`}>
-                  <div className="vp-mockup-shell vp-float bg-white border border-[hsl(var(--vp-border))] rounded-[24px] overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] transition-transform duration-500 hover:scale-[1.02]">
-                    <div className="p-3 sm:p-6 bg-white w-full">
-                      <div className="relative w-full aspect-[16/10] sm:aspect-video rounded-lg overflow-hidden border border-[hsl(var(--vp-border))/0.3]">
+                  <div className="vp-mockup-shell vp-float bg-white border border-[hsl(var(--vp-border))] rounded-[24px] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.12)] transition-transform duration-500 hover:scale-[1.02]">
+                    <div className="p-4 sm:p-8 bg-white w-full">
+                      <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden bg-slate-50 border border-[hsl(var(--vp-border))/0.4] shadow-inner">
                         <Image 
                           src={section.image} 
                           alt={section.title}
                           fill
-                          className="object-cover object-top"
+                          className="object-contain"
                           sizes="(max-width: 1024px) 100vw, 800px"
+                          priority={index < 2}
                         />
                       </div>
                     </div>

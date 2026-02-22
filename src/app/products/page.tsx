@@ -23,6 +23,7 @@ import {
   PLAN_FEATURES,
   getRemainingCount,
   isLimitReached,
+  PlanType,
 } from "@/lib/utils/planFeatures";
 import { parseNumberInput } from "@/lib/utils/decimalFormatter";
 
@@ -679,17 +680,28 @@ export default function ProductsPage() {
     URL.revokeObjectURL(url);
   };
 
-  const currentPlan: "BASIC" | "PROFESSIONAL" | "ENTERPRISE" =
-    subscription?.planId?.toUpperCase() === "PROFESSIONAL"
-      ? "PROFESSIONAL"
-      : subscription?.planId?.toUpperCase() === "ENTERPRISE"
-        ? "ENTERPRISE"
-        : "BASIC";
-  const planConfig = PLAN_FEATURES[currentPlan];
+  const currentPlan: PlanType = (subscription?.planId?.toUpperCase() as PlanType) || "BASIC";
+
+  const planConfig = PLAN_FEATURES[currentPlan] || PLAN_FEATURES.BASIC;
   const planNameMap: Record<string, Record<string, string>> = {
-    es: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
-    en: { BASIC: "Free", PROFESSIONAL: "Pro", ENTERPRISE: "Enterprise" },
-    pt: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
+    es: { 
+      BASIC: "Gratuito", 
+      ESENCIAL: "Esencial", 
+      PROFESIONAL: "Profesional", 
+      CRECIMIENTO: "Crecimiento" 
+    },
+    en: { 
+      BASIC: "Free", 
+      ESENCIAL: "Essential", 
+      PROFESIONAL: "Professional", 
+      CRECIMIENTO: "Growth" 
+    },
+    pt: { 
+      BASIC: "Gratuito", 
+      ESENCIAL: "Essencial", 
+      PROFESIONAL: "Profissional", 
+      CRECIMIENTO: "Crescimento" 
+    },
   };
   const planName =
     planNameMap[currentLanguage]?.[currentPlan] || planNameMap.en[currentPlan];

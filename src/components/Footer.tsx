@@ -6,7 +6,7 @@ import { useLanguage } from "@/lib/context/LanguageContext";
 import BrandLogo from "@/components/BrandLogo";
 
 export default function Footer() {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
 
   const companyLinks = [
     { label: String(t("aboutUs", "common") || "About Us"), href: "/about" },
@@ -193,6 +193,9 @@ export default function Footer() {
             <p className="text-[hsl(var(--vp-muted))] text-sm">
               © {new Date().getFullYear()} VentaPlus.{" "}
               {String(t("allRightsReserved", "common") || "All rights reserved.")}
+              <span className="block sm:inline sm:ml-4 text-[11px] font-bold opacity-60">
+                {currentLanguage === 'es' ? '• Todos los precios expresados en Pesos Argentinos (ARS)' : '• All prices expressed in Argentine Pesos (ARS)'}
+              </span>
             </p>
             <div className="flex items-center gap-6 text-sm text-[hsl(var(--vp-muted))]">
               <Link href="/terms" className="hover:text-[hsl(var(--vp-text))] transition-colors">

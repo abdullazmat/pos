@@ -87,7 +87,7 @@ export default function PricingSection() {
           </span>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-3">
           {plans.map((plan, index) => (
             <div
               key={`${plan.name}-${index}`}
@@ -127,11 +127,7 @@ export default function PricingSection() {
                 ))}
               </ul>
               <Link
-                href={
-                  plan.featured
-                    ? "/auth/register?plan=pro"
-                    : "/auth/register?plan=free"
-                }
+                href={`/auth/register?plan=${plan.name.toLowerCase()}`}
                 className={`mt-6 inline-flex w-full justify-center vp-button ${
                   plan.featured ? "vp-button-primary" : ""
                 }`}

@@ -2,8 +2,9 @@ import mongoose, { Document, Schema } from "mongoose";
 
 export enum SubscriptionPlan {
   BASIC = "BASIC",
-  PROFESSIONAL = "PROFESSIONAL",
-  ENTERPRISE = "ENTERPRISE",
+  ESENCIAL = "ESENCIAL",
+  PROFESIONAL = "PROFESIONAL",
+  CRECIMIENTO = "CRECIMIENTO",
 }
 
 export enum PaymentProvider {

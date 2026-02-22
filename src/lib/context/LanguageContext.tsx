@@ -134,147 +134,163 @@ const translationsEs = {
   landing: {
     hero: {
       badge: "⭐ El sistema que tu negocio necesita",
-      titleMain: "La base tecnológica para profesionalizar",
-      titleHighlight: "tu negocio retail",
+      titleMain: "La base tecnológica para hacer",
+      titleHighlight: "crecer tu negocio",
       titleLines: [
         "La base tecnológica",
-        "para profesionalizar",
-        "tu negocio retail",
+        "para hacer crecer",
+        "tu negocio",
       ],
       titleHighlightIndex: 2,
       description:
-        "Ventas rápidas en mostrador, control de ganancias diarias y facturación electrónica ARCA integrada. Diseñado para preparar tu empresa para crecer.",
-      primaryCta: "Ver el sistema en acción",
-      secondaryCta: "Empezar gratis",
+        "Ventas rápidas, control diario y facturación electrónica ARCA integrada en un sistema simple y moderno.",
+      primaryCta: "Empezar",
+      secondaryCta: "Ver cómo funciona",
     },
     modules: {
       module1: {
-        title: "Punto de Venta Optimizado para Mostrador",
+        title: "Velocidad de nivel supermercado",
         description: "Ventas rápidas, flujo ágil, diseñado para trabajar con teclado y escáner de códigos de barras.",
         image: "/images/new-features/new images/spanish/spanish POS page.png",
         features: [
-          "Compatible con teclado numérico",
-          "Integración con escáner de códigos de barras",
-          "Ideal para horas pico",
-          "Interfaz clara y organizada"
+          "Optimizado para teclado",
+          "Escaneo de códigos de barra",
+          "Ideal para momentos de alta demanda",
+          "Sin demoras en caja"
         ]
       },
       module2: {
-        title: "Control Diario de Ventas y Márgenes",
+        title: "Control diario de ventas y caja",
         description: "Visualizá ingresos, gastos y ganancias en tiempo real con reportes automáticos.",
         image: "/images/new-features/new images/spanish/spanish Reports Page.png",
         features: [
           "Resumen diario automático",
           "Control de caja integral",
-          "Reportes simples para contabilidad",
-          "Información clara para decidir"
+          "Márgenes de ganancia claros",
+          "Cierre de caja en segundos"
         ]
       },
       module3: {
-        title: "Inventario Actualizado Automáticamente",
-        description: "Cada venta impacta en el stock sin procesos manuales ni pasos extra.",
+        title: "Organización total de tu negocio",
+        description: "Gestión completa de stock, proveedores y gastos en una sola plataforma.",
         image: "/images/new-features/new images/spanish/spanish Product Management.png",
         features: [
-          "Alertas de stock bajo instantáneas",
-          "Movimientos registrados con detalle",
-          "Control total a nivel de producto",
-          "Historial completo de trazabilidad"
+          "Inventario automatizado",
+          "Gestión de proveedores",
+          "Control de gastos",
+          "Alertas de stock bajo"
         ]
       },
       module4: {
-        title: "Facturación Electrónica ARCA Integrada",
-        description: "Emití documentos fiscales directamente desde el sistema con sincronización total.",
+        title: "Facturación electrónica ARCA",
+        description: "Emití comprobantes fiscales (Factura A, B, C) integrados directamente con AFIP/ARCA.",
         image: "/images/new-features/new images/spanish/spanish Fiscal Reports - VAT.png",
         features: [
-          "Factura A, B y C integradas",
+          "Integración nativa ARCA",
           "Notas de crédito automáticas",
-          "Reportes impositivos para tu contador",
-          "Sincronización directa y segura"
+          "Reportes impositivos listos",
+          "Cumplimiento legal garantizado"
         ]
       }
     },
     finalCta: {
       title: "Prepará tu negocio para crecer",
-      description: "Un sistema simple y listo para facturación fiscal, diseñado para el ritmo real del comercio minorista.",
+      description: "Un sistema simple y listo para facturación fiscal, diseñado para el ritmo real del comercio.",
       primaryCta: "Crear cuenta gratis",
-      secondaryCta: "Ver el sistema en acción"
+      secondaryCta: "Ver demostración"
     },
     cta: {
       title: "Listo para operar en mostrador",
       subtitle:
-        "Pensado para kioscos, retail chico y atención en caja donde la velocidad importa.",
+        "Pensado para kioscos, minimercados y atención en caja donde la velocidad importa.",
       startFreeNow: "Empezar Gratis Ahora →",
       noCard: "Sin tarjeta de crédito • Configuración en 2 minutos",
     },
     promoCta: {
-      eyebrow: "Precios congelados",
-      title: "Todos los planes congelados por tus primeros 3 meses",
+      eyebrow: "Precios transparentes",
+      title: "Planes diseñados para cada etapa de tu negocio",
       subtitle:
-        "Empezá con todos los módulos activos y escalá al mismo precio.",
-      primaryCta: "Empezar prueba gratis",
+        "Empezá hoy mismo y profesionalizá tu gestión con VentaPlus.",
+      primaryCta: "Ver planes",
     },
     pricingSection: {
-      title: "Congelamos tus primeros 3 meses con VentaPlus",
+      title: "Planes simples y escalables",
       subtitle:
-        "Mantené todos los módulos activos mientras escalás ventas, stock, compras y operaciones fiscales con confianza.",
-      billingTitle: "Elegí tu ciclo de facturación",
+        "Elegí el plan que mejor se adapte al tamaño de tu negocio. Todos los precios en Pesos Argentinos (ARS).",
+      billingTitle: "Ciclo de facturación",
       billingMonthly: "Mensual",
       billingAnnual: "Anual",
-      billingSavings: "Ahorrá hasta 15% con facturación anual",
-      mostPopular: "Más popular",
-      cta: "Empezar prueba gratis",
+      billingSavings: "Ahorrá con el pago anual",
+      mostPopular: "Recomendado",
+      cta: "Empezar ahora",
       plans: [
         {
-          name: "Gratis",
-          monthly: "$0",
-          annual: "$0",
+          name: "Esencial",
+          monthly: "$14.999",
+          annual: "$12.999",
           caption: "ARS por mes",
-          usage: "Hasta 100 productos, 2 usuarios",
+          usage: "1 usuario • Hasta 500 productos",
           features: [
-            "Sistema POS + escaneo de códigos",
-            "Control básico de caja",
-            "Gestión de stock",
-            "Reportes básicos",
-            "Teclado personalizado",
+            "Punto de Venta (POS)",
+            "Control de stock básico",
+            "Gestión de gastos",
+            "Sin facturación ARCA",
           ],
         },
         {
-          name: "Pro",
-          monthly: "$24.990",
-          annual: "$21.900",
+          name: "Profesional",
+          monthly: "$29.999",
+          annual: "$25.999",
           caption: "ARS por mes",
-          usage: "Productos y usuarios ilimitados",
+          usage: "Hasta 3 usuarios • Hasta 3.000 productos",
           features: [
-            "Múltiples medios de pago",
-            "Ventas a crédito y descuentos",
-            "Arqueos y retiros de caja",
-            "Reportes avanzados + exportaciones",
-            "Integraciones fiscales",
+            "Facturación ARCA incluida",
+            "Notas de Crédito",
+            "Gestión de Proveedores",
+            "Cuentas Corrientes (Fiado)",
           ],
           featured: true,
+        },
+        {
+          name: "Crecimiento",
+          monthly: "$54.999",
+          annual: "$46.999",
+          caption: "ARS por mes",
+          usage: "Hasta 10 usuarios • Hasta 10.000 productos",
+          features: [
+            "Reportes avanzados",
+            "Soporte Prioritario",
+            "Multi-depósito",
+            "Capacitación inicial",
+          ],
         },
       ],
     },
     supportSection: {
       eyebrow: "Soporte",
-      title: "Todo nuestro equipo a tu servicio",
+      title: "Estamos para ayudarte a crecer",
       subtitle:
-        "VentaPlus combina onboarding experto, soporte ágil y guía proactiva para que tu equipo nunca se sienta solo.",
+        "VentaPlus ofrece múltiples canales de soporte para que tu negocio nunca se detenga.",
       items: [
         {
-          title: "Personas reales cuando las necesitás",
+          title: "Centro de Ayuda con buscador",
           description:
-            "Desde la implementación hasta la operación diaria, nuestros especialistas están disponibles por chat y email.",
+            "Guías detalladas y tutoriales paso a paso para dominar cada función del sistema.",
         },
         {
-          title: "Respuestas rápidas, guía clara",
+          title: "WhatsApp Business Dedicado",
           description:
-            "Ayuda inmediata con flujos, integraciones y configuración fiscal.",
+            "Soporte rápido y directo a través de nuestra línea oficial de WhatsApp.",
         },
         {
-          title: "Soporte que escala con vos",
+          title: "Email y Formulario de Contacto",
           description:
-            "Asistencia prioritaria y seguimientos de éxito para crecer con confianza.",
+            "Atención personalizada para consultas administrativas y técnicas las 24 horas.",
+        },
+        {
+          title: "Estado del Servicio",
+          description:
+            "Monitoreo en tiempo real de la conexión con ARCA y estabilidad de la plataforma.",
         },
       ],
     },
@@ -457,10 +473,11 @@ const translationsEs = {
   dashboard: {
     welcome: "Bienvenido",
     currentPlan: "Tu plan actual",
-    planBasic: "Plan Básico",
-    planProfessional: "Plan Profesional",
-    planEnterprise: "Plan Empresarial",
-    upgradeToPro: "Actualizar a Pro",
+    planBasic: "Plan Básico (Prueba)",
+    planEsencial: "Plan Esencial",
+    planProfesional: "Plan Profesional",
+    planCrecimiento: "Plan Crecimiento",
+    upgradeToPro: "Mejorar Plan",
     status: "Estado",
     nextRenewal: "Próxima Renovación",
     posSale: "Venta POS",
@@ -596,37 +613,17 @@ const translationsEs = {
     },
   },
   pricing: {
-    title: "Planes simples y transparentes",
-    subtitle: "Pensado para kioscos, almacenes y minimercados",
-    free: "Plan Gratuito",
-    freePrice: "$0",
-    freeSubtitle: "para siempre",
-    freeDescription: "Ideal para empezar",
-    pro: "Plan Pro",
-    proPrice: "$24.990",
-    proSubtitle: "ARS/mes",
-    proDescription: "Sin límites para crecer",
-    mostPopular: "Más Popular",
-    freeFeatures: [
-      "Hasta 100 productos",
-      "Hasta 2 usuarios",
-      "Punto de venta completo",
-      "Control de caja",
-      "Reportes básicos",
-      "Stock básico",
-    ],
-    proFeatures: [
-      "Productos ilimitados",
-      "Usuarios ilimitados",
-      "Todo lo del plan gratuito",
-      "Gestión de clientes",
-      "Ventas a crédito (fiado)",
-      "Gestión de gastos",
-      "Reportes avanzados",
-      "Soporte prioritario",
-    ],
+    title: "Planes en ARS",
+    subtitle: "Elegí el nivel de potencia que tu comercio necesita",
+    essential: "Plan Esencial",
+    essentialPrice: "$14.999",
+    pro: "Plan Profesional",
+    proPrice: "$29.999",
+    growth: "Plan Crecimiento",
+    growthPrice: "$54.999",
+    mostPopular: "Recomendado",
     startFree: "Empezar Gratis",
-    tryFree: "Probar 14 días gratis",
+    tryFree: "Pruebalo Gratis",
   },
   subscriptionProModal: {
     titlePrefix: "Suscripción -",
@@ -1240,79 +1237,115 @@ const translationsEs = {
   },
   featuresPage: {
     hero: {
-      eyebrow: "Funcionalidades",
-      title: "Todo lo que necesitas para profesionalizar tu retail",
-      subtitle: "Una plataforma simple, lista para facturación fiscal y diseñada para crecer junto a tu empresa.",
+      eyebrow: "Producto",
+      title: "Toda la potencia de VentaPlus en una sola plataforma",
+      subtitle: "Gestioná cada aspecto de tu retail con módulos integrados y diseñados para la velocidad.",
       primaryCta: "Empezar ahora",
-      secondaryCta: "Ver precios"
+      secondaryCta: "Ver planes"
     },
     sections: [
       {
         id: "pos",
-        title: "Punto de Venta Optimizado para Venta en Mostrador",
-        description: "Ventas rápidas, flujo ágil, diseñado para trabajar con teclado y escáner de códigos de barras.",
+        title: "Punto de Venta (POS)",
+        description: "Optimizado para la velocidad en mostrador. Compatible con teclado numérico y escáner de códigos de barras.",
         image: "/images/new-features/new images/spanish/spanish POS page.png",
         items: [
-          "Compatible con teclado numérico",
-          "Integración con escáner de códigos de barras",
-          "Ideal para horas pico",
-          "Interfaz clara y organizada"
+          "Atajos de teclado para máxima velocidad",
+          "Búsqueda instantánea de productos",
+          "Soporte para múltiples medios de pago",
+          "Tickets y facturas en segundos"
         ]
       },
       {
         id: "reports",
-        title: "Control Diario de Ventas y Márgenes",
-        description: "Visualizá ingresos, gastos y ganancias en tiempo real con reportes automáticos.",
+        title: "Control de Ventas y Ganancias",
+        description: "Visualizá tus márgenes de ganancia y ventas diarias de forma clara y automática.",
         image: "/images/new-features/new images/spanish/spanish Reports Page.png",
         items: [
-          "Resumen diario automático",
-          "Control de caja integral",
-          "Reportes simples para contabilidad",
-          "Información clara para decidir"
+          "Cálculo de rentabilidad automática",
+          "Reportes de ventas por período",
+          "Control de arqueos de caja",
+          "Estadísticas de productos más vendidos"
         ]
       },
       {
         id: "inventory",
-        title: "Inventario Actualizado Automáticamente",
-        description: "Cada venta impacta en el stock sin procesos manuales pesados.",
-        image: "/images/new-features/new images/spanish/spanish Product Management.png",
+        title: "Gestión Automática de Inventario",
+        description: "Cada venta descuenta stock automáticamente. Olvida las planillas manuales.",
+        image: "/images/new-features/new images/spanish/spanish Category Management.png",
         items: [
-          "Alertas de stock bajo instantáneas",
-          "Movimientos registrados con detalle",
-          "Control total a nivel de producto",
-          "Historial completo de trazabilidad"
+          "Alertas de stock crítico",
+          "Actualización masiva vía CSV",
+          "Categorización inteligente",
+          "Historial de movimientos"
+        ]
+      },
+      {
+        id: "suppliers",
+        title: "Gestión de Proveedores",
+        description: "Centralizá tus compras y mantené un registro de cuentas corrientes con tus proveedores.",
+        image: "/images/new-features/new images/spanish/spanish Supplier Management.png",
+        items: [
+          "Directorio de proveedores completo",
+          "Registro de facturas de compra",
+          "Aviso de vencimientos de facturas",
+          "Historial de precios de compra"
+        ]
+      },
+      {
+        id: "expenses",
+        title: "Control de Gastos",
+        description: "Registrá tus costos operativos y gastos fijos para un balance neto real.",
+        image: "/images/new-features/new images/spanish/spanish expenses.png",
+        items: [
+          "Categorización de gastos",
+          "Impacto directo en ganancias",
+          "Adjunto de comprobantes",
+          "Reporte de gastos mensuales"
         ]
       },
       {
         id: "fiscal",
-        title: "Facturación Electrónica ARCA Integrada",
-        description: "Emití facturas legales y cumplí con ARCA sin aplicaciones externas.",
+        title: "Facturación Electrónica ARCA",
+        description: "Emisión de comprobantes fiscales A, B y C directamente conectados con AFIP.",
         image: "/images/new-features/new images/spanish/spanish Fiscal Reports - VAT.png",
         items: [
-          "Factura A, B y C integradas",
-          "Notas de crédito automáticas",
-          "Reportes impositivos para tu contador",
-          "Sincronización directa y segura"
+          "Obtención de CAE instantánea",
+          "Notas de Crédito y Débito",
+          "Configuración simple de certificados",
+          "Exportación para Libro IVA Digital"
+        ]
+      },
+      {
+        id: "security",
+        title: "Roles y Seguridad",
+        description: "Asigná permisos específicos para cajeros, administradores y dueños.",
+        image: "/images/new-features/new images/spanish/spanish User Management.png",
+        items: [
+          "Roles personalizables",
+          "Historial de acciones por usuario",
+          "Restricción de funciones críticas",
+          "Acceso seguro desde cualquier lugar"
         ]
       }
     ],
     otherFeatures: {
-      title: "Más herramientas para tu crecimiento",
+      title: "Diseñado para el comercio real",
       items: [
         { 
-          title: "Proveedores y Mercadería", 
-          description: "Registros de compras, seguimiento de pagos e historial completo de proveedores.", 
-          icon: "truck" 
+          title: "Soporte WhatsApp", 
+          description: "Atención dedicada para resolver tus dudas rápidamente.", 
+          icon: "phone" 
         },
         { 
-          title: "Control de Gastos Integrado", 
-          description: "Registro simple, categorización clara e impacto directo en tus reportes de utilidad.", 
-          icon: "trending-down" 
+          title: "Sin Instalaciones", 
+          description: "Accedé desde cualquier navegador sin configuraciones complejas.", 
+          icon: "cloud" 
         },
         { 
-          title: "Control de Usuarios y Acceso", 
-          description: "Roles y permisos detallados, protección de datos y actualizaciones automáticas.", 
-          icon: "lock" 
+          title: "Estado del Servicio", 
+          description: "Seguimiento en tiempo real de la conectividad con ARCA.", 
+          icon: "activity" 
         }
       ]
     }
@@ -1808,61 +1841,61 @@ const translationsEn = {
     hero: {
       badge: "⭐ The system your business needs",
       titleMain: "The technological foundation to",
-      titleHighlight: "grow your retail business",
+      titleHighlight: "grow your business",
       titleLines: [
         "The technological",
         "foundation to grow",
-        "your retail business",
+        "your business",
       ],
       titleHighlightIndex: 2,
       description:
-        "Fast counter sales, daily profit control, and integrated ARCA electronic invoicing. Designed to professionalize your business and prepare it for scaling.",
-      primaryCta: "See the system in action",
-      secondaryCta: "Start for free",
+        "Fast sales, daily control, and integrated electronic invoicing in one simple and modern system.",
+      primaryCta: "Get Started",
+      secondaryCta: "See How It Works",
     },
     modules: {
       module1: {
-        title: "Point of Sale Optimized for Counter Sales",
+        title: "Supermarket-level speed",
         description: "Fast sales, agile workflow, designed to work with keyboard and barcode scanner.",
         image: "/images/new-features/new images/eng/eng POS page.png",
         features: [
-          "Numeric keypad compatible",
-          "Barcode scanner integration",
+          "Keyboard optimized",
+          "Barcode scanning integration",
           "Ideal for peak hours",
-          "Clear and organized interface"
+          "Organized interface"
         ]
       },
       module2: {
-        title: "Daily Sales and Margin Control",
+        title: "Daily sales and cash control",
         description: "View revenue, expenses, and profits in real-time with automated summaries.",
         image: "/images/new-features/new images/eng/eng Reports Page.png",
         features: [
           "Automatic daily summary",
-          "Cash register control",
-          "Simple reports for accounting",
-          "Clear information for decision-making"
+          "Complete cash control",
+          "Clear profit margins",
+          "Fast daily close"
         ]
       },
       module3: {
-        title: "Automatically Updated Inventory",
-        description: "Every sale impacts inventory without manual processes or extra steps.",
+        title: "Full business organization",
+        description: "Complete management of stock, suppliers, and expenses in one single platform.",
         image: "/images/new-features/new images/eng/eng Product Management.png",
         features: [
-          "Real-time low stock alerts",
-          "Recorded stock movements",
-          "Product-level precision control",
-          "Complete inventory history"
+          "Automated inventory",
+          "Supplier management",
+          "Expense tracking",
+          "Low stock alerts"
         ]
       },
       module4: {
-        title: "Integrated ARCA Electronic Invoicing",
-        description: "Issue fiscal documents and comply with regulations directly from the POS.",
+        title: "ARCA electronic invoicing",
+        description: "Issue fiscal documents (Invoice A, B, C) integrated directly with AFIP/ARCA.",
         image: "/images/new-features/new images/eng/eng Fiscal Reports - VAT.png",
         features: [
-          "Invoice A, B, and C support",
-          "Integrated Credit Notes",
-          "Fiscal reports for your accountant",
-          "Ready for professional accounting"
+          "Native ARCA integration",
+          "Automatic credit notes",
+          "Tax records ready",
+          "Guaranteed legal compliance"
         ]
       }
     },
@@ -1875,78 +1908,94 @@ const translationsEn = {
     cta: {
       title: "Ready to operate at the counter",
       subtitle:
-        "Designed for kiosks, small retail and counter service where speed matters.",
+        "Designed for kiosks, convenience stores and counter service where speed matters.",
       startFreeNow: "Start Free Now →",
       noCard: "No credit card required • 2-minute setup",
     },
     promoCta: {
-      eyebrow: "Prices frozen",
-      title: "All plans locked for your first 3 months",
-      subtitle: "Start with every module enabled and scale at the same price.",
-      primaryCta: "Start free trial",
+      eyebrow: "Transparent pricing",
+      title: "Plans designed for every stage of your business",
+      subtitle: "Professionalize your management with VentaPlus starting today.",
+      primaryCta: "View plans",
     },
     pricingSection: {
-      title: "We’re freezing your first 3 months with VentaPlus",
+      title: "Simple and scalable plans",
       subtitle:
-        "Keep every module unlocked while you scale sales, stock, purchases, and fiscal operations with confidence.",
-      billingTitle: "Choose your billing cycle",
+        "Choose the plan that best fits your business size. All prices in Argentine Pesos (ARS).",
+      billingTitle: "Billing cycle",
       billingMonthly: "Monthly",
       billingAnnual: "Annual",
-      billingSavings: "Save up to 15% with annual billing",
-      mostPopular: "Most popular",
-      cta: "Start free trial",
+      billingSavings: "Save with annual payment",
+      mostPopular: "Recommended",
+      cta: "Get Started Now",
       plans: [
         {
-          name: "Free",
-          monthly: "$0",
-          annual: "$0",
+          name: "Essential",
+          monthly: "$14,999",
+          annual: "$12,999",
           caption: "ARS per month",
-          usage: "Up to 100 products, 2 users",
+          usage: "1 user • Up to 500 products",
           features: [
-            "POS system + code scanning",
-            "Basic cash control",
-            "Stock management",
-            "Basic reports",
-            "Custom keyboard",
+            "Point of Sale (POS)",
+            "Basic stock control",
+            "Expense management",
+            "No ARCA invoicing",
           ],
         },
         {
-          name: "Pro",
-          monthly: "$24,990",
-          annual: "$21,900",
+          name: "Professional",
+          monthly: "$29,999",
+          annual: "$25,999",
           caption: "ARS per month",
-          usage: "Unlimited products and users",
+          usage: "Up to 3 users • Up to 3,000 products",
           features: [
-            "Multiple payment methods",
-            "Credit sales and discounts",
-            "Cash audits and withdrawals",
-            "Advanced reports + exports",
-            "Fiscal integrations",
+            "ARCA invoicing included",
+            "Credit notes",
+            "Supplier management",
+            "Customer accounts (Credit)",
           ],
           featured: true,
+        },
+        {
+          name: "Growth",
+          monthly: "$54,999",
+          annual: "$46,999",
+          caption: "ARS per month",
+          usage: "Up to 10 users • Up to 10,000 products",
+          features: [
+            "Advanced reports",
+            "Priority support",
+            "Multi-warehouse",
+            "Initial training",
+          ],
         },
       ],
     },
     supportSection: {
       eyebrow: "Support",
-      title: "Our entire team at your service",
+      title: "We're here to help you grow",
       subtitle:
-        "VentaPlus combines expert onboarding, responsive support, and proactive guidance so your team never feels alone.",
+        "VentaPlus offers multiple support channels so your business never stops.",
       items: [
         {
-          title: "Real humans when you need them",
+          title: "Help Center with Search",
           description:
-            "From onboarding to daily operations, our specialists are available by chat and email to keep you moving.",
+            "Detailed guides and step-by-step tutorials to master every system feature.",
         },
         {
-          title: "Fast answers, clear guidance",
+          title: "Dedicated WhatsApp Business",
           description:
-            "Get instant help with workflows, integrations, and fiscal setup so your team stays productive.",
+            "Fast and direct support through our official WhatsApp line.",
         },
         {
-          title: "Support that scales with you",
+          title: "Email and Contact Form",
           description:
-            "Priority assistance and success check-ins help you grow confidently as your operation expands.",
+            "Personalized attention for administrative and technical inquiries 24/7.",
+        },
+        {
+          title: "System Status",
+          description:
+            "Real-time monitoring of ARCA connectivity and platform stability.",
         },
       ],
     },
@@ -2127,10 +2176,11 @@ const translationsEn = {
   dashboard: {
     welcome: "Welcome",
     currentPlan: "Your current plan",
-    planBasic: "Basic Plan",
-    planProfessional: "Professional Plan",
-    planEnterprise: "Enterprise Plan",
-    upgradeToPro: "Upgrade to Pro",
+    planBasic: "Basic Plan (Trial)",
+    planEsencial: "Essential Plan",
+    planProfesional: "Professional Plan",
+    planCrecimiento: "Growth Plan",
+    upgradeToPro: "Upgrade Plan",
     status: "Status",
     nextRenewal: "Next Renewal",
     posSale: "POS Sale",
@@ -2265,37 +2315,17 @@ const translationsEn = {
     },
   },
   pricing: {
-    title: "Simple and transparent plans",
-    subtitle: "Built for kiosks, convenience stores, and minimarkets",
-    free: "Free Plan",
-    freePrice: "$0",
-    freeSubtitle: "forever",
-    freeDescription: "Perfect to get started",
-    pro: "Pro Plan",
-    proPrice: "$24.990",
-    proSubtitle: "ARS/month",
-    proDescription: "Unlimited to grow",
-    mostPopular: "Most Popular",
-    freeFeatures: [
-      "Up to 100 products",
-      "Up to 2 users",
-      "Complete point of sale",
-      "Cash register control",
-      "Basic reports",
-      "Basic stock",
-    ],
-    proFeatures: [
-      "Unlimited products",
-      "Unlimited users",
-      "Everything from free plan",
-      "Customer management",
-      "Credit sales",
-      "Expense management",
-      "Advanced reports",
-      "Priority support",
-    ],
+    title: "Pricing in ARS",
+    subtitle: "Choose the level of power your business needs",
+    essential: "Essential Plan",
+    essentialPrice: "$14,999",
+    pro: "Professional Plan",
+    proPrice: "$29,999",
+    growth: "Growth Plan",
+    growthPrice: "$54,999",
+    mostPopular: "Recommended",
     startFree: "Start Free",
-    tryFree: "Try 14 days free",
+    tryFree: "Try for Free",
   },
   subscriptionProModal: {
     titlePrefix: "Subscription -",
@@ -2898,79 +2928,115 @@ const translationsEn = {
   },
   featuresPage: {
     hero: {
-      eyebrow: "Features",
-      title: "Everything you need to professionalize your retail business",
-      subtitle: "A simple, fiscal-ready platform designed to grow with your company.",
-      primaryCta: "Start now",
-      secondaryCta: "View pricing"
+      eyebrow: "Product",
+      title: "The full power of VentaPlus in one platform",
+      subtitle: "Manage every aspect of your retail business with modules built for speed and growth.",
+      primaryCta: "Start Now",
+      secondaryCta: "View Plans"
     },
     sections: [
       {
         id: "pos",
-        title: "Point of Sale Optimized for Counter Sales",
-        description: "Fast sales, agile workflow, designed to work with keyboard and barcode scanner.",
+        title: "Point of Sale (POS)",
+        description: "Optimized for counter speed. Compatible with numeric keypad and barcode scanners.",
         image: "/images/new-features/new images/eng/eng POS page.png",
         items: [
-          "Numeric keypad compatible",
-          "Barcode scanner integration",
-          "Ideal for peak hours",
-          "Clear and organized interface"
+          "Keyboard shortcuts for maximum speed",
+          "Instant product search",
+          "Multiple payment method support",
+          "Tickets and invoices in seconds"
         ]
       },
       {
         id: "reports",
-        title: "Daily Sales and Margin Control",
-        description: "View revenue, expenses, and profits in real-time with automated summaries.",
+        title: "Sales & Profit Control",
+        description: "Visualize profit margins and daily sales clearly and automatically.",
         image: "/images/new-features/new images/eng/eng Reports Page.png",
         items: [
-          "Automatic daily summary",
-          "Cash register control",
-          "Simple reports for accounting",
-          "Clear information for decision-making"
+          "Automatic profitability calculation",
+          "Sales reports by period",
+          "Cash audit controls",
+          "Best-selling product statistics"
         ]
       },
       {
         id: "inventory",
-        title: "Automatically Updated Inventory",
-        description: "Every sale impacts inventory without manual processes or extra steps.",
-        image: "/images/new-features/new images/eng/eng Product Management.png",
+        title: "Automatic Inventory Management",
+        description: "Every sale automatically deducts stock. Forget about manual spreadsheets.",
+        image: "/images/new-features/new images/eng/eng Stock report.png",
         items: [
-          "Real-time low stock alerts",
-          "Recorded stock movements",
-          "Product-level precision control",
-          "Complete inventory history"
+          "Critical stock alerts",
+          "Bulk update via CSV",
+          "Smart categorization",
+          "Movement history"
+        ]
+      },
+      {
+        id: "suppliers",
+        title: "Supplier Management",
+        description: "Centralize your purchases and keep a record of debts with your suppliers.",
+        image: "/images/new-features/new images/eng/eng Supplier Management.png",
+        items: [
+          "Complete supplier directory",
+          "Purchase invoice records",
+          "Invoice due date alerts",
+          "Purchase price history"
+        ]
+      },
+      {
+        id: "expenses",
+        title: "Expense Tracking",
+        description: "Register your operating costs and fixed expenses for a real net balance.",
+        image: "/images/new-features/new images/eng/eng expenses.png",
+        items: [
+          "Expense categorization",
+          "Direct impact on profits",
+          "Receipt attachments",
+          "Monthly expense reports"
         ]
       },
       {
         id: "fiscal",
-        title: "Integrated ARCA Electronic Invoicing",
-        description: "Issue fiscal documents and comply with regulations directly from the POS.",
+        title: "ARCA Electronic Invoicing",
+        description: "Issue fiscal invoices (A, B, C) directly connected with AFIP.",
         image: "/images/new-features/new images/eng/eng Fiscal Reports - VAT.png",
         items: [
-          "Invoice A, B, and C support",
-          "Integrated Credit Notes",
-          "Fiscal reports for your accountant",
-          "Ready for professional accounting"
+          "Instant CAE acquisition",
+          "Credit and Debit Notes",
+          "Simple certificate setup",
+          "Exporter for Digital IVA Book"
+        ]
+      },
+      {
+        id: "security",
+        title: "Roles & Security",
+        description: "Assign specific permissions for cashiers, admins, and owners.",
+        image: "/images/new-features/new images/eng/eng User Management.png",
+        items: [
+          "Customizable roles",
+          "Action history per user",
+          "Critical function restriction",
+          "Secure access from anywhere"
         ]
       }
     ],
     otherFeatures: {
-      title: "More tools for your growth",
+      title: "Built for real-world retail",
       items: [
         { 
-          title: "Supplier & Merchandise Organization", 
-          description: "Purchase records, payment tracking, and detailed supplier history.", 
-          icon: "truck" 
+          title: "WhatsApp Support", 
+          description: "Dedicated attention to resolve your doubts quickly.", 
+          icon: "phone" 
         },
         { 
-          title: "Integrated Expense Control", 
-          description: "Simple registration, clear categorization, and direct impact on profit reports.", 
-          icon: "trending-down" 
+          title: "Zero Installation", 
+          description: "Access from any browser with no complex setup.", 
+          icon: "cloud" 
         },
         { 
-          title: "User Control & Secure Access", 
-          description: "Roles and permissions, data protection, and automatic system updates.", 
-          icon: "lock" 
+          title: "Service Status", 
+          description: "Real-time tracking of ARCA connectivity.", 
+          icon: "activity" 
         }
       ]
     }
@@ -3543,44 +3609,55 @@ const translationsPt = {
       primaryCta: "Começar teste grátis",
     },
     pricingSection: {
-      title: "Congelamos seus primeiros 3 meses com a VentaPlus",
+      title: "Planos simples e escaláveis",
       subtitle:
-        "Mantenha todos os módulos liberados enquanto você escala vendas, estoque, compras e operações fiscais com confiança.",
-      billingTitle: "Escolha seu ciclo de cobrança",
+        "Escolha o plano que melhor se adapta ao tamanho do seu negócio. Todos os preços em Pesos Argentinos (ARS).",
+      billingTitle: "Ciclo de faturamento",
       billingMonthly: "Mensal",
       billingAnnual: "Anual",
-      billingSavings: "Economize até 15% com cobrança anual",
-      mostPopular: "Mais popular",
-      cta: "Começar teste grátis",
+      billingSavings: "Economize com o pagamento anual",
+      mostPopular: "Recomendado",
+      cta: "Começar agora",
       plans: [
         {
-          name: "Grátis",
-          monthly: "$0",
-          annual: "$0",
+          name: "Essencial",
+          monthly: "$14.999",
+          annual: "$12.999",
           caption: "ARS por mês",
-          usage: "Até 100 produtos, 2 usuários",
+          usage: "1 usuário • Até 500 produtos",
           features: [
-            "Sistema POS + leitura de códigos",
-            "Controle básico de caixa",
-            "Gestão de estoque",
-            "Relatórios básicos",
-            "Teclado personalizado",
+            "Ponto de Venda (PDV)",
+            "Controle de estoque básico",
+            "Gestão de despesas",
+            "Sem faturamento ARCA",
           ],
         },
         {
-          name: "Pro",
-          monthly: "$24.990",
-          annual: "$21.900",
+          name: "Profissional",
+          monthly: "$29.999",
+          annual: "$25.999",
           caption: "ARS por mês",
-          usage: "Produtos e usuários ilimitados",
+          usage: "Até 3 usuários • Até 3.000 produtos",
           features: [
-            "Múltiplos meios de pagamento",
-            "Vendas a crédito e descontos",
-            "Auditorias e retiradas de caixa",
-            "Relatórios avançados + exportações",
-            "Integrações fiscais",
+            "Faturamento ARCA incluído",
+            "Notas de Crédito",
+            "Gestão de Fornecedores",
+            "Contas Correntes (Fiado)",
           ],
           featured: true,
+        },
+        {
+          name: "Crescimento",
+          monthly: "$54.999",
+          annual: "$46.999",
+          caption: "ARS por mês",
+          usage: "Até 10 usuários • Até 10.000 produtos",
+          features: [
+            "Relatórios avançados",
+            "Suporte Prioritário",
+            "Multi-depósito",
+            "Treinamento inicial",
+          ],
         },
       ],
     },
@@ -3785,10 +3862,11 @@ const translationsPt = {
   dashboard: {
     welcome: "Bem-vindo",
     currentPlan: "Seu plano atual",
-    planBasic: "Plano Básico",
-    planProfessional: "Plano Profissional",
-    planEnterprise: "Plano Empresarial",
-    upgradeToPro: "Atualizar para Pro",
+    planBasic: "Plano Básico (Teste)",
+    planEsencial: "Plano Essencial",
+    planProfesional: "Plano Profissional",
+    planCrecimiento: "Plano Crescimento",
+    upgradeToPro: "Melhorar Plano",
     status: "Status",
     nextRenewal: "Próxima Renovação",
     posSale: "Venda POS",

@@ -122,7 +122,7 @@ export default function PricingPage() {
           </div>
 
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
             {plans.map((plan: any, index: number) => (
               <div
                 key={index}
@@ -175,7 +175,7 @@ export default function PricingPage() {
                 </ul>
 
                 <Link
-                  href={plan.featured ? "/auth/register?plan=pro" : "/auth/register?plan=free"}
+                  href={`/auth/register?plan=${plan.name.toLowerCase()}`}
                   className={`vp-button w-full h-16 text-lg font-black tracking-wide transition-all duration-300 rounded-2xl ${
                     plan.featured 
                       ? "vp-button-primary shadow-2xl shadow-[hsl(var(--vp-primary))/0.3] hover:scale-105" 

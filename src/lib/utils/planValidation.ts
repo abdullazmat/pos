@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import Subscription from "@/lib/models/Subscription";
-import { PLAN_FEATURES } from "@/lib/utils/planFeatures";
+import { PLAN_FEATURES, PlanType } from "@/lib/utils/planFeatures";
 
 /**
  * Check if user has exceeded a plan limit
@@ -26,10 +26,7 @@ export async function checkPlanLimit(
     }
 
     const planId = (subscription as any).planId || "BASIC";
-    const plan = (planId.toUpperCase() as
-      | "BASIC"
-      | "PROFESSIONAL"
-      | "ENTERPRISE") || "BASIC";
+    const plan = (planId.toUpperCase() as PlanType) || "BASIC";
     const planConfig = PLAN_FEATURES[plan] || PLAN_FEATURES["BASIC"];
 
     const limit = planConfig[limitType];
@@ -65,10 +62,7 @@ export async function checkPlanFeature(
     }
 
     const planId = (subscription as any).planId || "BASIC";
-    const plan = (planId.toUpperCase() as
-      | "BASIC"
-      | "PROFESSIONAL"
-      | "ENTERPRISE") || "BASIC";
+    const plan = (planId.toUpperCase() as PlanType) || "BASIC";
     const planConfig = PLAN_FEATURES[plan] || PLAN_FEATURES["BASIC"];
 
     const hasFeature = planConfig.features[feature] || false;
@@ -85,6 +79,7 @@ export async function checkPlanFeature(
     return { allowed: true, message: "Could not verify feature" };
   }
 }
+
 
 /**
  * Response helper for plan-blocked actions

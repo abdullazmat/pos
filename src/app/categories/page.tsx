@@ -8,7 +8,7 @@ import Header from "@/components/layout/Header";
 import { toast as notify } from "react-toastify";
 import { Edit2, Lock, Plus, Tag, Trash2, X } from "lucide-react";
 import { LimitReachedPrompt } from "@/components/common/UpgradePrompt";
-import { PLAN_FEATURES, isLimitReached } from "@/lib/utils/planFeatures";
+import { PLAN_FEATURES, isLimitReached, PlanType } from "@/lib/utils/planFeatures";
 
 export default function CategoriesPage() {
   const router = useRouter();
@@ -102,17 +102,28 @@ export default function CategoriesPage() {
     loadSubscription();
   }, [router, mounted]);
 
-  const currentPlan: "BASIC" | "PROFESSIONAL" | "ENTERPRISE" =
-    subscription?.planId?.toUpperCase() === "PROFESSIONAL"
-      ? "PROFESSIONAL"
-      : subscription?.planId?.toUpperCase() === "ENTERPRISE"
-        ? "ENTERPRISE"
-        : "BASIC";
-  const planConfig = PLAN_FEATURES[currentPlan];
+  const currentPlan: PlanType = (subscription?.planId?.toUpperCase() as PlanType) || "BASIC";
+
+  const planConfig = PLAN_FEATURES[currentPlan] || PLAN_FEATURES.BASIC;
   const planNameMap: Record<string, Record<string, string>> = {
-    es: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
-    en: { BASIC: "Free", PROFESSIONAL: "Pro", ENTERPRISE: "Enterprise" },
-    pt: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
+    es: { 
+      BASIC: "Gratuito", 
+      ESENCIAL: "Esencial", 
+      PROFESIONAL: "Profesional", 
+      CRECIMIENTO: "Crecimiento" 
+    },
+    en: { 
+      BASIC: "Free", 
+      ESENCIAL: "Essential", 
+      PROFESIONAL: "Professional", 
+      CRECIMIENTO: "Growth" 
+    },
+    pt: { 
+      BASIC: "Gratuito", 
+      ESENCIAL: "Essencial", 
+      PROFESIONAL: "Profissional", 
+      CRECIMIENTO: "Crescimento" 
+    },
   };
   const planName =
     planNameMap[currentLanguage]?.[currentPlan] || planNameMap.en[currentPlan];

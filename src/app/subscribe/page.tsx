@@ -28,7 +28,7 @@ export default function SubscriptionPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [plans, setPlans] = useState<PlanConfig[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<string>("PROFESSIONAL");
+  const [selectedPlan, setSelectedPlan] = useState<string>("PROFESIONAL");
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

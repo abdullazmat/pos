@@ -580,8 +580,10 @@ export default function BusinessConfigPage() {
     const normalized = (planId || "").toUpperCase();
 
     if (normalized === "FREE") return "BASIC";
-    if (normalized === "PRO") return "PROFESSIONAL";
-    if (normalized === "PREMIUM") return "ENTERPRISE";
+    if (normalized === "PRO") return "PROFESIONAL";
+    if (normalized === "PREMIUM") return "CRECIMIENTO";
+    if (normalized === "PROFESSIONAL") return "PROFESIONAL";
+    if (normalized === "ENTERPRISE") return "CRECIMIENTO";
 
     return normalized;
   };
@@ -590,7 +592,10 @@ export default function BusinessConfigPage() {
     const normalizedPlanId = normalizePlanId(currentSubscription?.planId);
     if (currentSubscription?.features?.customBranding) return true;
     return (
-      normalizedPlanId === "PROFESSIONAL" || normalizedPlanId === "ENTERPRISE"
+      normalizedPlanId === "PROFESIONAL" || 
+      normalizedPlanId === "CRECIMIENTO" ||
+      normalizedPlanId === "PROFESSIONAL" || 
+      normalizedPlanId === "ENTERPRISE"
     );
   })();
 
@@ -645,66 +650,28 @@ export default function BusinessConfigPage() {
     const plan = plans.find((p) => p.id === planId);
     if (!plan) return;
 
-    const planNameLower = plan.name.toLowerCase();
-
     if (isCurrentPlanSelected(plan)) {
       toast.info(copy.messages.alreadySubscribed);
       return;
     }
 
-    // Show modal for Free plan
-    if (planNameLower === "free" || planNameLower === "gratuito") {
+    // Show modal for paid plans (any plan with price > 0)
+    if (plan.price > 0) {
       setSelectedPlanForModal(plan);
-      setShowFreePlanModal(true);
-      return;
-    }
-
-    // Show modal for Pro plan
-    if (planNameLower === "pro") {
-      setSelectedPlanForModal(plan);
-      setShowSubscriptionModal(true);
-      return;
-    }
-
-    // Show modal for Premium plan
-    if (planNameLower === "premium") {
-      setSelectedPlanForModal(plan);
-      setShowPremiumModal(true);
-      return;
-    }
-
-    // For other plans, proceed directly
-    setSubscribing(true);
-    try {
-      const resolvedPlanId = resolveSubscriptionPlanId(plan);
-      if (!resolvedPlanId) {
-        toast.error(copy.messages.subscriptionError);
-        return;
-      }
-
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch("/api/subscription/upgrade", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ planId: resolvedPlanId }),
-      });
-
-      if (response.ok) {
-        toast.success(copy.messages.subscriptionUpdated(plan?.name || ""));
-        fetchSubscription();
+      
+      // Use Premium modal for Growth plan, Pro modal for others
+      if (plan.id === "CRECIMIENTO") {
+        setShowPremiumModal(true);
       } else {
-        const data = await response.json();
-        toast.error(data.error || copy.messages.subscriptionError);
+        setShowSubscriptionModal(true);
       }
-    } catch (error) {
-      console.error("Error subscribing:", error);
-      toast.error(copy.messages.subscriptionError);
-    } finally {
-      setSubscribing(false);
+      return;
     }
+
+    // Default to Free/Basic modal
+    setSelectedPlanForModal(plan);
+    setShowFreePlanModal(true);
+    return;
   };
 
   const handleSubscriptionConfirm = async (billingData: any) => {

@@ -2,8 +2,9 @@ import { Schema, model, Document, models } from "mongoose";
 
 export enum SubscriptionPlan {
   BASIC = "BASIC",
-  PROFESSIONAL = "PROFESSIONAL",
-  ENTERPRISE = "ENTERPRISE",
+  ESENCIAL = "ESENCIAL",
+  PROFESIONAL = "PROFESIONAL",
+  CRECIMIENTO = "CRECIMIENTO",
 }
 
 export interface ISubscription extends Document {

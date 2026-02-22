@@ -86,13 +86,15 @@ export default function Dashboard() {
     );
   }
 
-  const isPremium = subscription?.isPremium || false;
+  const isPremium = subscription?.planId && subscription.planId !== "BASIC";
   const planName =
-    subscription?.planId === "PROFESSIONAL"
-      ? String(t("planProfessional", "dashboard"))
-      : subscription?.planId === "ENTERPRISE"
-        ? String(t("planEnterprise", "dashboard"))
-        : String(t("planBasic", "dashboard"));
+    subscription?.planId === "ESENCIAL"
+      ? String(t("planEsencial", "dashboard")) 
+      : subscription?.planId === "PROFESIONAL"
+        ? String(t("planProfesional", "dashboard"))
+        : subscription?.planId === "CRECIMIENTO"
+          ? String(t("planCrecimiento", "dashboard"))
+          : String(t("planBasic", "dashboard"));
 
   const nextRenewalDate = subscription?.currentPeriodEnd
     ? new Date(subscription.currentPeriodEnd)

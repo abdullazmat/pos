@@ -1,9 +1,9 @@
 "use client";
 
 import { useLanguage } from "@/lib/context/LanguageContext";
-import { MessageSquareIcon, HeadsetIcon, StarIcon, CheckCircle2Icon } from "lucide-react";
+import { MessageSquareIcon, HeadsetIcon, StarIcon, CheckCircle2Icon, ActivityIcon } from "lucide-react";
 
-const SUPPORT_ICONS = [MessageSquareIcon, HeadsetIcon, StarIcon];
+const SUPPORT_ICONS = [MessageSquareIcon, HeadsetIcon, StarIcon, ActivityIcon];
 
 export default function SupportSection() {
   const { t } = useLanguage();
@@ -37,7 +37,7 @@ export default function SupportSection() {
             </p>
           </div>
 
-          <div className="grid gap-6">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
             {content?.items?.map((item, index) => {
               const Icon = SUPPORT_ICONS[index] || MessageSquareIcon;
               return (

@@ -21,7 +21,7 @@ import {
   UpgradePrompt,
   LimitReachedPrompt,
 } from "@/components/common/UpgradePrompt";
-import { PLAN_FEATURES, isLimitReached } from "@/lib/utils/planFeatures";
+import { PLAN_FEATURES, isLimitReached, PlanType } from "@/lib/utils/planFeatures";
 
 interface Supplier {
   _id: string;
@@ -381,13 +381,8 @@ export default function SuppliersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const currentPlan: "BASIC" | "PROFESSIONAL" | "ENTERPRISE" =
-      subscription?.planId?.toUpperCase() === "PROFESSIONAL"
-        ? "PROFESSIONAL"
-        : subscription?.planId?.toUpperCase() === "ENTERPRISE"
-          ? "ENTERPRISE"
-          : "BASIC";
-    const planConfig = PLAN_FEATURES[currentPlan];
+    const currentPlan: PlanType = (subscription?.planId?.toUpperCase() as PlanType) || "BASIC";
+    const planConfig = PLAN_FEATURES[currentPlan] || PLAN_FEATURES.BASIC;
 
     if (
       !editingId &&
@@ -665,17 +660,27 @@ export default function SuppliersPage() {
     );
   }
 
-  const currentPlan: "BASIC" | "PROFESSIONAL" | "ENTERPRISE" =
-    subscription?.planId?.toUpperCase() === "PROFESSIONAL"
-      ? "PROFESSIONAL"
-      : subscription?.planId?.toUpperCase() === "ENTERPRISE"
-        ? "ENTERPRISE"
-        : "BASIC";
-  const planConfig = PLAN_FEATURES[currentPlan];
+  const currentPlan: PlanType = (subscription?.planId?.toUpperCase() as PlanType) || "BASIC";
+  const planConfig = PLAN_FEATURES[currentPlan] || PLAN_FEATURES.BASIC;
   const planNameMap: Record<string, Record<string, string>> = {
-    es: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
-    en: { BASIC: "Free", PROFESSIONAL: "Pro", ENTERPRISE: "Enterprise" },
-    pt: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
+    es: { 
+      BASIC: "Gratuito", 
+      ESENCIAL: "Esencial", 
+      PROFESIONAL: "Profesional", 
+      CRECIMIENTO: "Crecimiento" 
+    },
+    en: { 
+      BASIC: "Free", 
+      ESENCIAL: "Essential", 
+      PROFESIONAL: "Professional", 
+      CRECIMIENTO: "Growth" 
+    },
+    pt: { 
+      BASIC: "Gratuito", 
+      ESENCIAL: "Essencial", 
+      PROFESIONAL: "Profissional", 
+      CRECIMIENTO: "Crescimento" 
+    },
   };
   const planName =
     planNameMap[currentLanguage]?.[currentPlan] || planNameMap.en[currentPlan];
