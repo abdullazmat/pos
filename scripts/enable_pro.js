@@ -76,7 +76,7 @@ async function main() {
   const subscription = await Subscription.findOneAndUpdate(
     { businessId: user.businessId },
     {
-      planId: "PROFESSIONAL",
+      planId: "PROFESIONAL",
       status: "active",
       provider: "mercado_pago",
       currentPeriodStart: now,

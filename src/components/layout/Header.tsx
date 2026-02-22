@@ -123,6 +123,11 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
       label: t("nav.paymentOrders", "pos"),
       icon: Receipt,
     },
+    {
+      href: "/purchase-orders",
+      label: t("nav.purchaseOrders", "pos"),
+      icon: ShoppingCart,
+    },
   ];
 
   const adminNavItems = [
@@ -167,18 +172,21 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
   const planLabelMap: Record<string, Record<string, string>> = {
     es: {
       BASIC: "Gratuito",
-      PROFESSIONAL: "Pro",
-      ENTERPRISE: "Empresarial",
+      ESENCIAL: "Esencial",
+      PROFESIONAL: "Pro",
+      CRECIMIENTO: "Empresarial",
     },
     en: {
       BASIC: "Free",
-      PROFESSIONAL: "Pro",
-      ENTERPRISE: "Enterprise",
+      ESENCIAL: "Essential",
+      PROFESIONAL: "Pro",
+      CRECIMIENTO: "Enterprise",
     },
     pt: {
       BASIC: "Gratuito",
-      PROFESSIONAL: "Pro",
-      ENTERPRISE: "Empresarial",
+      ESENCIAL: "Essencial",
+      PROFESIONAL: "Pro",
+      CRECIMIENTO: "Empresarial",
     },
   };
   const planInfo = {

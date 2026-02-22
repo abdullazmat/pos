@@ -107,7 +107,7 @@ export async function POST(
       });
     }
 
-    if (invoice.status === "CANCELLED" || invoice.arcaStatus === "CANCELLED") {
+    if (invoice.status === InvoiceStatus.CANCELLED) {
       return NextResponse.json(
         {
           errorCode: "CANCELLED_CANNOT_RETRY",

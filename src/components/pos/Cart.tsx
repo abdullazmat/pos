@@ -11,6 +11,7 @@ import {
   getInputMin,
   getInputPlaceholder,
 } from "@/lib/utils/decimalFormatter";
+import CrossSell from "./CrossSell";
 
 interface CartItem {
   productId: string;
@@ -34,6 +35,7 @@ interface CartProps {
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onApplyDiscount: (productId: string, discount: number) => void;
   onCheckout: (paymentMethod: string) => Promise<void>;
+  onAddProduct?: (productId: string, name: string, price: number, quantity?: number, isSoldByWeight?: boolean) => void;
   additionalPaymentMethods?: PaymentMethod[];
 }
 
@@ -43,6 +45,7 @@ export default function Cart({
   onUpdateQuantity,
   onApplyDiscount,
   onCheckout,
+  onAddProduct,
   additionalPaymentMethods = [],
 }: CartProps) {
   const { t } = useGlobalLanguage();
@@ -455,7 +458,18 @@ export default function Cart({
             </div>
           ))
         )}
+        
+
       </div>
+
+      {/* CrossSell: always visible pinned above totals */}
+      {items.length > 0 && onAddProduct && (
+        <CrossSell
+          cartProductIds={items.map(i => i.productId)}
+          onAdd={(p) => onAddProduct(p._id, p.name, p.price, undefined, p.isSoldByWeight)}
+          compact
+        />
+      )}
 
       {items.length > 0 && (
         <>

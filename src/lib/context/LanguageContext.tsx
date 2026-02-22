@@ -15,7 +15,7 @@ type Language = (typeof SUPPORTED_LANGUAGES)[number];
 interface LanguageContextType {
   currentLanguage: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string, namespace?: string) => any;
+  t: (key: string, namespace?: string, options?: Record<string, any>) => any;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
@@ -518,6 +518,12 @@ const translationsEs = {
     passwordsDoNotMatch: "Las contraseñas no coinciden",
     userAlreadyExists: "El usuario ya existe",
     invalidCredentials: "Credenciales inválidas",
+    orderNotFound: "Orden de compra no encontrada",
+    onlyDraftSent: "Solo se pueden enviar órdenes en estado borrador",
+    onlyDraftEdited: "Solo se pueden editar órdenes en estado borrador",
+    orderStatusInvalid: "Esta orden no puede recibir ítems en su estado actual",
+    orderAlreadyCancelled: "Esta orden ya ha sido recibida o cancelada",
+    itemsRequired: "Se requiere al menos un ítem",
     sessionExpired: "Tu sesión ha expirado. Por favor inicia sesión nuevamente",
     errorSaving: "Error al guardar",
     errorLoading: "Error al cargar",
@@ -703,6 +709,7 @@ const translationsEs = {
       businessConfig: "Configuración de Negocio",
       planComparison: "Comparación de Planes",
       sales: "Ventas",
+      purchaseOrders: "Órdenes de Compra",
     },
     salesPage: {
       title: "Historial de Ventas",
@@ -1202,9 +1209,9 @@ const translationsEs = {
         no: "No",
         yes: "Sí",
         fiscalQR: "QR Fiscal",
-        fiscalValidity: "Validez Fiscal",
+        fiscalValidity: "Validez fiscal",
         notValid: "No válido",
-        validBeforeArca: "Válido ante ARCA",
+        validOnceApproved: "Válido una vez aprobado",
         usage: "Uso",
         contingencyBackup: "Contingencia / Respaldo",
         finalLegalDocument: "Documento legal definitivo",
@@ -1222,6 +1229,66 @@ const translationsEs = {
         summaryCorrections: "Correcciones solo vía Nota de Crédito",
       },
     },
+    ai: {
+      common: {
+        lockedTitle: "Análisis Inteligente Bloqueado",
+        upgradeNow: "Actualizar Ahora",
+      },
+      rankings: {
+        title: "Ranking Inteligente y Análisis de Stock",
+        lockedDesc: "El ranking avanzado de productos y el análisis de estancamiento están disponibles en el Plan PRO.",
+        bestSellers: "Más Vendidos (30d)",
+        mostProfitable: "Mayor Ingreso (30d)",
+        stagnantProducts: "Productos Estancados",
+        noStagnant: "No se detectaron productos estancados.",
+        inStock: "{count} en stock",
+        noSalesThirty: "0 ventas en 30 días",
+        strategyTitle: "Estrategia Recomendada",
+        strategyDesc: "Basado en tus productos estancados, tienes aproximadamente {amount} en capital inmovilizado. Te sugerimos realizar una promoción o descuento especial para estos artículos y liberar flujo de caja.",
+        units: "uts",
+      },
+      forecast: {
+        lockedDesc: "Las proyecciones basadas en IA están disponibles exclusivamente para usuarios PRO.",
+        title: "Proyección de Ventas (IA Ligera)",
+        sevenDays: "Pronóstico 7 Días",
+        thirtyDays: "Pronóstico 30 Días",
+        trend: "Tendencia",
+        trendUp: "Alcista",
+        trendDown: "Bajista",
+        trendStable: "Estable",
+        disclaimer: "* Basado en el comportamiento de ventas de las últimas 4 semanas.",
+        howItWorksTitle: "¿Cómo funciona?",
+        howItWorksDesc: "Nuestra IA ligera analiza tus patrones de venta históricos, otorgando mayor peso a los días más recientes. Este pronóstico te ayuda a planificar tus compras y flujos de caja con mayor precisión.",
+        chartTitle: "Gráfico de Proyección y Tendencia",
+      },
+      insights: {
+        title: "IA Business Insights",
+        subtitle: "Explora oportunidades de crecimiento y alertas de stock.",
+        empty: "No se encontraron insights en este momento. Sigue vendiendo para que la IA detecte patrones.",
+        stockOutTitle: "Stock Crítico: {name}",
+        stockOutDesc: "Tu producto estrella se está agotando. Repón stock para no perder ventas.",
+        createOrder: "Crear Orden",
+        marginTitle: "Oportunidad de Margen: {name}",
+        marginDesc: "Este producto tiene un margen del {margin}%. Considera promocionarlo para aumentar ganancias.",
+        viewProduct: "Ver Producto",
+        crossSellTitle: "Sugerencia: {p1} + {p2}",
+        crossSellDesc: "Los clientes suelen comprar estos productos juntos. Crea un combo para incentivar la venta.",
+        seePromos: "Ver Promociones",
+        lockedCardTitle: "IA Business Insights",
+        lockedCardDesc: "Tus datos comerciales analizados con IA.",
+        lockedCardBadge: "PRO",
+        lockedCardTeaser: "Desbloquea análisis predictivos, alertas de stock inteligente y recomendaciones de venta para maximizar tus ganancias.",
+        lockedCardButton: "Actualizar a PRO",
+        growthTitle: "Crecimiento en Ventas",
+        growthDesc: "Tus ingresos subieron un {growth}% esta semana comparado con la anterior. ¡Buen trabajo!",
+      },
+      crossSell: {
+        title: "Sugerencias de Venta",
+        desc: "Clientes que compraron esto también llevaron...",
+        add: "Agregar",
+        loading: "Buscando sugerencias...",
+      }
+    },
     receipt: {
       date: "Fecha:",
       time: "Hora:",
@@ -1233,6 +1300,30 @@ const translationsEs = {
       paymentMethod: "Método de Pago:",
       print: "Imprimir",
       close: "Cerrar",
+    },
+  },
+  purchaseOrders: {
+    title: "Órdenes de Compra",
+    subtitle: "Gestiona tus compras con inteligencia artificial",
+    newOrder: "Nueva Orden",
+    stats: { total: "Total", draft: "Borrador", sent: "Enviada", partial: "Parcial", received: "Recibida", cancelled: "Cancelada" },
+    filters: { searchPlaceholder: "Buscar por número o proveedor...", allStatuses: "Todos los estados" },
+    table: { number: "Número", supplier: "Proveedor", date: "Fecha", status: "Estado", items: "Items", totalEst: "Total Est.", actions: "Acciones", send: "Enviar", receive: "Recibir", noOrders: "Sin órdenes de compra", noOrdersSubtitle: "Crea tu primera orden con sugerencias inteligentes", code: "Código" },
+    create: { title: "Nueva Orden de Compra", subtitle: "Usa sugerencias IA o agrega productos manualmente", generalInfo: "Información General", supplier: "Proveedor *", selectSupplier: "Seleccionar proveedor", deliveryDate: "Entrega Estimada", warehouse: "Almacén / Sucursal", warehousePlaceholder: "Sucursal Principal", notes: "Notas", notesPlaceholder: "Notas opcionales", aiSuggestions: "Sugerencias Inteligentes", coverage: "Cobertura:", days: "{count} días", generate: "Generar", analyzing: "Analizando...", suggestedProducts: "{count} productos sugeridos", addAll: "+ Agregar todos", manualAdd: "Agregar Manual", selectProduct: "Seleccionar producto", quantity: "Cantidad", cost: "Costo", add: "Agregar", summary: "Resumen", totalUnits: "Unidades", totalEstimated: "Total Estimado", createButton: "Crear Orden", unitAbr: "uds", aiPill: "IA", noSuggestions: "No se encontraron sugerencias para este proveedor.", noSuggestionsSubtitle: "Vincular productos a este proveedor o registrar más ventas ayudará a la IA.", unlinkedWarning: "Este producto no está vinculado a este proveedor.", autoLinkCheckbox: "Vincular producto al proveedor (guardar costo y lead time)" },
+    detail: { back: "Volver", orderNumber: "Orden #", receivedAt: "Recibida el", cancelledAt: "Cancelada el", finalTotal: "Total Final", requested: "Solicitado", received: "Recibido", costEst: "Costo Est.", costFinal: "Costo Final", subtotal: "Subtotal", receiveAction: "Registrar Recepción" },
+    reception: { title: "Recepción", subtitle: "Registre cantidades recibidas y costos finales", alreadyReceived: "Ya Recibido", receiveNow: "Recibir Ahora", confirm: "Confirmar Recepción" },
+    priorities: { critical: "Crítico", high: "Alto", medium: "Medio", low: "Bajo" },
+    toasts: { alreadyAdded: "Producto ya agregado", added: "{name} agregado", addedMany: "{count} productos agregados", created: "Orden de compra creada exitosamente", sent: "Orden enviada", received: "Recepción registrada exitosamente", cancelled: "Orden cancelada", error: "Error al procesar la solicitud" },
+    reasons: {
+      noStock: "⚠️ Sin stock - Reposición urgente",
+      criticalStock: "⚠️ Stock crítico ({days} días restantes)",
+      lowStock: "🔶 Stock bajo - cubrirá {days} días",
+      recommended: "📊 Reposición recomendada",
+      preventive: "✅ Reposición preventiva",
+      growingTrend: "📈 Tendencia creciente (+{percent}%)",
+      decliningTrend: "📉 Tendencia decreciente ({percent}%)",
+      dailySales: "Venta diaria: {amount} {unit}",
+      noRotation: "📦 Reposición inicial (sin ventas registradas)"
     },
   },
   featuresPage: {
@@ -1363,7 +1454,7 @@ const translationsEs = {
       features: [
         "Solicitud y asignación de CAE automática",
         "Facturas A, B y C integradas",
-        "Notas de crédito y débito fiscales",
+        "Notas de Crédito y Débito fiscales",
         "Gestión de certificados digitales",
         "Sincronización en tiempo real con ARCA",
         "Libro de IVA Digital integrado",
@@ -2194,6 +2285,92 @@ const translationsEn = {
     quickStats: "Quick Stats",
     salesToday: "Sales Today",
     totalRevenue: "Total Revenue",
+    supplierAlerts: "Supplier Due Date Alerts",
+    dueSoon: "Due soon",
+    overdue: "Overdue",
+  },
+  ai: {
+    common: {
+      lockedTitle: "AI Analysis Locked",
+      upgradeNow: "Upgrade Now",
+    },
+    rankings: {
+      title: "Smart Rankings and Stock Analysis",
+      lockedDesc: "Advanced product rankings and stagnation analysis are available in the PRO Plan.",
+      bestSellers: "Best Sellers (30d)",
+      mostProfitable: "Highest Revenue (30d)",
+      stagnantProducts: "Stagnant Products",
+      noStagnant: "No stagnant products detected.",
+      inStock: "{count} in stock",
+      noSalesThirty: "0 sales in 30 days",
+      strategyTitle: "Recommended Strategy",
+      strategyDesc: "Based on your stagnant products, you have approximately {amount} in tied-up capital. We suggest a special promotion or discount to clear these items and free up cash flow.",
+      units: "units",
+    },
+    forecast: {
+      lockedDesc: "AI-based projections are exclusively available for PRO users.",
+      title: "Sales Forecast (Lightweight AI)",
+      sevenDays: "7 Day Forecast",
+      thirtyDays: "30 Day Forecast",
+      trend: "Trend",
+      trendUp: "Upward",
+      trendDown: "Downward",
+      trendStable: "Stable",
+      disclaimer: "* Based on sales behavior from the last 4 weeks.",
+      howItWorksTitle: "How it works?",
+      howItWorksDesc: "Our lightweight AI analyzes your historical sales patterns, giving more weight to recent days. This forecast helps you plan purchases and cash flows with greater accuracy.",
+      chartTitle: "Projection & Trend Chart",
+    },
+    insights: {
+      title: "AI Business Insights",
+      subtitle: "Explore growth opportunities and stock alerts.",
+      empty: "No insights found at this time. Keep selling so the AI can detect patterns.",
+      stockOutTitle: "Critical Stock: {name}",
+      stockOutDesc: "Your star product is running out. Restock now to avoid lost sales.",
+      createOrder: "Create Order",
+      marginTitle: "Margin Opportunity: {name}",
+      marginDesc: "This product has a {margin}% margin. Consider a promotion to increase profits.",
+      viewProduct: "View Product",
+      crossSellTitle: "Suggestion: {p1} + {p2}",
+      crossSellDesc: "Customers often buy these products together. Create a bundle to boost sales.",
+      seePromos: "View Promos",
+      lockedCardTitle: "AI Business Insights",
+      lockedCardDesc: "Your business data analyzed with AI.",
+      lockedCardBadge: "PRO",
+      lockedCardTeaser: "Unlock predictive analysis, smart stock alerts and sales recommendations to maximize profits.",
+      lockedCardButton: "Upgrade to PRO",
+      growthTitle: "Sales Growth",
+      growthDesc: "Your revenue increased by {growth}% this week compared to the previous one. Great job!",
+    },
+    crossSell: {
+      title: "Sales Suggestions",
+      desc: "Customers who bought this also took...",
+      add: "Add",
+      loading: "Finding suggestions...",
+    }
+  },
+  purchaseOrders: {
+    title: "Purchase Orders",
+    subtitle: "Manage your purchases with artificial intelligence",
+    newOrder: "New Order",
+    stats: { total: "Total", draft: "Draft", sent: "Sent", partial: "Partial", received: "Received", cancelled: "Cancelled" },
+    filters: { searchPlaceholder: "Search by number or supplier...", allStatuses: "All statuses" },
+    table: { number: "Number", supplier: "Supplier", date: "Date", status: "Status", items: "Items", totalEst: "Est. Total", actions: "Actions", send: "Send", receive: "Receive", noOrders: "No purchase orders", noOrdersSubtitle: "Create your first order with smart suggestions", code: "Code" },
+    create: { title: "New Purchase Order", subtitle: "Use AI suggestions or add products manually", generalInfo: "General Information", supplier: "Supplier *", selectSupplier: "Select supplier", deliveryDate: "Estimated Delivery", warehouse: "Warehouse / Branch", warehousePlaceholder: "Main Branch", notes: "Notes", notesPlaceholder: "Optional notes", aiSuggestions: "Smart Suggestions", coverage: "Coverage:", days: "{count} days", generate: "Generate", analyzing: "Analyzing...", suggestedProducts: "{count} suggested products", addAll: "+ Add all", manualAdd: "Manual Add", selectProduct: "Select product", quantity: "Quantity", cost: "Cost", add: "Add", summary: "Summary", totalUnits: "Units", totalEstimated: "Estimated Total", createButton: "Create Order", unitAbr: "units", aiPill: "AI", noSuggestions: "No suggestions found for this supplier.", noSuggestionsSubtitle: "Linking products to this supplier or recording more sales will help the AI.", unlinkedWarning: "This product is not linked to this supplier.", autoLinkCheckbox: "Link product to supplier (save cost and lead time)" },
+    detail: { back: "Back", orderNumber: "Order #", receivedAt: "Received on", cancelledAt: "Cancelled on", finalTotal: "Final Total", requested: "Requested", received: "Received", costEst: "Est. Cost", costFinal: "Final Cost", subtotal: "Subtotal", receiveAction: "Register Reception" },
+    reception: { title: "Reception", subtitle: "Record received quantities and final costs", alreadyReceived: "Already Received", receiveNow: "Receive Now", confirm: "Confirm Reception" },
+    priorities: { critical: "Critical", high: "High", medium: "Medium", low: "Low" },
+    toasts: { alreadyAdded: "Product already added", added: "{name} added", addedMany: "{count} products added", created: "Purchase order created successfully", sent: "Order sent", received: "Reception recorded successfully", cancelled: "Order cancelled", error: "Error processing request", linked: "Product linked to supplier successfully" },
+    reasons: {
+      noStock: "⚠️ Out of stock - Urgent replenishment",
+      criticalStock: "⚠️ Critical stock ({days} days remaining)",
+      lowStock: "🔶 Low stock - will cover {days} days",
+      recommended: "📊 Recommended replenishment",
+      preventive: "✅ Preventive replenishment",
+      growingTrend: "📈 Growing trend (+{percent}%)",
+      decliningTrend: "📉 Declining trend ({percent}%)",
+      dailySales: "Daily sales: {amount} {unit}"
+    },
   },
   errors: {
     generic: "Something went wrong. Please try again",
@@ -2221,6 +2398,12 @@ const translationsEn = {
     passwordsDoNotMatch: "Passwords do not match",
     userAlreadyExists: "User already exists",
     invalidCredentials: "Invalid credentials",
+    orderNotFound: "Purchase order not found",
+    onlyDraftSent: "Only draft orders can be sent",
+    onlyDraftEdited: "Only draft orders can be edited",
+    orderStatusInvalid: "This order cannot receive items in its current state",
+    orderAlreadyCancelled: "This order is already received or cancelled",
+    itemsRequired: "At least one item is required",
     sessionExpired: "Your session has expired. Please sign in again",
     errorSaving: "Error saving",
     errorLoading: "Error loading",
@@ -2404,6 +2587,7 @@ const translationsEn = {
       businessConfig: "Business Settings",
       planComparison: "Plan Comparison",
       sales: "Sales",
+      purchaseOrders: "Purchase Orders",
     },
     salesPage: {
       title: "Sales History",
@@ -3880,6 +4064,93 @@ const translationsPt = {
     quickStats: "Estatísticas Rápidas",
     salesToday: "Vendas Hoje",
     totalRevenue: "Receita Total",
+    supplierAlerts: "Alertas de Vencimento de Fornecedores",
+    dueSoon: "Vencendo logo",
+    overdue: "Atrasado",
+  },
+  ai: {
+    common: {
+      lockedTitle: "Análise Inteligente Bloqueada",
+      upgradeNow: "Atualizar Agora",
+    },
+    rankings: {
+      title: "Ranking Inteligente e Análise de Estoque",
+      lockedDesc: "O ranking avançado de produtos e a análise de estagnação estão disponíveis no Plano PRO.",
+      bestSellers: "Mais Vendidos (30d)",
+      mostProfitable: "Maior Receita (30d)",
+      stagnantProducts: "Produtos Estagnados",
+      noStagnant: "Nenhum produto estagnado detectado.",
+      inStock: "{count} em estoque",
+      noSalesThirty: "0 vendas em 30 dias",
+      strategyTitle: "Estratégia Recomendada",
+      strategyDesc: "Com base em seus produtos estagnados, você tem aproximadamente {amount} em capital imobilizado. Sugerimos uma promoção ou desconto especial para liberar esses itens e o fluxo de caixa.",
+      units: "unid",
+    },
+    forecast: {
+      lockedDesc: "As projeções baseadas em IA estão disponíveis exclusivamente para usuários PRO.",
+      title: "Projeção de Vendas (IA Leve)",
+      sevenDays: "Previsão de 7 Dias",
+      thirtyDays: "Previsão de 30 Dias",
+      trend: "Tendência",
+      trendUp: "Alta",
+      trendDown: "Baixa",
+      trendStable: "Estável",
+      disclaimer: "* Baseado no comportamento de vendas das últimas 4 semanas.",
+      howItWorksTitle: "Como funciona?",
+      howItWorksDesc: "Nossa IA leve analisa seus padrões históricos de vendas, dando mais peso aos dias recentes. Esta previsão ajuda você a planejar compras e fluxos de caixa com maior precisão.",
+      chartTitle: "Gráfico de Projeção e Tendência",
+    },
+    insights: {
+      title: "IA Business Insights",
+      subtitle: "Explore oportunidades de crescimento e alertas de estoque.",
+      empty: "Nenhum insight encontrado no momento. Continue vendendo para que a IA detecte padrões.",
+      stockOutTitle: "Estoque Crítico: {name}",
+      stockOutDesc: "Seu produto estrela está acabando. Reponha o estoque para não perder vendas.",
+      createOrder: "Criar Pedido",
+      marginTitle: "Oportunidade de Margem: {name}",
+      marginDesc: "Este produto tem uma margem de {margin}%. Considere uma promoção para aumentar os lucros.",
+      viewProduct: "Ver Produto",
+      crossSellTitle: "Sugestão: {p1} + {p2}",
+      crossSellDesc: "Os clientes costumam comprar esses produtos juntos. Crie um combo para incentivar a venda.",
+      seePromos: "Ver Promoções",
+      lockedCardTitle: "IA Business Insights",
+      lockedCardDesc: "Seus dados comerciais analisados com IA.",
+      lockedCardBadge: "PRO",
+      lockedCardTeaser: "Desbloqueie análises preditivas, alertas de estoque inteligentes e recomendações de vendas para maximizar seus lucros.",
+      lockedCardButton: "Atualizar para PRO",
+      growthTitle: "Crescimento de Vendas",
+      growthDesc: "Sua receita aumentou {growth}% esta semana em comparação com a anterior. Bom trabalho!",
+    },
+    crossSell: {
+      title: "Sugestões de Venda",
+      desc: "Clientes que compraram isso também levaram...",
+      add: "Adicionar",
+      loading: "Buscando sugestões...",
+    }
+  },
+  purchaseOrders: {
+    title: "Ordens de Compra",
+    subtitle: "Gerencie suas compras com inteligência artificial",
+    newOrder: "Nova Ordem",
+    stats: { total: "Total", draft: "Rascunho", sent: "Enviada", partial: "Parcial", received: "Recebida", cancelled: "Cancelada" },
+    filters: { searchPlaceholder: "Buscar por número ou fornecedor...", allStatuses: "Todos os estados" },
+    table: { number: "Número", supplier: "Fornecedor", date: "Data", status: "Status", items: "Itens", totalEst: "Total Est.", actions: "Ações", send: "Enviar", receive: "Receber", noOrders: "Sem ordens de compra", noOrdersSubtitle: "Crie sua primeira ordem com sugestões inteligentes", code: "Código" },
+    create: { title: "Nova Ordem de Compra", subtitle: "Use sugestões de IA ou adicione produtos manualmente", generalInfo: "Informação Geral", supplier: "Fornecedor *", selectSupplier: "Selecionar fornecedor", deliveryDate: "Entrega Estimada", warehouse: "Almoxarifado / Filial", warehousePlaceholder: "Filial Principal", notes: "Notas", notesPlaceholder: "Notas opcionais", aiSuggestions: "Sugestões Inteligentes", coverage: "Cobertura:", days: "{count} dias", generate: "Gerar", analyzing: "Analisando...", suggestedProducts: "{count} produtos sugeridos", addAll: "+ Adicionar todos", manualAdd: "Adicionar Manual", selectProduct: "Selecionar produto", quantity: "Quantidade", cost: "Costo", add: "Adicionar", summary: "Resumo", totalUnits: "Unidades", totalEstimated: "Total Estimado", createButton: "Criar Ordem", unitAbr: "unid", aiPill: "IA", noSuggestions: "Nenhuma sugestão encontrada para este fornecedor.", noSuggestionsSubtitle: "Vincular produtos a este fornecedor ou registrar mais vendas ajudará a IA.", unlinkedWarning: "Este produto não está vinculado a este fornecedor.", autoLinkCheckbox: "Vincular produto ao fornecedor (salvar custo e lead time)" },
+    detail: { back: "Voltar", orderNumber: "Ordem #", receivedAt: "Recebida em", cancelledAt: "Cancelada em", finalTotal: "Total Final", requested: "Solicitado", received: "Recebido", costEst: "Custo Est.", costFinal: "Custo Final", subtotal: "Subtotal", receiveAction: "Registrar Recebimento" },
+    reception: { title: "Recebimento", subtitle: "Registre quantidades recebidas e custos finais", alreadyReceived: "Já Recebido", receiveNow: "Receber Agora", confirm: "Confirmar Recebimento" },
+    priorities: { critical: "Crítico", high: "Alto", medium: "Médio", low: "Baixo" },
+    toasts: { alreadyAdded: "Produto já adicionado", added: "{name} adicionado", addedMany: "{count} produtos adicionados", created: "Ordem de compra criada com sucesso", sent: "Ordem enviada", received: "Recebimento registrado com sucesso", cancelled: "Ordem cancelada", error: "Erro ao processar a solicitação", linked: "Produto vinculado ao fornecedor com sucesso" },
+    reasons: {
+      noStock: "⚠️ Sem estoque - Reposição urgente",
+      criticalStock: "⚠️ Estoque crítico ({days} dias restantes)",
+      lowStock: "🔶 Estoque baixo - cobrirá {days} dias",
+      recommended: "📊 Reposição recomendada",
+      preventive: "✅ Reposição preventiva",
+      growingTrend: "📈 Tendência crescente (+{percent}%)",
+      decliningTrend: "📉 Tendência de queda ({percent}%)",
+      dailySales: "Venda diária: {amount} {unit}",
+      noRotation: "📦 Reposição inicial (sem vendas registradas)"
+    },
   },
   errors: {
     generic: "Algo deu errado. Por favor, tente novamente",
@@ -3907,6 +4178,12 @@ const translationsPt = {
     passwordsDoNotMatch: "As senhas não correspondem",
     userAlreadyExists: "O usuário já existe",
     invalidCredentials: "Credenciais inválidas",
+    orderNotFound: "Ordem de compra não encontrada",
+    onlyDraftSent: "Apenas ordens em rascunho podem ser enviadas",
+    onlyDraftEdited: "Apenas ordens em rascunho podem ser editadas",
+    orderStatusInvalid: "Esta ordem não pode receber itens em seu estado atual",
+    orderAlreadyCancelled: "Esta ordem já foi recebida ou cancelada",
+    itemsRequired: "Pelo menos um item é obrigatório",
     sessionExpired: "Sua sessão expirou. Faça login novamente",
     errorSaving: "Erro ao salvar",
     errorLoading: "Erro ao carregar",
@@ -4110,6 +4387,7 @@ const translationsPt = {
       businessConfig: "Configurações de Negócio",
       planComparison: "Comparação de Planos",
       sales: "Vendas",
+      purchaseOrders: "Ordens de Compra",
     },
     salesPage: {
       title: "Histórico de Vendas",
@@ -5150,12 +5428,27 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     notifyLanguageChange(normalized);
   };
 
-  const t = (key: string, namespace: string = "common"): any => {
-    const keys = key.split(".");
-    let value = translations[currentLanguage][namespace];
+  const t = (
+    key: string,
+    namespace: string = "common",
+    options?: Record<string, any>,
+  ): any => {
+    const namespaces = namespace.split(".");
+    let value: any = translations[currentLanguage];
 
+    for (const ns of namespaces) {
+      value = value?.[ns];
+    }
+
+    const keys = key.split(".");
     for (const k of keys) {
       value = value?.[k];
+    }
+
+    if (typeof value === "string" && options) {
+      Object.keys(options).forEach((k) => {
+        value = (value as string).replace(`{${k}}`, String(options[k]));
+      });
     }
 
     return value ?? key;

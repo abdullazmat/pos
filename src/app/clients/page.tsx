@@ -298,13 +298,10 @@ export default function ClientsPage() {
     e.preventDefault();
 
     // Check if free plan and trying to add client
-    const currentPlan: "BASIC" | "PROFESSIONAL" | "ENTERPRISE" =
-      subscription?.planId?.toUpperCase() === "PROFESSIONAL"
-        ? "PROFESSIONAL"
-        : subscription?.planId?.toUpperCase() === "ENTERPRISE"
-          ? "ENTERPRISE"
-          : "BASIC";
-    if (currentPlan === "BASIC" && !editingId) {
+    const currentPlanId = subscription?.planId?.toUpperCase() || "BASIC";
+    const isBasicPlan = currentPlanId === "BASIC";
+    
+    if (isBasicPlan && !editingId) {
       setShowUpgradePrompt(true);
       toast.info(copy.toastBasic);
       return;
@@ -428,18 +425,14 @@ export default function ClientsPage() {
     );
   }
 
-  const currentPlan: "BASIC" | "PROFESSIONAL" | "ENTERPRISE" =
-    subscription?.planId?.toUpperCase() === "PROFESSIONAL"
-      ? "PROFESSIONAL"
-      : subscription?.planId?.toUpperCase() === "ENTERPRISE"
-        ? "ENTERPRISE"
-        : "BASIC";
-  const canAddClients = currentPlan !== "BASIC";
+  const currentPlanId = subscription?.planId?.toUpperCase() || "BASIC";
+  const isBasicPlan = currentPlanId === "BASIC";
+  const canAddClients = !isBasicPlan;
   const addButtonText =
-    currentPlan === "BASIC" ? copy.addBasic : copy.addPrimary;
+    isBasicPlan ? copy.addBasic : copy.addPrimary;
 
   // Show premium upgrade prompt for BASIC plan
-  if (currentPlan === "BASIC") {
+  if (isBasicPlan) {
     return (
       <div className="min-h-screen bg-white dark:bg-slate-950">
         <Header user={user} showBackButton />

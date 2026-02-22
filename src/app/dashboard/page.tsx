@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { Zap, Calendar, Check } from "lucide-react";
 import { useLanguage } from "@/lib/context/LanguageContext";
 import { useBusinessDateTime } from "@/lib/hooks/useBusinessDateTime";
+import AIInsights from "@/components/dashboard/AIInsights";
 
 interface User {
   id: string;
@@ -81,7 +82,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen text-[hsl(var(--vp-muted))]">
-        Cargando...
+        {String(t("loading", "common"))}
       </div>
     );
   }
@@ -178,6 +179,11 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* AI Insights Section */}
+        <div className="mb-8">
+          <AIInsights />
+        </div>
+
         {/* Main Navigation Cards */}
         <div className="grid md:grid-cols-4 gap-6">
           <Link href="/pos" className="vp-card vp-card-hover p-6">
@@ -233,14 +239,14 @@ export default function Dashboard() {
 
         <div className="mt-10 vp-card p-6">
           <h3 className="text-lg font-semibold text-[hsl(var(--vp-text))] mb-3">
-            Supplier Due Date Alerts
+            {String(t("supplierAlerts", "dashboard"))}
           </h3>
           <div className="flex flex-wrap gap-3">
             <div className="px-3 py-2 rounded-lg bg-amber-50 text-amber-700 text-sm">
-              Due soon: {alerts.dueSoon}
+              {String(t("dueSoon", "dashboard"))}: {alerts.dueSoon}
             </div>
             <div className="px-3 py-2 rounded-lg bg-rose-50 text-rose-700 text-sm">
-              Overdue: {alerts.overdue}
+              {String(t("overdue", "dashboard"))}: {alerts.overdue}
             </div>
           </div>
         </div>

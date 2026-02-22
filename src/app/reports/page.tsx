@@ -15,7 +15,10 @@ import {
   DollarSign,
   ShoppingCart,
   BarChart3,
+  Sparkles
 } from "lucide-react";
+import AIRankings from "@/components/reports/AIRankings";
+import AIForecast from "@/components/reports/AIForecast";
 
 const getKpiValueSize = (value: string) => {
   const length = value.replace(/\s/g, "").length;
@@ -46,6 +49,7 @@ const REPORTS_COPY = {
       profitability: "Rentabilidad",
       products: "Productos",
       premium: "Premium",
+      ai: "Previsiones & Análisis IA",
     },
     kpis: {
       totalSales: {
@@ -100,6 +104,7 @@ const REPORTS_COPY = {
       profitability: "Profitability",
       products: "Products",
       premium: "Premium",
+      ai: "AI Forecast & Analysis",
     },
     kpis: {
       totalSales: {
@@ -154,6 +159,7 @@ const REPORTS_COPY = {
       profitability: "Rentabilidade",
       products: "Produtos",
       premium: "Premium",
+      ai: "Previsões & Análise IA",
     },
     kpis: {
       totalSales: {
@@ -509,12 +515,9 @@ export default function ReportsPage() {
   const tabs = [
     { id: "general", icon: BarChart3 },
     { id: "categories", icon: Package, premium: true },
-    {
-      id: "profitability",
-      icon: DollarSign,
-      premium: true,
-    },
+    { id: "profitability", icon: DollarSign, premium: true },
     { id: "products", icon: ShoppingCart, premium: true },
+    { id: "ai", icon: Sparkles, premium: true },
   ];
 
   const getTabLabel = (tabId: string): string => {
@@ -523,6 +526,7 @@ export default function ReportsPage() {
       categories: copy.tabs.categories,
       profitability: copy.tabs.profitability,
       products: copy.tabs.products,
+      ai: copy.tabs.ai,
     };
     return tabLabels[tabId] || "";
   };
@@ -933,6 +937,26 @@ export default function ReportsPage() {
                   </table>
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeTab === "ai" && (
+            <div className="p-6 space-y-10">
+              <section>
+                <h3 className="text-xl font-bold text-[hsl(var(--vp-text))] mb-6 flex items-center gap-2">
+                  <TrendingUp className="w-6 h-6 text-[hsl(var(--vp-primary))]" />
+                  {String(t("title", "ai.forecast"))}
+                </h3>
+                <AIForecast />
+              </section>
+
+              <section>
+                <h3 className="text-xl font-bold text-[hsl(var(--vp-text))] mb-6 flex items-center gap-2">
+                  <Sparkles className="w-6 h-6 text-[hsl(var(--vp-primary))]" />
+                  {String(t("title", "ai.rankings"))}
+                </h3>
+                <AIRankings />
+              </section>
             </div>
           )}
         </div>

@@ -373,9 +373,9 @@ export default function AdminPage() {
   const planUserLimit = subscription?.features?.maxUsers || 2;
   const userLimit = isFreePlan ? 2 : planUserLimit;
   const planNameMap: Record<string, Record<string, string>> = {
-    es: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
-    en: { BASIC: "Free", PROFESSIONAL: "Pro", ENTERPRISE: "Enterprise" },
-    pt: { BASIC: "Gratuito", PROFESSIONAL: "Pro", ENTERPRISE: "Empresarial" },
+    es: { BASIC: "Gratuito", ESENCIAL: "Esencial", PROFESIONAL: "Pro", CRECIMIENTO: "Empresarial" },
+    en: { BASIC: "Free", ESENCIAL: "Essential", PROFESIONAL: "Pro", CRECIMIENTO: "Enterprise" },
+    pt: { BASIC: "Gratuito", ESENCIAL: "Essencial", PROFESIONAL: "Pro", CRECIMIENTO: "Empresarial" },
   };
   const planName =
     planNameMap[currentLanguage]?.[planId] || planNameMap.en[planId] || "Free";

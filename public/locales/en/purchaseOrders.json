@@ -1,0 +1,91 @@
+{
+  "title": "Purchase Orders",
+  "subtitle": "Manage your purchases with artificial intelligence",
+  "newOrder": "New Order",
+  "stats": {
+    "total": "Total",
+    "draft": "Draft",
+    "sent": "Sent",
+    "partial": "Partial",
+    "received": "Received",
+    "cancelled": "Cancelled"
+  },
+  "filters": {
+    "searchPlaceholder": "Search by number or supplier...",
+    "allStatuses": "All statuses"
+  },
+  "table": {
+    "number": "Number",
+    "supplier": "Supplier",
+    "date": "Date",
+    "status": "Status",
+    "items": "Items",
+    "totalEst": "Est. Total",
+    "actions": "Actions",
+    "send": "Send",
+    "receive": "Receive",
+    "noOrders": "No purchase orders",
+    "noOrdersSubtitle": "Create your first order with smart suggestions"
+  },
+  "create": {
+    "title": "New Purchase Order",
+    "subtitle": "Use AI suggestions or add products manually",
+    "generalInfo": "General Information",
+    "supplier": "Supplier *",
+    "selectSupplier": "Select supplier",
+    "deliveryDate": "Estimated Delivery",
+    "warehouse": "Warehouse / Branch",
+    "notes": "Notes",
+    "notesPlaceholder": "Optional notes",
+    "aiSuggestions": "Smart Suggestions",
+    "coverage": "Coverage:",
+    "generate": "Generate",
+    "analyzing": "Analyzing...",
+    "suggestedProducts": "{count} suggested products",
+    "addAll": "+ Add all",
+    "manualAdd": "Manual Add",
+    "selectProduct": "Select product",
+    "quantity": "Quantity",
+    "cost": "Cost",
+    "add": "Add",
+    "summary": "Summary",
+    "totalUnits": "Units",
+    "totalEstimated": "Estimated Total",
+    "createButton": "Create Order"
+  },
+  "detail": {
+    "back": "Back",
+    "orderNumber": "Order #",
+    "receivedAt": "Received on",
+    "cancelledAt": "Cancelled on",
+    "finalTotal": "Final Total",
+    "requested": "Requested",
+    "received": "Received",
+    "costEst": "Est. Cost",
+    "costFinal": "Final Cost",
+    "subtotal": "Subtotal",
+    "receiveAction": "Register Reception"
+  },
+  "reception": {
+    "title": "Reception",
+    "subtitle": "Register received quantities and final costs",
+    "alreadyReceived": "Already Received",
+    "receiveNow": "Receive Now",
+    "confirm": "Confirm Reception"
+  },
+  "priorities": {
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "toasts": {
+    "alreadyAdded": "Product already added",
+    "added": "{name} added",
+    "addedMany": "{count} products added",
+    "created": "Purchase order created successfully",
+    "sent": "Order sent",
+    "cancelled": "Order cancelled",
+    "error": "Error processing request"
+  }
+}

@@ -36,7 +36,11 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
   const isClientsEnabled =
     typeof maxClients === "number"
       ? maxClients > 0
-      : planId === "PROFESSIONAL" || planId === "ENTERPRISE";
+      : planId === "PROFESIONAL" || 
+        planId === "CRECIMIENTO" ||
+        planId === "PROFESSIONAL" || 
+        planId === "ENTERPRISE" ||
+        planId === "ESENCIAL";
   useEffect(() => {
     async function fetchClients() {
       setLoading(true);

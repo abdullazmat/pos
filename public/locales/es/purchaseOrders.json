@@ -1,0 +1,91 @@
+{
+  "title": "Órdenes de Compra",
+  "subtitle": "Gestiona tus compras con inteligencia artificial",
+  "newOrder": "Nueva Orden",
+  "stats": {
+    "total": "Total",
+    "draft": "Borrador",
+    "sent": "Enviada",
+    "partial": "Parcial",
+    "received": "Recibida",
+    "cancelled": "Cancelada"
+  },
+  "filters": {
+    "searchPlaceholder": "Buscar por número o proveedor...",
+    "allStatuses": "Todos los estados"
+  },
+  "table": {
+    "number": "Número",
+    "supplier": "Proveedor",
+    "date": "Fecha",
+    "status": "Estado",
+    "items": "Items",
+    "totalEst": "Total Est.",
+    "actions": "Acciones",
+    "send": "Enviar",
+    "receive": "Recibir",
+    "noOrders": "Sin órdenes de compra",
+    "noOrdersSubtitle": "Crea tu primera orden con sugerencias inteligentes"
+  },
+  "create": {
+    "title": "Nueva Orden de Compra",
+    "subtitle": "Usa sugerencias IA o agrega productos manualmente",
+    "generalInfo": "Información General",
+    "supplier": "Proveedor *",
+    "selectSupplier": "Seleccionar proveedor",
+    "deliveryDate": "Entrega Estimada",
+    "warehouse": "Almacén / Sucursal",
+    "notes": "Notas",
+    "notesPlaceholder": "Notas opcionales",
+    "aiSuggestions": "Sugerencias Inteligentes",
+    "coverage": "Cobertura:",
+    "generate": "Generar",
+    "analyzing": "Analizando...",
+    "suggestedProducts": "{count} productos sugeridos",
+    "addAll": "+ Agregar todos",
+    "manualAdd": "Agregar Manual",
+    "selectProduct": "Seleccionar producto",
+    "quantity": "Cantidad",
+    "cost": "Costo",
+    "add": "Agregar",
+    "summary": "Resumen",
+    "totalUnits": "Unidades",
+    "totalEstimated": "Total Estimado",
+    "createButton": "Crear Orden"
+  },
+  "detail": {
+    "back": "Volver",
+    "orderNumber": "Orden #",
+    "receivedAt": "Recibida el",
+    "cancelledAt": "Cancelada el",
+    "finalTotal": "Total Final",
+    "requested": "Solicitado",
+    "received": "Recibido",
+    "costEst": "Costo Est.",
+    "costFinal": "Costo Final",
+    "subtotal": "Subtotal",
+    "receiveAction": "Registrar Recepción"
+  },
+  "reception": {
+    "title": "Recepción",
+    "subtitle": "Registre cantidades recibidas y costos finales",
+    "alreadyReceived": "Ya Recibido",
+    "receiveNow": "Recibir Ahora",
+    "confirm": "Confirmar Recepción"
+  },
+  "priorities": {
+    "critical": "Crítico",
+    "high": "Alto",
+    "medium": "Medio",
+    "low": "Bajo"
+  },
+  "toasts": {
+    "alreadyAdded": "Producto ya agregado",
+    "added": "{name} agregado",
+    "addedMany": "{count} productos agregados",
+    "created": "Orden de compra creada exitosamente",
+    "sent": "Orden enviada",
+    "cancelled": "Orden cancelada",
+    "error": "Error al procesar la solicitud"
+  }
+}

@@ -715,10 +715,14 @@ export default function POSPage() {
           const message =
             typeof error?.error === "string"
               ? error.error
-              : typeof error?.message === "string"
-                ? error.message
-                : null;
-          toast.error(message || t("ui.checkoutError", "pos"));
+              : typeof error?.details === "string"
+                ? error.details
+                : typeof error?.message === "string"
+                  ? error.message
+                  : null;
+          toast.error(message || t("ui.checkoutError", "pos"), {
+            autoClose: 6000,
+          });
         }
         return;
       }
@@ -1230,6 +1234,7 @@ export default function POSPage() {
                   onUpdateQuantity={handleUpdateQuantity}
                   onApplyDiscount={handleApplyDiscount}
                   onCheckout={handleCheckout}
+                  onAddProduct={handleAddToCart}
                   additionalPaymentMethods={
                     selectedClient
                       ? [

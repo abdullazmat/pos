@@ -220,7 +220,7 @@ const InvoiceSchema = new Schema<IInvoice>(
         quantity: {
           type: Number,
           required: true,
-          min: 1,
+          min: 0.001,
         },
         unitPrice: {
           type: Number,
@@ -281,5 +281,9 @@ InvoiceSchema.index({ business: 1, status: 1 });
 InvoiceSchema.index({ business: 1, "fiscalData.cae": 1 }); // For CAE lookup
 InvoiceSchema.index({ business: 1, date: -1, "fiscalData.caeStatus": 1 }); // For fiscal reports
 
-export default mongoose.models.Invoice ||
-  mongoose.model<IInvoice>("Invoice", InvoiceSchema);
+// Force re-registration to pick up schema changes (especially in dev/hot-reload)
+if (mongoose.models.Invoice) {
+  delete (mongoose.models as any).Invoice;
+}
+export default mongoose.model<IInvoice>("Invoice", InvoiceSchema);
+

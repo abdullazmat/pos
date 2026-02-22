@@ -879,12 +879,28 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 },
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Complete sale error:", error);
+
+    // Surface Mongoose ValidationErrors as 400 with clear message
+    if (error?.name === "ValidationError" && error?.errors) {
+      const firstKey = Object.keys(error.errors)[0];
+      const firstError = error.errors[firstKey];
+      const fieldMsg = firstError?.message || error.message;
+      return NextResponse.json(
+        {
+          errorCode: "VALIDATION_ERROR",
+          error: fieldMsg,
+          details: error.message,
+        },
+        { status: 400 },
+      );
+    }
+
     return NextResponse.json(
       {
         errorCode: "SERVER_ERROR",
-        error: "Internal server error",
+        error: (error as any)?.message || "Internal server error",
         details: (error as any).message,
       },
       { status: 500 },
