@@ -11,7 +11,7 @@ import CTASection from "@/components/CTASection";
 import SupportSection from "@/components/SupportSection";
 import TestimonialSection from "@/components/TestimonialSection";
 import Footer from "@/components/Footer";
-import TrustedDemoSection from "@/components/TrustedDemoSection";
+
 import { useLanguage } from "@/lib/context/LanguageContext";
 
 export default function Home() {
@@ -97,8 +97,6 @@ export default function Home() {
           </div>
         </div>
 
-        <TrustedDemoSection />
-        
         <div className="space-y-0">
           <FeatureModule moduleKey="module1" index={0} />
           <div className="bg-[hsl(var(--vp-bg-section))]">

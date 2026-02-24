@@ -344,13 +344,6 @@ const translationsEs = {
         },
       ],
     },
-    trustedDemo: {
-      title: "Estas empresas ya confían en VentaPlus",
-      demoTitle: "¿Te gustaría ver una demostración en vivo?",
-      demoSubtitle: "Registrate con el formulario y reservá la fecha.",
-      demoCta: "Quiero una demo",
-      demoImageAlt: "Demo de VentaPlus",
-    },
     businessInsights: {
       heroEyebrow: "Tu negocio está a un clic",
       heroTitle: "Entendé cómo está tu negocio en todo momento",
@@ -1698,7 +1691,7 @@ const translationsEs = {
         items: [
           { icon: "mail", title: "Email", description: "Soporte general", value: "soporte@ventaplus.com" },
           { icon: "phone", title: "Teléfono", description: "Lunes a Viernes 9-18h", value: "+54 11 5555-0123" },
-          { icon: "location", title: "Oficinas", description: "Nuestro centro técnico", value: "Palermo, CABA, Argentina" }
+          { icon: "location", title: "Oficinas", description: "Nuestro centro técnico", value: "Córdoba City, Argentina" }
         ]
       },
       demo: {
@@ -1826,7 +1819,7 @@ const translationsEs = {
     inquiries: {
       title: "Consultas de Prensa",
       description: "Para consultas de medios, entrevistas o discusiones sobre alianzas, por favor contactate con nuestro equipo.",
-      location: "Buenos Aires, Argentina"
+      location: "Córdoba City, Argentina"
     },
     about: {
       title: "Sobre VentaPlus",
@@ -2140,13 +2133,7 @@ const translationsEn = {
         },
       ],
     },
-    trustedDemo: {
-      title: "These companies already trust VentaPlus",
-      demoTitle: "Would you like to see a live demonstration?",
-      demoSubtitle: "Sign up using the form below and save the date!",
-      demoCta: "I want a demo",
-      demoImageAlt: "VentaPlus demo",
-    },
+
     businessInsights: {
       heroEyebrow: "Your business is just a click away",
       heroTitle: "Understand where your business is at all times",
@@ -3482,7 +3469,7 @@ const translationsEn = {
         items: [
           { icon: "mail", title: "Email", description: "General support", value: "support@ventaplus.com" },
           { icon: "phone", title: "Phone", description: "Mon-Fri 9am-6pm", value: "+54 11 5555-0123" },
-          { icon: "location", title: "Offices", description: "Technical center", value: "Palermo, CABA, Argentina" }
+          { icon: "location", title: "Offices", description: "Technical center", value: "Córdoba City, Argentina" }
         ]
       },
       demo: {
@@ -3610,7 +3597,7 @@ const translationsEn = {
     inquiries: {
       title: "Press Inquiries",
       description: "For media inquiries, interviews, or partnership discussions, please reach out to our team.",
-      location: "Buenos Aires, Argentina"
+      location: "Córdoba City, Argentina"
     },
     about: {
       title: "About VentaPlus",
@@ -3918,13 +3905,7 @@ const translationsPt = {
         },
       ],
     },
-    trustedDemo: {
-      title: "Estas empresas já confiam na VentaPlus",
-      demoTitle: "Gostaria de ver uma demonstração ao vivo?",
-      demoSubtitle: "Cadastre-se no formulário abaixo e reserve a data!",
-      demoCta: "Quero uma demo",
-      demoImageAlt: "Demonstração da VentaPlus",
-    },
+
     businessInsights: {
       heroEyebrow: "Seu negócio está a um clique",
       heroTitle: "Entenda como está o seu negócio o tempo todo",
@@ -5217,7 +5198,7 @@ const translationsPt = {
         items: [
           { icon: "mail", title: "E-mail", description: "Suporte geral", value: "suporte@ventaplus.com" },
           { icon: "phone", title: "Telefone", description: "Seg-Sex 9h-18h", value: "+54 11 5555-0123" },
-          { icon: "location", title: "Escritórios", description: "Centro técnico", value: "Palermo, CABA, Argentina" }
+          { icon: "location", title: "Escritórios", description: "Centro técnico", value: "Córdoba City, Argentina" }
         ]
       },
       demo: {
@@ -5345,7 +5326,7 @@ const translationsPt = {
     inquiries: {
       title: "Consultas de Imprensa",
       description: "Para consultas de mídia, entrevistas ou discussões sobre parcerias, entre em contato com nossa equipe.",
-      location: "Buenos Aires, Argentina"
+      location: "Córdoba City, Argentina"
     },
     about: {
       title: "Sobre a VentaPlus",

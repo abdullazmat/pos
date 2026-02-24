@@ -170,9 +170,9 @@ export default function ContactPage() {
           {/* background orbs */}
           <div className="absolute inset-0 -z-10 overflow-hidden">
             <div className="absolute top-[-15%] right-[-10%] w-[55%] h-[55%] rounded-full blur-[140px]"
-              style={{ background: "hsl(var(--vp-primary) / 0.07)" }} />
+              style={{ background: "hsl(var(--vp-primary) / 0.15)" }} />
             <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full blur-[140px]"
-              style={{ background: "hsl(var(--vp-accent) / 0.06)" }} />
+              style={{ background: "hsl(var(--vp-accent) / 0.12)" }} />
           </div>
 
           <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center vp-reveal">
@@ -204,9 +204,9 @@ export default function ContactPage() {
                 { icon: "🇦🇷", label: hero?.badges?.argentina },
               ].map((b) => (
                 <div key={b.label}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest vp-card border-[hsl(var(--vp-border))] bg-white/50 backdrop-blur-sm shadow-sm"
+                  className="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] vp-card border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-surface)/0.5)] backdrop-blur-md shadow-lg hover:border-[hsl(var(--vp-primary)/0.4)] transition-all duration-300 hover:-translate-y-1"
                   style={{ color: "hsl(var(--vp-muted))" }}>
-                  <span className="text-lg">{b.icon}</span>
+                  <span className="text-xl filter drop-shadow-sm">{b.icon}</span>
                   {b.label}
                 </div>
               ))}
@@ -386,7 +386,7 @@ export default function ContactPage() {
               {Array.isArray(info?.items) && info.items.map((item: any, i: number) => (
                 <div
                   key={i}
-                  className="vp-card p-6 flex items-center gap-5 group vp-card-hover cursor-default border-[hsl(var(--vp-border))] hover:border-[hsl(var(--vp-primary)/0.3)] bg-white/40 shadow-sm"
+                  className="vp-card p-7 flex items-center gap-6 group vp-card-hover cursor-default border-[hsl(var(--vp-border))] hover:border-[hsl(var(--vp-primary)/0.4)] bg-[hsl(var(--vp-surface)/0.6)] backdrop-blur-sm shadow-xl"
                 >
                   <div
                     className="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:bg-[hsl(var(--vp-primary))] group-hover:text-white"
@@ -482,7 +482,7 @@ export default function ContactPage() {
                     {ready?.primaryCta}
                     <ArrowRightIcon className="w-6 h-6 ml-1" />
                   </Link>
-                  <Link href="/features" className="vp-button h-16 px-12 text-xl font-black rounded-2xl border-[hsl(var(--vp-border))] bg-white/80 hover:bg-white transition-all shadow-sm">
+                   <Link href="/features" className="vp-button h-16 px-12 text-xl font-black rounded-2xl border-[hsl(var(--vp-border))] bg-[hsl(var(--vp-surface)/0.8)] backdrop-blur-md hover:bg-[hsl(var(--vp-surface))] hover:border-[hsl(var(--vp-primary)/0.5)] transition-all shadow-xl hover:shadow-2xl">
                     {ready?.secondaryCta}
                   </Link>
                 </div>
