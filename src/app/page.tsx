@@ -9,7 +9,7 @@ import FeatureModule from "@/components/FeatureModule";
 import PricingSection from "@/components/PricingSection";
 import CTASection from "@/components/CTASection";
 import SupportSection from "@/components/SupportSection";
-import TestimonialSection from "@/components/TestimonialSection";
+import ScenariosSection from "@/components/ScenariosSection";
 import Footer from "@/components/Footer";
 
 import { useLanguage } from "@/lib/context/LanguageContext";
@@ -111,7 +111,7 @@ export default function Home() {
         <PricingSection />
         <CTASection />
         <SupportSection />
-        <TestimonialSection />
+        <ScenariosSection />
       </main>
 
       <Footer />

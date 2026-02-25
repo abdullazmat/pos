@@ -294,55 +294,53 @@ const translationsEs = {
         },
       ],
     },
-    testimonialsSection: {
-      eyebrow: "Testimonios",
-      title: "Lo que dicen nuestros clientes",
-      subtitle:
-        "Historias reales de comercios que crecen con VentaPlus en Argentina.",
-      metricCaption: "Verificado en los últimos 90 días.",
-      highlightLabel: "Destacado",
-      highlightCaption:
-        "Flujos integrados, listo para fiscal y permisos por equipo.",
-      controls: {
-        previous: "Testimonio anterior",
-        next: "Siguiente testimonio",
-        dotPrefix: "Ver testimonio de",
-      },
+    scenariosSection: {
+      title: "Escenarios Reales en Negocios Argentinos",
+      subtitle: "Situaciones comunes que VentasPlus ya puede resolver.",
       items: [
         {
-          id: "darjeeling",
-          quote:
-            "En plena pandemia empezamos con planillas. Dos años después, VentaPlus nos ayudó a operar tres locales con la misma claridad del primer día.",
-          name: "Lali Hernández",
-          role: "Fundadora, Darjeeling Goods",
-          location: "Rosario, AR",
-          metricLabel: "Precisión de stock",
-          metricValue: "98%",
-          highlight: "Listo para multi-sucursal",
+          id: "scenario-1",
+          title: "Kiosco con stock desorganizado",
+          problemTitle: "Problema común",
+          problemText: "El dueño carga productos sin un control claro. No sabe qué vende más o qué le queda en estantería.",
+          solutionTitle: "Con VentasPlus",
+          solutionItems: [
+            "Gestión organizada de productos y categorías",
+            "Reporte de stock actualizado",
+            "Historial detallado de ventas"
+          ],
+          impactTitle: "Impacto esperado",
+          impactText: "Mayor control diario y menos pérdidas por desorganización."
         },
         {
-          id: "panaderia-central",
-          quote:
-            "Los cajeros aprendieron el flujo en una tarde. El cierre diario ahora es una rutina de 4 minutos y los márgenes por fin se ven claros.",
-          name: "Matías Gutiérrez",
-          role: "Operaciones, Panadería Central",
-          location: "Córdoba, AR",
-          metricLabel: "Cierre diario más rápido",
-          metricValue: "4 min",
-          highlight: "Márgenes claros",
+          id: "scenario-2",
+          title: "Separación entre canales legal e interno",
+          problemTitle: "Problema común",
+          problemText: "Falta de claridad entre las ventas registradas fiscalmente y movimientos internos.",
+          solutionTitle: "Con VentasPlus",
+          solutionItems: [
+            "Canales legal e interno diferenciados",
+            "Reportes separados por canal",
+            "Control claro al cierre de caja"
+          ],
+          impactTitle: "Impacto esperado",
+          impactText: "Mayor orden financiero y mejor manejo del efectivo."
         },
         {
-          id: "almacen-norte",
-          quote:
-            "Desde comprobantes fiscales hasta alertas de stock, todo se siente conectado. Por fin confiamos en los números y podemos planificar compras con seguridad.",
-          name: "Carmen Ibáñez",
-          role: "Dueña, Almacén Norte",
-          location: "Mendoza, AR",
-          metricLabel: "Quiebres de stock",
-          metricValue: "-42%",
-          highlight: "Listo para fiscal",
-        },
-      ],
+          id: "scenario-3",
+          title: "Negocio que quiere dejar el Excel",
+          problemTitle: "Problema común",
+          problemText: "Uso de planillas manuales con errores frecuentes y falta de trazabilidad.",
+          solutionTitle: "Con VentasPlus",
+          solutionItems: [
+            "Punto de venta optimizado para teclado",
+            "Control de caja integrado",
+            "Reportes automáticos"
+          ],
+          impactTitle: "Impacto esperado",
+          impactText: "Menos errores y más tiempo enfocado en vender."
+        }
+      ]
     },
     businessInsights: {
       heroEyebrow: "Tu negocio está a un clic",
@@ -1476,7 +1474,7 @@ const translationsEs = {
           name: "Mercado Pago",
           category: "payments",
           description: "Cobros con QR y link de pago sincronizados automáticamente con tu caja.",
-          status: "active"
+          status: "coming_soon"
         },
         {
           name: "MODO",
@@ -1494,7 +1492,7 @@ const translationsEs = {
           name: "WhatsApp",
           category: "marketing",
           description: "Envío automático de comprobantes y notificaciones de stock por chat.",
-          status: "active"
+          status: "coming_soon"
         }
       ]
     }
@@ -2083,55 +2081,53 @@ const translationsEn = {
         },
       ],
     },
-    testimonialsSection: {
-      eyebrow: "Testimonials",
-      title: "What our customers say",
-      subtitle:
-        "Real stories from retailers growing with VentaPlus across Argentina.",
-      metricCaption: "Verified over the last 90 days.",
-      highlightLabel: "Highlight",
-      highlightCaption:
-        "Built-in workflows, fiscal ready, and team permissions.",
-      controls: {
-        previous: "Previous testimonial",
-        next: "Next testimonial",
-        dotPrefix: "Show testimonial from",
-      },
+    scenariosSection: {
+      title: "Real Scenarios in Argentine Businesses",
+      subtitle: "Common situations that VentasPlus can already handle.",
       items: [
         {
-          id: "darjeeling",
-          quote:
-            "In the middle of the pandemic we started with spreadsheets. Two years later, VentaPlus helped us run three stores with the same clarity we had on day one.",
-          name: "Lali Hernández",
-          role: "Founder, Darjeeling Goods",
-          location: "Rosario, AR",
-          metricLabel: "Inventory accuracy",
-          metricValue: "98%",
-          highlight: "Multi-store ready",
+          id: "scenario-1",
+          title: "Kiosk with disorganized stock",
+          problemTitle: "Common problem",
+          problemText: "The owner loads products without clear control. They do not know what sells more or what remains on the shelf.",
+          solutionTitle: "With VentasPlus",
+          solutionItems: [
+            "Organized management of products and categories",
+            "Updated stock report",
+            "Detailed sales history"
+          ],
+          impactTitle: "Expected impact",
+          impactText: "More daily control and fewer losses due to disorganization."
         },
         {
-          id: "panaderia-central",
-          quote:
-            "Cashiers learned the flow in one afternoon. The daily close is now a 4-minute routine and our margins are finally visible.",
-          name: "Matías Gutiérrez",
-          role: "Operations, Panadería Central",
-          location: "Córdoba, AR",
-          metricLabel: "Faster daily close",
-          metricValue: "4 min",
-          highlight: "Clear margins",
+          id: "scenario-2",
+          title: "Separation between legal and internal channels",
+          problemTitle: "Common problem",
+          problemText: "Lack of clarity between fiscally recorded sales and internal movements.",
+          solutionTitle: "With VentasPlus",
+          solutionItems: [
+            "Differentiated legal and internal channels",
+            "Separate reports by channel",
+            "Clear control at cash closing"
+          ],
+          impactTitle: "Expected impact",
+          impactText: "Greater financial order and better cash management."
         },
         {
-          id: "almacen-norte",
-          quote:
-            "From fiscal receipts to stock alerts, everything feels connected. We finally trust the numbers and can plan purchases with confidence.",
-          name: "Carmen Ibáñez",
-          role: "Owner, Almacén Norte",
-          location: "Mendoza, AR",
-          metricLabel: "Stockouts reduced",
-          metricValue: "-42%",
-          highlight: "Fiscal ready",
-        },
-      ],
+          id: "scenario-3",
+          title: "Business wanting to leave Excel",
+          problemTitle: "Common problem",
+          problemText: "Use of manual spreadsheets with frequent errors and lack of traceability.",
+          solutionTitle: "With VentasPlus",
+          solutionItems: [
+            "Optimized point of sale for keyboard",
+            "Integrated cash control",
+            "Automatic reports"
+          ],
+          impactTitle: "Expected impact",
+          impactText: "Fewer errors and more time focused on selling."
+        }
+      ]
     },
 
     businessInsights: {
@@ -3254,7 +3250,7 @@ const translationsEn = {
           name: "Mercado Pago",
           category: "payments",
           description: "QR and payment link charges synchronized automatically with your cash register.",
-          status: "active"
+          status: "coming_soon"
         },
         {
           name: "MODO",
@@ -3272,7 +3268,7 @@ const translationsEn = {
           name: "WhatsApp",
           category: "marketing",
           description: "Automatic sending of receipts and stock notifications via chat.",
-          status: "active"
+          status: "coming_soon"
         }
       ]
     }
@@ -3855,55 +3851,53 @@ const translationsPt = {
         },
       ],
     },
-    testimonialsSection: {
-      eyebrow: "Depoimentos",
-      title: "O que nossos clientes dizem",
-      subtitle:
-        "Histórias reais de varejistas crescendo com a VentaPlus na Argentina.",
-      metricCaption: "Verificado nos últimos 90 dias.",
-      highlightLabel: "Destaque",
-      highlightCaption:
-        "Fluxos integrados, pronto para fiscal e permissões por equipe.",
-      controls: {
-        previous: "Depoimento anterior",
-        next: "Próximo depoimento",
-        dotPrefix: "Ver depoimento de",
-      },
+    scenariosSection: {
+      title: "Cenários Reais em Negócios Argentinos",
+      subtitle: "Situações comuns que o VentasPlus já pode resolver.",
       items: [
         {
-          id: "darjeeling",
-          quote:
-            "No meio da pandemia começamos com planilhas. Dois anos depois, a VentaPlus nos ajudou a operar três lojas com a mesma clareza do primeiro dia.",
-          name: "Lali Hernández",
-          role: "Fundadora, Darjeeling Goods",
-          location: "Rosario, AR",
-          metricLabel: "Precisão do estoque",
-          metricValue: "98%",
-          highlight: "Pronto para múltiplas lojas",
+          id: "scenario-1",
+          title: "Quiosque com estoque desorganizado",
+          problemTitle: "Problema comum",
+          problemText: "O proprietário carrega produtos sem um controle claro. Não sabe o que vende mais ou o que resta na prateleira.",
+          solutionTitle: "Com VentasPlus",
+          solutionItems: [
+            "Gestão organizada de produtos e categorias",
+            "Relatório de estoque atualizado",
+            "Histórico detalhado de vendas"
+          ],
+          impactTitle: "Impacto esperado",
+          impactText: "Maior controle diário e menos perdas por desorganização."
         },
         {
-          id: "panaderia-central",
-          quote:
-            "Os caixas aprenderam o fluxo em uma tarde. O fechamento diário agora é uma rotina de 4 minutos e nossas margens finalmente estão visíveis.",
-          name: "Matías Gutiérrez",
-          role: "Operações, Panadería Central",
-          location: "Córdoba, AR",
-          metricLabel: "Fechamento diário mais rápido",
-          metricValue: "4 min",
-          highlight: "Margens claras",
+          id: "scenario-2",
+          title: "Separação entre canais legal e interno",
+          problemTitle: "Problema comum",
+          problemText: "Falta de clareza entre vendas registradas fiscalmente e movimentos internos.",
+          solutionTitle: "Com VentasPlus",
+          solutionItems: [
+            "Canais legal e interno diferenciados",
+            "Relatórios separados por canal",
+            "Controle claro no fechamento do caixa"
+          ],
+          impactTitle: "Impacto esperado",
+          impactText: "Maior ordem financeira e melhor gestão de caixa."
         },
         {
-          id: "almacen-norte",
-          quote:
-            "De comprovantes fiscais a alertas de estoque, tudo parece conectado. Finalmente confiamos nos números e podemos planejar compras com confiança.",
-          name: "Carmen Ibáñez",
-          role: "Proprietária, Almacén Norte",
-          location: "Mendoza, AR",
-          metricLabel: "Rupturas de estoque",
-          metricValue: "-42%",
-          highlight: "Pronto para fiscal",
-        },
-      ],
+          id: "scenario-3",
+          title: "Negócio querendo sair do Excel",
+          problemTitle: "Problema comum",
+          problemText: "Uso de planilhas manuais com erros frequentes e falta de rastreabilidade.",
+          solutionTitle: "Com VentasPlus",
+          solutionItems: [
+            "Ponto de venda otimizado para teclado",
+            "Controle de caixa integrado",
+            "Relatórios automáticos"
+          ],
+          impactTitle: "Impacto esperado",
+          impactText: "Menos erros e mais tempo focado em vender."
+        }
+      ]
     },
 
     businessInsights: {
@@ -5021,7 +5015,7 @@ const translationsPt = {
           name: "Mercado Pago",
           category: "payments",
           description: "Pagamentos com QR e link de pagamento sincronizados automaticamente com seu caixa.",
-          status: "active"
+          status: "coming_soon"
         },
         {
           name: "MODO",
@@ -5039,7 +5033,7 @@ const translationsPt = {
           name: "WhatsApp",
           category: "marketing",
           description: "Envio automático de comprovantes e notificações de estoque via chat.",
-          status: "active"
+          status: "coming_soon"
         }
       ]
     }
