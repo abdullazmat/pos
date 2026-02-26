@@ -764,6 +764,7 @@ export default function POSPage() {
       if (paymentMethod === "account" && selectedClient?._id) {
         fetchClientAccount();
       }
+
     } catch (error) {
       console.error("Checkout error:", error);
       toast.error(t("ui.checkoutProcessError", "pos"));

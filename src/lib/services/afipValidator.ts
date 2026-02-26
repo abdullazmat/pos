@@ -11,22 +11,27 @@ export function validateAfipFiles(opts: {
   keyPath: string;
   cuit?: string;
 }): ValidateResult {
-  // Require the runtime JS validator located in /lib/afip/validateAfip.js
-  // Use absolute path to ensure it resolves correctly at runtime
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const validator = require(
-    path.resolve(process.cwd(), "lib/afip/validateAfip.js"),
-  );
-  if (!validator || typeof validator.validateAfip !== "function") {
-    return {
-      ok: false,
-      issues: [
-        { code: "VALIDATOR_MISSING", message: "Validator module not found" },
-      ],
-    };
+  // Prevent execution in browser environment
+  if (typeof window !== "undefined") {
+    return { ok: false, issues: [{ code: "NODE_ONLY", message: "This validator only runs on the server" }] };
   }
 
   try {
+    // Build absolute path at runtime so webpack doesn't try to bundle it.
+    // Using path.join avoids the "critical dependency" warning.
+    const modulePath = path.join(process.cwd(), "lib", "afip", "validateAfip.js");
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const validator = require(modulePath);
+
+    if (!validator || typeof validator.validateAfip !== "function") {
+      return {
+        ok: false,
+        issues: [
+          { code: "VALIDATOR_MISSING", message: "Validator module not found" },
+        ],
+      };
+    }
+
     const result = validator.validateAfip({
       certPath: opts.certPath,
       keyPath: opts.keyPath,

@@ -52,12 +52,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: suggestions });
     }
 
-    // Default to insights
+    if (type === "health-score") {
+      const scoreData = await AIEngine.getBusinessHealthScore(decoded.businessId);
+      return NextResponse.json({ success: true, data: scoreData });
+    }
+
+    // Default to insights + health score
     const insights = await AIEngine.getAutomaticInsights(decoded.businessId);
+    const healthScore = await AIEngine.getBusinessHealthScore(decoded.businessId);
+
     return NextResponse.json({ 
       success: true, 
       data: { 
         insights,
+        healthScore,
         locked: false
       } 
     });

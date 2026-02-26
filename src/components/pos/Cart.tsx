@@ -58,6 +58,7 @@ export default function Cart({
     {},
   );
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+
   const [availablePaymentMethods, setAvailablePaymentMethods] = useState<
     PaymentMethod[]
   >([
@@ -556,6 +557,8 @@ export default function Cart({
           </div>
         </>
       )}
+
+
     </div>
   );
 }

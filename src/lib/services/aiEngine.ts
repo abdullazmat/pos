@@ -31,6 +31,17 @@ export interface SalesForecast {
   forecast: Array<{ date: string; revenue: number; isForecast: boolean }>;
 }
 
+export interface BusinessHealthScore {
+  score: number;
+  factors: {
+    salesGrowth: number;
+    marginBalance: number;
+    stockEfficiency: number;
+    rotationHealth: number;
+  };
+  recommendation: string;
+}
+
 /**
  * AI Engine Service - Strategic Implementation
  */
@@ -42,34 +53,49 @@ export class AIEngine {
     const insights: Insight[] = [];
     const bId = new mongoose.Types.ObjectId(businessId);
 
-    // 1. Check for stockouts of top sellers
-    const topSellers = await Sale.aggregate([
-      { $match: { businessId: bId, createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } } },
+    // 1. Check for stockouts based on sales velocity
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const topSellersByVelocity = await Sale.aggregate([
+      { $match: { businessId: bId, createdAt: { $gte: thirtyDaysAgo } } },
       { $unwind: "$items" },
-      { $group: { _id: "$items.productId", totalSold: { $sum: "$items.quantity" } } },
-      { $addFields: { totalSold: { $toDouble: "$totalSold" } }},
+      { $group: { 
+          _id: "$items.productId", 
+          totalSold: { $sum: "$items.quantity" },
+          name: { $first: "$items.productName" }
+      } },
+      { $addFields: { dailyVelocity: { $divide: [{ $toDouble: "$totalSold" }, 30] } } },
       { $sort: { totalSold: -1 } },
-      { $limit: 10 }
+      { $limit: 20 }
     ]);
 
-    const topProductIds = topSellers.map(s => s._id);
-    const lowStockProducts = await Product.find({
-      _id: { $in: topProductIds },
-      stock: { $lte: 5 }, // Simple threshold, ideally could use minStock
-      active: true
-    }).limit(3);
-
-    lowStockProducts.forEach(p => {
-      insights.push({
-        type: "warning",
-        title: `Stock Crítico: ${p.name}`,
-        titleKey: "stockOutTitle",
-        description: `Tu producto estrella se está agotando. Repón stock para no perder ventas.`,
-        descriptionKey: "stockOutDesc",
-        templateData: { name: p.name },
-        action: { label: "Crear Orden", labelKey: "createOrder", href: "/purchase-orders" }
-      });
-    });
+    for (const item of topSellersByVelocity) {
+      const product = await Product.findById(item._id);
+      if (product && product.active) {
+        const daysToStockout = item.dailyVelocity > 0 ? product.stock / item.dailyVelocity : Infinity;
+        
+        if (daysToStockout <= 3 && product.stock > 0) {
+          insights.push({
+            type: "warning",
+            title: `Agotamiento Inminente: ${product.name}`,
+            titleKey: "stockOutVelocityTitle",
+            description: `${product.name} se agotará en aprox. ${Math.ceil(daysToStockout)} días basado en tus ventas.`,
+            descriptionKey: "stockOutVelocityDesc",
+            templateData: { name: product.name, days: Math.ceil(daysToStockout) },
+            action: { label: "Reponer Ahora", labelKey: "replenishNow", href: `/purchase-orders?productId=${product._id}` }
+          });
+        } else if (product.stock === 0) {
+          insights.push({
+            type: "warning",
+            title: `Sin Stock: ${product.name}`,
+            titleKey: "noStockTitle",
+            description: `Has perdido ventas potenciales de ${product.name} por falta de inventario.`,
+            descriptionKey: "noStockDesc",
+            templateData: { name: product.name },
+            action: { label: "Crear Orden", labelKey: "createOrder", href: "/purchase-orders" }
+          });
+        }
+      }
+    }
 
     // 2. High Margin Opportunity
     const highMarginStagnant = await Product.find({
@@ -80,7 +106,6 @@ export class AIEngine {
     }).limit(2);
 
     highMarginStagnant.forEach(p => {
-      // Check if it sold well recently
       insights.push({
         type: "opportunity",
         title: `Oportunidad de Margen: ${p.name}`,
@@ -92,23 +117,154 @@ export class AIEngine {
       });
     });
 
-    // 3. Overall Sales Trend
+    // 3. Weekly Sales Insights & Weakest Days
     const last7Days = await this.getPeriodRevenue(bId, 7);
     const prev7Days = await this.getPeriodRevenue(bId, 14, 7);
 
-    if (last7Days > prev7Days && prev7Days > 0) {
-      const growth = ((last7Days - prev7Days) / prev7Days) * 100;
+    if (last7Days > 0) {
+      if (last7Days < prev7Days) {
+        const drop = ((prev7Days - last7Days) / prev7Days) * 100;
+        insights.push({
+          type: "warning",
+          title: "Caída de Ventas Semanal",
+          titleKey: "salesDropTitle",
+          description: `Tus ventas bajaron un ${drop.toFixed(1)}% comparado con la semana pasada.`,
+          descriptionKey: "salesDropDesc",
+          templateData: { drop: drop.toFixed(1) }
+        });
+
+        // Find weakest day of the week
+        const weeklyStats = await Sale.aggregate([
+          { $match: { businessId: bId, createdAt: { $gte: thirtyDaysAgo } } },
+          { $group: {
+              _id: { $dayOfWeek: "$createdAt" },
+              total: { $sum: "$total" }
+          }},
+          { $sort: { total: 1 } }
+        ]);
+
+        if (weeklyStats.length > 0) {
+          const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+          const weakestDay = days[weeklyStats[0]._id - 1];
+          insights.push({
+            type: "opportunity",
+            title: `Impulsa tu ${weakestDay}`,
+            titleKey: "weakestDayTitle",
+            description: `El ${weakestDay} es tu día más bajo. Considera lanzar una promoción "Flash" ese día.`,
+            descriptionKey: "weakestDayDesc",
+            templateData: { day: weakestDay }
+          });
+        }
+      } else if (last7Days > prev7Days && prev7Days > 0) {
+        const growth = ((last7Days - prev7Days) / prev7Days) * 100;
+        insights.push({
+          type: "opportunity",
+          title: "Crecimiento en Ventas",
+          titleKey: "growthTitle",
+          description: `¡Excelente! Tus ingresos subieron un ${growth.toFixed(1)}% esta semana.`,
+          descriptionKey: "growthDesc",
+          templateData: { growth: growth.toFixed(1) }
+        });
+      }
+    }
+
+    // 4. Slow Moving Products
+    const soldIn30Days = await Sale.distinct("items.productId", { businessId: bId, createdAt: { $gte: thirtyDaysAgo } });
+    const slowMoving = await Product.find({
+      businessId: bId,
+      active: true,
+      stock: { $gt: 20 },
+      _id: { $nin: soldIn30Days }
+    }).limit(1);
+
+    if (slowMoving.length > 0) {
       insights.push({
         type: "info",
-        title: "Crecimiento en Ventas",
-        titleKey: "growthTitle",
-        description: `Tus ingresos subieron un ${growth.toFixed(1)}% esta semana comparado con la anterior. ¡Buen trabajo!`,
-        descriptionKey: "growthDesc",
-        templateData: { growth: growth.toFixed(1) }
+        title: "Producto Estancado",
+        titleKey: "slowMovingTitle",
+        description: `${slowMoving[0].name} no ha tenido ventas en 30 días. Considera un descuento del 15%.`,
+        descriptionKey: "slowMovingDesc",
+        templateData: { name: slowMoving[0].name },
+        action: { label: "Editar Precio", labelKey: "editPrice", href: `/products?search=${slowMoving[0].name}` }
       });
     }
 
     return insights;
+  }
+
+  /**
+   * Generates a Business Health Score (0-100)
+   */
+  static async getBusinessHealthScore(businessId: string): Promise<BusinessHealthScore> {
+    const bId = new mongoose.Types.ObjectId(businessId);
+    
+    // 1. Sales Growth (25 pts)
+    const revenue30d = await this.getPeriodRevenue(bId, 30);
+    const revenuePrev30d = await this.getPeriodRevenue(bId, 60, 30);
+    let growthPts = 15; // default neutral
+    if (revenuePrev30d > 0) {
+      const growth = ((revenue30d - revenuePrev30d) / revenuePrev30d) * 100;
+      if (growth > 10) growthPts = 25;
+      else if (growth > 0) growthPts = 20;
+      else if (growth > -10) growthPts = 10;
+      else growthPts = 5;
+    } else if (revenue30d > 0) {
+      growthPts = 25; // New business growing
+    }
+
+    // 2. Margin Balance (25 pts)
+    const products = await Product.find({ businessId: bId, active: true });
+    let marginPts = 0;
+    if (products.length > 0) {
+      const avgMargin = products.reduce((acc, p) => acc + (p.margin || 0), 0) / products.length;
+      if (avgMargin >= 35) marginPts = 25;
+      else if (avgMargin >= 25) marginPts = 20;
+      else if (avgMargin >= 15) marginPts = 15;
+      else marginPts = 10;
+    }
+
+    // 3. Stock Efficiency (25 pts)
+    const totalProducts = products.length;
+    const outOfStock = products.filter(p => p.stock === 0).length;
+    let stockPts = 25;
+    if (totalProducts > 0) {
+      const oosRate = (outOfStock / totalProducts) * 100;
+      if (oosRate < 5) stockPts = 25;
+      else if (oosRate < 15) stockPts = 20;
+      else if (oosRate < 30) stockPts = 10;
+      else stockPts = 5;
+    }
+
+    // 4. Rotation Health (25 pts)
+    const soldProductIds = await Sale.distinct("items.productId", { 
+      businessId: bId, 
+      createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } 
+    });
+    let rotationPts = 0;
+    if (totalProducts > 0) {
+      const rotationRate = (soldProductIds.length / totalProducts) * 100;
+      if (rotationRate > 50) rotationPts = 25;
+      else if (rotationRate > 30) rotationPts = 20;
+      else if (rotationRate > 15) rotationPts = 15;
+      else rotationPts = 5;
+    }
+
+    const totalScore = growthPts + marginPts + stockPts + rotationPts;
+    
+    let recommendation = "Tu negocio está en buen camino. Enfócate en mantener el flujo de caja.";
+    if (totalScore > 85) recommendation = "¡Excelente rendimiento! Considera expandir tu inventario o abrir nuevas sucursales.";
+    else if (totalScore < 50) recommendation = "Atención requerida. Revisa tus márgenes y productos estancados para mejorar la rentabilidad.";
+
+    return {
+      score: totalScore,
+      factors: {
+        salesGrowth: growthPts,
+        marginBalance: marginPts,
+        stockEfficiency: stockPts,
+        rotationHealth: rotationPts
+      },
+      recommendation
+    };
   }
 
   /**
