@@ -75,7 +75,7 @@ export default function UnusualExpenses({ data, lang, copy }: Props) {
             <div
               key={exp._id}
               className="p-4 rounded-lg border-l-4 border-amber-500"
-              style={{ background: "hsl(var(--vp-muted))" }}
+              style={{ background: "hsl(var(--vp-bg-card-soft))" }}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">

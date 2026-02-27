@@ -649,8 +649,9 @@ export default function ExpenseAnalyticsPage() {
                       }}
                       className="w-full text-left px-4 py-2 text-sm hover:opacity-80 transition-opacity"
                       style={{
-                        background:
-                          p === period ? "hsl(var(--vp-muted))" : "transparent",
+                        backgroundColor:
+                          p === period ? "hsl(var(--vp-primary) / 0.12)" : "transparent",
+                        color: p === period ? "hsl(var(--vp-primary))" : "inherit",
                       }}
                     >
                       {copy.period[p]}

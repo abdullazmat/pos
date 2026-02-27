@@ -80,7 +80,7 @@ export default function TopExpenses({
               <div
                 key={exp._id}
                 className="flex items-center gap-3 p-3 rounded-lg"
-                style={{ background: "hsl(var(--vp-muted))" }}
+                style={{ background: "hsl(var(--vp-bg-card-soft))" }}
               >
                 <span
                   className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"

@@ -108,7 +108,7 @@ export default function YearOverYear({ data, lang, copy }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div
           className="p-4 rounded-lg"
-          style={{ background: "hsl(var(--vp-muted))" }}
+          style={{ background: "hsl(var(--vp-bg-card-soft))" }}
         >
           <p className="text-xs opacity-60">
             {monthLabel} {data.currentYear}
@@ -122,7 +122,7 @@ export default function YearOverYear({ data, lang, copy }: Props) {
         </div>
         <div
           className="p-4 rounded-lg"
-          style={{ background: "hsl(var(--vp-muted))" }}
+          style={{ background: "hsl(var(--vp-bg-card-soft))" }}
         >
           <p className="text-xs opacity-60">
             {monthLabel} {data.currentYear - 1}
@@ -133,7 +133,7 @@ export default function YearOverYear({ data, lang, copy }: Props) {
         </div>
         <div
           className="p-4 rounded-lg"
-          style={{ background: "hsl(var(--vp-muted))" }}
+          style={{ background: "hsl(var(--vp-bg-card-soft))" }}
         >
           <p className="text-xs opacity-60">{copy.variation}</p>
           <p className="text-xl font-bold mt-1">
