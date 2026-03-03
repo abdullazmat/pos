@@ -3,6 +3,7 @@ import dbConnect from "@/lib/db/connect";
 import Client from "@/lib/models/Client";
 import { verifyToken } from "@/lib/utils/jwt";
 import { MAX_DISCOUNT_PERCENT } from "@/lib/utils/discounts";
+import { checkPlanLimit } from "@/lib/utils/planValidation";
 
 const parseDiscountLimit = (value: unknown) => {
   if (value === null || value === undefined || value === "") return null;
@@ -77,6 +78,18 @@ export async function POST(request: Request) {
     }
 
     await dbConnect();
+
+    const clientCount = await Client.countDocuments({
+      business: decoded.businessId,
+    });
+    const planCheck = await checkPlanLimit(
+      decoded.businessId,
+      "maxClients",
+      clientCount
+    );
+    if (!planCheck.allowed) {
+      return NextResponse.json({ error: planCheck.message }, { status: 403 });
+    }
 
     const client = await Client.create({
       name,

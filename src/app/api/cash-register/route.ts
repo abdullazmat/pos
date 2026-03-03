@@ -10,6 +10,7 @@ import {
   generateErrorResponse,
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
+import { checkPlanFeature } from "@/lib/utils/planValidation";
 
 export async function GET(req: NextRequest) {
   try {
@@ -35,13 +36,19 @@ export async function GET(req: NextRequest) {
       }).sort({ createdAt: 1 });
     }
 
+    // Check Plan Feature for Cash Register Audit
+    const auditFeatureCheck = await checkPlanFeature(businessId, "cashRegisterAudit");
+    
     // Get session history (last 10 closed sessions)
-    const closedSessions = await CashRegister.find({
-      businessId,
-      status: "closed",
-    })
-      .sort({ closedAt: -1 })
-      .limit(10);
+    let closedSessions: any[] = [];
+    if (auditFeatureCheck.allowed) {
+      closedSessions = await CashRegister.find({
+        businessId,
+        status: "closed",
+      })
+        .sort({ closedAt: -1 })
+        .limit(10);
+    }
 
     // Format session history with proper data
     const sessions = closedSessions.map((session) => {

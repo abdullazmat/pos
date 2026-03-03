@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dbConnect from "@/lib/db/connect";
 import Expense from "@/lib/models/Expense";
 import { verifyToken } from "@/lib/utils/jwt";
+import { checkPlanFeature } from "@/lib/utils/planValidation";
 
 export async function GET(request: Request) {
   try {
@@ -150,6 +151,12 @@ export async function POST(request: Request) {
     }
 
     await dbConnect();
+
+    // Check Plan Feature for Expense Tracking
+    const expenseFeatureCheck = await checkPlanFeature(decoded.businessId, "expenseTracking");
+    if (!expenseFeatureCheck.allowed) {
+      return NextResponse.json({ error: expenseFeatureCheck.message }, { status: 403 });
+    }
 
     const expenseData: any = {
       description,

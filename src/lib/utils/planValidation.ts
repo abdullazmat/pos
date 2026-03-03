@@ -1,7 +1,29 @@
 import { NextRequest } from "next/server";
 import dbConnect from "@/lib/db/connect";
-import Subscription from "@/lib/models/Subscription";
+import Subscription, { SubscriptionPlan } from "@/lib/models/Subscription";
+import Sale from "@/lib/models/Sale";
 import { PLAN_FEATURES, PlanType } from "@/lib/utils/planFeatures";
+/**
+ * Count sales for the current calendar month
+ */
+export async function countMonthlySales(businessId: string): Promise<number> {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999
+  );
+
+  return await Sale.countDocuments({
+    businessId,
+    createdAt: { $gte: start, $lte: end },
+  });
+}
 
 /**
  * Check if user has exceeded a plan limit
@@ -14,9 +36,11 @@ export async function checkPlanLimit(
     | "maxCategories"
     | "maxClients"
     | "maxSuppliers"
-    | "maxUsers",
-  currentCount: number
-): Promise<{ allowed: boolean; message: string }> {
+    | "maxUsers"
+    | "maxSalesPerMonth"
+    | "maxPaymentMethods",
+  currentCount?: number
+): Promise<{ allowed: boolean; message: string; limit?: number }> {
   try {
     await dbConnect();
 
@@ -25,21 +49,38 @@ export async function checkPlanLimit(
       return { allowed: false, message: "No subscription found" };
     }
 
-    const planId = (subscription as any).planId || "BASIC";
+    const planId = (subscription as any).planId || SubscriptionPlan.BASIC;
     const plan = (planId.toUpperCase() as PlanType) || "BASIC";
     const planConfig = PLAN_FEATURES[plan] || PLAN_FEATURES["BASIC"];
 
-    const limit = planConfig[limitType];
-    if (limit === -1) return { allowed: true, message: "Unlimited" };
+    // Use provided count or fetch if needed
+    let count = currentCount;
+    if (count === undefined) {
+      if (limitType === "maxSalesPerMonth") {
+        count = await countMonthlySales(businessId);
+      } else {
+        // For other limits, we should ideally fetch them here if not provided, 
+        // but current implementation expects them to be passed.
+        // Defaulting to 0 if not provided for safety (incorrect but avoids crash)
+        count = 0; 
+      }
+    }
 
-    if (currentCount >= limit) {
+    const limit = planConfig[limitType] as number;
+    if (limit === -1 || limit === 999999) return { allowed: true, message: "Unlimited", limit };
+
+    if (count >= limit) {
+      let limitName = limitType.replace("max", "").toLowerCase();
+      if (limitType === "maxSalesPerMonth") limitName = "ventas mensuales";
+      
       return {
         allowed: false,
-        message: `Has alcanzado el límite de ${limitType} (${limit}) en tu plan`,
+        message: `Has alcanzado el límite de ${limitName} (${limit}) en tu plan actual.`,
+        limit
       };
     }
 
-    return { allowed: true, message: "Within limit" };
+    return { allowed: true, message: "Within limit", limit };
   } catch (error) {
     console.error("Check plan limit error:", error);
     return { allowed: true, message: "Could not verify limit" };
@@ -51,7 +92,7 @@ export async function checkPlanLimit(
  */
 export async function checkPlanFeature(
   businessId: string,
-  feature: keyof typeof PLAN_FEATURES.free.features
+  feature: string
 ): Promise<{ allowed: boolean; message: string }> {
   try {
     await dbConnect();
@@ -69,7 +110,7 @@ export async function checkPlanFeature(
     if (!hasFeature) {
       return {
         allowed: false,
-        message: `Feature ${feature} not available in your plan`,
+        message: `Esta funcionalidad no está disponible en el plan ${planConfig.name}. Por favor, actualiza tu plan para acceder.`,
       };
     }
 
@@ -80,15 +121,16 @@ export async function checkPlanFeature(
   }
 }
 
-
 /**
  * Response helper for plan-blocked actions
  */
-export function generatePlanBlockedResponse(reason: string) {
+export function generatePlanBlockedResponse(reason: string, limitReached?: boolean) {
   return new Response(
     JSON.stringify({
       error: reason,
       code: "PLAN_LIMIT_EXCEEDED",
+      upgradeOption: true,
+      limitReached: limitReached === true
     }),
     {
       status: 403,

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import Supplier from "@/lib/models/Supplier";
 import { verifyToken } from "@/lib/utils/jwt";
+import { checkPlanLimit } from "@/lib/utils/planValidation";
 
 export async function GET(request: Request) {
   try {
@@ -54,6 +55,18 @@ export async function POST(request: Request) {
     }
 
     await dbConnect();
+
+    const supplierCount = await Supplier.countDocuments({
+      business: decoded.businessId,
+    });
+    const planCheck = await checkPlanLimit(
+      decoded.businessId,
+      "maxSuppliers",
+      supplierCount
+    );
+    if (!planCheck.allowed) {
+      return NextResponse.json({ error: planCheck.message }, { status: 403 });
+    }
 
     const existingSupplier = await Supplier.findOne({
       business: decoded.businessId,

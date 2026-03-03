@@ -7,7 +7,7 @@ import {
   generateErrorResponse,
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
-import { checkPlanLimit } from "@/lib/utils/planValidation";
+import { checkPlanLimit, checkPlanFeature } from "@/lib/utils/planValidation";
 import { generateNextProductInternalId } from "@/lib/utils/productCodeGenerator";
 
 const normalizeCode = (value: string | undefined | null) =>
@@ -76,6 +76,14 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse("No se recibió ningún archivo", 400);
     }
 
+    const businessId = authResult.user!.businessId;
+    
+    // Check Plan Feature for Excel/CSV Import
+    const importFeatureCheck = await checkPlanFeature(businessId, "excelImport");
+    if (!importFeatureCheck.allowed) {
+      return generateErrorResponse(importFeatureCheck.message, 403);
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer());
     const content = buffer.toString("utf-8");
     const rows = parseCsv(content);
@@ -89,7 +97,6 @@ export async function POST(req: NextRequest) {
 
     await dbConnect();
 
-    const businessId = authResult.user!.businessId;
     const existingCount = await Product.countDocuments({ businessId });
     const planCheck = await checkPlanLimit(
       businessId,

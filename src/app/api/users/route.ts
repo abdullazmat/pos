@@ -10,6 +10,7 @@ import {
 import bcrypt from "bcryptjs";
 import { PLAN_FEATURES } from "@/lib/utils/planFeatures";
 import { MAX_DISCOUNT_PERCENT } from "@/lib/utils/discounts";
+import { checkPlanLimit } from "@/lib/utils/planValidation";
 
 const parseDiscountLimit = (value: unknown) => {
   if (value === null || value === undefined || value === "") return null;
@@ -107,6 +108,13 @@ export async function POST(req: NextRequest) {
     }
 
     await dbConnect();
+
+    // Check Plan Limit for Users
+    const userCount = await User.countDocuments({ businessId, isActive: true });
+    const planCheck = await checkPlanLimit(businessId, "maxUsers", userCount);
+    if (!planCheck.allowed) {
+      return generateErrorResponse(planCheck.message, 403);
+    }
 
     // Check if email or username already exists (unique across all businesses)
     const existingUser = await User.findOne({

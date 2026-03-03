@@ -15,6 +15,13 @@ import { broadcastStockUpdate } from "@/lib/server/stockStream";
 import { generateNextProductInternalId } from "@/lib/utils/productCodeGenerator";
 import { parseNumberInput } from "@/lib/utils/decimalFormatter";
 import { clampDiscountLimit } from "@/lib/utils/discounts";
+import Subscription from "@/lib/models/Subscription";
+import { PLAN_FEATURES, PlanType } from "@/lib/utils/planFeatures";
+import {
+  checkPlanLimit,
+  checkPlanFeature,
+  generatePlanBlockedResponse,
+} from "@/lib/utils/planValidation";
 
 export async function GET(req: NextRequest) {
   try {
@@ -34,18 +41,31 @@ export async function GET(req: NextRequest) {
 
     await dbConnect();
 
+    // Check Plan History Limit
+    const subscription = await Subscription.findOne({ businessId }).lean();
+    const planId = (subscription as any)?.planId || "BASIC";
+    const plan = (planId.toUpperCase() as PlanType) || "BASIC";
+    const planConfig = PLAN_FEATURES[plan] || PLAN_FEATURES["BASIC"];
+    const historyDays = planConfig.saleHistoryDays || 3650;
+
+    const historyLimitDate = new Date();
+    historyLimitDate.setDate(historyLimitDate.getDate() - historyDays);
+
     // Support legacy documents that might have been stored with `business` instead of `businessId`
     const query: Record<string, unknown> = {
       $or: [{ businessId }, { business: businessId }],
     };
+
     if (startDate && endDate) {
       // Parse dates as local midnight, then expand range to cover all timezones
-      // This accounts for timezone offsets by going back 12 hours on start and forward 12 hours on end
       const start = new Date(`${startDate}T00:00:00.000Z`);
       const end = new Date(`${endDate}T23:59:59.999Z`);
 
+      // Enforce history limit
+      const finalStart = start < historyLimitDate ? historyLimitDate : start;
+
       // Expand the range by ±14 hours to cover all possible timezone offsets (-12 to +14)
-      const expandedStart = new Date(start.getTime() - 14 * 60 * 60 * 1000); // 14 hours before
+      const expandedStart = new Date(finalStart.getTime() - 14 * 60 * 60 * 1000); // 14 hours before
       const expandedEnd = new Date(end.getTime() + 14 * 60 * 60 * 1000); // 14 hours after
 
       query.createdAt = {
@@ -53,12 +73,11 @@ export async function GET(req: NextRequest) {
         $lte: expandedEnd,
       };
 
-      console.log(`[SALES API GET] Date range: ${startDate} to ${endDate}`);
-      console.log(
-        `[SALES API GET] Expanded query: ${expandedStart.toISOString()} to ${expandedEnd.toISOString()}`,
-      );
+      console.log(`[SALES API GET] Date range: ${startDate} to ${endDate} (Limited by ${historyDays} days)`);
     } else {
-      console.log(`[SALES API GET] No date range provided`);
+      // If no date range provided, apply history limit automatically
+      query.createdAt = { $gte: historyLimitDate };
+      console.log(`[SALES API GET] No date range provided. Applying ${historyDays} days limit.`);
     }
 
     // First, check total sales in database for this business (debugging)
@@ -167,6 +186,38 @@ export async function POST(req: NextRequest) {
     }
 
     await dbConnect();
+
+    // 1. Check Monthly Sales Limit
+    const saleLimitCheck = await checkPlanLimit(businessId, "maxSalesPerMonth");
+    if (!saleLimitCheck.allowed) {
+      return generatePlanBlockedResponse(
+        saleLimitCheck.message,
+        true
+      );
+    }
+
+    // 2. Check Discount Feature
+    if (discount > 0) {
+      const discountFeatureCheck = await checkPlanFeature(businessId, "discounts");
+      if (!discountFeatureCheck.allowed) {
+        return generatePlanBlockedResponse(discountFeatureCheck.message);
+      }
+    }
+
+    // 3. Check Payment Method Restrictions
+    if (paymentMethod === "multiple") {
+      const multiplePaymentCheck = await checkPlanFeature(businessId, "combinedPaymentMethods");
+      if (!multiplePaymentCheck.allowed) {
+        return generatePlanBlockedResponse(multiplePaymentCheck.message);
+      }
+    }
+
+    if (paymentMethod === "account") {
+      const creditSalesCheck = await checkPlanFeature(businessId, "creditSales");
+      if (!creditSalesCheck.allowed) {
+        return generatePlanBlockedResponse(creditSalesCheck.message);
+      }
+    }
 
     const saleUser = await User.findOne({
       _id: userId,

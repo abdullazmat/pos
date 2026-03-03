@@ -5,6 +5,8 @@ import Invoice, { InvoiceStatus } from "@/lib/models/Invoice";
 import Business from "@/lib/models/Business";
 import InvoiceAudit from "@/lib/models/InvoiceAudit";
 import { verifyToken } from "@/lib/utils/jwt";
+import Subscription from "@/lib/models/Subscription";
+import { PLAN_FEATURES, PlanType } from "@/lib/utils/planFeatures";
 import "@/lib/server/arcaRetryScheduler";
 
 export const dynamic = "force-dynamic";
@@ -199,6 +201,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Sale not found" }, { status: 404 });
     }
 
+    // Get plan configuration for feature enforcement
+    const subscription = await Subscription.findOne({ businessId: decoded.businessId }).lean();
+    const planId = (subscription as any)?.planId || "BASIC";
+    const plan = (planId.toUpperCase() as PlanType) || "BASIC";
+    const planConfig = PLAN_FEATURES[plan] || PLAN_FEATURES["BASIC"];
+
     // Fetch business config to get custom ticket message
     const businessConfig = await Business.findOne({
       _id: decoded.businessId,
@@ -354,6 +362,9 @@ export async function GET(req: NextRequest) {
       return Number(v) || 0;
     };
 
+    // Check Mandatory Branding
+    const mandatoryBranding = planConfig?.mandatoryBranding || "";
+
     // Format receipt data
     const receiptData = {
       receiptNumber:
@@ -379,6 +390,7 @@ export async function GET(req: NextRequest) {
         unitPrice: toNum(item.unitPrice),
         discount: toNum(item.discount),
         total: toNum(item.total),
+        notes: planConfig?.features?.productNotes ? item.notes : null, // Filter notes if not allowed
       })),
       subtotal: toNum((sale as any).subtotal),
       discount: toNum((sale as any).discount),
@@ -390,8 +402,9 @@ export async function GET(req: NextRequest) {
         invoice?.customerName ||
         (lang === "en" ? "Customer" : lang === "pt" ? "Cliente" : "Cliente"),
       customerCuit: invoice?.customerCuit,
-      notes: invoice?.notes,
+      notes: sale.notes,
       ticketMessage, // Add the ticket message
+      mandatoryBranding, // Added this field
     };
 
     if (format === "json") {
@@ -808,6 +821,7 @@ function generateHTMLReceipt(data: any, lang: string = "en"): string {
         
         <div class="footer">
             <div style="white-space: pre-wrap;">${data.ticketMessage || (RECEIPT_LABELS[lang]?.saleReceipt ? DEFAULT_TICKET_MESSAGES[lang] : DEFAULT_TICKET_MESSAGES.en) || ""}</div>
+            ${data.mandatoryBranding ? `<div style="margin-top: 8px; font-weight: bold; color: #333;">${data.mandatoryBranding}</div>` : ""}
             <div style="margin-top: 5px;">${new Date().toLocaleString(
               lang === "es" ? "es-AR" : lang === "pt" ? "pt-BR" : "en-US",
             )}</div>

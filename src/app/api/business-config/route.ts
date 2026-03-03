@@ -6,6 +6,7 @@ import {
   generateErrorResponse,
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
+import { checkPlanLimit } from "@/lib/utils/planValidation";
 
 export async function GET(req: NextRequest) {
   try {
@@ -96,6 +97,15 @@ export async function POST(req: NextRequest) {
     }
 
     await dbConnect();
+
+    // Check Plan Limit for Payment Methods
+    if (paymentMethods) {
+      const enabledMethodsCount = (paymentMethods as any[]).filter(pm => pm.enabled).length;
+      const planCheck = await checkPlanLimit(businessId, "maxPaymentMethods", enabledMethodsCount);
+      if (!planCheck.allowed) {
+        return generateErrorResponse(planCheck.message, 403);
+      }
+    }
 
     // Find and update business, or create if doesn't exist
     let business = await Business.findOneAndUpdate(

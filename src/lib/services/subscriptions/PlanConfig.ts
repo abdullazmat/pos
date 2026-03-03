@@ -15,31 +15,63 @@ export interface PlanConfig {
     maxCategories: number;
     maxClients: number;
     maxSuppliers: number;
+    maxPaymentMethods: number;
+    maxSalesPerMonth: number;
+    saleHistoryDays: number;
     arcaIntegration: boolean;
     advancedReporting: boolean;
     customBranding: boolean;
     invoiceChannels: number;
+    discounts: boolean;
+    combinedPaymentMethods: boolean;
+    creditSales: boolean;
+    productNotes: boolean;
+    cashRegisterAudit: boolean;
+    expenseTracking: boolean;
+    chartsAndGraphs: boolean;
+    reportExport: boolean;
+    excelImport: boolean;
+    customTicketDesign: boolean;
+    customBrandingRemoval: boolean;
+    mercadoPagoIntegration: boolean;
+    mandatoryBranding: string;
   };
 }
 
 export const SUBSCRIPTION_PLANS: Record<string, PlanConfig> = {
   BASIC: {
     id: "BASIC",
-    name: "Básico (Histórico)",
-    description: "Plan gratuito de prueba",
+    name: "Básico (Gratis)",
+    description: "Versión de prueba con límites estructurales",
     price: 0,
     currency: "ARS",
     billingPeriod: "monthly",
     features: {
-      maxProducts: 100,
+      maxProducts: 50,
       maxUsers: 1,
       maxCategories: 10,
-      maxClients: 10,
-      maxSuppliers: 5,
+      maxClients: 5,
+      maxSuppliers: 3,
+      maxPaymentMethods: 2,
+      maxSalesPerMonth: 100,
+      saleHistoryDays: 30,
       arcaIntegration: false,
       advancedReporting: false,
       customBranding: false,
       invoiceChannels: 1,
+      discounts: false,
+      combinedPaymentMethods: false,
+      creditSales: false,
+      productNotes: false,
+      cashRegisterAudit: false,
+      expenseTracking: false,
+      chartsAndGraphs: false,
+      reportExport: false,
+      excelImport: false,
+      customTicketDesign: false,
+      customBrandingRemoval: false,
+      mercadoPagoIntegration: false,
+      mandatoryBranding: "Powered by VentaPlus",
     },
   },
   ESENCIAL: {
@@ -55,10 +87,26 @@ export const SUBSCRIPTION_PLANS: Record<string, PlanConfig> = {
       maxCategories: 100,
       maxClients: 500,
       maxSuppliers: 20,
+      maxPaymentMethods: 5,
+      maxSalesPerMonth: 999999,
+      saleHistoryDays: 365,
       arcaIntegration: false,
       advancedReporting: false,
       customBranding: false,
       invoiceChannels: 1,
+      discounts: true,
+      combinedPaymentMethods: true,
+      creditSales: true,
+      productNotes: true,
+      cashRegisterAudit: true,
+      expenseTracking: true,
+      chartsAndGraphs: true,
+      reportExport: true,
+      excelImport: true,
+      customTicketDesign: false,
+      customBrandingRemoval: false,
+      mercadoPagoIntegration: true,
+      mandatoryBranding: "",
     },
   },
   PROFESIONAL: {
@@ -74,10 +122,26 @@ export const SUBSCRIPTION_PLANS: Record<string, PlanConfig> = {
       maxCategories: 9999,
       maxClients: 3000,
       maxSuppliers: 100,
+      maxPaymentMethods: 10,
+      maxSalesPerMonth: 999999,
+      saleHistoryDays: 730,
       arcaIntegration: true,
       advancedReporting: true,
       customBranding: true,
       invoiceChannels: 2,
+      discounts: true,
+      combinedPaymentMethods: true,
+      creditSales: true,
+      productNotes: true,
+      cashRegisterAudit: true,
+      expenseTracking: true,
+      chartsAndGraphs: true,
+      reportExport: true,
+      excelImport: true,
+      customTicketDesign: true,
+      customBrandingRemoval: true,
+      mercadoPagoIntegration: true,
+      mandatoryBranding: "",
     },
   },
   CRECIMIENTO: {
@@ -93,10 +157,26 @@ export const SUBSCRIPTION_PLANS: Record<string, PlanConfig> = {
       maxCategories: 99999,
       maxClients: 10000,
       maxSuppliers: 99999,
+      maxPaymentMethods: 20,
+      maxSalesPerMonth: 999999,
+      saleHistoryDays: 3650,
       arcaIntegration: true,
       advancedReporting: true,
       customBranding: true,
       invoiceChannels: 2,
+      discounts: true,
+      combinedPaymentMethods: true,
+      creditSales: true,
+      productNotes: true,
+      cashRegisterAudit: true,
+      expenseTracking: true,
+      chartsAndGraphs: true,
+      reportExport: true,
+      excelImport: true,
+      customTicketDesign: true,
+      customBrandingRemoval: true,
+      mercadoPagoIntegration: true,
+      mandatoryBranding: "",
     },
   },
 };

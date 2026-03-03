@@ -34,10 +34,26 @@ export interface ISubscription extends Document {
     maxCategories: number;
     maxClients: number;
     maxSuppliers: number;
+    maxPaymentMethods: number;
+    maxSalesPerMonth: number;
+    saleHistoryDays: number;
     arcaIntegration: boolean;
     advancedReporting: boolean;
     customBranding: boolean;
     invoiceChannels: number;
+    discounts: boolean;
+    combinedPaymentMethods: boolean;
+    creditSales: boolean;
+    productNotes: boolean;
+    cashRegisterAudit: boolean;
+    expenseTracking: boolean;
+    chartsAndGraphs: boolean;
+    reportExport: boolean;
+    excelImport: boolean;
+    customTicketDesign: boolean;
+    customBrandingRemoval: boolean;
+    mercadoPagoIntegration: boolean;
+    mandatoryBranding: string;
   };
 
   createdAt: Date;
@@ -91,15 +107,31 @@ const subscriptionSchema = new Schema<ISubscription>(
     },
 
     features: {
-      maxProducts: { type: Number, default: 500 },
-      maxUsers: { type: Number, default: 2 },
-      maxCategories: { type: Number, default: 50 },
-      maxClients: { type: Number, default: 0 },
-      maxSuppliers: { type: Number, default: 10 },
+      maxProducts: { type: Number, default: 50 },
+      maxUsers: { type: Number, default: 1 },
+      maxCategories: { type: Number, default: 10 },
+      maxClients: { type: Number, default: 5 },
+      maxSuppliers: { type: Number, default: 3 },
+      maxPaymentMethods: { type: Number, default: 2 },
+      maxSalesPerMonth: { type: Number, default: 100 },
+      saleHistoryDays: { type: Number, default: 30 },
       arcaIntegration: { type: Boolean, default: false },
       advancedReporting: { type: Boolean, default: false },
       customBranding: { type: Boolean, default: false },
       invoiceChannels: { type: Number, default: 1 },
+      discounts: { type: Boolean, default: false },
+      combinedPaymentMethods: { type: Boolean, default: false },
+      creditSales: { type: Boolean, default: false },
+      productNotes: { type: Boolean, default: false },
+      cashRegisterAudit: { type: Boolean, default: false },
+      expenseTracking: { type: Boolean, default: false },
+      chartsAndGraphs: { type: Boolean, default: false },
+      reportExport: { type: Boolean, default: false },
+      excelImport: { type: Boolean, default: false },
+      customTicketDesign: { type: Boolean, default: false },
+      customBrandingRemoval: { type: Boolean, default: false },
+      mercadoPagoIntegration: { type: Boolean, default: false },
+      mandatoryBranding: { type: String, default: "Powered by VentaPlus" },
     },
   },
   {

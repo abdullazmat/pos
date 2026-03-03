@@ -7,6 +7,7 @@ import {
   generateErrorResponse,
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
+import { checkPlanFeature } from "@/lib/utils/planValidation";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,13 @@ export async function GET(req: NextRequest) {
     }
 
     const { businessId } = authResult.user!;
+    
+    // Check Plan Feature for Charts and Graphs
+    const chartsFeatureCheck = await checkPlanFeature(businessId, "chartsAndGraphs");
+    if (!chartsFeatureCheck.allowed) {
+      return generateErrorResponse(chartsFeatureCheck.message, 403);
+    }
+
     const { searchParams } = new URL(req.url);
     const reportType = searchParams.get("type") || "daily";
     const fromParam = searchParams.get("from");
