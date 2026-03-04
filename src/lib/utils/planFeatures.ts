@@ -51,10 +51,10 @@ export const PLAN_FEATURES: Record<
 > = {
   BASIC: {
     name: "Free",
-    maxProducts: 50,
+    maxProducts: 100,
     maxCategories: 10,
-    maxClients: 5,
-    maxSuppliers: 3,
+    maxClients: 10,
+    maxSuppliers: 5,
     maxUsers: 1,
     maxPaymentMethods: 2,
     maxSalesPerMonth: 100,
@@ -188,10 +188,10 @@ export const PLAN_FEATURES: Record<
   },
   free: {
     name: "Free",
-    maxProducts: 50,
+    maxProducts: 100,
     maxCategories: 10,
-    maxClients: 5,
-    maxSuppliers: 3,
+    maxClients: 10,
+    maxSuppliers: 5,
     maxUsers: 1,
     maxPaymentMethods: 2,
     maxSalesPerMonth: 100,

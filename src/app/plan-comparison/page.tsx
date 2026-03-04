@@ -74,6 +74,7 @@ const PLAN_COMPARISON_COPY = {
       suppliers: "Proveedores",
       paymentMethods: "Métodos de Pago",
       maxDiscount: "Descuento Máximo",
+      maxSalesPerMonth: "Ventas Mensuales",
     },
     features: {
       pos: "Sistema POS",
@@ -155,6 +156,7 @@ const PLAN_COMPARISON_COPY = {
       suppliers: "Suppliers",
       paymentMethods: "Payment Methods",
       maxDiscount: "Max Discount",
+      maxSalesPerMonth: "Monthly Sales",
     },
     features: {
       pos: "POS System",
@@ -236,6 +238,7 @@ const PLAN_COMPARISON_COPY = {
       suppliers: "Fornecedores",
       paymentMethods: "Métodos de Pagamento",
       maxDiscount: "Desconto Máximo",
+      maxSalesPerMonth: "Vendas Mensais",
     },
     features: {
       pos: "Sistema PDV",
@@ -384,6 +387,7 @@ export default function PlanComparisonPage() {
     { label: copy.limits.suppliers, free: "5", esencial: "20", profesional: "100", crecimiento: copy.unlimited },
     { label: copy.limits.paymentMethods, free: "2", esencial: "5", profesional: copy.unlimited, crecimiento: copy.unlimited },
     { label: copy.limits.maxDiscount, free: copy.notAvailable, esencial: "15%", profesional: "100%", crecimiento: "100%" },
+    { label: copy.limits.maxSalesPerMonth, free: "100", esencial: copy.unlimited, profesional: copy.unlimited, crecimiento: copy.unlimited },
   ];
 
   const checkRowsPOS = [
