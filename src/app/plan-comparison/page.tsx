@@ -380,11 +380,11 @@ export default function PlanComparisonPage() {
 
   // Comparison data based on screenshot
   const limitsRows = [
-    { label: copy.limits.products, free: "100", esencial: "500", profesional: "3.000", crecimiento: "10.000" },
+    { label: copy.limits.products, free: "50", esencial: "500", profesional: "3.000", crecimiento: "10.000" },
     { label: copy.limits.users, free: "1", esencial: "1", profesional: "3", crecimiento: "10" },
     { label: copy.limits.categories, free: "10", esencial: "100", profesional: "9.999", crecimiento: copy.unlimited },
-    { label: copy.limits.clients, free: "10", esencial: "500", profesional: "3.000", crecimiento: copy.unlimited },
-    { label: copy.limits.suppliers, free: "5", esencial: "20", profesional: "100", crecimiento: copy.unlimited },
+    { label: copy.limits.clients, free: "5", esencial: "500", profesional: "3.000", crecimiento: copy.unlimited },
+    { label: copy.limits.suppliers, free: "3", esencial: "20", profesional: "100", crecimiento: copy.unlimited },
     { label: copy.limits.paymentMethods, free: "2", esencial: "5", profesional: copy.unlimited, crecimiento: copy.unlimited },
     { label: copy.limits.maxDiscount, free: copy.notAvailable, esencial: "15%", profesional: "100%", crecimiento: "100%" },
     { label: copy.limits.maxSalesPerMonth, free: "100", esencial: copy.unlimited, profesional: copy.unlimited, crecimiento: copy.unlimited },

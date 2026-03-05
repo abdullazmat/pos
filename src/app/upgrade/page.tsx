@@ -25,7 +25,7 @@ const UPGRADE_COPY = {
         price: "$0",
         billing: "/mes",
         features: [
-          "Hasta 100 productos",
+          "Hasta 50 productos",
           "Control manual",
           "1 usuario",
         ],
@@ -112,7 +112,7 @@ const UPGRADE_COPY = {
         price: "$0",
         billing: "/month",
         features: [
-          "Up to 100 products",
+          "Up to 50 products",
           "Manual control",
           "1 user",
         ],
@@ -199,7 +199,7 @@ const UPGRADE_COPY = {
         price: "$0",
         billing: "/mês",
         features: [
-          "Até 100 produtos",
+          "Até 50 produtos",
           "Controle manual",
           "1 usuário",
         ],

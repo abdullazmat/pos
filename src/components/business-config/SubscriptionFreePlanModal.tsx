@@ -94,7 +94,7 @@ export default function SubscriptionFreePlanModal({
             <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-blue-200 dark:border-blue-600/30">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                  100
+                  50
                 </div>
                 <div className="text-xs text-slate-600 dark:text-gray-400">
                   Productos
@@ -102,10 +102,10 @@ export default function SubscriptionFreePlanModal({
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                  2
+                  1
                 </div>
                 <div className="text-xs text-slate-600 dark:text-gray-400">
-                  Usuarios
+                  Usuario
                 </div>
               </div>
               <div className="text-center">
@@ -140,11 +140,11 @@ export default function SubscriptionFreePlanModal({
               <ul className="space-y-2">
                 <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
                   <span className="text-teal-600 dark:text-teal-400">✓</span>
-                  Hasta 100 productos
+                  Hasta 50 productos
                 </li>
                 <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
-                  <span className="text-teal-600 dark:text-teal-400">✓</span> 2
-                  usuarios
+                  <span className="text-teal-600 dark:text-teal-400">✓</span> 1
+                  usuario
                 </li>
                 <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
                   <span className="text-teal-600 dark:text-teal-400">✓</span>

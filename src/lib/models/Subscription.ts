@@ -107,11 +107,11 @@ const subscriptionSchema = new Schema<ISubscription>(
     },
 
     features: {
-      maxProducts: { type: Number, default: 100 },
+      maxProducts: { type: Number, default: 50 },
       maxUsers: { type: Number, default: 1 },
       maxCategories: { type: Number, default: 10 },
-      maxClients: { type: Number, default: 10 },
-      maxSuppliers: { type: Number, default: 5 },
+      maxClients: { type: Number, default: 5 },
+      maxSuppliers: { type: Number, default: 3 },
       maxPaymentMethods: { type: Number, default: 2 },
       maxSalesPerMonth: { type: Number, default: 100 },
       saleHistoryDays: { type: Number, default: 30 },

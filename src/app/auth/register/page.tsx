@@ -87,7 +87,7 @@ export default function RegisterPage() {
   }
 
   const freePlanFeatures = [
-    "Up to 100 products",
+    "Up to 50 products",
     "Basic inventory tracking",
     "Daily sales reports",
     "1 user account",
@@ -283,7 +283,7 @@ export default function RegisterPage() {
                   Plan Gratuito Incluido
                 </p>
                 <p className="text-xs leading-relaxed text-[hsl(var(--vp-muted))]">
-                  Empieza gratis con 100 productos y 2 usuarios. Puedes
+                  Empieza gratis con 50 productos y 1 usuario. Puedes
                   actualizar a Pro cuando quieras.
                 </p>
               </div>

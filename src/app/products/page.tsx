@@ -132,7 +132,7 @@ const PRODUCT_COPY = {
     upgrade: {
       feature: "Productos Ilimitados",
       reason:
-        "Tu plan Free tiene un límite de 100 productos. Actualiza a Pro para acceso ilimitado.",
+        "Tu plan Free tiene un límite de 50 productos. Actualiza a Pro para acceso ilimitado.",
     },
     limit: {
       limitName: "Productos",
@@ -262,7 +262,7 @@ const PRODUCT_COPY = {
     upgrade: {
       feature: "Unlimited Products",
       reason:
-        "Your Free plan is limited to 100 products. Upgrade to Pro for unlimited access.",
+        "Your Free plan is limited to 50 products. Upgrade to Pro for unlimited access.",
     },
     limit: {
       limitName: "Products",
@@ -392,7 +392,7 @@ const PRODUCT_COPY = {
     upgrade: {
       feature: "Produtos Ilimitados",
       reason:
-        "Seu plano Free tem limite de 100 produtos. Faça upgrade para Pro para uso ilimitado.",
+        "Seu plano Free tem limite de 50 produtos. Faça upgrade para Pro para uso ilimitado.",
     },
     limit: {
       limitName: "Produtos",
