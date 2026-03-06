@@ -50,7 +50,7 @@ export const SUBSCRIPTION_PLANS: Record<string, PlanConfig> = {
       maxProducts: 50,
       maxUsers: 1,
       maxCategories: 10,
-      maxClients: 5,
+      maxClients: 0,
       maxSuppliers: 3,
       maxPaymentMethods: 2,
       maxSalesPerMonth: 100,

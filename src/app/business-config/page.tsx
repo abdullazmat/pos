@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 import Header from "@/components/layout/Header";
 import SubscriptionProModal from "@/components/business-config/SubscriptionProModal";
 import SubscriptionFreePlanModal from "@/components/business-config/SubscriptionFreePlanModal";
@@ -344,6 +345,8 @@ export default function BusinessConfigPage() {
   );
   const router = useRouter();
   const { currentLanguage } = useGlobalLanguage();
+  const { subscription } = useSubscription();
+  const isFreePlan = (subscription?.planId || "BASIC").toUpperCase() === "BASIC";
   const copy =
     CONFIG_COPY[currentLanguage as keyof typeof CONFIG_COPY] || CONFIG_COPY.es;
 
@@ -1156,33 +1159,48 @@ export default function BusinessConfigPage() {
                     {copy.paymentMethods.subtitle}
                   </p>
                   <div className="space-y-3">
-                    {formData.paymentMethods?.map((method) => (
-                      <div
-                        key={method.id}
-                        className="flex items-center justify-between p-3 border rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-                      >
-                        <span className="text-sm font-medium text-slate-900 dark:text-white">
-                          {copy.paymentMethods[
-                            method.id as keyof typeof copy.paymentMethods
-                          ] || method.name}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => togglePaymentMethod(method.id)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                            method.enabled
-                              ? "bg-blue-600"
-                              : "bg-slate-300 dark:bg-slate-600"
-                          }`}
+                    {formData.paymentMethods?.map((method) => {
+                      const isRestricted = isFreePlan && !["cash", "bankTransfer"].includes(method.id);
+                      return (
+                        <div
+                          key={method.id}
+                          className={`flex items-center justify-between p-3 border rounded-lg ${
+                            isRestricted 
+                              ? "bg-slate-100 dark:bg-slate-900/50 opacity-60" 
+                              : "bg-slate-50 dark:bg-slate-800"
+                          } border-slate-200 dark:border-slate-700`}
                         >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              method.enabled ? "translate-x-6" : "translate-x-1"
-                            }`}
-                          />
-                        </button>
-                      </div>
-                    ))}
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                              {copy.paymentMethods[
+                                method.id as keyof typeof copy.paymentMethods
+                              ] || method.name}
+                              {isRestricted && (
+                                <span className="text-[10px] bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-slate-500 uppercase font-bold">
+                                  🔒 Pro
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => !isRestricted && togglePaymentMethod(method.id)}
+                            disabled={isRestricted}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                              method.enabled
+                                ? "bg-blue-600"
+                                : "bg-slate-300 dark:bg-slate-600"
+                            } ${isRestricted ? "cursor-not-allowed" : ""}`}
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                method.enabled ? "translate-x-6" : "translate-x-1"
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 

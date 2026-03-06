@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 import { formatARS } from "@/lib/utils/currency";
 import {
   parseQuantity,
@@ -48,7 +49,7 @@ export default function Cart({
   onAddProduct,
   additionalPaymentMethods = [],
 }: CartProps) {
-  const { t } = useGlobalLanguage();
+  const { t, currentLanguage } = useGlobalLanguage();
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
   const [isLoading, setIsLoading] = useState(false);
   const [quantityInputs, setQuantityInputs] = useState<Record<string, string>>(
@@ -62,9 +63,9 @@ export default function Cart({
   const [availablePaymentMethods, setAvailablePaymentMethods] = useState<
     PaymentMethod[]
   >([
-    { id: "cash", name: "Efectivo", enabled: true },
-    { id: "bankTransfer", name: "Transferencia", enabled: true },
-    { id: "qr", name: "QR", enabled: true },
+    { id: "cash", name: t("ui.paymentOptions.cash", "pos"), enabled: true },
+    { id: "bankTransfer", name: t("ui.paymentOptions.bankTransfer", "pos"), enabled: true },
+    { id: "qr", name: t("ui.paymentOptions.qr", "pos"), enabled: true },
   ]);
 
   useEffect(() => {
@@ -93,20 +94,32 @@ export default function Cart({
     fetchPaymentMethods();
   }, []);
 
+  const { subscription } = useSubscription();
+  const isFreePlan = (subscription?.planId || "BASIC").toUpperCase() === "BASIC";
+
   const mergedPaymentMethods = useMemo(() => {
     const byId = new Map<string, PaymentMethod>();
     availablePaymentMethods.forEach((method) => {
       if (method?.id) {
+        // Filter payment methods for free plan
+        if (isFreePlan && !["cash", "bankTransfer"].includes(method.id)) {
+          return;
+        }
         byId.set(method.id, method);
       }
     });
+
     additionalPaymentMethods.forEach((method) => {
       if (method?.id && !byId.has(method.id)) {
+        // Filter additional payment methods for free plan
+        if (isFreePlan && !["cash", "bankTransfer"].includes(method.id)) {
+          return;
+        }
         byId.set(method.id, method);
       }
     });
     return Array.from(byId.values());
-  }, [availablePaymentMethods, additionalPaymentMethods]);
+  }, [availablePaymentMethods, additionalPaymentMethods, isFreePlan]);
 
   useEffect(() => {
     if (!mergedPaymentMethods.find((method) => method.id === paymentMethod)) {
@@ -294,7 +307,7 @@ export default function Cart({
                     inputMode={item.isSoldByWeight ? "decimal" : "numeric"}
                     placeholder={getInputPlaceholder(
                       item.isSoldByWeight || false,
-                      "en",
+                      currentLanguage || "es",
                     )}
                     value={
                       quantityInputs[item.productId] ??
@@ -427,14 +440,24 @@ export default function Cart({
                   )}
                 </div>
                 <div>
-                  <label className="vp-label">{t("ui.discount", "pos")}</label>
+                  <label className="vp-label flex items-center justify-between">
+                    {t("ui.discount", "pos")}
+                    {isFreePlan && (
+                      <span className="text-[10px] bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded text-slate-500 uppercase font-bold">
+                        {t("ui.proBadge", "pos") || "🔒 PRO"}
+                      </span>
+                    )}
+                  </label>
                   <input
                     type="number"
                     min="0"
                     step="1"
                     inputMode="numeric"
+                    disabled={isFreePlan}
+                    title={isFreePlan ? t("ui.keyboardPROHint", "pos") : ""}
                     value={discountInputs[item.productId] ?? item.discount}
                     onChange={(e) => {
+                      if (isFreePlan) return;
                       const value = e.target.value;
                       setDiscountInputs((prev) => ({
                         ...prev,
@@ -446,7 +469,7 @@ export default function Cart({
                         Number.isFinite(parsed) ? parsed : 0,
                       );
                     }}
-                    className="vp-input text-sm h-9"
+                    className={`vp-input text-sm h-9 ${isFreePlan ? "bg-slate-50 dark:bg-slate-900/50 cursor-not-allowed opacity-60" : ""}`}
                   />
                 </div>
                 <div>
@@ -464,7 +487,7 @@ export default function Cart({
       </div>
 
       {/* CrossSell: always visible pinned above totals */}
-      {items.length > 0 && onAddProduct && (
+      {items.length > 0 && onAddProduct && !isFreePlan && (
         <CrossSell
           cartProductIds={items.map(i => i.productId)}
           onAdd={(p) => onAddProduct(p._id, p.name, p.price, undefined, p.isSoldByWeight)}

@@ -10,6 +10,7 @@ import Toast from "@/components/common/Toast";
 import Loading from "@/components/common/Loading";
 import { isTokenExpiredSoon } from "@/lib/utils/token";
 import { useBusinessDateTime } from "@/lib/hooks/useBusinessDateTime";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 
 import WithdrawalModal from "@/components/cash-register/WithdrawalModal";
 import WithdrawalTicket from "@/components/cash-register/WithdrawalTicket";
@@ -321,6 +322,8 @@ export default function CashRegisterPage() {
   } | null>(null);
   const router = useRouter();
   const { currentLanguage } = useGlobalLanguage();
+  const { subscription } = useSubscription();
+  const isFreePlan = (subscription?.planId || "BASIC").toUpperCase() === "BASIC";
   const copy = (CASH_COPY[currentLanguage] ||
     CASH_COPY.en) as typeof CASH_COPY.en;
   const { formatDateTime } = useBusinessDateTime();
@@ -1388,7 +1391,13 @@ export default function CashRegisterPage() {
                 <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-4">
                   <button
                     onClick={() => setShowWithdrawalModal(true)}
-                    className="flex items-center justify-center gap-2 px-6 py-3 font-bold text-white transition bg-orange-600 rounded-lg shadow-lg hover:bg-orange-700 hover:shadow-xl"
+                    disabled={isFreePlan}
+                    title={isFreePlan ? "Disponible en planes superiores" : ""}
+                    className={`flex items-center justify-center gap-2 px-6 py-3 font-bold text-white transition rounded-lg shadow-lg ${
+                      isFreePlan
+                        ? "bg-slate-400 cursor-not-allowed"
+                        : "bg-orange-600 hover:bg-orange-700 hover:shadow-xl"
+                    }`}
                   >
                     <svg
                       className="w-5 h-5"

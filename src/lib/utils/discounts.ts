@@ -1,4 +1,4 @@
-export const MAX_DISCOUNT_PERCENT = 5;
+export const MAX_DISCOUNT_PERCENT = 100;
 
 export const normalizeDiscountLimit = (
   limit: number | null | undefined,

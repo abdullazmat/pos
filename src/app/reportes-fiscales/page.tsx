@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 import Header from "@/components/layout/Header";
 import { toast } from "react-toastify";
 import { Calendar, Download, FileText, Filter, Loader } from "lucide-react";
@@ -378,6 +379,7 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
 export default function FiscalReportsPage() {
   const router = useRouter();
   const { currentLanguage } = useGlobalLanguage();
+  const { isFreePlan } = useSubscription();
   const t =
     TRANSLATIONS[currentLanguage as keyof typeof TRANSLATIONS] ||
     TRANSLATIONS.es;
@@ -701,6 +703,39 @@ export default function FiscalReportsPage() {
       setLoading(false);
     }
   };
+
+  if (isFreePlan) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+        <Header user={user} />
+        <main className="max-w-4xl mx-auto px-6 py-20 text-center">
+            <div className="bg-white dark:bg-gray-900 p-12 border-dashed border-2 border-blue-500/30 rounded-2xl">
+                <div className="w-20 h-20 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-6">
+                    <FileText size={40} className="text-blue-500" />
+                </div>
+                <h1 className="text-3xl font-bold mb-4">{t.title}</h1>
+                <p className="text-lg opacity-70 mb-8">
+                    El libro de IVA y los reportes fiscales están disponibles únicamente en planes Pro y superiores.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                    <button 
+                        onClick={() => router.push("/upgrade")}
+                        className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
+                    >
+                        Actualizar Plan
+                    </button>
+                    <button 
+                        onClick={() => router.push("/dashboard")}
+                        className="px-8 py-3 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 font-bold rounded-xl transition-colors"
+                    >
+                        Volver al Dashboard
+                    </button>
+                </div>
+            </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <>

@@ -11,6 +11,7 @@ import Cart from "@/components/pos/Cart";
 import ClientSelector from "@/components/pos/ClientSelector";
 import Header from "@/components/layout/Header";
 import Loading from "@/components/common/Loading";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 import { isTokenExpiredSoon } from "@/lib/utils/token";
 import { toast } from "react-toastify";
 import { formatARS } from "@/lib/utils/currency";
@@ -36,6 +37,9 @@ export default function POSPage() {
   const router = useRouter();
   const { t, currentLanguage } = useGlobalLanguage();
   const { formatDate, formatTime } = useBusinessDateTime();
+  const { subscription } = useSubscription();
+
+  const isFreePlan = (subscription?.planId || "BASIC").toUpperCase() === "BASIC";
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -574,12 +578,7 @@ export default function POSPage() {
       ),
     );
     if (limitExceeded) {
-      toast.error(
-        t("ui.discountLimitExceeded", "pos") !== "ui.discountLimitExceeded"
-          ? (t("ui.discountLimitExceeded", "pos") as string)
-          : "Discount exceeds your limit",
-        { toastId: "discount-limit" },
-      );
+      toast.error(t("ui.discountLimitExceeded", "pos"), { toastId: "discount-limit" });
     }
   };
 
@@ -812,13 +811,13 @@ export default function POSPage() {
           <div className="flex flex-wrap items-center gap-2">
             <span className="vp-status-pill">
               <span className="vp-status-dot" />
-              {getPosLabel("ui.statusOnline", "Online")}
+              {t("ui.statusOnline", "pos")}
             </span>
             <span className="vp-status-pill">
-              {getPosLabel("ui.statusSync", "Sync 0s")}
+              {t("ui.statusSync", "pos")}
             </span>
             <span className="vp-status-pill">
-              {getPosLabel("ui.statusPrinter", "Printer OK")}
+              {t("ui.statusPrinter", "pos")}
             </span>
           </div>
           <div className="text-sm text-[hsl(var(--vp-muted))]">
@@ -1111,10 +1110,37 @@ export default function POSPage() {
                   ) : null}
                 </div>
                 {/* New Keyboard-First Input */}
-                <KeyboardPOSInput
-                  onAddToCart={handleAddToCart}
-                  onCustomerAction={handleCustomerAction}
-                />
+                {isFreePlan ? (
+                  <div className="vp-card p-6 border-dashed border-2 border-[hsl(var(--vp-border))] flex flex-col items-center justify-center text-center bg-[hsl(var(--vp-bg-card-soft))]/30">
+                    <div className="w-10 h-10 rounded-full bg-[hsl(var(--vp-bg-soft))] flex items-center justify-center mb-3">
+                      <svg
+                        className="w-5 h-5 text-[hsl(var(--vp-muted))]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-semibold text-[hsl(var(--vp-text))] mb-1">
+                      {t("ui.keyboardPOSQuick", "pos")}
+                      <span className="ml-2 vp-pill text-[10px]">PRO</span>
+                    </p>
+                    <p className="text-xs text-[hsl(var(--vp-muted))] max-w-[280px]">
+                      {t("ui.keyboardPROHint", "pos")}
+                    </p>
+                  </div>
+                ) : (
+                  <KeyboardPOSInput
+                    onAddToCart={handleAddToCart}
+                    onCustomerAction={handleCustomerAction}
+                  />
+                )}
 
                 {/* Legacy Product Search (collapsible) */}
                 <details className="group">
@@ -1166,8 +1192,6 @@ export default function POSPage() {
                           | "INTERNAL"
                           | "ARCA";
                         setInvoiceChannel(newChannel);
-                        // Reset ivaType to default when switching channels
-                        // to prevent stale values from a previous ARCA selection
                         if (newChannel === "INTERNAL") {
                           setIvaType("CONSUMIDOR_FINAL");
                         }
@@ -1177,9 +1201,11 @@ export default function POSPage() {
                       <option value="INTERNAL">
                         {t("ui.internalNonFiscal", "pos")}
                       </option>
-                      <option value="ARCA">
-                        {t("ui.arcaFiscalInvoice", "pos")}
-                      </option>
+                      {!isFreePlan && (
+                        <option value="ARCA">
+                          {t("ui.arcaFiscalInvoice", "pos")}
+                        </option>
+                      )}
                     </select>
                   </div>
                   {invoiceChannel === "ARCA" && (

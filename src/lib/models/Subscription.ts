@@ -110,7 +110,7 @@ const subscriptionSchema = new Schema<ISubscription>(
       maxProducts: { type: Number, default: 50 },
       maxUsers: { type: Number, default: 1 },
       maxCategories: { type: Number, default: 10 },
-      maxClients: { type: Number, default: 5 },
+      maxClients: { type: Number, default: 0 },
       maxSuppliers: { type: Number, default: 3 },
       maxPaymentMethods: { type: Number, default: 2 },
       maxSalesPerMonth: { type: Number, default: 100 },

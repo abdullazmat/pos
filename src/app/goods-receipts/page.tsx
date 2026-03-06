@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 import Header from "@/components/layout/Header";
 import { toast } from "react-toastify";
 import {
@@ -392,6 +393,7 @@ type Lang = keyof typeof COPY;
 export default function GoodsReceiptPage() {
   const router = useRouter();
   const { currentLanguage } = useGlobalLanguage();
+  const { isFreePlan } = useSubscription();
   const lang = (currentLanguage || "es") as Lang;
   const copy = COPY[lang] || COPY.es;
 
@@ -810,6 +812,39 @@ export default function GoodsReceiptPage() {
     );
 
   if (!mounted) return null;
+
+  if (isFreePlan) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+        <Header user={user} />
+        <main className="max-w-4xl mx-auto px-6 py-20 text-center">
+            <div className="bg-white dark:bg-gray-900 p-12 border-dashed border-2 border-[hsl(var(--vp-primary)/0.3)] bg-[hsl(var(--vp-primary)/0.05)] rounded-2xl">
+                <div className="w-20 h-20 rounded-full bg-[hsl(var(--vp-primary)/0.1)] flex items-center justify-center mx-auto mb-6">
+                    <Truck size={40} className="text-[hsl(var(--vp-primary))]" />
+                </div>
+                <h1 className="text-3xl font-bold mb-4">{copy.title}</h1>
+                <p className="text-lg opacity-70 mb-8">
+                    La gestión de recepción de mercadería y control de stock avanzado está disponible únicamente en planes Pro.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                    <button 
+                        onClick={() => router.push("/upgrade")}
+                        className="px-8 py-3 bg-[hsl(var(--vp-primary))] hover:opacity-90 text-white font-bold rounded-xl transition-colors"
+                    >
+                        Ver Planes Pro
+                    </button>
+                    <button 
+                        onClick={() => router.push("/dashboard")}
+                        className="px-8 py-3 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 font-bold rounded-xl transition-colors"
+                    >
+                        Volver al Dashboard
+                    </button>
+                </div>
+            </div>
+        </main>
+      </div>
+    );
+  }
 
   // ── Form View ──────────────────────────────────
   if (showForm) {

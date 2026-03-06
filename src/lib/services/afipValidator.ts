@@ -19,7 +19,10 @@ export function validateAfipFiles(opts: {
   try {
     // Build absolute path at runtime so webpack doesn't try to bundle it.
     // Using path.join avoids the "critical dependency" warning.
-    const modulePath = path.join(process.cwd(), "lib", "afip", "validateAfip.js");
+    // Build absolute path at runtime
+    const modulePath = path.resolve(process.cwd(), "lib", "afip", "validateAfip.js");
+    console.log(`[AFIP] Loading validator from: ${modulePath}`);
+    
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const validator = require(modulePath);
 

@@ -383,7 +383,7 @@ export default function PlanComparisonPage() {
     { label: copy.limits.products, free: "50", esencial: "500", profesional: "3.000", crecimiento: "10.000" },
     { label: copy.limits.users, free: "1", esencial: "1", profesional: "3", crecimiento: "10" },
     { label: copy.limits.categories, free: "10", esencial: "100", profesional: "9.999", crecimiento: copy.unlimited },
-    { label: copy.limits.clients, free: "5", esencial: "500", profesional: "3.000", crecimiento: copy.unlimited },
+    { label: copy.limits.clients, free: "0", esencial: "500", profesional: "3.000", crecimiento: copy.unlimited },
     { label: copy.limits.suppliers, free: "3", esencial: "20", profesional: "100", crecimiento: copy.unlimited },
     { label: copy.limits.paymentMethods, free: "2", esencial: "5", profesional: copy.unlimited, crecimiento: copy.unlimited },
     { label: copy.limits.maxDiscount, free: copy.notAvailable, esencial: "15%", profesional: "100%", crecimiento: "100%" },
@@ -424,7 +424,7 @@ export default function PlanComparisonPage() {
   ];
 
   const checkRowsConfig = [
-    { label: copy.features.customKeyboard, free: true, esencial: true, profesional: true, crecimiento: true },
+    { label: copy.features.customKeyboard, free: false, esencial: true, profesional: true, crecimiento: true },
     { label: copy.businessConfig, free: true, esencial: true, profesional: true, crecimiento: true },
     { label: copy.customTickets, free: false, esencial: false, profesional: true, crecimiento: true },
     { label: copy.customBranding, free: false, esencial: false, profesional: true, crecimiento: true },

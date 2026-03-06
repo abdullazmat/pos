@@ -56,20 +56,11 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
           setClients(normalized);
         } else {
           const error = await res.json().catch(() => ({}));
-          toast.error(
-            t("messages.clientFetchError", "pos") !==
-              "messages.clientFetchError"
-              ? t("messages.clientFetchError", "pos")
-              : error?.error || "Error al cargar clientes",
-          );
+          toast.error(t("messages.clientFetchError", "pos"));
           setClients([]);
         }
       } catch (e) {
-        toast.error(
-          t("messages.clientFetchError", "pos") !== "messages.clientFetchError"
-            ? t("messages.clientFetchError", "pos")
-            : "Error al cargar clientes",
-        );
+        toast.error(t("messages.clientFetchError", "pos"));
         setClients([]);
       } finally {
         setLoading(false);
@@ -92,9 +83,7 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
   return (
     <div className="mb-4">
       <label className="vp-label">
-        {t("labels.customer", "pos") !== "labels.customer"
-          ? t("labels.customer", "pos")
-          : "Cliente"}
+        {t("labels.customer", "pos")}
       </label>
       <select
         ref={selectRef}
@@ -111,9 +100,7 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
         <option value="">
           {loading
             ? t("messages.loading", "pos")
-            : t("messages.selectClient", "pos") !== "messages.selectClient"
-              ? t("messages.selectClient", "pos")
-              : "Seleccionar cliente..."}
+              : t("messages.selectClient", "pos")}
         </option>
         {clients.map((client) => (
           <option key={String(client._id)} value={String(client._id)}>
@@ -127,29 +114,19 @@ const ClientSelector: React.FC<ClientSelectorProps> = ({
         {!loading && clients.length === 0 && (
           <option value="" disabled>
             {!isClientsEnabled
-              ? t("messages.clientsUpgradeRequired", "pos") !==
-                "messages.clientsUpgradeRequired"
-                ? t("messages.clientsUpgradeRequired", "pos")
-                : "Búsqueda de clientes disponible solo en el plan Pro"
-              : t("messages.noClients", "pos") !== "messages.noClients"
-                ? t("messages.noClients", "pos")
-                : "No hay clientes"}
+              ? t("messages.clientsUpgradeRequired", "pos")
+              : t("messages.noClients", "pos")}
           </option>
         )}
       </select>
       {!loading && clients.length === 0 && !isClientsEnabled && (
         <p className="mt-2 text-xs text-amber-500">
-          {t("messages.clientsUpgradeRequired", "pos") !==
-          "messages.clientsUpgradeRequired"
-            ? t("messages.clientsUpgradeRequired", "pos")
-            : "Búsqueda de clientes disponible solo en el plan Pro"}
+          {t("messages.clientsUpgradeRequired", "pos")}
         </p>
       )}
       {value && typeof value.discountLimit === "number" && (
         <p className="mt-2 text-xs text-amber-400">
-          {t("ui.discount", "pos") !== "ui.discount"
-            ? `${t("ui.discount", "pos")}: ${value.discountLimit}%`
-            : `Discount limit: ${value.discountLimit}%`}
+          {t("ui.discount", "pos")}: {value.discountLimit}%
         </p>
       )}
     </div>

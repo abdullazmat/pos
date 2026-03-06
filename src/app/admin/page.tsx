@@ -119,7 +119,7 @@ const ADMIN_COPY = {
       pinCleared: "PIN interno eliminado",
       pinTooShort: "El PIN debe tener entre 4 y 8 dígitos",
       userLimitReached:
-        "El límite de usuarios en el plan gratuito es 2/2. Actualiza tu plan para agregar más usuarios.",
+        "El límite de usuarios en el plan gratuito es 1/1. Actualiza tu plan para agregar más usuarios.",
       cannotDelete: "No puedes eliminar tu propio usuario.",
       emailInUse: "El email ya está en uso",
       usernameInUse: "El nombre de usuario ya está en uso",
@@ -216,7 +216,7 @@ const ADMIN_COPY = {
       pinCleared: "Internal PIN cleared",
       pinTooShort: "PIN must be 4-8 digits",
       userLimitReached:
-        "The free plan user limit is 2/2. Upgrade your plan to add more users.",
+        "The free plan user limit is 1/1. Upgrade your plan to add more users.",
       cannotDelete: "You cannot delete your own user.",
       emailInUse: "Email is already in use",
       usernameInUse: "Username is already in use",
@@ -313,7 +313,7 @@ const ADMIN_COPY = {
       pinCleared: "PIN interno removido",
       pinTooShort: "O PIN deve ter entre 4 e 8 dígitos",
       userLimitReached:
-        "O limite de usuários no plano gratuito é 2/2. Atualize seu plano para adicionar mais usuários.",
+        "O limite de usuários no plano gratuito é 1/1. Atualize seu plano para adicionar mais usuários.",
       cannotDelete: "Você não pode excluir seu próprio usuário.",
       emailInUse: "O e-mail já está em uso",
       usernameInUse: "O nome de usuário já está em uso",
@@ -370,8 +370,7 @@ export default function AdminPage() {
 
   const planId = (subscription?.planId || "BASIC").toUpperCase();
   const isFreePlan = planId === "BASIC";
-  const planUserLimit = subscription?.features?.maxUsers || 2;
-  const userLimit = isFreePlan ? 2 : planUserLimit;
+  const userLimit = isFreePlan ? 1 : (subscription?.features?.maxUsers || 2);
   const planNameMap: Record<string, Record<string, string>> = {
     es: { BASIC: "Gratuito", ESENCIAL: "Esencial", PROFESIONAL: "Pro", CRECIMIENTO: "Empresarial" },
     en: { BASIC: "Free", ESENCIAL: "Essential", PROFESIONAL: "Pro", CRECIMIENTO: "Enterprise" },

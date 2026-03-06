@@ -26,7 +26,7 @@ const UPGRADE_COPY = {
         billing: "/mes",
         features: [
           "Hasta 50 productos",
-          "Control manual",
+          "Sin clientes",
           "1 usuario",
         ],
         button: "Plan Actual",
@@ -113,7 +113,7 @@ const UPGRADE_COPY = {
         billing: "/month",
         features: [
           "Up to 50 products",
-          "Manual control",
+          "No clients",
           "1 user",
         ],
         button: "Current Plan",
@@ -200,7 +200,7 @@ const UPGRADE_COPY = {
         billing: "/mês",
         features: [
           "Até 50 produtos",
-          "Controle manual",
+          "Sem clientes",
           "1 usuário",
         ],
         button: "Plano Atual",

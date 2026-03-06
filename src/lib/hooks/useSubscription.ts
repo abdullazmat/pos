@@ -58,7 +58,7 @@ export function useSubscription() {
             maxProducts: 50,
             maxUsers: 1,
             maxCategories: 10,
-            maxClients: 5,
+            maxClients: 0,
             maxSuppliers: 3,
             arcaIntegration: false,
             advancedReporting: false,
@@ -78,5 +78,14 @@ export function useSubscription() {
     fetchSubscription();
   }, []);
 
-  return { subscription, loading, error };
+  const isFreePlan = (subscription?.planId || "BASIC").toUpperCase() === "BASIC" || (subscription?.planId || "").toLowerCase() === "free";
+  const isPremiumPlan = !isFreePlan;
+
+  return { 
+    subscription, 
+    loading, 
+    error,
+    isFreePlan,
+    isPremiumPlan
+  };
 }

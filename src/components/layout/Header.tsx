@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -158,17 +158,37 @@ export default function Header({ user, showBackButton = false }: HeaderProps) {
     },
   ];
 
-  const navItems =
-    user?.role === "admin"
+  const planId = (subscription?.planId || "BASIC").toUpperCase();
+  const planStatus = subscription?.status || "active";
+  const isFreePlan = planId === "BASIC";
+
+  const navItems = useMemo(() => {
+    let baseItems = user?.role === "admin"
       ? adminNavItems
       : user?.role === "supervisor"
         ? supervisorNavItems
         : cashierNavItems;
 
+    if (isFreePlan) {
+      // Filter out items not available in BASIC plan
+      const restrictedHrefs = [
+        "/expenses",
+        "/expense-analytics",
+        "/reportes-fiscales",
+        "/purchase-orders",
+        "/payment-orders",
+        "/supplier-documents",
+        "/supplier-returns",
+        "/goods-receipts",
+      ];
+      return baseItems.filter((item: any) => !restrictedHrefs.includes(item.href));
+    }
+
+    return baseItems;
+  }, [user?.role, isFreePlan]);
+
   const isActive = (href: string) => pathname === href;
 
-  const planId = (subscription?.planId || "BASIC").toUpperCase();
-  const planStatus = subscription?.status || "active";
   const planLabelMap: Record<string, Record<string, string>> = {
     es: {
       BASIC: "Gratuito",

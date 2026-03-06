@@ -219,28 +219,28 @@ export default function KeyboardPOSInput({
 
       // Validate quantity
       if (qty === null || Number.isNaN(qty)) {
-        toast.error(`Invalid quantity: ${multiplierMatch[1]}`);
+        toast.error(t("ui.invalidQuantityDetail", "pos").replace("{quantity}", multiplierMatch[1]));
         return null;
       }
 
       if (qty <= 0) {
-        toast.error("Quantity must be greater than zero");
+        toast.error(t("ui.quantityGreaterZero", "pos"));
         return null;
       }
 
       if (qty > 100000) {
-        toast.error("Quantity too large. Maximum is 100,000");
+        toast.error(t("ui.quantityTooLarge", "pos"));
         return null;
       }
 
       // Validate product code
       if (!code || code.length === 0) {
-        toast.error("Product code is required after '*'");
+        toast.error(t("ui.productCodeRequiredAfterStar", "pos"));
         return null;
       }
 
       if (code.length > 50) {
-        toast.error("Product code too long");
+        toast.error(t("ui.productCodeTooLong", "pos"));
         return null;
       }
 
@@ -260,7 +260,7 @@ export default function KeyboardPOSInput({
     try {
       const token = localStorage.getItem("accessToken");
       if (!token) {
-        toast.error("Session expired. Please login again.");
+        toast.error(t("ui.sessionExpired", "pos"));
         return null;
       }
 
@@ -276,7 +276,7 @@ export default function KeyboardPOSInput({
         const errorData = await response.json().catch(() => ({}));
         const errorMessage =
           errorData.message ||
-          `HTTP ${response.status}: ${response.statusText}`;
+          `HTTP ${response.status}`;
         console.error("Product search failed:", errorMessage);
         throw new Error(errorMessage);
       }
@@ -286,14 +286,14 @@ export default function KeyboardPOSInput({
       // Validate API response structure
       if (!data || typeof data !== "object") {
         console.error("Invalid API response format:", data);
-        throw new Error("Invalid response from server");
+        throw new Error(t("ui.invalidServerResponse", "pos"));
       }
 
       const products = data.data?.products || [];
 
       if (!Array.isArray(products)) {
         console.error("Products is not an array:", products);
-        throw new Error("Invalid products data");
+        throw new Error(t("ui.invalidProductsData", "pos"));
       }
 
       if (products.length === 0) {
@@ -333,12 +333,12 @@ export default function KeyboardPOSInput({
       );
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
+        error instanceof Error ? error.message : "";
       console.error("Product search error:", errorMessage, error);
 
       // Show user-friendly error
       if (!errorMessage.includes("not found")) {
-        toast.error(`Search failed: ${errorMessage}`);
+        toast.error(t("ui.searchFailed", "pos").replace("{message}", errorMessage));
       }
       return null;
     }
@@ -377,7 +377,7 @@ export default function KeyboardPOSInput({
               onCustomerAction("change");
             } catch (error) {
               console.error("Error in customer action:", error);
-              toast.error("Failed to change customer type");
+              toast.error(t("ui.failedChangeCustomer", "pos"));
             }
           }
           return;
@@ -388,7 +388,7 @@ export default function KeyboardPOSInput({
               onCustomerAction("search");
             } catch (error) {
               console.error("Error in customer action:", error);
-              toast.error("Failed to search customer");
+              toast.error(t("ui.failedSearchCustomer", "pos"));
             }
           }
           return;
@@ -399,7 +399,7 @@ export default function KeyboardPOSInput({
               onCustomerAction("new");
             } catch (error) {
               console.error("Error in customer action:", error);
-              toast.error("Failed to create new customer");
+              toast.error(t("ui.failedCreateCustomer", "pos"));
             }
           }
           return;
@@ -410,7 +410,7 @@ export default function KeyboardPOSInput({
               onCustomerAction("remove");
             } catch (error) {
               console.error("Error in customer action:", error);
-              toast.error("Failed to remove customer");
+              toast.error(t("ui.failedRemoveCustomer", "pos"));
             }
           }
           return;
@@ -490,7 +490,7 @@ export default function KeyboardPOSInput({
               onCustomerAction("change");
             } catch (error) {
               console.error("Error in customer action:", error);
-              toast.error("Failed to change customer type");
+              toast.error(t("ui.failedChangeCustomer", "pos"));
             }
           }
           return;
@@ -501,7 +501,7 @@ export default function KeyboardPOSInput({
               onCustomerAction("search");
             } catch (error) {
               console.error("Error in customer action:", error);
-              toast.error("Failed to search customer");
+              toast.error(t("ui.failedSearchCustomer", "pos"));
             }
           }
           return;
@@ -512,7 +512,7 @@ export default function KeyboardPOSInput({
               onCustomerAction("new");
             } catch (error) {
               console.error("Error in customer action:", error);
-              toast.error("Failed to create new customer");
+              toast.error(t("ui.failedCreateCustomer", "pos"));
             }
           }
           return;
@@ -523,7 +523,7 @@ export default function KeyboardPOSInput({
               onCustomerAction("remove");
             } catch (error) {
               console.error("Error in customer action:", error);
-              toast.error("Failed to remove customer");
+              toast.error(t("ui.failedRemoveCustomer", "pos"));
             }
           }
           return;
@@ -611,19 +611,19 @@ export default function KeyboardPOSInput({
   const processProductAddition = async (code: string, qty: number) => {
     // Validate inputs before processing
     if (!code || code.trim().length === 0) {
-      toast.error("Product code cannot be empty");
+      toast.error(t("ui.productCodeEmpty", "pos"));
       return;
     }
 
     if (isNaN(qty) || qty <= 0) {
-      toast.error("Invalid quantity: must be a positive number");
+      toast.error(t("ui.invalidQuantityPositive", "pos"));
       setQuantity("1");
       quantityInputRef.current?.focus();
       return;
     }
 
     if (qty > 100000) {
-      toast.error("Quantity too large. Maximum is 100,000");
+      toast.error(t("ui.quantityTooLarge", "pos"));
       return;
     }
 
@@ -645,7 +645,7 @@ export default function KeyboardPOSInput({
 
       // Validate product data
       if (!product._id || !product.name || product.price === undefined) {
-        toast.error("Invalid product data received");
+        toast.error(t("ui.invalidProductData", "pos"));
         console.error("Invalid product:", product);
         return;
       }
@@ -667,7 +667,7 @@ export default function KeyboardPOSInput({
         isNaN(product.price) ||
         product.price < 0
       ) {
-        toast.error(`Invalid price for product: ${product.name}`);
+        toast.error(t("ui.invalidPriceForProduct", "pos").replace("{name}", product.name));
         console.error("Invalid product price:", product);
         return;
       }
@@ -739,7 +739,7 @@ export default function KeyboardPOSInput({
             ? t("ui.quantity", "pos")
             : "Quantity"}
           <span className="text-[hsl(var(--vp-muted))] ml-2 text-xs">
-            (Default: 1)
+            {t("ui.defaultQuantity", "pos")}
           </span>
         </label>
         <div className="relative">

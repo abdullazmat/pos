@@ -85,11 +85,7 @@ export default function ProductSearch({
         if (target) {
           console.log("Adding product to cart:", target);
           if (typeof target.stock === "number" && target.stock <= 0) {
-            toast.error(
-              t("ui.outOfStock", "pos") !== "ui.outOfStock"
-                ? t("ui.outOfStock", "pos")
-                : "Product out of stock",
-            );
+            toast.error(t("ui.outOfStock", "pos"));
             setBarcodeQuery("");
             setResults([]);
             return;
@@ -277,11 +273,7 @@ export default function ProductSearch({
                         typeof product.stock === "number" &&
                         product.stock <= 0
                       ) {
-                        toast.error(
-                          t("ui.outOfStock", "pos") !== "ui.outOfStock"
-                            ? t("ui.outOfStock", "pos")
-                            : "Product out of stock",
-                        );
+                          toast.error(t("ui.outOfStock", "pos"));
                         return;
                       }
                       const normalizedPrice = product.price;

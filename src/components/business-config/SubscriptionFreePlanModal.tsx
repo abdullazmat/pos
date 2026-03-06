@@ -110,10 +110,10 @@ export default function SubscriptionFreePlanModal({
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                  0%
+                  0
                 </div>
                 <div className="text-xs text-slate-600 dark:text-gray-400">
-                  Descuento
+                  Clientes
                 </div>
               </div>
             </div>
@@ -145,6 +145,15 @@ export default function SubscriptionFreePlanModal({
                 <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
                   <span className="text-teal-600 dark:text-teal-400">✓</span> 1
                   usuario
+                </li>
+                <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
+                  <span className="text-red-500 dark:text-red-400">✕</span> Sin clientes (Solo venta mostrador)
+                </li>
+                <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
+                  <span className="text-red-500 dark:text-red-400">✕</span> Sin retiros de caja
+                </li>
+                <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
+                  <span className="text-teal-600 dark:text-teal-400">✓</span> Solo 2 métodos de pago (Efectivo/Transf.)
                 </li>
                 <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
                   <span className="text-teal-600 dark:text-teal-400">✓</span>

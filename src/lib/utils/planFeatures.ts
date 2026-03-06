@@ -30,6 +30,7 @@ export interface UserFeatures {
   customTicketDesign: boolean;
   customBrandingRemoval: boolean;
   mercadoPagoIntegration: boolean;
+  customKeyboard: boolean;
   mandatoryBranding: string;
 }
 
@@ -53,7 +54,7 @@ export const PLAN_FEATURES: Record<
     name: "Free",
     maxProducts: 50,
     maxCategories: 10,
-    maxClients: 5,
+    maxClients: 0,
     maxSuppliers: 3,
     maxUsers: 1,
     maxPaymentMethods: 2,
@@ -82,6 +83,7 @@ export const PLAN_FEATURES: Record<
       customTicketDesign: false,
       customBrandingRemoval: false,
       mercadoPagoIntegration: false,
+      customKeyboard: false,
     },
   },
   ESENCIAL: {
@@ -116,6 +118,7 @@ export const PLAN_FEATURES: Record<
       customTicketDesign: false,
       customBrandingRemoval: false,
       mercadoPagoIntegration: true,
+      customKeyboard: true,
     },
   },
   PROFESIONAL: {
@@ -150,6 +153,7 @@ export const PLAN_FEATURES: Record<
       customTicketDesign: true,
       customBrandingRemoval: true,
       mercadoPagoIntegration: true,
+      customKeyboard: true,
     },
   },
   CRECIMIENTO: {
@@ -184,13 +188,14 @@ export const PLAN_FEATURES: Record<
       customTicketDesign: true,
       customBrandingRemoval: true,
       mercadoPagoIntegration: true,
+      customKeyboard: true,
     },
   },
   free: {
     name: "Free",
     maxProducts: 50,
     maxCategories: 10,
-    maxClients: 5,
+    maxClients: 0,
     maxSuppliers: 3,
     maxUsers: 1,
     maxPaymentMethods: 2,
@@ -219,6 +224,7 @@ export const PLAN_FEATURES: Record<
       customTicketDesign: false,
       customBrandingRemoval: false,
       mercadoPagoIntegration: false,
+      customKeyboard: false,
     },
   },
 };

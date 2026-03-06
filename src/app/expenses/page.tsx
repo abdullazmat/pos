@@ -1040,7 +1040,7 @@ export default function ExpensesPage() {
   const router = useRouter();
   const copy = (EXPENSE_COPY[currentLanguage] ||
     EXPENSE_COPY.en) as typeof EXPENSE_COPY.en;
-  const { subscription, loading: subLoading } = useSubscription();
+  const { subscription, loading: subLoading, isFreePlan } = useSubscription();
 
   const [user, setUser] = useState<any>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -1168,6 +1168,39 @@ export default function ExpensesPage() {
   const descInputRef = useRef<HTMLInputElement>(null);
   const amountInputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  if (isFreePlan) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+        <Header user={user} />
+        <main className="max-w-4xl mx-auto px-6 py-20 text-center">
+            <div className="bg-white dark:bg-gray-900 p-12 border-dashed border-2 border-primary/30 rounded-2xl">
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                    <Receipt size={40} className="text-primary" />
+                </div>
+                <h1 className="text-3xl font-bold mb-4">{copy.title}</h1>
+                <p className="text-lg opacity-70 mb-8">
+                    La gestión profesional de gastos, OCR de comprobantes e importación masiva están disponibles únicamente en planes Pro.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                    <button 
+                        onClick={() => router.push("/upgrade")}
+                        className="px-8 py-3 bg-[hsl(var(--vp-primary))] hover:opacity-90 text-white font-bold rounded-xl transition-colors"
+                    >
+                        Ver Planes Pro
+                    </button>
+                    <button 
+                        onClick={() => router.push("/dashboard")}
+                        className="px-8 py-3 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 font-bold rounded-xl transition-colors"
+                    >
+                        Volver al Dashboard
+                    </button>
+                </div>
+            </div>
+        </main>
+      </div>
+    );
+  }
 
   // ─── Batch Selection State ─────────────────────────────────────────
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());

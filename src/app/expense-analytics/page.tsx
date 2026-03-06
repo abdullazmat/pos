@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalLanguage } from "@/lib/hooks/useGlobalLanguage";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 import { apiFetch } from "@/lib/utils/apiFetch";
 import Header from "@/components/layout/Header";
 import { toast } from "react-toastify";
@@ -350,6 +351,7 @@ type AnalyticsData = Record<string, any>;
 export default function ExpenseAnalyticsPage() {
   const router = useRouter();
   const { currentLanguage } = useGlobalLanguage();
+  const { isFreePlan, subscription } = useSubscription();
   const lang = (currentLanguage || "es") as "es" | "en" | "pt";
   const copy = COPY[lang] || COPY.es;
 
@@ -381,6 +383,7 @@ export default function ExpenseAnalyticsPage() {
   }, [router]);
 
   const fetchData = useCallback(async () => {
+    if (isFreePlan) return;
     setLoading(true);
     try {
       const token = localStorage.getItem("accessToken");
@@ -400,7 +403,7 @@ export default function ExpenseAnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  }, [period, router, copy.export.error]);
+  }, [period, router, copy.export.error, isFreePlan]);
 
   useEffect(() => {
     fetchData();
@@ -585,6 +588,39 @@ export default function ExpenseAnalyticsPage() {
     { key: "unusual", label: copy.tabs.unusual },
     { key: "top", label: copy.tabs.top },
   ];
+
+  if (isFreePlan) {
+    return (
+      <div className="min-h-screen" style={{ background: "hsl(var(--vp-bg))" }}>
+        <Header user={user} />
+        <main className="max-w-4xl mx-auto px-6 py-20 text-center">
+            <div className="vp-card p-12 border-dashed border-2 border-purple-500/30 bg-purple-500/5">
+                <div className="w-20 h-20 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto mb-6">
+                    <Zap size={40} className="text-purple-500" />
+                </div>
+                <h1 className="text-3xl font-bold mb-4">{copy.title}</h1>
+                <p className="text-lg opacity-70 mb-8">
+                    Esta función avanzada de inteligencia y análisis de gastos está disponible únicamente en planes Pro.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                    <button 
+                        onClick={() => router.push("/upgrade")}
+                        className="vp-button vp-button-primary h-12 px-10"
+                    >
+                        Ver Planes Pro
+                    </button>
+                    <button 
+                        onClick={() => router.push("/dashboard")}
+                        className="vp-button h-12 px-10"
+                    >
+                        Volver al Dashboard
+                    </button>
+                </div>
+            </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div
