@@ -7,16 +7,28 @@ import {
   generateErrorResponse,
   generateSuccessResponse,
 } from "@/lib/utils/helpers";
-
-if (!process.env.MERCADO_PAGO_ACCESS_TOKEN) {
-  throw new Error("MERCADO_PAGO_ACCESS_TOKEN is not defined");
-}
+import { createMercadoPagoPreference } from "@/lib/mercadopago";
 
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.MERCADO_PAGO_ACCESS_TOKEN) {
+      return generateErrorResponse(
+        "MERCADO_PAGO_ACCESS_TOKEN is not configured",
+        500,
+      );
+    }
+
     const authResult = await authMiddleware(req);
     if (!authResult.authorized) {
       return generateErrorResponse(authResult.error || "Unauthorized", 401);
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) {
+      return generateErrorResponse(
+        "NEXT_PUBLIC_APP_URL is not configured",
+        500,
+      );
     }
 
     const { userId, businessId } = authResult.user!;
@@ -34,35 +46,26 @@ export async function POST(req: NextRequest) {
       return generateErrorResponse("User not found", 404);
     }
 
-    // Create Mercado Pago preference
-    const preference = {
-      items: [
+    const preference = await createMercadoPagoPreference(
+      [
         {
-          title: `Plan Pro - POS Cloud`,
+          title: "Plan Pro - POS Cloud",
           description: "Acceso completo a todas las funciones",
           quantity: 1,
-          currency_id: "ARS",
           unit_price: 24990,
+          currency_id: "ARS",
         },
       ],
-      payer: {
-        email: user.email,
-        name: user.name,
+      user.email,
+      user.name,
+      `${businessId}-${plan}`,
+      {
+        success: `${appUrl}/subscribe/mercadopago/success`,
+        failure: `${appUrl}/subscribe/mercadopago/failure`,
+        pending: `${appUrl}/subscribe/mercadopago/pending`,
       },
-      back_urls: {
-        success: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/subscribe/mercadopago/success`,
-        failure: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/subscribe/mercadopago/failure`,
-        pending: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/subscribe/mercadopago/pending`,
-      },
-      notification_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/payment/mercadopago/webhook`,
-      external_reference: `${businessId}-${plan}`,
-      auto_return: "approved",
-    };
-
-    // For now, return a mock response
-    // In production, you would call Mercado Pago API
-    const mockPreferenceId = `PREF_${Date.now()}`;
-    const mockInitPoint = `https://www.mercadopago.com/checkout/v1/redirect?pref_id=${mockPreferenceId}`;
+      `${appUrl}/api/payment/mercadopago/webhook`,
+    );
 
     // Store preference ID for webhook handling
     const subscription = new Subscription({
@@ -71,21 +74,21 @@ export async function POST(req: NextRequest) {
       plan,
       status: "pending",
       paymentMethod: "mercadopago",
-      mercadopagoPreferenceId: mockPreferenceId,
+      mercadopagoPreferenceId: preference.id,
     });
 
     await subscription.save();
 
     return generateSuccessResponse({
-      preference_id: mockPreferenceId,
-      init_point: mockInitPoint,
-      sandbox_init_point: mockInitPoint.replace(
-        "mercadopago.com",
-        "sandbox.mercadopago.com",
-      ),
+      preference_id: preference.id,
+      init_point: preference.init_point,
+      sandbox_init_point: preference.sandbox_init_point,
     });
   } catch (error) {
     console.error("Mercado Pago error:", error);
-    return generateErrorResponse("Internal server error", 500);
+    return generateErrorResponse(
+      `Payment preference creation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500,
+    );
   }
 }

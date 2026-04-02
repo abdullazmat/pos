@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Full-stack SaaS POS System with Next.js, MongoDB, Stripe",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "node api.js && next dev",
+    "build": "node api.js && next build",
+    "start": "node api.js && next start",
     "lint": "eslint . --ext .ts,.tsx",
     "validate-afip": "node scripts/afip-validate.js",
     "apply-env-cuit": "node scripts/apply-env-cuit-to-businesses.js"
