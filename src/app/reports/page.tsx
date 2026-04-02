@@ -15,10 +15,12 @@ import {
   DollarSign,
   ShoppingCart,
   BarChart3,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import AIRankings from "@/components/reports/AIRankings";
 import AIForecast from "@/components/reports/AIForecast";
+
+export const dynamic = "force-dynamic";
 
 const getKpiValueSize = (value: string) => {
   const length = value.replace(/\s/g, "").length;

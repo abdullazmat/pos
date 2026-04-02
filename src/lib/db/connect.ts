@@ -32,7 +32,9 @@ async function dbConnect() {
     cached.conn = await cached.promise;
     // Run AFIP startup validation once after DB connect (best-effort)
     try {
-      runAfipStartupValidation();
+      if (process.env.NEXT_PHASE !== "phase-production-build") {
+        runAfipStartupValidation();
+      }
     } catch (e) {
       // ignore
     }
