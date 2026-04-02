@@ -3,6 +3,9 @@ import dbConnect from "@/lib/db/connect";
 import { generateSmartSuggestions } from "@/lib/services/smartSuggestionEngine";
 import { verifyToken } from "@/lib/utils/jwt";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
   try {
     const token = request.headers.get("authorization")?.split(" ")[1];
@@ -22,8 +25,7 @@ export async function GET(request: NextRequest) {
     const budgetLimit = searchParams.get("budgetLimit")
       ? parseFloat(searchParams.get("budgetLimit")!)
       : undefined;
-    const includeNoRotation =
-      searchParams.get("includeNoRotation") === "true";
+    const includeNoRotation = searchParams.get("includeNoRotation") === "true";
 
     const result = await generateSmartSuggestions({
       businessId: decoded.businessId,
