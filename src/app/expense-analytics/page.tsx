@@ -32,6 +32,8 @@ import TopExpenses from "@/components/expense-analytics/TopExpenses";
 import { formatCurrency } from "@/components/expense-analytics/chartUtils";
 import * as XLSX from "xlsx";
 
+export const dynamic = "force-dynamic";
+
 // ─── Translations ──────────────────────────────────────────────────
 const COPY = {
   es: {
@@ -594,29 +596,30 @@ export default function ExpenseAnalyticsPage() {
       <div className="min-h-screen" style={{ background: "hsl(var(--vp-bg))" }}>
         <Header user={user} />
         <main className="max-w-4xl mx-auto px-6 py-20 text-center">
-            <div className="vp-card p-12 border-dashed border-2 border-purple-500/30 bg-purple-500/5">
-                <div className="w-20 h-20 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto mb-6">
-                    <Zap size={40} className="text-purple-500" />
-                </div>
-                <h1 className="text-3xl font-bold mb-4">{copy.title}</h1>
-                <p className="text-lg opacity-70 mb-8">
-                    Esta función avanzada de inteligencia y análisis de gastos está disponible únicamente en planes Pro.
-                </p>
-                <div className="flex flex-col sm:flex-row justify-center gap-4">
-                    <button 
-                        onClick={() => router.push("/upgrade")}
-                        className="vp-button vp-button-primary h-12 px-10"
-                    >
-                        Ver Planes Pro
-                    </button>
-                    <button 
-                        onClick={() => router.push("/dashboard")}
-                        className="vp-button h-12 px-10"
-                    >
-                        Volver al Dashboard
-                    </button>
-                </div>
+          <div className="vp-card p-12 border-dashed border-2 border-purple-500/30 bg-purple-500/5">
+            <div className="w-20 h-20 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto mb-6">
+              <Zap size={40} className="text-purple-500" />
             </div>
+            <h1 className="text-3xl font-bold mb-4">{copy.title}</h1>
+            <p className="text-lg opacity-70 mb-8">
+              Esta función avanzada de inteligencia y análisis de gastos está
+              disponible únicamente en planes Pro.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <button
+                onClick={() => router.push("/upgrade")}
+                className="vp-button vp-button-primary h-12 px-10"
+              >
+                Ver Planes Pro
+              </button>
+              <button
+                onClick={() => router.push("/dashboard")}
+                className="vp-button h-12 px-10"
+              >
+                Volver al Dashboard
+              </button>
+            </div>
+          </div>
         </main>
       </div>
     );
@@ -686,8 +689,11 @@ export default function ExpenseAnalyticsPage() {
                       className="w-full text-left px-4 py-2 text-sm hover:opacity-80 transition-opacity"
                       style={{
                         backgroundColor:
-                          p === period ? "hsl(var(--vp-primary) / 0.12)" : "transparent",
-                        color: p === period ? "hsl(var(--vp-primary))" : "inherit",
+                          p === period
+                            ? "hsl(var(--vp-primary) / 0.12)"
+                            : "transparent",
+                        color:
+                          p === period ? "hsl(var(--vp-primary))" : "inherit",
                       }}
                     >
                       {copy.period[p]}
